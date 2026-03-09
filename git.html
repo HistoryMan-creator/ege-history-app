@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Тренажер ЕГЭ: Задание 4 (ULTIMATE)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    colors: {
+                        examBg: '#f0f4f8',
+                        examBlue: '#0f4c81',
+                        examRed: '#b91d47',
+                        examGreen: '#00a86b',
+                        ink: '#1a202c',
+                        cardBg: '#ffffff'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body { overscroll-behavior-y: none; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
+
+        /* Оптимизация слотов для мобилок */
+        .dnd-slot { 
+            min-height: 40px; border: 2px dashed #cbd5e1; border-radius: 0.5rem; 
+            display: flex; align-items: center; justify-content: center;
+            background-color: #f8fafc; cursor: pointer; transition: all 0.2s ease;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+            padding: 0.15rem; touch-action: manipulation;
+            font-size: 10px;
+            line-height: 1;
+            text-align: center;
+        }
+        .dnd-slot:empty::before {
+            content: attr(data-letter);
+            color: #94a3b8;
+            font-size: 1.5rem;
+            font-weight: 900;
+            opacity: 0.4;
+        }
+        .dark .dnd-slot { border-color: #475569; background-color: #1e293b; }
+        .dark .dnd-slot:empty::before { color: #64748b; }
+        @media (min-width: 768px) { .dnd-slot { min-height: 52px; border-radius: 0.5rem; font-size: 13px;} }
+        
+        .dnd-slot:hover { border-color: #94a3b8; background-color: #f1f5f9; }
+        .dark .dnd-slot:hover { border-color: #64748b; background-color: #334155; }
+        .dnd-slot.has-item { border: 2px solid #3b82f6; background-color: white; box-shadow: none; padding: 0; }
+        .dark .dnd-slot.has-item { border-color: #3b82f6; background-color: #1e293b; }
+        .dnd-slot.correct-slot { border-color: #22c55e; background-color: #f0fdf4; pointer-events: none; }
+        .dark .dnd-slot.correct-slot { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
+        .dnd-slot.incorrect-slot { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.4s ease-in-out; }
+        .dark .dnd-slot.incorrect-slot { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        
+        .dnd-slot.revealed-slot { border-color: #f59e0b; background-color: #fffbeb; pointer-events: none; }
+        .dark .dnd-slot.revealed-slot { border-color: #d97706; background-color: rgba(245, 158, 11, 0.1); }
+
+        .slot-ready {
+            border-color: #3b82f6 !important; 
+            background-color: #eff6ff !important; 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+            transform: scale(1.01);
+        }
+
+        /* Оптимизация плашек */
+        .dnd-chip {
+            padding: 0.4rem 0.6rem; background-color: white; border: 2px solid #e2e8f0; 
+            border-radius: 0.6rem; font-weight: 600; font-size: 0.75rem; cursor: pointer;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease; user-select: none;
+            color: #334155; text-align: center; touch-action: manipulation;
+        }
+        .dark .dnd-chip { background-color: #1e293b; border-color: #334155; color: #e2e8f0; }
+        @media (min-width: 768px) { .dnd-chip { border-radius: 0.5rem; padding: 0.5rem 1rem; font-size: 0.85rem;} }
+        
+        .dnd-chip.selected { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+        .dnd-chip.in-slot { border: none; box-shadow: none; background: transparent; padding: 0.15rem; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px;}
+        @media (min-width: 768px) { .dnd-chip.in-slot { font-size: 0.85rem; } }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printable-report, #printable-report * { visibility: visible; }
+            #printable-report { display: block !important; position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px; font-family: sans-serif; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-examBg dark:bg-slate-900 text-ink dark:text-gray-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="bg-examBlue dark:bg-slate-950 text-white shadow-md border-b-2 sm:border-b-4 border-examRed sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <span class="text-xl sm:text-3xl">🧩</span>
+                    <div class="text-left">
+                        <h1 class="text-sm sm:text-xl font-bold tracking-tight leading-tight">Тренажер Задания 4</h1>
+                        <p class="text-blue-200 dark:text-slate-400 text-[9px] sm:text-xs">PRO | Подготовка к ЕГЭ</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openTeacherModal()" class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-ink font-bold text-[10px] sm:text-xs rounded-md transition-colors shadow-sm">
+                        👨‍🏫 Учителю
+                    </button>
+                    <button onclick="toggleTheme()" id="theme-toggle" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full text-sm">
+                        🌙
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 sm:gap-4 bg-white/10 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-white/20 w-full sm:w-auto justify-around">
+                <div class="text-center cursor-pointer" onclick="openStatsModal()">
+                    <p class="text-[8px] sm:text-[10px] text-blue-200 uppercase font-bold">Ошибки</p>
+                    <p class="text-sm sm:text-xl font-black text-red-300 leading-none" id="stat-mistakes">0</p>
+                </div>
+                <div class="w-px bg-white/30"></div>
+                <div class="text-center">
+                    <p class="text-[8px] sm:text-[10px] text-blue-200 uppercase font-bold">Стрик</p>
+                    <p class="text-sm sm:text-xl font-black text-yellow-300 leading-none" id="stat-streak">0</p>
+                </div>
+                <div class="w-px bg-white/30"></div>
+                <div class="text-center">
+                    <p class="text-[8px] sm:text-[10px] text-green-200 uppercase font-bold">Решено</p>
+                    <p class="text-sm sm:text-xl font-black text-green-300 leading-none" id="stat-solved">0</p>
+                </div>
+                <div id="timer-container" class="hidden flex-row gap-2 items-center ml-2 border-l border-white/30 pl-2">
+                    <div class="text-center">
+                        <p class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">Таймер</p>
+                        <p class="text-sm sm:text-xl font-black text-yellow-300 leading-none" id="stat-timer">03:00</p>
+                    </div>
+                </div>
+                <div id="lives-container" class="hidden flex-row gap-2 items-center ml-2 border-l border-white/30 pl-2">
+                    <div class="text-center">
+                        <p class="text-[8px] sm:text-[10px] text-rose-200 uppercase font-bold">Жизни</p>
+                        <p class="text-sm leading-none" id="stat-lives">❤️❤️❤️</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification -->
+    <div id="joke-toast" class="no-print fixed top-16 right-0 transform translate-x-full transition-transform duration-300 z-[9999]">
+        <div id="toast-content" class="text-white font-bold text-xs sm:text-base px-4 py-2 rounded-l-lg shadow-lg flex items-center gap-2 border-y-2 border-l-2"></div>
+    </div>
+
+    <!-- HW Alert -->
+    <div id="hw-alert" class="hidden no-print bg-yellow-100 dark:bg-yellow-900 border-b-2 border-yellow-500 text-yellow-900 dark:text-yellow-100 p-2 text-center text-[10px] sm:text-xs font-bold">
+        ⚠️ РЕЖИМ ДЗ: осталось <span id="hw-remaining" class="text-red-600 dark:text-red-400">0</span>
+    </div>
+
+    <main class="no-print flex-grow max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 w-full flex flex-col gap-4">
+        
+        <!-- Controls Area -->
+        <div id="controls-area" class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-1">
+                    <label class="block text-[9px] sm:text-xs font-bold text-gray-500 uppercase mb-1">Период</label>
+                    <select id="filter-period" onchange="generateTable()" class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-xs sm:text-sm rounded-lg p-2 outline-none font-semibold">
+                        <option value="all">🌍 Вся история</option>
+                        <option value="upTo17">⚔️ До XVII в.</option>
+                        <option value="upTo18">👑 До XVIII в.</option>
+                        <option value="upTo19">🚂 До XIX в.</option>
+                        <option value="18th">👑 XVIII век</option>
+                        <option value="19th">🚂 XIX век</option>
+                        <option value="20th">🚀 XX век</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-[9px] sm:text-xs font-bold text-gray-500 uppercase mb-1">Объем</label>
+                    <select id="filter-rows" onchange="generateTable()" class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-xs sm:text-sm rounded-lg p-2 outline-none font-semibold">
+                        <option value="4" selected>4 строки (ЕГЭ)</option>
+                        <option value="6">6 строк</option>
+                        <option value="10">10 строк</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <label class="flex items-center gap-2 cursor-pointer w-full bg-blue-50 dark:bg-slate-700/50 p-2 rounded-lg border border-blue-100 dark:border-slate-600 h-[38px] sm:h-[42px]">
+                        <input type="checkbox" id="toggle-hide-learned" onchange="toggleHideLearned()" class="w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
+                        <span class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-tight">🙈 Скрыть выученное</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+                <button onclick="generateTable()" id="btn-update" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-gray-800 dark:text-white font-bold py-2 px-3 rounded-lg border text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors">🔄 Обновить</button>
+                <button onclick="openStatsModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">📊 Аналитика</button>
+                <button onclick="toggleMode('mistakes')" id="btn-mistakes" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">🔥 Ошибки</button>
+                <button onclick="toggleMode('speedrun')" id="btn-speedrun" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">⚡ Спидран</button>
+                <button onclick="toggleMode('survival')" id="btn-survival" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">❤️ Выживание</button>
+            </div>
+        </div>
+
+        <!-- Task Area -->
+        <div class="flex flex-col lg:flex-row flex-grow relative gap-4 items-start">
+            <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl"></div>
+
+            <!-- Таблица -->
+            <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200">
+                            <tr>
+                                <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] text-center">🗺️ Объект</th>
+                                <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[45%] border-l border-gray-300 dark:border-slate-600 text-center">📜 Событие</th>
+                                <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] border-l border-gray-300 dark:border-slate-600 text-center">⏳ Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody id="task-table-body">
+                            <!-- JS content here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pool of answers -->
+            <div class="w-full lg:w-1/3 bg-white dark:bg-slate-800 flex flex-col sticky bottom-0 z-40 p-4 border border-gray-200 dark:border-slate-700 rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md">
+                <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
+                    <h3 class="font-black text-gray-800 dark:text-white flex items-center gap-1.5 text-xs sm:text-base">
+                        <span>🧩</span> ВАРИАНТЫ
+                    </h3>
+                    <button id="pool-toggle-btn" class="lg:hidden text-gray-500 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded text-[10px] font-bold">Свернуть</button>
+                </div>
+                
+                <div id="pool-content-wrapper">
+                    <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 lg:gap-2 max-h-[25vh] lg:max-h-none overflow-y-auto custom-scroll pb-2"></div>
+                    <div class="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700 flex flex-col gap-2">
+                        <div id="check-buttons" class="flex gap-2 w-full">
+                            <button onclick="checkAnswers(true)" class="bg-examBlue hover:bg-blue-900 text-white font-bold py-3 px-2 rounded-xl shadow-lg active:scale-95 text-xs sm:text-sm w-full uppercase tracking-wider flex items-center justify-center gap-1 transition-colors">
+                                ✅ Уверен
+                            </button>
+                            <button onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-2 rounded-xl shadow-lg active:scale-95 text-xs sm:text-sm w-full uppercase tracking-wider flex items-center justify-center gap-1 transition-colors">
+                                🤔 Сомневаюсь
+                            </button>
+                        </div>
+                        <button id="reveal-btn" onclick="toggleAnswers()" class="hidden bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-300 font-bold py-2 px-6 rounded-xl shadow-sm active:scale-95 text-xs sm:text-sm w-full transition-colors flex items-center justify-center gap-2">
+                            👀 Показать ответы
+                        </button>
+                        <button id="next-btn" onclick="generateTable()" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg active:scale-95 text-xs sm:text-base w-full uppercase tracking-wider flex items-center justify-center gap-2 transition-colors">
+                            ➡️ Дальше
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-[95%] max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+             <div class="p-3 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900">
+                <h2 class="font-bold text-sm sm:text-lg">👨‍🏫 Кабинет учителя</h2>
+                <button onclick="closeTeacherModal()" class="text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
+             </div>
+             
+             <!-- Табы учителя -->
+             <div class="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                 <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="flex-1 py-2 text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors">📝 Конструктор ДЗ</button>
+                 <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">📊 Прогресс класса</button>
+             </div>
+
+             <!-- Конструктор ДЗ -->
+             <div class="flex-grow p-4 overflow-y-auto custom-scroll flex flex-col" id="teacher-tab-hw">
+                 <div id="teacher-facts-list" class="flex-grow"></div>
+                 <div class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 flex flex-col gap-2">
+                    <div id="teacher-link-container" class="hidden mb-2">
+                        <input type="text" id="teacher-generated-url" readonly class="w-full p-2 text-[10px] border border-gray-300 rounded dark:bg-slate-700 dark:border-slate-600 mb-2">
+                        <button onclick="copyHomeworkLink()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold transition-colors">Копировать ссылку</button>
+                    </div>
+                    <button onclick="generateHomeworkLink()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded font-bold text-xs transition-colors">Создать ДЗ</button>
+                 </div>
+             </div>
+
+             <!-- Прогресс Класса (Cloud) -->
+             <div class="flex-grow p-4 overflow-y-auto custom-scroll hidden bg-gray-100 dark:bg-slate-900" id="teacher-tab-stats">
+                 <p class="text-[10px] sm:text-xs text-gray-500 mb-3 text-center">Статистика обновляется в реальном времени. Данные привязаны к аккаунтам Telegram.</p>
+                 <div id="teacher-class-stats" class="flex flex-col gap-2">
+                     <!-- Ученики будут рендериться здесь -->
+                 </div>
+             </div>
+        </div>
+    </div>
+
+    <!-- Модалка ввода имени для отчета -->
+    <div id="name-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
+            <h3 class="font-black text-lg dark:text-white text-center">🎓 Дневник достижений</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center -mt-3">Проверьте имя для отчета учителю</p>
+            <input type="text" id="student-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex gap-2 mt-2">
+                <button onclick="closeNameModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 rounded-xl font-bold transition-colors">Отмена</button>
+                <button onclick="submitNameAndPrint()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Готово</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="fixed inset-0 bg-black/70 z-[10001] hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl w-[90%] max-w-sm p-5 flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-black text-gray-800 dark:text-white">📊 Прогресс</h2>
+                <button onclick="closeStatsModal()" class="text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
+            </div>
+            <div id="stats-era-container" class="space-y-3 mb-4"></div>
+            
+            <div class="flex gap-2 mb-2">
+                <button onclick="openNameModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
+                <button onclick="copyTextReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📋 Копировать</button>
+            </div>
+            
+            <button onclick="resetAllProgress()" class="text-[9px] text-red-400 hover:text-red-600 uppercase font-bold text-center py-2 transition-colors">Сбросить всё</button>
+        </div>
+    </div>
+
+    <div id="map-modal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-[95%] h-[60vh] max-w-4xl flex flex-col overflow-hidden relative">
+            <div class="p-3 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900">
+                <h2 class="text-xs font-bold text-gray-800 dark:text-white" id="map-modal-title">Карта</h2>
+                <button onclick="closeMapModal()" class="text-xl text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
+            </div>
+            <iframe id="yandex-map-iframe" class="flex-grow w-full border-none"></iframe>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="fixed inset-0 bg-black/90 z-[10000] hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-[80%] max-w-xs text-center shadow-2xl">
+            <div class="text-5xl mb-2" id="modal-emoji">🏆</div>
+            <h2 class="text-xl font-black mb-1 text-gray-800 dark:text-white" id="modal-main-title">Результат</h2>
+            <p class="text-3xl font-black text-blue-600 dark:text-blue-400 mb-4" id="modal-score">0</p>
+            <button onclick="shareTelegram()" class="w-full bg-[#0088cc] hover:bg-[#0077b3] text-white py-2 rounded-xl font-bold mb-3 flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-md">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.94z"/></svg>
+                Поделиться
+            </button>
+            <button onclick="closeModal()" class="w-full bg-examBlue hover:bg-blue-800 text-white py-3 rounded-xl font-bold transition-transform active:scale-95 shadow-md">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Область печати -->
+    <div id="printable-report" class="hidden"></div>
+
+    <script>
+        // =========================================================================
+        // МЕГА-БАЗА ДАННЫХ
+        // =========================================================================
+        const bigData = [
+            // --- ДРЕВНОСТЬ И УДЕЛЬНАЯ РУСЬ ---
+            { c: 'early', event: "Призвание варяжского князя Рюрика на княжение", geo: "Новгород", year: "862 г." },
+            { c: 'early', event: "Поход князя Олега, завершившийся объединением двух главных центров Руси", geo: "Киев", year: "882 г." },
+            { c: 'early', event: "Подписание первого письменного договора Руси с Византией", geo: "Константинополь", year: "911 г." },
+            { c: 'early', event: "Поход на Византию, завершившийся неудачей (применение греческого огня)", geo: "Константинополь", year: "941 г." },
+            { c: 'early', event: "Убийство князя Игоря во время сбора полюдья", geo: "Искоростень", year: "945 г." },
+            { c: 'early', event: "Принятие христианства княгиней Ольгой", geo: "Константинополь", year: "957 г." },
+            { c: 'early', event: "Разгром и уничтожение столицы Хазарского каганата князем Святославом", geo: "Итиль", year: "965 г." },
+            { c: 'early', event: "Оборона столицы Руси от печенегов княгиней Ольгой", geo: "Киев", year: "968 г." },
+            { c: 'early', event: "Оборона крепости войсками Святослава от византийской армии Иоанна Цимисхия", geo: "Доростол", year: "971 г." },
+            { c: 'early', event: "Крещение киевлян князем Владимиром Святославичем", geo: "Киев", year: "988 г." },
+            { c: 'early', event: "Основание города-крепости на юго-западных рубежах Руси князем Владимиром", geo: "Владимир", year: "990 г." },
+            { c: 'early', event: "Сражение, в котором Ярослав Мудрый разгромил Святополка Окаянного", geo: "река Альта", year: "1019 г." },
+            { c: 'early', event: "Основание города на землях эстов князем Ярославом Мудрым", geo: "Юрьев", year: "1030 г." },
+            { c: 'early', event: "Окончательный разгром печенегов русскими дружинами", geo: "Киев", year: "1036 г." },
+            { c: 'early', event: "Завершение строительства Софийского собора", geo: "Киев", year: "1037 г." },
+            { c: 'early', event: "Съезд русских князей с целью прекращения междоусобиц", geo: "Любеч", year: "1097 г." },
+            { c: 'early', event: "Съезд князей, осудивший Давыда Игоревича за ослепление Василька Теребовльского", geo: "Уветичи", year: "1100 г." },
+            { c: 'early', event: "Крупный разгром половцев объединенным русским войском (крестовый поход в степь)", geo: "река Сальница", year: "1111 г." },
+            { c: 'early', event: "Восстание низов и призвание на престол Владимира Мономаха", geo: "Киев", year: "1113 г." },
+            { c: 'early', event: "Первое летописное упоминание города в связи с приглашением Юрия Долгорукого", geo: "Москва", year: "1147 г." },
+            { c: 'early', event: "Взятие и разорение «матери городов русских» войсками Андрея Боголюбского", geo: "Киев", year: "1169 г." },
+            { c: 'early', event: "Убийство князя Андрея Боголюбского заговорщиками-боярами", geo: "Боголюбово", year: "1174 г." },
+            { c: 'early', event: "Неудачное сражение Игоря Святославича с половцами («Слово о полку Игореве»)", geo: "река Каяла", year: "1185 г." },
+            { c: 'early', event: "Битва, в котором Константин Всеволодович разбил своих младших братьев", geo: "река Липица", year: "1216 г." },
+            { c: 'early', event: "Первое масштабное столкновение объединенных русских дружин и монгольского войска", geo: "река Калка", year: "1223 г." },
+            { c: 'early', event: "Разгром первого крупного русского города во время нашествия Батыя", geo: "Рязань", year: "1237 г." },
+            { c: 'early', event: "Взятие и сожжение столицы Северо-Восточной Руси войсками Батыя", geo: "Владимир", year: "1238 г." },
+            { c: 'early', event: "Сражение, в котором погиб великий князь владимирский Юрий Всеволодович", geo: "река Сить", year: "1238 г." },
+            { c: 'early', event: "Многонедельная оборона «злого города» от войск хана Батыя", geo: "Козельск", year: "1238 г." },
+            { c: 'early', event: "Разгром шведского отряда дружиной князя Александра Ярославича", geo: "река Нева", year: "1240 г." },
+            { c: 'early', event: "Осада и разорение крупнейшего города Южной Руси войсками хана Батыя", geo: "Киев", year: "1240 г." },
+            { c: 'early', event: "Сражение новгородцев с рыцарями Ливонского ордена на льду", geo: "Чудское озеро", year: "1242 г." },
+            { c: 'early', event: "Антиордынское восстание против баскака Чолхана (Щелкана)", geo: "Тверь", year: "1327 г." },
+            { c: 'early', event: "Тяжелое поражение русского войска от ордынцев из-за потери бдительности", geo: "река Пьяна", year: "1377 г." },
+            { c: 'early', event: "Победа московского войска над ордынцами мурзы Бегича", geo: "река Вожа", year: "1378 г." },
+            { c: 'early', event: "Разгром войск темника Мамая объединенным русским войском", geo: "река Дон", year: "1380 г." },
+            { c: 'early', event: "Взятие и сожжение Москвы обманным путем войсками хана Тохтамыша", geo: "Москва", year: "1382 г." },
+            { c: 'early', event: "Поражение литовско-русского войска Витовта от золотоордынцев Едигея", geo: "река Ворскла", year: "1399 г." },
+            { c: 'early', event: "Битва, в которой объединенное польско-литовско-русское войско разбило Тевтонский орден", geo: "Грюнвальд", year: "1410 г." },
+            { c: 'early', event: "Сражение, предрешившее падение независимости Новгородской республики", geo: "река Шелонь", year: "1471 г." },
+            { c: 'early', event: "Окончательное присоединение Новгородской земли к Московскому государству", geo: "Великий Новгород", year: "1478 г." },
+            { c: 'early', event: "Событие, ознаменовавшее окончание татаро-монгольского ига", geo: "река Угра", year: "1480 г." },
+            { c: 'early', event: "Присоединение княжества, бывшего главным соперником Москвы, к единому государству", geo: "Тверь", year: "1485 г." },
+            { c: 'early', event: "Победа московского войска над литовским, приведшая к перемирию", geo: "река Ведрошь", year: "1500 г." },
+
+            // --- РОССИЙСКОЕ ГОСУДАРСТВО (XVI - XVII вв.) ---
+            { c: 'early', event: "Взятие важнейшей западной крепости войсками Василия III", geo: "Смоленск", year: "1514 г." },
+            { c: 'early', event: "Ликвидация независимости второй крупной вечевой республики", geo: "Псков", year: "1510 г." },
+            { c: 'early', event: "Присоединение последнего крупного удела (княжества) к Московскому государству", geo: "Рязань", year: "1521 г." },
+            { c: 'early', event: "Венчание Ивана IV на царство в Успенском соборе", geo: "Москва", year: "1547 г." },
+            { c: 'early', event: "Возведение Собора Покрова на Рву в честь взятия татарского ханства", geo: "Москва", year: "1550-е гг." },
+            { c: 'early', event: "Присоединение территории крупного ханства войсками Ивана IV", geo: "Казань", year: "1552 г." },
+            { c: 'early', event: "Бескровное присоединение территорий в низовьях Волги", geo: "Астрахань", year: "1556 г." },
+            { c: 'early', event: "Взятие русскими войсками ливонской крепости в начале Ливонской войны", geo: "Дерпт", year: "1558 г." },
+            { c: 'early', event: "Разгром войск крымского хана Девлет-Гирея князем М.И. Воротынским", geo: "село Молоди", year: "1572 г." },
+            { c: 'early', event: "Героическая оборона города от польских войск короля Стефана Батория", geo: "Псков", year: "1581 г." },
+            { c: 'early', event: "Поход казачьего атамана Ермака против войск сибирского хана Кучума", geo: "река Иртыш", year: "1582 г." },
+            { c: 'early', event: "Подписание перемирия, лишившего Россию городов Ям, Копорье, Ивангород", geo: "Плюсса", year: "1583 г." },
+            { c: 'early', event: "Основание первого морского порта России для торговли с Англией", geo: "Архангельск", year: "1584 г." },
+            { c: 'early', event: "Загадочная смерть младшего сына Ивана Грозного — царевича Дмитрия", geo: "Углич", year: "1591 г." },
+            { c: 'early', event: "Подписание «Вечного мира» со Швецией (возврат городов Копорье, Ивангород)", geo: "Тявзино", year: "1595 г." },
+            { c: 'early', event: "Крупное восстание крестьян и холопов в период голода (восстание Хлопка)", geo: "село Коломна", year: "1603 г." },
+            { c: 'early', event: "Поражение войск Лжедмитрия I от царской армии", geo: "село Добрыничи", year: "1605 г." },
+            { c: 'early', event: "Крупное восстание под предводительством Ивана Болотникова", geo: "Тула", year: "1607 г." },
+            { c: 'early', event: "Создание лагеря Лжедмитрием II", geo: "Тушино", year: "1608 г." },
+            { c: 'early', event: "Длительная осада крупного монастыря польско-литовскими интервентами", geo: "Троице-Сергиев монастырь", year: "1608-1610 гг." },
+            { c: 'early', event: "Длительная и героическая оборона крепости от войск Сигизмунда III", geo: "Смоленск", year: "1609-1611 гг." },
+            { c: 'early', event: "Тяжелое поражение русско-шведского войска от гетмана Жолкевского", geo: "деревня Клушино", year: "1610 г." },
+            { c: 'early', event: "Формирование Второго земского ополчения под руководством Минина и Пожарского", geo: "Нижний Новгород", year: "1611 г." },
+            { c: 'early', event: "Освобождение столицы от польско-литовских интервентов Вторым ополчением", geo: "Москва", year: "1612 г." },
+            { c: 'early', event: "Заключение «вечного мира» со Швецией, лишившего Россию выхода к Балтике", geo: "Столбово", year: "1617 г." },
+            { c: 'early', event: "Заключение перемирия с Речью Посполитой, завершившего период Смуты", geo: "Деулино", year: "1618 г." },
+            { c: 'early', event: "Открытие крупнейшей ярмарки, ставшей центром всероссийского рынка", geo: "Макарьев", year: "1620-е гг." },
+            { c: 'early', event: "Начало работы крупнейшей ярмарки на Урале и в Сибири", geo: "Ирбит", year: "1630-е гг." },
+            { c: 'early', event: "Капитуляция русской армии под командованием М.Б. Шеина", geo: "Смоленск", year: "1634 г." },
+            { c: 'early', event: "Заключение мирного договора после неудачной Смоленской войны (отказ Владислава от престола)", geo: "река Поляновка", year: "1634 г." },
+            { c: 'early', event: "Героическая оборона крепости донскими казаками от турецких войск («сидение»)", geo: "Азов", year: "1641 г." },
+            { c: 'early', event: "Открытие пролива между Евразией и Северной Америкой экспедицией С. Дежнева", geo: "мыс Дежнева", year: "1648 г." },
+            { c: 'early', event: "Городское восстание, вызванное введением высокой пошлины на важный продукт (Соляной бунт)", geo: "Москва", year: "1648 г." },
+            { c: 'early', event: "Экспедиция Е. Хабарова и начало освоения новых дальневосточных территорий", geo: "река Амур", year: "1649 г." },
+            { c: 'early', event: "Собрание представителей запорожского казачества, принявшее решение об объединении с Россией", geo: "Переяславль", year: "1654 г." },
+            { c: 'early', event: "Городское восстание, вызванное обесцениванием новых правительственных монет (Медный бунт)", geo: "Москва", year: "1662 г." },
+            { c: 'early', event: "Заключение перемирия с Речью Посполитой, закрепившего Левобережную Украину", geo: "Андрусово", year: "1667 г." },
+            { c: 'early', event: "Мирный договор, по которому Россия возвращала Швеции все завоеванные в Прибалтике города", geo: "Кардис", year: "1661 г." },
+            { c: 'early', event: "Осада города бунтующими войсками казачьего атамана С.Т. Разина", geo: "Симбирск", year: "1670 г." },
+            { c: 'early', event: "Вооруженное сопротивление монахов церковной реформе патриарха Никона («сидение»)", geo: "Соловецкий монастырь", year: "1668-1676 гг." },
+            { c: 'early', event: "Мирный договор, закрепивший Левобережную Украину за Россией в признании Османов", geo: "Бахчисарай", year: "1681 г." },
+            { c: 'early', event: "Подписание договора, подтвердившего условия Андрусовского перемирия навечно", geo: "Москва", year: "1686 г." },
+            { c: 'early', event: "Неудачные военные походы русской армии под командованием В.В. Голицына", geo: "Перекоп", year: "1687 г." },
+            { c: 'early', event: "Заключение первого договора о границе с империей Цин", geo: "Нерчинск", year: "1689 г." },
+            { c: 'early', event: "Овладение турецкой крепостью в результате второго похода молодого Петра I", geo: "Азов", year: "1696 г." },
+            { c: 'early', event: "Основание первой русской военно-морской базы на Азовском море", geo: "Таганрог", year: "1698 г." },
+
+            // --- ИМПЕРИЯ: XVIII ВЕК ---
+            { c: '18th', event: "Тяжелое поражение русской армии от войск Карла XII в самом начале Северной войны", geo: "Нарва", year: "1700 г." },
+            { c: '18th', event: "Взятие шведской крепости Нотебург (Орешек) войсками Петра I", geo: "исток Невы", year: "1702 г." },
+            { c: '18th', event: "Взятие шведской крепости Ниеншанц", geo: "устье Невы", year: "1703 г." },
+            { c: '18th', event: "Основание города, ставшего новой столицей Российской империи", geo: "Санкт-Петербург", year: "1703 г." },
+            { c: '18th', event: "Основание первой русской военно-морской базы на Балтике", geo: "Кронштадт", year: "1704 г." },
+            { c: '18th', event: "Разгром шведского корпуса генерала Левенгаупта («Мать Полтавской баталии»)", geo: "Лесная", year: "1708 г." },
+            { c: '18th', event: "Генеральная баталия, завершившаяся полным разгромом шведской армии Карла XII", geo: "Полтава", year: "1709 г." },
+            { c: '18th', event: "Окружение русской армии во главе с царем турецко-татарскими войсками", geo: "река Прут", year: "1711 г." },
+            { c: '18th', event: "Первая крупная победа русского галерного флота над шведами", geo: "Гангут", year: "1714 г." },
+            { c: '18th', event: "Морское сражение, закрепившее превосходство русского флота на Балтике", geo: "Гренгам", year: "1720 г." },
+            { c: '18th', event: "Заключение мирного договора, сделавшего Россию империей", geo: "Ништадт", year: "1721 г." },
+            { c: '18th', event: "Основание города-завода на Урале по инициативе В.Н. Татищева", geo: "Екатеринбург", year: "1723 г." },
+            { c: '18th', event: "Взятие сильной турецкой крепости армией под командованием Б.К. Миниха", geo: "Очаков", year: "1737 г." },
+            { c: '18th', event: "Мирный договор, по которому Россия вернула Азов, но без права иметь флот", geo: "Белград", year: "1739 г." },
+            { c: '18th', event: "Подписание мирного договора со Швецией при Елизавете Петровне", geo: "Або", year: "1743 г." },
+            { c: '18th', event: "Первая победа русской армии под командованием С.Ф. Апраксина в Семилетней войне", geo: "Гросс-Егерсдорф", year: "1757 г." },
+            { c: '18th', event: "Кровопролитное сражение Семилетней войны (ничья)", geo: "Цорндорф", year: "1758 г." },
+            { c: '18th', event: "Разгром прусской армии короля Фридриха II войсками П.С. Салтыкова", geo: "Кунерсдорф", year: "1759 г." },
+            { c: '18th', event: "Взятие столицы Пруссии русским конным корпусом", geo: "Берлин", year: "1760 г." },
+            { c: '18th', event: "Взятие прусской крепости русским корпусом П.А. Румянцева", geo: "Кольберг", year: "1761 г." },
+            { c: '18th', event: "Создание архитектурного ансамбля Зимнего дворца (Растрелли)", geo: "Санкт-Петербург", year: "1762 г." },
+            { c: '18th', event: "Издание Манифеста о вольности дворянства императором Петром III", geo: "Санкт-Петербург", year: "1762 г." },
+            { c: '18th', event: "Блестящие победы П.А. Румянцева над превосходящими силами турок", geo: "река Кагул", year: "1770 г." },
+            { c: '18th', event: "Уничтожение турецкого флота русской эскадрой А.Г. Орлова", geo: "Чесменская бухта", year: "1770 г." },
+            { c: '18th', event: "Заключение мирного договора, закрепившего за Россией выход к Черному морю", geo: "Кючук-Кайнарджи", year: "1774 г." },
+            { c: '18th', event: "Начало масштабной крестьянской войны под предводительством казака-самозванца", geo: "река Яик", year: "1773 г." },
+            { c: '18th', event: "Осада крупного уральского города войсками Емельяна Пугачева", geo: "Оренбург", year: "1773 г." },
+            { c: '18th', event: "Открытие памятника Петру I («Медный всадник» работы Э. Фальконе)", geo: "Санкт-Петербург", year: "1782 г." },
+            { c: '18th', event: "Основание главной военно-морской базы Черноморского флота", geo: "Севастополь", year: "1783 г." },
+            { c: '18th', event: "Переход Восточной Грузии под покровительство (протекторат) Российской империи", geo: "Георгиевск", year: "1783 г." },
+            { c: '18th', event: "Разгром турецких войск А.В. Суворовым (за что он получил графский титул)", geo: "река Рымник", year: "1789 г." },
+            { c: '18th', event: "Мирный договор, завершивший Русско-шведскую войну 1788-1790", geo: "Верель", year: "1790 г." },
+            { c: '18th', event: "Взятие неприступной турецкой крепости войсками под командованием А.В. Суворова", geo: "Измаил", year: "1790 г." },
+            { c: '18th', event: "Разгром турецкого флота эскадрой Ф.Ф. Ушакова у берегов Болгарии", geo: "мыс Калиакрия", year: "1791 г." },
+            { c: '18th', event: "Заключение договора, по которому Турция признала присоединение Крыма к России", geo: "Яссы", year: "1791 г." },
+            { c: '18th', event: "Решающий штурм предместий польской столицы войсками Суворова", geo: "Варшава", year: "1794 г." },
+            { c: '18th', event: "Победа Суворова над французской армией генерала Макдональда", geo: "река Треббия", year: "1799 г." },
+            { c: '18th', event: "Сражение Итальянского похода, в котором погиб французский генерал Жубер", geo: "Нови", year: "1799 г." },
+            { c: '18th', event: "Знаменитый переход русской армии через обледенелые горные перевалы", geo: "Швейцарские Альпы", year: "1799 г." },
+            { c: '18th', event: "Взятие неприступной островной крепости русским флотом Ф. Ушакова", geo: "Корфу", year: "1799 г." },
+
+            // --- ИМПЕРИЯ: XIX ВЕК ---
+            { c: '19th', event: "Сражение «трех императоров», завершившееся тяжелым поражением русской армии", geo: "Аустерлиц", year: "1805 г." },
+            { c: '19th', event: "Кровопролитное сражение без явного победителя в ходе Войны четвертой коалиции", geo: "Прейсиш-Эйлау", year: "1807 г." },
+            { c: '19th', event: "Поражение русской армии, вынудившее Александра I пойти на мир с Францией", geo: "Фридланд", year: "1807 г." },
+            { c: '19th', event: "Встреча Александра I и Наполеона на плоту и подписание союзного мирного договора", geo: "Тильзит", year: "1807 г." },
+            { c: '19th', event: "Заключение договора, по которому к России присоединялась Финляндия", geo: "Фридрихсгам", year: "1809 г." },
+            { c: '19th', event: "Успешное соединение 1-й и 2-й русских армий в начале Отечественной войны", geo: "Смоленск", year: "1812 г." },
+            { c: '19th', event: "Генеральное сражение Отечественной войны 1812 года", geo: "Бородино", year: "1812 г." },
+            { c: '19th', event: "Военный совет, на котором М.И. Кутузов принял тяжелое решение оставить Москву", geo: "Фили", year: "1812 г." },
+            { c: '19th', event: "Маневр русской армии, позволивший прикрыть оружейные заводы и хлебные губернии", geo: "Тарутино", year: "1812 г." },
+            { c: '19th', event: "Сражение, вынудившее Наполеона отступать по разоренной Старой Смоленской дороге", geo: "Малоярославец", year: "1812 г." },
+            { c: '19th', event: "Катастрофическая переправа отступающей французской армии, сопровождавшаяся огромными потерями", geo: "река Березина", year: "1812 г." },
+            { c: '19th', event: "Подписание договора, завершившего первую Русско-иранскую войну XIX века", geo: "Гюлистан", year: "1813 г." },
+            { c: '19th', event: "«Битва народов», в которой антифранцузская коалиция нанесла решающее поражение Наполеону", geo: "Лейпциг", year: "1813 г." },
+            { c: '19th', event: "Международный конгресс, определивший послевоенное устройство Европы", geo: "Вена", year: "1814-1815 гг." },
+            { c: '19th', event: "Вооруженное выступление членов тайных обществ (Северного общества декабристов)", geo: "Санкт-Петербург", year: "1825 г." },
+            { c: '19th', event: "Заключение договора, по которому Россия получила Эриванское и Нахичеванское ханства", geo: "Туркманчай", year: "1828 г." },
+            { c: '19th', event: "Разгром турецко-египетского флота эскадрой России, Англии и Франции", geo: "Наваринская бухта", year: "1827 г." },
+            { c: '19th', event: "Мирный договор, закрепивший за Россией устье Дуная и восточное побережье Черного моря", geo: "Адрианополь", year: "1829 г." },
+            { c: '19th', event: "Открытие железной дороги, соединившей две столицы (Николаевская ЖД)", geo: "Москва - Санкт-Петербург", year: "1851 г." },
+            { c: '19th', event: "Уничтожение турецкой эскадры флотом под командованием П.С. Нахимова", geo: "Синоп", year: "1853 г." },
+            { c: '19th', event: "Первое крупное полевое сражение Крымской войны", geo: "река Альма", year: "1854 г." },
+            { c: '19th', event: "Кровопролитное сражение Крымской войны в тумане", geo: "Инкерман", year: "1854 г." },
+            { c: '19th', event: "Многомесячная героическая оборона города в ходе Крымской войны", geo: "Севастополь", year: "1854-1855 гг." },
+            { c: '19th', event: "Первый дипломатический договор между Россией и Японией", geo: "Симода", year: "1855 г." },
+            { c: '19th', event: "Подписание трактата, лишившего Россию права иметь военно-морской флот на Черном море", geo: "Париж", year: "1856 г." },
+            { c: '19th', event: "Подписание договора, закрепившего левобережье Амура за Российской империей", geo: "Айгун", year: "1858 г." },
+            { c: '19th', event: "Пленение имама Шамиля, завершившее основной этап Кавказской войны", geo: "Гуниб", year: "1859 г." },
+            { c: '19th', event: "Основание города-порта на Дальнем Востоке графом Н.Н. Муравьёвым-Амурским", geo: "Владивосток", year: "1860 г." },
+            { c: '19th', event: "Трактат с империей Цин, окончательно присоединивший к России Приморье", geo: "Пекин", year: "1860 г." },
+            { c: '19th', event: "Издание Манифеста об отмене крепостного права Александром II", geo: "Санкт-Петербург", year: "1861 г." },
+            { c: '19th', event: "Подписание договора о продаже российских владений в Северной Америке", geo: "Вашингтон", year: "1867 г." },
+            { c: '19th', event: "Длительная осада турецкой крепости русскими войсками", geo: "Плевна", year: "1877 г." },
+            { c: '19th', event: "Оборона стратегического горного перевала русскими войсками и болгарскими ополченцами", geo: "Шипка", year: "1877 г." },
+            { c: '19th', event: "Подписание предварительного мирного договора, создавшего независимую Болгарию", geo: "Сан-Стефано", year: "1878 г." },
+            { c: '19th', event: "Международный конгресс, значительно урезавший успехи России в войне с Турцией", geo: "Берлин", year: "1878 г." },
+            { c: '19th', event: "Взятие мощной туркменской крепости отрядом генерала Скобелева", geo: "Геок-Тепе", year: "1881 г." },
+            { c: '19th', event: "Убийство императора Александра II народовольцами", geo: "Санкт-Петербург", year: "1881 г." },
+            { c: '19th', event: "Крупнейшая стачка текстильщиков, приведшая к появлению рабочего законодательства", geo: "Орехово-Зуево", year: "1885 г." },
+            { c: '19th', event: "Начало строительства Великой Сибирской магистрали (Транссиба)", geo: "Владивосток", year: "1891 г." },
+
+            // --- XX ВЕК И НОВЕЙШАЯ ИСТОРИЯ ---
+            { c: '20th', event: "Многомесячная героическая оборона русской военно-морской базы на Ляодунском полуострове", geo: "Порт-Артур", year: "1904 г." },
+            { c: '20th', event: "Крупнейшее сухопутное сражение Русско-японской войны", geo: "Мукден", year: "1905 г." },
+            { c: '20th', event: "Разгром Второй Тихоокеанской эскадры адмирала З.П. Рожественского", geo: "Цусима", year: "1905 г." },
+            { c: '20th', event: "Подписание мирного договора, по которому Россия уступала Южный Сахалин", geo: "Портсмут", year: "1905 г." },
+            { c: '20th', event: "Расстрел мирной демонстрации рабочих («Кровавое воскресенье»)", geo: "Санкт-Петербург", year: "1905 г." },
+            { c: '20th', event: "Трагический расстрел бастующих рабочих на золотых приисках", geo: "река Лена", year: "1912 г." },
+            { c: '20th', event: "Первое сражение русской армии в Восточной Пруссии в начале Первой мировой войны", geo: "Гумбиннен", year: "1914 г." },
+            { c: '20th', event: "Окружение и разгром 2-й русской армии генерала А.В. Самсонова", geo: "Танненберг", year: "1914 г." },
+            { c: '20th', event: "Успешное крупное наступление войск русского фронта под командованием А.А. Брусилова", geo: "Юго-Западный фронт", year: "1916 г." },
+            { c: '20th', event: "Вооруженное восстание, завершившееся арестом министров Временного правительства", geo: "Петроград", year: "1917 г." },
+            { c: '20th', event: "Подписание унизительного сепаратного мирного договора с Германией", geo: "Брест-Литовск", year: "1918 г." },
+            { c: '20th', event: "Расстрел царской семьи большевиками", geo: "Екатеринбург", year: "1918 г." },
+            { c: '20th', event: "Антибольшевистское восстание гарнизона военно-морской крепости", geo: "Кронштадт", year: "1921 г." },
+            { c: '20th', event: "Подписание мирного договора, закрепившего Западную Украину и Белоруссию за Польшей", geo: "Рига", year: "1921 г." },
+            { c: '20th', event: "Утверждение Договора об образовании Союза Советских Социалистических Республик", geo: "Москва", year: "1922 г." },
+            { c: '20th', event: "Международная конференция, в ходе которой был подписан Рапалльский договор с Германией", geo: "Генуя", year: "1922 г." },
+            { c: '20th', event: "Строительство железной дороги, соединившей Среднюю Азию с Сибирью (Турксиб)", geo: "Казахская ССР", year: "1930 г." },
+            { c: '20th', event: "Конфликт на КВЖД между СССР и Китаем", geo: "Харбин", year: "1929 г." },
+            { c: '20th', event: "Локальный вооруженный конфликт с японскими войсками (командующий В.К. Блюхер)", geo: "озеро Хасан", year: "1938 г." },
+            { c: '20th', event: "Локальный вооруженный конфликт с Японией у границ союзной Монголии (командующий Г.К. Жуков)", geo: "река Халхин-Гол", year: "1939 г." },
+            { c: '20th', event: "Прорыв глубоко эшелонированной «линии Маннергейма» в ходе Зимней войны", geo: "Карельский перешеек", year: "1940 г." },
+            
+            // --- ВЕЛИКАЯ ОТЕЧЕСТВЕННАЯ ВОЙНА ---
+            { c: '20th', event: "Героическая оборона пограничной крепости в первые дни Великой Отечественной войны", geo: "Брест", year: "1941 г." },
+            { c: '20th', event: "Тяжелое оборонительное сражение, задержавшее продвижение врага к столице на два месяца", geo: "Смоленск", year: "1941 г." },
+            { c: '20th', event: "Проведение знаменитого парада войск, уходивших прямо на фронт", geo: "Москва", year: "1941 г." },
+            { c: '20th', event: "Контрнаступление, ставшее первым крупным поражением вермахта во Второй мировой войне", geo: "Москва", year: "1941 г." },
+            { c: '20th', event: "Начало многомесячной героической обороны главной базы Черноморского флота", geo: "Севастополь", year: "1941 г." },
+            { c: '20th', event: "Успешное контрнаступление советских войск (операция «Уран»)", geo: "Сталинград", year: "1942 г." },
+            { c: '20th', event: "Окружение и последующая капитуляция немецкой 6-й армии (операция «Кольцо»)", geo: "Сталинград", year: "1943 г." },
+            { c: '20th', event: "Операция «Искра», в результате которой был пробит сухопутный коридор к осажденному городу", geo: "Ленинград", year: "1943 г." },
+            { c: '20th', event: "Крупнейшее встречное танковое сражение Второй мировой войны", geo: "Прохоровка", year: "1943 г." },
+            { c: '20th', event: "Освобождение города первого салюта в ходе операции «Кутузов»", geo: "Орёл", year: "1943 г." },
+            { c: '20th', event: "Освобождение города первого салюта в ходе операции «Румянцев»", geo: "Белгород", year: "1943 г." },
+            { c: '20th', event: "Масштабное форсирование водной преграды, за которое множество солдат получили звание Героя", geo: "река Днепр", year: "1943 г." },
+            { c: '20th', event: "Освобождение столицы Украинской ССР от немецко-фашистских захватчиков", geo: "Киев", year: "1943 г." },
+            { c: '20th', event: "Первая личная встреча лидеров «Большой тройки» (Сталин, Рузвельт, Черчилль)", geo: "Тегеран", year: "1943 г." },
+            { c: '20th', event: "Успешная операция по окружению крупной группировки вермахта (2-й Сталинград)", geo: "Корсунь-Шевченковский", year: "1944 г." },
+            { c: '20th', event: "Полное окончательное снятие вражеской блокады (Январский гром)", geo: "Ленинград", year: "1944 г." },
+            { c: '20th', event: "Крупномасштабная наступательная операция («Багратион») по освобождению республики", geo: "Белорусская ССР", year: "1944 г." },
+            { c: '20th', event: "Освобождение столицы Белорусской ССР в ходе операции «Багратион»", geo: "Минск", year: "1944 г." },
+            { c: '20th', event: "Успешная наступательная операция («Ясско-Кишиневская»), приведшая к выходу Румынии из войны", geo: "Кишинев", year: "1944 г." },
+            { c: '20th', event: "Открытие союзниками Второго фронта в Европе (операция «Оверлорд»)", geo: "Нормандия", year: "1944 г." },
+            { c: '20th', event: "Стремительное наступление Красной Армии, освободившее территорию Польши («Висло-Одерская»)", geo: "река Висла", year: "1945 г." },
+            { c: '20th', event: "Историческая встреча наступающих союзных советских и американских войск", geo: "река Эльба", year: "1945 г." },
+            { c: '20th', event: "Успешная наступательная операция советских войск в Восточной Пруссии", geo: "Кёнигсберг", year: "1945 г." },
+            { c: '20th', event: "Наступательная операция, завершившая поднятием Знамени Победы над Рейхстагом", geo: "Берлин", year: "1945 г." },
+            { c: '20th', event: "Конференция лидеров «Большой тройки», принявшая решение о создании ООН", geo: "Ялта", year: "1945 г." },
+            { c: '20th', event: "Конференция стран-победительниц, утвердившая демилитаризацию и денацификацию Германии", geo: "Потсдам", year: "1945 г." },
+            { c: '20th', event: "Начало Международного военного трибунала над главными нацистскими преступниками", geo: "Нюрнберг", year: "1945 г." },
+            
+            // --- ПОСЛЕВОЕННОЕ ВРЕМЯ ---
+            { c: '20th', event: "Подписание договора о создании военно-политического блока социалистических стран", geo: "Варшава", year: "1955 г." },
+            { c: '20th', event: "Первый в истории полет человека в космос (Юрий Гагарин)", geo: "Байконур", year: "1961 г." },
+            { c: '20th', event: "Размещение советских ядерных ракет, спровоцировавшее острейший международный кризис", geo: "остров Куба", year: "1962 г." },
+            { c: '20th', event: "Вооруженный пограничный конфликт между СССР и КНР", geo: "остров Даманский", year: "1969 г." },
+            { c: '20th', event: "Начало масштабного строительства Байкало-Амурской магистрали (БАМ)", geo: "Восточная Сибирь", year: "1974 г." },
+            { c: '20th', event: "Подписание Заключительного акта Совещания по безопасности и сотрудничеству в Европе", geo: "Хельсинки", year: "1975 г." },
+            { c: '20th', event: "Ввод ограниченного контингента советских войск, приведший к десятилетней войне", geo: "Афганистан", year: "1979 г." },
+            { c: '20th', event: "Проведение XXII летних Олимпийских игр, бойкотированных рядом западных стран", geo: "Москва", year: "1980 г." },
+            { c: '20th', event: "Крупнейшая радиационная техногенная катастрофа на атомной электростанции", geo: "Чернобыль", year: "1986 г." },
+            { c: '20th', event: "Подписание главами трех республик соглашения о прекращении существования СССР", geo: "Беловежская пуща", year: "1991 г." },
+            
+            // --- НОВЫЕ ФАКТЫ ОТ ПОЛЬЗОВАТЕЛЯ ---
+            // Новейшая история
+            { c: '20th', event: "Подписание Федеративного договора", geo: "Москва", year: "1992 г." },
+            { c: '20th', event: "Принятие Конституции Российской Федерации", geo: "Москва", year: "1993 г." },
+            { c: '20th', event: "Учреждение Шанхайской организации сотрудничества (ШОС)", geo: "Шанхай", year: "2001 г." },
+            { c: '20th', event: "Проведение XXII зимних Олимпийских игр", geo: "Сочи", year: "2014 г." },
+            { c: '20th', event: "Подписание договора о принятии Республики Крым в состав РФ", geo: "Москва", year: "2014 г." },
+            { c: '20th', event: "Открытие автомобильного сообщения по новому мосту", geo: "Керченский пролив", year: "2018 г." },
+            { c: '20th', event: "Начало Специальной военной операции (СВО)", geo: "Донбасс", year: "2022 г." },
+            { c: '20th', event: "Подписание договоров о вхождении ДНР, ЛНР, Запорожской и Херсонской областей в РФ", geo: "Москва", year: "2022 г." },
+            // Экономика, Транспорт и Культура
+            { c: '18th', event: "Основание первого в России университета", geo: "Москва", year: "1755 г." },
+            { c: '18th', event: "Основание Академии наук и художеств", geo: "Санкт-Петербург", year: "1724 г." },
+            { c: '19th', event: "Открытие первой в России железной дороги", geo: "Санкт-Петербург — Царское Село", year: "1837 г." },
+            { c: '19th', event: "Начало строительства Китайско-Восточной железной дороги (КВЖД)", geo: "Маньчжурия", year: "1897 г." },
+            { c: '20th', event: "Строительство крупнейшей гидроэлектростанции на Днепре", geo: "Запорожье", year: "1927-1932 гг." },
+            { c: '20th', event: "Запуск первой в мире атомной электростанции (АЭС)", geo: "Обнинск", year: "1954 г." },
+            // Восстания и договоры
+            { c: '18th', event: "Начало казачьего восстания под предводительством К.А. Булавина", geo: "река Дон", year: "1707 г." },
+            { c: '18th', event: "Крупный бунт стрельцов и посадских людей", geo: "Астрахань", year: "1705-1706 гг." },
+            { c: '19th', event: "Выступление Черниговского полка (Южное общество декабристов)", geo: "село Трилесы", year: "1825-1826 гг." },
+            { c: '19th', event: "Крупное национально-освободительное восстание", geo: "Варшава", year: "1830-1831 гг." },
+            { c: '19th', event: "Подписание мирного договора после русско-турецкой войны (М.И. Кутузов)", geo: "Бухарест", year: "1812 г." },
+            { c: '19th', event: "Заключение союзного договора России и Османской империи", geo: "Ункяр-Искелеси", year: "1833 г." },
+            { c: '20th', event: "Масштабное крестьянское восстание против большевиков (Антоновщина)", geo: "Тамбовская губерния", year: "1920-1921 гг." },
+            { c: '20th', event: "Восстание матросов на эскадренном броненосце", geo: "Одесса", year: "1905 г." },
+            
+            // --- НОВЫЕ ФАКТЫ (ИЗ ПОСЛЕДНЕГО ЗАПРОСА) ---
+            { c: 'early', event: "Созыв первого Земского собора", geo: "Москва", year: "1549 г." },
+            { c: 'early', event: "Венчание на царство первого представителя династии Романовых", geo: "Москва", year: "1613 г." },
+            { c: '18th', event: "Учреждение Правительствующего Сената", geo: "Санкт-Петербург", year: "1711 г." },
+            { c: '18th', event: "Учреждение Святейшего Синода", geo: "Санкт-Петербург", year: "1721 г." },
+            { c: '18th', event: "Созыв Уложенной комиссии Екатериной II", geo: "Москва", year: "1767 г." },
+            { c: '19th', event: "Создание системы министерств", geo: "Санкт-Петербург", year: "1802 г." },
+            { c: '19th', event: "Учреждение Государственного совета", geo: "Санкт-Петербург", year: "1810 г." },
+            { c: '19th', event: "Создание военных поселений", geo: "Новгородская губерния", year: "1810-е гг." },
+            { c: '19th', event: "Утверждение Свода законов Российской империи", geo: "Санкт-Петербург", year: "1832 г." },
+            { c: '20th', event: "Начало работы Первой Государственной думы", geo: "Санкт-Петербург", year: "1906 г." },
+            { c: '20th', event: "Разгон Учредительного собрания", geo: "Петроград", year: "1918 г." },
+            { c: 'early', event: "Начало книгопечатания в России, издание «Апостола»", geo: "Москва", year: "1564 г." },
+            { c: 'early', event: "Основание Славяно-греко-латинской академии", geo: "Москва", year: "1687 г." },
+            { c: '18th', event: "Издание первой печатной русской газеты «Ведомости»", geo: "Москва", year: "1702 г." },
+            { c: '19th', event: "Открытие Императорского Царскосельского лицея", geo: "Царское Село", year: "1811 г." },
+            { c: '19th', event: "Открытие Высших женских курсов (Бестужевских)", geo: "Санкт-Петербург", year: "1878 г." },
+            { c: '19th', event: "Открытие Московского Художественного театра (МХТ)", geo: "Москва", year: "1898 г." },
+            { c: '20th', event: "Проведение первого съезда РСДРП", geo: "Минск", year: "1898 г." },
+            { c: '20th', event: "Проведение XX съезда КПСС (доклад о культе личности)", geo: "Москва", year: "1956 г." },
+            { c: '20th', event: "Проведение Всемирного фестиваля молодежи и студентов", geo: "Москва", year: "1957 г." },
+            { c: 'early', event: "Сражение при Клушине (поражение Василия Шуйского)", geo: "деревня Клушино", year: "1610 г." },
+            { c: '19th', event: "Образование Священного союза", geo: "Париж", year: "1815 г." },
+            { c: '20th', event: "Кровавое воскресение", geo: "Санкт-Петербург", year: "1905 г." },
+            { c: '20th', event: "Смертельное ранение П.А. Столыпина", geo: "Киев", year: "1911 г." },
+            { c: '20th', event: "Создание Совета экономической взаимопомощи (СЭВ)", geo: "Москва", year: "1949 г." },
+            { c: '20th', event: "Подписание договора об ограничении систем ПРО (ОСВ-1)", geo: "Москва", year: "1972 г." },
+
+            // --- НОВЫЕ ФАКТЫ (ССЫЛКИ, СТРОЙКИ, ЗАБАСТОВКИ) ---
+            { c: '18th', event: "Ссылка А.Д. Меншикова", geo: "Берёзов", year: "1727 г." },
+            { c: '19th', event: "Трагедия во время коронационных торжеств Николая II", geo: "Ходынское поле", year: "1896 г." },
+            { c: '19th', event: "Ссылка В.И. Ленина", geo: "село Шушенское", year: "1897-1900 гг." },
+            { c: '19th', event: "Начало работы крупнейшей ярмарки в Центральной России", geo: "Нижний Новгород", year: "1817 г." },
+            { c: '20th', event: "Строительство крупнейшего металлургического комбината первых пятилеток", geo: "Магнитогорск", year: "1930-е гг." },
+            { c: '20th', event: "Строительство Горьковского автомобильного завода (ГАЗ)", geo: "Нижний Новгород", year: "1932 г." },
+            { c: '20th', event: "Строительство Волжского автозавода (ВАЗ)", geo: "Тольятти", year: "1966-1970 гг." },
+            { c: '20th', event: "Строительство Камского автомобильного завода (КАМАЗ)", geo: "Набережные Челны", year: "1969 г." },
+            { c: '20th', event: "Установление дипломатических отношений РСФСР с Германией (Рапалльский договор)", geo: "Рапалло", year: "1922 г." },
+            { c: 'early', event: "Массовое движение старообрядцев против церковной реформы", geo: "Соловецкий монастырь", year: "1668-1676 гг." },
+            { c: '20th', event: "Создание первого Совета рабочих уполномоченных", geo: "Иваново-Вознесенск", year: "1905 г." },
+            { c: '20th', event: "Антибольшевистское восстание гарнизона крепости", geo: "Кронштадт", year: "1921 г." },
+            { c: '20th', event: "Выступление рабочих, приведшее к началу Февральской революции", geo: "Петроград", year: "1917 г." }
+        ];
+
+        const geoDict = {
+            "Новгород": [31.27, 58.52], "Великий Новгород": [31.27, 58.52], "Киев": [30.52, 50.45], 
+            "Константинополь": [28.97, 41.00], "Искоростень": [28.63, 50.94], "Итиль": [48.00, 46.16], 
+            "Доростол": [27.26, 44.11], "Владимир": [40.40, 56.12], "река Альта": [31.53, 50.08], 
+            "Любеч": [30.65, 51.70], "Москва": [37.61, 55.75], "Боголюбово": [40.53, 56.19], 
+            "река Липица": [39.83, 56.55], "река Калка": [37.76, 47.37], "Рязань": [39.71, 54.62], 
+            "река Сить": [37.90, 58.06], "Козельск": [35.78, 54.03], "река Нева": [30.66, 59.80], 
+            "Чудское озеро": [27.46, 58.63], "Тверь": [35.90, 56.85], "река Пьяна": [45.45, 55.55], 
+            "река Вожа": [39.43, 54.73], "река Дон": [39.03, 50.15], "Грюнвальд": [20.11, 53.48], 
+            "река Шелонь": [29.93, 58.20], "река Угра": [36.10, 54.51], "Смоленск": [31.97, 54.78], 
+            "Псков": [28.34, 57.81], "Казань": [49.10, 55.79], "Астрахань": [48.03, 46.34], 
+            "Дерпт": [26.72, 58.37], "Юрьев": [26.72, 58.37], "село Молоди": [37.51, 55.28], 
+            "река Иртыш": [68.21, 58.18], "устье Северной Двины": [40.54, 64.54], "Архангельск": [40.52, 64.53],
+            "Углич": [38.33, 57.52], "село Добрыничи": [34.61, 52.31], "Тула": [37.61, 54.19], 
+            "Троице-Сергиев монастырь": [38.13, 56.31], "Нижний Новгород": [44.00, 56.32], 
+            "Столбово": [32.96, 59.88], "Деулино": [38.16, 56.33], "Макарьев": [45.06, 56.08], 
+            "Ирбит": [63.06, 57.66], "Азов": [39.42, 47.11], "мыс Дежнева": [-169.65, 66.07], 
+            "река Амур": [140.71, 53.11], "Переяславль": [31.45, 50.06], "Андрусово": [31.50, 54.33], 
+            "Симбирск": [48.40, 54.31], "Соловецкий монастырь": [35.71, 65.02], "Нерчинск": [116.58, 51.98], 
+            "Бахчисарай": [33.86, 44.74], "Перекоп": [33.69, 46.14], "Таганрог": [38.89, 47.23], 
+            "Нарва": [28.17, 59.37], "исток Невы": [31.03, 59.95], "устье Невы": [30.33, 59.93], 
+            "Кронштадт": [29.76, 59.99], "Заячий остров": [30.31, 59.95], "Лесная": [31.33, 53.53], 
+            "Полтава": [34.55, 49.58], "река Прут": [28.05, 45.46], "Гангут": [22.97, 59.82], 
+            "Гренгам": [20.43, 60.03], "Ништадт": [21.40, 60.80], 
+            "Очаков": [31.55, 46.61], "Гросс-Егерсдорф": [21.61, 54.68], "Кунерсдорф": [14.61, 52.33], 
+            "Берлин": [13.40, 52.52], "Чесменская бухта": [26.30, 38.31], "Кючук-Кайнарджи": [27.46, 44.00], 
+            "река Яик": [51.36, 51.20], "Оренбург": [55.10, 51.76], "Севастополь": [33.52, 44.61], 
+            "Георгиевск": [43.46, 44.15], "река Рымник": [27.08, 45.43], "Измаил": [28.83, 45.35], 
+            "мыс Калиакрия": [28.46, 43.36], "Яссы": [27.60, 47.15], "Швейцарские Альпы": [8.55, 46.55], 
+            "Корфу": [19.91, 39.61], "Аустерлиц": [16.76, 49.16], "Тильзит": [21.88, 55.08], 
+            "Фридрихсгам": [27.20, 60.56], "Гюлистан": [46.58, 40.63], "Бородино": [35.81, 55.51], 
+            "Фили": [37.50, 55.73], "Тарутино": [36.93, 55.13], "Малоярославец": [36.46, 55.01], 
+            "Лейпциг": [12.37, 51.34], "Санкт-Петербург": [30.33, 59.93], "Туркманчай": [47.65, 37.60], 
+            "река Альма": [33.65, 44.83], "Синоп": [35.15, 42.01],
+            "Париж": [2.35, 48.85], "Айгун": [127.48, 50.23], "Владивосток": [131.88, 43.11], 
+            "Вашингтон": [-77.03, 38.90], "Плевна": [24.61, 43.41], "Шипка": [25.31, 42.76], 
+            "Сан-Стефано": [28.81, 40.96], "Орехово-Зуево": [38.98, 55.80], 
+            "Порт-Артур": [121.26, 38.80], "Цусима": [129.50, 34.33],
+            "Портсмут": [-70.76, 43.07], "Одесса": [30.72, 46.48], "река Лена": [112.00, 58.00], 
+            "Гумбиннен": [22.20, 54.58], "Юго-Западный фронт": [25.00, 49.00], "Петроград": [30.33, 59.93], 
+            "Брест-Литовск": [23.70, 52.10], "Екатеринбург": [60.60, 56.83], "Генуя": [8.94, 44.40], 
+            "Запорожье": [35.13, 47.83], "река Халхин-Гол": [118.66, 47.75], "Карельский перешеек": [29.50, 60.50], 
+            "Брест": [23.70, 52.10], "Сталинград": [44.51, 48.70], "Прохоровка": [36.73, 51.03], 
+            "река Днепр": [35.00, 48.50], "Ленинград": [30.33, 59.93], 
+            "Тегеран": [51.38, 35.68], "Белорусская ССР": [27.56, 53.90], "Минск": [27.56, 53.90], 
+            "Нормандия": [-0.50, 49.20], "река Эльба": [13.00, 51.53], "Кёнигсберг": [20.45, 54.71], 
+            "Ялта": [34.16, 44.49], "Потсдам": [13.06, 52.40], "Нюрнберг": [11.07, 49.45], 
+            "Варшава": [21.01, 52.22], "Байконур": [63.30, 45.96], "остров Куба": [-79.48, 21.60], 
+            "Хельсинки": [24.93, 60.16], "Афганистан": [67.71, 33.93], "Чернобыль": [30.22, 51.27], 
+            "Беловежская пуща": [23.86, 52.61], "Уветичи": [30.86, 50.15], "река Каяла": [38.25, 48.15], 
+            "река Ворскла": [34.15, 48.91], "река Ведрошь": [33.35, 54.81], "деревня Клушино": [34.98, 55.61], 
+            "река Поляновка": [31.55, 54.68], "Або": [22.26, 60.45], "Кольберг": [15.58, 54.17], 
+            "Цорндорф": [14.66, 52.66], "Верель": [26.96, 60.91], "река Треббия": [9.68, 45.05], 
+            "Нови": [8.78, 44.76], "Геок-Тепе": [57.96, 38.15], "Инкерман": [33.60, 44.60], 
+            "Корсунь-Шевченковский": [31.26, 49.41], "Кишинев": [28.85, 47.01], "река Висла": [18.95, 54.31], 
+            "Орёл": [36.07, 52.96], "Белгород": [36.60, 50.60], "Прейсиш-Эйлау": [20.63, 54.38],
+            "Фридланд": [21.00, 54.45], "Мукден": [123.45, 41.80], "Пекин": [116.40, 39.90], 
+            "река Кагул": [28.25, 45.91], "село Коломна": [38.77, 55.09], "Плюсса": [28.32, 58.43], 
+            "Тявзино": [28.17, 59.37], "Белград": [20.46, 44.81], "Москва - Санкт-Петербург": [33.50, 57.50], 
+            "Казахская ССР": [66.92, 48.01], "Харбин": [126.63, 45.75], "озеро Хасан": [130.60, 42.43],
+            "остров Даманский": [133.84, 46.48], "Восточная Сибирь": [110.00, 60.00], "река Сальница": [37.20, 49.10],
+            "Шанхай": [121.47, 31.23], "Сочи": [39.72, 43.58], "Керченский пролив": [36.60, 45.30], 
+            "Донбасс": [37.80, 48.00], "Санкт-Петербург — Царское Село": [30.40, 59.72], 
+            "Маньчжурия": [125.00, 45.00], "Обнинск": [36.61, 55.10], "село Трилесы": [29.84, 49.95], 
+            "Бухарест": [26.10, 44.43], "Ункяр-Искелеси": [29.08, 41.15], "Тамбовская губерния": [41.45, 52.72],
+            "Новгородская губерния": [31.27, 58.52], "СССР": [37.61, 55.75],
+
+            // Новые локации
+            "Берёзов": [65.04, 63.93], "Ходынское поле": [37.53, 55.78], "село Шушенское": [91.93, 53.32],
+            "Магнитогорск": [58.98, 53.41], "Тольятти": [49.41, 53.52], "Набережные Челны": [52.33, 55.73],
+            "Рапалло": [9.23, 44.35], "Иваново-Вознесенск": [40.97, 56.99]
+        };
+
+        // Словарь ловушек (коварных дистракторов) для усложнения
+        const trapDict = {
+            "Ништадт": ["Або", "Верель"],
+            "Медный бунт": ["Соляной бунт", "Чумной бунт"],
+            "Соляной бунт": ["Медный бунт"],
+            "1240 г.": ["1242 г.", "1223 г."],
+            "1242 г.": ["1240 г.", "1237 г."],
+            "1380 г.": ["1382 г.", "1378 г."],
+            "1382 г.": ["1380 г."],
+            "Взятие Казани Иваном IV": ["Взятие Астрахани Иваном IV"],
+            "Взятие Астрахани Иваном IV": ["Взятие Казани Иваном IV"],
+            "Тильзит": ["Фридрихсгам", "Эрфурт"],
+            "Аустерлиц": ["Фридланд", "Прейсиш-Эйлау"],
+            "Кючук-Кайнарджи": ["Яссы", "Сан-Стефано"],
+            "Яссы": ["Кючук-Кайнарджи", "Бухарест"],
+            "Сан-Стефано": ["Берлин"],
+            "Берлин": ["Сан-Стефано", "Париж"],
+            "1905 г.": ["1904 г.", "1914 г."],
+            "1914 г.": ["1916 г.", "1918 г."],
+            "1941 г.": ["1942 г.", "1939 г."],
+            "1943 г.": ["1944 г.", "1945 г."],
+            "Полтава": ["Лесная", "Нарва"],
+            "Нарва": ["Полтава"],
+            "Смоленск": ["Псков", "Киев"],
+            "Псков": ["Смоленск", "Новгород"],
+            "река Калка": ["река Сить", "река Вожа"],
+            "река Сить": ["река Калка"],
+            "река Дон": ["река Угра", "река Вожа"],
+            "река Угра": ["река Дон"]
+        };
+
+        // Выводим state в window, чтобы Firebase скрипт тоже имел к нему доступ
+        window.state = {
+            selectedChip: null,
+            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0 },
+            mistakesPool: [],
+            currentTargetData: [],
+            currentMode: 'normal',
+            timeLeft: 0,
+            lives: 3,
+            timerInterval: null,
+            hideLearned: false,
+            isHomeworkMode: false,
+            hwTargetIndices: [],
+            hwCurrentPool: [],
+            answersRevealed: false
+        };
+
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+
+        function haptic(type) {
+            if (tg && tg.HapticFeedback) {
+                if (['light', 'medium', 'heavy', 'rigid', 'soft'].includes(type)) {
+                    tg.HapticFeedback.impactOccurred(type);
+                } else if (['error', 'success', 'warning'].includes(type)) {
+                    tg.HapticFeedback.notificationOccurred(type);
+                }
+            }
+        }
+
+        function initStorage() {
+            if (tg && tg.initDataUnsafe) {
+                tg.expand();
+                tg.ready();
+                if (tg.colorScheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('ege_theme', 'dark');
+                }
+                if (tg.setHeaderColor) {
+                    tg.setHeaderColor(document.documentElement.classList.contains('dark') ? '#020617' : '#0f4c81');
+                }
+            }
+
+            try {
+                const saved = localStorage.getItem('ege_final_storage_v4');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(window.state.stats, parsed);
+                    if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
+                    if (parsed.hideLearned !== undefined) window.state.hideLearned = parsed.hideLearned;
+                    if (parsed.totalTimeSpent === undefined) window.state.stats.totalTimeSpent = 0;
+                    
+                    // Миграция данных и интервальное повторение (Кривая забывания Эббингауза)
+                    const now = Date.now();
+                    const ONE_DAY = 24 * 60 * 60 * 1000;
+                    for (let key in window.state.stats.factStreaks) {
+                        let data = window.state.stats.factStreaks[key];
+                        // Преобразуем старые числа в объекты с отметкой времени
+                        if (typeof data === 'number') {
+                            window.state.stats.factStreaks[key] = { streak: data, lastUpdated: now };
+                        } else if (data && data.streak > 0) {
+                            let daysPassed = Math.floor((now - data.lastUpdated) / ONE_DAY);
+                            if (daysPassed >= 3) {
+                                // Если факт не повторяли 3 дня, он начинает "забываться" (-1 балл, или -2 если прошла неделя)
+                                window.state.stats.factStreaks[key].streak = Math.max(0, data.streak - (daysPassed >= 7 ? 2 : 1));
+                                window.state.stats.factStreaks[key].lastUpdated = now;
+                            }
+                        }
+                    }
+                }
+            } catch(e) { console.error("Ошибка чтения кэша", e); }
+            
+            const isDark = localStorage.getItem('ege_theme') === 'dark';
+            if (isDark) document.documentElement.classList.add('dark');
+            document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
+            updateGlobalUI();
+            checkURLForHomework();
+
+            setInterval(() => {
+                window.state.stats.totalTimeSpent = (window.state.stats.totalTimeSpent || 0) + 1;
+                if (window.state.stats.totalTimeSpent % 15 === 0 && !window.state.isHomeworkMode) {
+                    saveProgress();
+                }
+            }, 1000);
+        }
+
+        function saveProgress() {
+            localStorage.setItem('ege_final_storage_v4', JSON.stringify({
+                totalSolvedEver: window.state.stats.totalSolvedEver,
+                eraStats: window.state.stats.eraStats,
+                factStreaks: window.state.stats.factStreaks,
+                mistakesPool: window.state.mistakesPool,
+                hideLearned: window.state.hideLearned,
+                totalTimeSpent: window.state.stats.totalTimeSpent
+            }));
+            
+            // Синхронизация с облаком (Firebase)
+            if (window.syncProgressToCloud) window.syncProgressToCloud();
+        }
+
+        function checkURLForHomework() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hw = urlParams.get('hw');
+            if (hw) {
+                window.state.isHomeworkMode = true;
+                window.state.hwTargetIndices = hw.split(',').map(Number);
+                window.state.hwCurrentPool = [...window.state.hwTargetIndices];
+                document.getElementById('controls-area').classList.add('hidden');
+                document.getElementById('hw-alert').classList.remove('hidden');
+                document.getElementById('hw-remaining').innerText = window.state.hwCurrentPool.length;
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('ege_theme', isDark ? 'dark' : 'light');
+            if (tg && tg.setHeaderColor) {
+                tg.setHeaderColor(isDark ? '#020617' : '#0f4c81');
+            }
+        }
+
+        function toggleHideLearned() {
+            window.state.hideLearned = document.getElementById('toggle-hide-learned').checked;
+            saveProgress();
+            generateTable();
+        }
+
+        function generateTable() {
+            const period = document.getElementById('filter-period').value;
+            const rowsCount = parseInt(document.getElementById('filter-rows').value);
+            const tbody = document.getElementById('task-table-body');
+            const pool = document.getElementById('pool-container');
+            
+            window.state.answersRevealed = false;
+            document.getElementById('check-buttons').classList.remove('hidden');
+            document.getElementById('check-buttons').classList.add('flex');
+            const revealBtn = document.getElementById('reveal-btn');
+            revealBtn.className = "hidden bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-300 font-bold py-2 px-6 rounded-xl shadow-sm active:scale-95 text-xs sm:text-sm w-full transition-colors flex items-center justify-center gap-2";
+            revealBtn.innerHTML = '👀 Показать ответы';
+            document.getElementById('next-btn').classList.add('hidden');
+
+            tbody.innerHTML = ''; pool.innerHTML = '';
+            
+            let target = [];
+            if (window.state.isHomeworkMode) {
+                let count = Math.min(4, window.state.hwCurrentPool.length);
+                window.state.hwCurrentPool.slice(0, count).forEach(i => target.push(bigData[i]));
+            } else if (window.state.currentMode === 'mistakes') {
+                let allowed = window.state.mistakesPool.map(m => m.fact);
+                let count = Math.min(4, allowed.length);
+                target = allowed.sort(() => Math.random() - 0.5).slice(0, count);
+            } else {
+                let allowed = [];
+                if (period === 'all') {
+                    allowed = [...bigData];
+                } else if (period === 'upTo17') {
+                    allowed = bigData.filter(d => d.c === 'early');
+                } else if (period === 'upTo18') {
+                    allowed = bigData.filter(d => ['early', '18th'].includes(d.c));
+                } else if (period === 'upTo19') {
+                    allowed = bigData.filter(d => ['early', '18th', '19th'].includes(d.c));
+                } else {
+                    allowed = bigData.filter(d => d.c === period);
+                }
+                
+                if (window.state.hideLearned) allowed = allowed.filter(f => {
+                    let fData = window.state.stats.factStreaks[f.event];
+                    let streakVal = fData ? (typeof fData === 'number' ? fData : fData.streak) : 0;
+                    return streakVal < 3;
+                });
+
+                if (allowed.length < rowsCount) {
+                    if (window.state.hideLearned) {
+                        alert('Вы выучили почти все факты в этой эпохе! Фильтр отключен.');
+                        document.getElementById('toggle-hide-learned').checked = false;
+                        window.state.hideLearned = false;
+                        generateTable();
+                        return;
+                    }
+                }
+                target = allowed.sort(() => Math.random() - 0.5).slice(0, rowsCount);
+            }
+            
+            window.state.currentTargetData = target;
+            let missing = [];
+            let hiddenRowsData = [];
+
+            // Распределяем 6 пропусков на строки, чтобы было СТРОГО 2 гео, 2 события, 2 даты
+            let blanksPerRow = [];
+            let availableTypes = [];
+            let requiredFakes = { geo: 0, event: 0, year: 0 };
+
+            if (target.length === 4) {
+                blanksPerRow = [2, 2, 1, 1].sort(() => Math.random() - 0.5);
+                availableTypes = ['geo', 'geo', 'event', 'event', 'year', 'year'];
+                requiredFakes = { geo: 1, event: 1, year: 1 }; // В пуле должно быть по 3 каждого (2 скрыто + 1 фейк)
+            } else {
+                // Для нестандартного числа строк (например 6 или 10)
+                blanksPerRow = Array(target.length).fill(1);
+                let remainingBlanks = Math.floor(target.length * 1.5) - target.length;
+                while(remainingBlanks > 0) {
+                    let r = Math.floor(Math.random() * target.length);
+                    if (blanksPerRow[r] < 2) { blanksPerRow[r]++; remainingBlanks--; }
+                }
+                
+                let total = blanksPerRow.reduce((a,b)=>a+b,0);
+                let types = ['geo', 'event', 'year'];
+                for(let i=0; i<total; i++) availableTypes.push(types[i%3]);
+                
+                // Считаем сколько нужно фейков, чтобы каждого типа было хотя бы по максимуму
+                let counts = { geo: availableTypes.filter(x=>x==='geo').length, event: availableTypes.filter(x=>x==='event').length, year: availableTypes.filter(x=>x==='year').length };
+                let maxCount = Math.max(counts.geo, counts.event, counts.year, 3);
+                requiredFakes = { 
+                    geo: maxCount - counts.geo, 
+                    event: maxCount - counts.event, 
+                    year: maxCount - counts.year 
+                };
+            }
+
+            let letterIndex = 0;
+            const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'];
+
+            function popRandomType(available, exclude) {
+                let validIndices = available.map((t, i) => exclude.includes(t) ? -1 : i).filter(i => i !== -1);
+                if (validIndices.length === 0) return available.pop(); 
+                let pickIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
+                return available.splice(pickIndex, 1)[0];
+            }
+
+            target.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/50";
+                tr.dataset.index = idx;
+                
+                let needed = blanksPerRow[idx];
+                let chosenTypes = [];
+                for(let i=0; i<needed; i++) {
+                    chosenTypes.push(popRandomType(availableTypes, chosenTypes));
+                }
+                hiddenRowsData.push({ row, types: chosenTypes });
+
+                const orderedKeys = ['geo', 'event', 'year'];
+
+                orderedKeys.forEach(key => {
+                    const td = document.createElement('td');
+                    td.className = "p-1.5 sm:p-4 align-middle text-center overflow-hidden border-l border-gray-100 dark:border-slate-700 first:border-l-0";
+                    
+                    if (chosenTypes.includes(key)) {
+                        missing.push(row[key]);
+                        let curLetter = letters[letterIndex] || '?';
+                        td.innerHTML = `<div class="dnd-slot relative" data-expected="${row[key]}" data-letter="${curLetter}" onclick="handleSlotClick(this)"></div>`;
+                        letterIndex++;
+                    } else {
+                        const style = key === 'year' ? "font-bold text-blue-800 dark:text-blue-300" : "text-gray-700 dark:text-gray-300";
+                        let cellHtml = `<span class="text-[10px] sm:text-sm ${style} leading-tight block">${row[key]}</span>`;
+                        if (key === 'geo' && geoDict[row[key]]) {
+                            cellHtml += `<button onclick="openMapModal('${row[key]}')" class="map-trigger-btn mt-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-700 dark:text-blue-300 text-[9px] sm:text-xs font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1 mx-auto transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-600 w-full">🗺️ На карте</button>`;
+                        }
+                        td.innerHTML = cellHtml;
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            // УМНЫЕ ДИСТРАКТОРЫ И ЛОВУШКИ (Trap System)
+            let poolItems = [...missing];
+            const targetEras = [...new Set(target.map(t => t.c))];
+            const plausibleFacts = bigData.filter(d => targetEras.includes(d.c));
+
+            ['geo', 'event', 'year'].forEach(type => {
+                let needed = requiredFakes[type];
+                for(let i=0; i<needed; i++) {
+                    let found = false;
+                    let attempts = 0;
+                    
+                    // Шанс 35% использовать ловушку, если она существует для этого факта
+                    let relevantHidden = hiddenRowsData.find(h => h.types.includes(type));
+                    let trapVal = null;
+                    if (relevantHidden && Math.random() < 0.35) {
+                        let correctAnswer = relevantHidden.row[type];
+                        let possibleTraps = trapDict[correctAnswer];
+                        if (possibleTraps && possibleTraps.length > 0) {
+                            trapVal = possibleTraps[Math.floor(Math.random() * possibleTraps.length)];
+                        }
+                    }
+
+                    // Добавляем ловушку, если её еще нет в пуле
+                    if (trapVal && !poolItems.includes(trapVal)) {
+                        poolItems.push(trapVal);
+                        continue; 
+                    }
+
+                    // Если ловушка не сработала или её нет - берем просто из той же эпохи
+                    while(!found && attempts < 50) {
+                        let randFact = plausibleFacts[Math.floor(Math.random()*plausibleFacts.length)];
+                        let val = randFact[type];
+                        if (!poolItems.includes(val)) {
+                            poolItems.push(val);
+                            found = true;
+                        }
+                        attempts++;
+                    }
+                }
+            });
+
+            poolItems.sort(() => Math.random() - 0.5).forEach(txt => {
+                const chip = document.createElement('div');
+                chip.className = "dnd-chip";
+                chip.innerText = txt;
+                chip.onclick = (e) => {
+                    haptic('light');
+
+                    const now = Date.now();
+                    const timeSinceLastClick = now - (chip._lastClickTime || 0);
+                    chip._lastClickTime = now;
+
+                    // 1. Если плашка зачеркнута — любой тап оживляет её
+                    if (chip.classList.contains('crossed-out')) {
+                        chip.classList.remove('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
+                        e.stopPropagation();
+                        return;
+                    }
+
+                    // 2. Если кликнули по плашке в слоте — возвращаем в пул
+                    if (chip.classList.contains('in-slot')) {
+                        e.stopPropagation();
+                        const slot = chip.parentElement;
+                        if (slot.classList.contains('correct-slot') || slot.classList.contains('revealed-slot')) return;
+
+                        chip.classList.remove('in-slot', 'selected');
+                        document.getElementById('pool-container').appendChild(chip);
+                        slot.innerHTML = '';
+                        slot.classList.remove('has-item', 'incorrect-slot');
+                        if (window.state.selectedChip === chip) window.state.selectedChip = null;
+                        updateSlotGlow();
+                        return;
+                    }
+
+                    // 3. Быстрый двойной тап по плашке в пуле — зачеркиваем
+                    if (timeSinceLastClick < 300) {
+                        chip.classList.add('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
+                        chip.classList.remove('selected');
+                        if (window.state.selectedChip === chip) window.state.selectedChip = null;
+                        updateSlotGlow();
+                        e.stopPropagation();
+                        return;
+                    }
+
+                    // 4. Обычное выделение
+                    document.querySelectorAll('.dnd-chip').forEach(c => {
+                        if (c !== chip) c.classList.remove('selected');
+                    });
+                    if (window.state.selectedChip !== chip) {
+                        window.state.selectedChip = chip;
+                        chip.classList.add('selected');
+                    } else {
+                        window.state.selectedChip = null;
+                        chip.classList.remove('selected');
+                    }
+                    updateSlotGlow();
+                };
+                pool.appendChild(chip);
+            });
+        }
+
+        function handleSlotClick(slot) {
+            if (slot.classList.contains('correct-slot') || slot.classList.contains('revealed-slot')) return;
+            haptic('light');
+
+            if (window.state.selectedChip) {
+                if (slot.classList.contains('has-item')) {
+                    const oldChip = slot.querySelector('.dnd-chip');
+                    if (oldChip) {
+                        oldChip.classList.remove('in-slot', 'selected');
+                        document.getElementById('pool-container').appendChild(oldChip);
+                    }
+                }
+                const newChip = window.state.selectedChip;
+                newChip.classList.remove('selected');
+                newChip.classList.add('in-slot');
+                slot.innerHTML = '';
+                slot.appendChild(newChip);
+                slot.classList.add('has-item');
+                slot.classList.remove('incorrect-slot');
+                window.state.selectedChip = null;
+                updateSlotGlow();
+            } else {
+                if (slot.classList.contains('has-item')) {
+                    const oldChip = slot.querySelector('.dnd-chip');
+                    if (oldChip) {
+                        oldChip.classList.remove('in-slot', 'selected');
+                        document.getElementById('pool-container').appendChild(oldChip);
+                        slot.innerHTML = '';
+                        slot.classList.remove('has-item', 'incorrect-slot');
+                    }
+                }
+            }
+        }
+
+        function updateSlotGlow() {
+            document.querySelectorAll('.dnd-slot').forEach(s => {
+                s.classList.toggle('slot-ready', !!window.state.selectedChip && !s.classList.contains('has-item'));
+            });
+        }
+
+        function checkAnswers(isSure = true) {
+            const rows = document.querySelectorAll('#task-table-body tr');
+            let allCorrect = true;
+            let filled = 0;
+            let total = document.querySelectorAll('.dnd-slot').length;
+
+            rows.forEach((tr, idx) => {
+                const fact = window.state.currentTargetData[idx];
+                const slots = tr.querySelectorAll('.dnd-slot');
+                
+                let rowAllCorrect = true;
+                let rowFilledCount = 0;
+
+                slots.forEach(slot => {
+                    if (slot.classList.contains('has-item') && !slot.classList.contains('revealed-slot')) {
+                        rowFilledCount++;
+                        filled++;
+                    }
+                    const chip = slot.querySelector('.dnd-chip');
+                    
+                    if(chip && chip.innerText === slot.dataset.expected && !slot.classList.contains('revealed-slot')) {
+                        slot.classList.add('correct-slot');
+                        slot.classList.remove('incorrect-slot');
+                    } else if (!slot.classList.contains('revealed-slot')) {
+                        rowAllCorrect = false;
+                        if(chip) {
+                            slot.classList.add('incorrect-slot');
+                            slot.classList.remove('correct-slot');
+                        }
+                    }
+                });
+
+                if (!rowAllCorrect || rowFilledCount !== slots.length) {
+                    allCorrect = false;
+                }
+
+                if (!window.state.isHomeworkMode && rowFilledCount > 0 && !window.state.answersRevealed) {
+                    if(!window.state.stats.eraStats[fact.c]) window.state.stats.eraStats[fact.c] = { correct: 0, total: 0 };
+                    window.state.stats.eraStats[fact.c].total++;
+                    
+                    // Обновленная логика объекта факта (Кривая Эббингауза)
+                    let factData = window.state.stats.factStreaks[fact.event];
+                    if (typeof factData === 'number') factData = { streak: factData, lastUpdated: Date.now() };
+                    if (!factData) factData = { streak: 0, lastUpdated: Date.now() };
+
+                    let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event);
+                    
+                    if (rowAllCorrect && rowFilledCount === slots.length) {
+                        window.state.stats.eraStats[fact.c].correct++;
+                        
+                        // Метакогнитивный анализ: Уверен = +1 балл, Сомневаюсь = +0.5 балла
+                        factData.streak += isSure ? 1 : 0.5;
+                        factData.lastUpdated = Date.now();
+                        window.state.stats.factStreaks[fact.event] = factData;
+                        
+                        if(mIdx !== -1) {
+                            window.state.mistakesPool[mIdx].streak++;
+                            if(window.state.mistakesPool[mIdx].streak >= 2) window.state.mistakesPool.splice(mIdx, 1);
+                        }
+                        
+                        if(geoDict[fact.geo] && !tr.children[0].querySelector('.map-trigger-btn')) {
+                            const btn = document.createElement('button');
+                            btn.className = "map-trigger-btn mt-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-700 dark:text-blue-300 text-[9px] sm:text-xs font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1 mx-auto transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-600 w-full";
+                            btn.innerHTML = `🗺️ На карте`;
+                            btn.onclick = (e) => { e.stopPropagation(); openMapModal(fact.geo); };
+                            tr.children[0].appendChild(btn);
+                        }
+                    } else {
+                        factData.streak = 0; 
+                        factData.lastUpdated = Date.now();
+                        window.state.stats.factStreaks[fact.event] = factData;
+
+                        if (mIdx === -1) {
+                            window.state.mistakesPool.push({ fact: fact, streak: 0 });
+                        } else {
+                            window.state.mistakesPool[mIdx].streak = 0;
+                        }
+                    }
+                }
+            });
+
+            if (filled === 0) return showToast('⚠️', 'Заполните ячейки', 'bg-gray-800', 'border-black');
+
+            if (allCorrect && filled === total) {
+                haptic('success');
+                window.state.stats.streak++;
+                window.state.stats.totalSolvedEver += rows.length;
+                
+                if (window.state.currentMode === 'speedrun') {
+                    window.state.timeLeft += 25;
+                    showToast('⚡', '+25 секунд!', 'bg-purple-600', 'border-purple-800');
+                } else if (window.state.currentMode === 'survival') {
+                    showToast('❤️', 'Идеально!', 'bg-rose-600', 'border-rose-800');
+                } else {
+                    if (isSure) {
+                        showToast('✅', 'Верно!', 'bg-green-600', 'border-green-800');
+                    } else {
+                        showToast('👌', 'Угадали! Но нужно повторить.', 'bg-indigo-500', 'border-indigo-700');
+                    }
+                }
+                
+                document.getElementById('check-buttons').classList.add('hidden');
+                document.getElementById('check-buttons').classList.remove('flex');
+                document.getElementById('reveal-btn').classList.add('hidden');
+                document.getElementById('next-btn').classList.remove('hidden');
+
+                if (window.state.isHomeworkMode) {
+                    window.state.hwCurrentPool.splice(0, rows.length);
+                    if (window.state.hwCurrentPool.length === 0) endGame();
+                } else {
+                    saveProgress();
+                }
+            } else {
+                haptic('error');
+                window.state.stats.streak = 0;
+                
+                if (window.state.currentMode === 'survival') {
+                    window.state.lives--;
+                    updateLivesUI();
+                    if(window.state.lives <= 0) endGame();
+                }
+                
+                const funnyMistakes = [
+                    { e: '🤡', t: 'Ты тупой? (Шучу, попробуй еще!)' },
+                    { e: '🗿', t: 'Историчка плачет в сторонке...' },
+                    { e: '🤦‍♂️', t: 'Ну почти... (на самом деле нет)' },
+                    { e: '🐒', t: 'Труд сделал из обезьяны стобалльника!' },
+                    { e: '🎪', t: 'Цирк уехал, а ошибки остались!' },
+                    { e: '📉', t: 'С такими ответами мы завалим ЕГЭ...' },
+                    { e: '🤔', t: 'Кнопка "наугад" тут не работает!' },
+                    { e: '👀', t: 'Это фиаско, братан...' }
+                ];
+                const joke = funnyMistakes[Math.floor(Math.random() * funnyMistakes.length)];
+                
+                showToast(joke.e, joke.t, 'bg-red-600', 'border-red-800');
+                document.getElementById('reveal-btn').classList.remove('hidden');
+            }
+            updateGlobalUI();
+        }
+
+        function toggleAnswers() {
+            window.state.answersRevealed = !window.state.answersRevealed;
+            const btn = document.getElementById('reveal-btn');
+            const rows = document.querySelectorAll('#task-table-body tr');
+
+            if (window.state.answersRevealed) {
+                btn.innerHTML = '🙈 Мои ответы';
+                btn.className = "bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 border border-blue-300 font-bold py-2 px-6 rounded-xl shadow-sm active:scale-95 text-xs sm:text-sm w-full transition-colors flex items-center justify-center gap-2";
+
+                rows.forEach((tr, idx) => {
+                    const fact = window.state.currentTargetData[idx];
+                    const slots = tr.querySelectorAll('.dnd-slot');
+                    slots.forEach(slot => {
+                        if (!slot.classList.contains('correct-slot')) {
+                            slot._userChildren = Array.from(slot.childNodes);
+                            slot.innerHTML = '';
+                            slot.classList.remove('incorrect-slot');
+                            slot.classList.add('revealed-slot', 'has-item');
+                            slot.innerHTML = `<div class="dnd-chip in-slot !bg-orange-100 !border-orange-400 !text-orange-900 dark:!bg-orange-900/40 dark:!text-orange-200 dark:!border-orange-700">${slot.dataset.expected}</div>`;
+                        }
+                    });
+                    
+                    if(geoDict[fact.geo] && !tr.children[0].querySelector('.map-trigger-btn')) {
+                        const mBtn = document.createElement('button');
+                        mBtn.className = "map-trigger-btn mt-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-700 dark:text-blue-300 text-[9px] sm:text-xs font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1 mx-auto transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-600 w-full";
+                        mBtn.innerHTML = `🗺️ На карте`;
+                        mBtn.onclick = (e) => { e.stopPropagation(); openMapModal(fact.geo); };
+                        tr.children[0].appendChild(mBtn);
+                    }
+                });
+                document.getElementById('check-buttons').classList.add('hidden');
+                document.getElementById('check-buttons').classList.remove('flex');
+                document.getElementById('next-btn').classList.remove('hidden');
+            } else {
+                btn.innerHTML = '👀 Показать ответы';
+                btn.className = "bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-300 font-bold py-2 px-6 rounded-xl shadow-sm active:scale-95 text-xs sm:text-sm w-full transition-colors flex items-center justify-center gap-2";
+
+                rows.forEach(tr => {
+                    const slots = tr.querySelectorAll('.dnd-slot');
+                    slots.forEach(slot => {
+                        if (slot.classList.contains('revealed-slot')) {
+                            slot.classList.remove('revealed-slot');
+                            slot.innerHTML = '';
+                            if (slot._userChildren && slot._userChildren.length > 0) {
+                                slot._userChildren.forEach(child => slot.appendChild(child));
+                                slot.classList.add('has-item', 'incorrect-slot');
+                            } else {
+                                slot.classList.remove('has-item', 'incorrect-slot');
+                            }
+                        }
+                    });
+                });
+                document.getElementById('check-buttons').classList.remove('hidden');
+                document.getElementById('check-buttons').classList.add('flex');
+                document.getElementById('next-btn').classList.add('hidden');
+            }
+        }
+
+        function toggleMobilePool() {
+            const wrapper = document.getElementById('pool-content-wrapper');
+            const btn = document.getElementById('pool-toggle-btn');
+            const isHidden = wrapper.classList.toggle('hidden');
+            btn.innerText = isHidden ? 'Развернуть' : 'Свернуть';
+        }
+
+        function updateGlobalUI() {
+            document.getElementById('stat-mistakes').innerText = window.state.mistakesPool.length;
+            document.getElementById('stat-streak').innerText = window.state.stats.streak;
+            document.getElementById('stat-solved').innerText = window.state.stats.totalSolvedEver;
+            if (window.state.isHomeworkMode) document.getElementById('hw-remaining').innerText = window.state.hwCurrentPool.length;
+        }
+
+        function showToast(emoji, text, bg, border) {
+            const t = document.getElementById('joke-toast');
+            const c = document.getElementById('toast-content');
+            c.innerHTML = `<span>${emoji}</span><span>${text}</span>`;
+            c.className = `${bg} ${border} text-white font-bold text-xs sm:text-base px-4 py-2 rounded-l-lg shadow-lg flex items-center gap-2 border-y-2 border-l-2`;
+            t.classList.remove('translate-x-full');
+            setTimeout(() => t.classList.add('translate-x-full'), 2000);
+        }
+
+        function endGame() {
+            clearInterval(window.state.timerInterval);
+            document.getElementById('modal-score').innerText = window.state.stats.streak;
+            const modal = document.getElementById('game-over-modal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            document.getElementById('board-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() { 
+            if (window.state.isHomeworkMode) {
+                window.location.href = window.location.pathname; 
+            } else {
+                location.reload(); 
+            }
+        }
+
+        function shareTelegram() {
+            const text = `🔥 Мой стрик в тренажере ЕГЭ по истории — ${window.state.stats.streak}! Попробуй побить: `;
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`);
+        }
+
+        // --- ФУНКЦИИ УЧИТЕЛЯ ---
+        function openTeacherModal() {
+            const modal = document.getElementById('teacher-modal');
+            const listContainer = document.getElementById('teacher-facts-list');
+            listContainer.innerHTML = '';
+
+            const periods = [
+                { id: 'early', name: 'Древность и Смута (до XVII в.)' },
+                { id: '18th', name: 'XVIII век' },
+                { id: '19th', name: 'XIX век' },
+                { id: '20th', name: 'XX век' }
+            ];
+
+            periods.forEach(p => {
+                const factsInPeriod = bigData.map((fact, index) => ({ fact, index })).filter(item => item.fact.c === p.id);
+                if (factsInPeriod.length === 0) return;
+
+                let html = `
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center bg-gray-100 dark:bg-slate-700 p-2 rounded-lg mb-2 cursor-pointer select-none" onclick="toggleEraCheckbox('${p.id}')">
+                            <h4 class="font-bold text-examBlue dark:text-blue-300 text-sm">${p.name}</h4>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 font-normal">Выбрать всё</span>
+                        </div>
+                        <div class="space-y-1 pl-2 era-group-${p.id}">
+                `;
+
+                factsInPeriod.forEach(item => {
+                    html += `
+                        <label class="flex items-start gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 p-1.5 rounded transition-colors">
+                            <input type="checkbox" value="${item.index}" class="hw-checkbox mt-0.5 w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
+                            <div class="text-xs text-gray-800 dark:text-gray-200 leading-tight">
+                                <span class="font-bold">${item.fact.event}</span><br>
+                                <span class="text-gray-500 dark:text-gray-400">${item.fact.geo} | ${item.fact.year}</span>
+                            </div>
+                        </label>
+                    `;
+                });
+                html += `</div></div>`;
+                listContainer.innerHTML += html;
+            });
+
+            document.getElementById('teacher-link-container').classList.add('hidden');
+            switchTeacherTab('hw'); // По умолчанию открываем вкладку ДЗ
+            
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function switchTeacherTab(tab) {
+            if (tab === 'hw') {
+                document.getElementById('teacher-tab-hw').classList.remove('hidden');
+                document.getElementById('teacher-tab-hw').classList.add('flex');
+                document.getElementById('teacher-tab-stats').classList.add('hidden');
+                
+                document.getElementById('tab-btn-hw').className = "flex-1 py-2 text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors";
+                document.getElementById('tab-btn-stats').className = "flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors";
+                if(window.stopClassProgressSync) window.stopClassProgressSync();
+            } else {
+                document.getElementById('teacher-tab-hw').classList.add('hidden');
+                document.getElementById('teacher-tab-hw').classList.remove('flex');
+                document.getElementById('teacher-tab-stats').classList.remove('hidden');
+                
+                document.getElementById('tab-btn-stats').className = "flex-1 py-2 text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors";
+                document.getElementById('tab-btn-hw').className = "flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors";
+                
+                if (window.loadClassProgress) window.loadClassProgress();
+            }
+        }
+
+        function closeTeacherModal() { 
+            if(window.stopClassProgressSync) window.stopClassProgressSync();
+            const m = document.getElementById('teacher-modal');
+            m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
+        }
+
+        function toggleEraCheckbox(eraId) {
+            const checkboxes = document.querySelectorAll(`.era-group-${eraId} .hw-checkbox`);
+            const allChecked = Array.from(checkboxes).every(c => c.checked);
+            checkboxes.forEach(c => c.checked = !allChecked);
+        }
+
+        function generateHomeworkLink() {
+            const checked = document.querySelectorAll('.hw-checkbox:checked');
+            if (checked.length === 0) {
+                alert("Выберите хотя бы один факт!"); return;
+            }
+            if (checked.length > 50) {
+                alert("Слишком много фактов для одной ссылки (максимум 50)."); return;
+            }
+
+            const indices = Array.from(checked).map(c => c.value).join(',');
+            const baseUrl = window.location.href.split('?')[0];
+            const finalUrl = `${baseUrl}?hw=${indices}`;
+
+            const container = document.getElementById('teacher-link-container');
+            const input = document.getElementById('teacher-generated-url');
+            input.value = finalUrl;
+            container.classList.remove('hidden');
+        }
+
+        function copyHomeworkLink() {
+            const input = document.getElementById('teacher-generated-url');
+            input.select();
+            document.execCommand('copy');
+            alert("Ссылка скопирована в буфер обмена!");
+        }
+
+        // --- РЕЖИМЫ ---
+        function toggleMode(mode) {
+            if (mode === 'mistakes' && window.state.mistakesPool.length === 0) {
+                showToast('🎉', 'У вас нет ошибок! Вы идеальны!', 'bg-green-600', 'border-green-800');
+                return;
+            }
+
+            if (window.state.currentMode === mode) {
+                window.state.currentMode = 'normal';
+                document.getElementById('timer-container').classList.add('hidden');
+                document.getElementById('lives-container').classList.add('hidden');
+                document.getElementById('filter-rows').disabled = false;
+                document.getElementById('filter-period').disabled = false;
+                document.getElementById('btn-update').disabled = false;
+                clearInterval(window.state.timerInterval);
+                generateTable();
+                return;
+            }
+
+            window.state.currentMode = mode;
+            window.state.stats.streak = 0; updateGlobalUI();
+            
+            document.getElementById('filter-rows').value = "4";
+            document.getElementById('filter-rows').disabled = true;
+            document.getElementById('filter-period').value = "all";
+            document.getElementById('filter-period').disabled = true;
+            document.getElementById('btn-update').disabled = true;
+
+            document.getElementById('timer-container').classList.add('hidden');
+            document.getElementById('lives-container').classList.add('hidden');
+
+            if(mode === 'survival') {
+                window.state.lives = 3; document.getElementById('lives-container').classList.remove('hidden'); updateLivesUI();
+            } else if(mode === 'speedrun') {
+                window.state.timeLeft = 180; document.getElementById('timer-container').classList.remove('hidden');
+                clearInterval(window.state.timerInterval);
+                window.state.timerInterval = setInterval(() => {
+                    window.state.timeLeft--;
+                    const min = Math.floor(window.state.timeLeft/60); const sec = window.state.timeLeft%60;
+                    document.getElementById('stat-timer').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                    if(window.state.timeLeft <= 0) endGame();
+                }, 1000);
+            }
+            generateTable();
+        }
+
+        function updateLivesUI() { 
+            document.getElementById('stat-lives').innerText = '❤️'.repeat(window.state.lives) + '🖤'.repeat(3 - window.state.lives); 
+        }
+
+        // --- СТАТИСТИКА, КОПИРОВАНИЕ ТЕКСТА И ПЕЧАТЬ ДНЕВНИКА ---
+        function openStatsModal() {
+            const modal = document.getElementById('stats-modal');
+            const container = document.getElementById('stats-era-container');
+            
+            container.innerHTML = `
+                <div class="mb-5 text-center bg-gray-50 dark:bg-slate-700/50 p-3 rounded-xl border border-gray-100 dark:border-slate-600 shadow-sm">
+                    <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Всего решено линий</p>
+                    <p class="text-3xl font-black text-examBlue dark:text-blue-400 leading-none mt-1">${window.state.stats.totalSolvedEver}</p>
+                </div>
+            `;
+            
+            const eras = {'early': 'Древность', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'};
+
+            Object.entries(eras).forEach(([key, name]) => {
+                const data = window.state.stats.eraStats[key] || { correct: 0, total: 0 };
+                const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+                container.innerHTML += `
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs font-black text-gray-600 dark:text-gray-300 uppercase mb-1"><span>${name}</span><span>${percent}%</span></div>
+                        <div class="w-full bg-gray-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden shadow-inner">
+                            <div class="h-full bg-examBlue dark:bg-blue-500" style="width: ${percent}%"></div>
+                        </div>
+                    </div>`;
+            });
+            
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeStatsModal() { document.getElementById('stats-modal').classList.add('opacity-0'); setTimeout(() => document.getElementById('stats-modal').classList.add('hidden'), 300); }
+
+        function copyTextReport() {
+            const timeMinutes = Math.floor((window.state.stats.totalTimeSpent || 0) / 60);
+            const learnedCount = Object.values(window.state.stats.factStreaks).filter(val => (typeof val === 'number' ? val : val.streak) >= 3).length;
+            const today = new Date().toLocaleDateString('ru-RU');
+
+            let text = `🎓 Отчет: Тренажер Задания 4 (ЕГЭ История)\n`;
+            text += `📅 Дата: ${today}\n`;
+            text += `⏱ Время в тренажере: ${timeMinutes} мин\n`;
+            text += `✅ Решено заданий (строк): ${window.state.stats.totalSolvedEver}\n`;
+            text += `🔥 Лучший стрик: ${window.state.stats.streak}\n`;
+            text += `🧠 Твердо выучено: ${learnedCount} фактов\n\n`;
+
+            text += `📊 Успеваемость по эпохам:\n`;
+            const eras = {'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'};
+            Object.entries(eras).forEach(([key, eraName]) => {
+                const data = window.state.stats.eraStats[key] || { correct: 0, total: 0 };
+                const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+                text += `- ${eraName}: ${percent}% (${data.correct} из ${data.total})\n`;
+            });
+
+            if (window.state.mistakesPool.length > 0) {
+                text += `\n⚠️ Ошибки для повторения:\n`;
+                window.state.mistakesPool.forEach((m, idx) => {
+                    text += `${idx + 1}. ${m.fact.geo} | ${m.fact.event} | ${m.fact.year}\n`;
+                });
+            } else {
+                text += `\n🎉 Ошибок нет! Идеальная работа!\n`;
+            }
+
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('📋', 'Текст отчета скопирован в буфер!', 'bg-emerald-600', 'border-emerald-800');
+            } catch (err) {
+                alert('Не удалось скопировать. К сожалению, ваш браузер блокирует буфер обмена.');
+            }
+            document.body.removeChild(ta);
+        }
+
+        function openNameModal() {
+            closeStatsModal();
+            
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const tgName = [tg.initDataUnsafe.user.first_name, tg.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
+                if (tgName) document.getElementById('student-name-input').value = tgName;
+            }
+
+            setTimeout(() => {
+                const modal = document.getElementById('name-modal');
+                modal.classList.remove('hidden'); modal.classList.add('flex');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            }, 300);
+        }
+
+        function closeNameModal() { 
+            const m = document.getElementById('name-modal');
+            m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
+        }
+
+        function submitNameAndPrint() {
+            const name = document.getElementById('student-name-input').value || 'Ученик';
+            closeNameModal();
+            
+            const container = document.getElementById('printable-report');
+            const timeMinutes = Math.floor((window.state.stats.totalTimeSpent || 0) / 60);
+            const learnedCount = Object.values(window.state.stats.factStreaks).filter(val => (typeof val === 'number' ? val : val.streak) >= 3).length;
+            const today = new Date().toLocaleDateString('ru-RU');
+            
+            let html = `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; border-bottom: 3px solid #0f4c81; padding-bottom: 15px; margin-bottom: 30px;">
+                        <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #0f4c81; text-transform: uppercase;">Официальный отчет</h1>
+                        <p style="font-size: 14px; color: #666; margin-top: 5px;">Тренажер ЕГЭ по истории (Задание 4)</p>
+                    </div>
+                    
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                        <h2 style="margin-top: 0; font-size: 20px; color: #1e293b;">Ученик: <span style="border-bottom: 1px solid #333; padding-bottom: 2px;">${name}</span></h2>
+                        <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Дата формирования: <strong>${today}</strong></p>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                        <tr>
+                            <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Время в тренажере</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #0f4c81; margin-top: 5px;">${timeMinutes} мин</div>
+                            </td>
+                            <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Решено заданий</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #00a86b; margin-top: 5px;">${window.state.stats.totalSolvedEver}</div>
+                            </td>
+                            <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Твердо выучено</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #8b5cf6; margin-top: 5px;">${learnedCount} ф.</div>
+                            </td>
+                            <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Лучший стрик</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #f59e0b; margin-top: 5px;">${window.state.stats.streak}</div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h3 style="font-size: 18px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px;">📊 Успеваемость по эпохам:</h3>
+                    <ul style="list-style-type: none; padding: 0; margin-bottom: 30px;">
+            `;
+            
+            const eras = {'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'};
+            Object.entries(eras).forEach(([key, eraName]) => {
+                const data = window.state.stats.eraStats[key] || { correct: 0, total: 0 };
+                const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+                let barColor = percent >= 80 ? '#00a86b' : (percent >= 50 ? '#f59e0b' : '#b91d47');
+                
+                html += `
+                    <li style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; font-weight: bold;">
+                            <span>${eraName}</span>
+                            <span>${percent}% (${data.correct} из ${data.total})</span>
+                        </div>
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden;">
+                            <div style="width: ${percent}%; background: ${barColor}; height: 100%;"></div>
+                        </div>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            
+            if (window.state.mistakesPool.length > 0) {
+                html += `
+                    <h3 style="font-size: 18px; color: #b91d47; border-bottom: 2px solid #fecdd3; padding-bottom: 8px; margin-bottom: 15px;">⚠️ Незакрытые ошибки (требуют повторения):</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #fff1f2; text-align: left;">
+                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239; width: 25%;">География</th>
+                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239;">Событие</th>
+                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239; width: 15%;">Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                window.state.mistakesPool.forEach(m => {
+                    html += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.geo}</td>
+                            <td style="padding: 8px; border: 1px solid #fecdd3;">${m.fact.event}</td>
+                            <td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.year}</td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+            } else {
+                html += `<div style="background: #f0fdf4; border: 2px dashed #4ade80; color: #166534; padding: 20px; text-align: center; border-radius: 12px; font-weight: bold; font-size: 16px;">Ошибок в памяти тренажера нет! Отличная работа! 🎉</div>`;
+            }
+            
+            html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в ULTIMATE Тренажере ЕГЭ</div></div>`;
+            
+            container.innerHTML = html;
+            
+            setTimeout(() => { window.print(); }, 500);
+        }
+
+        function resetAllProgress() {
+            if(confirm("Очистить всю статистику и выученные факты?")) {
+                localStorage.removeItem('ege_final_storage_v4');
+                location.reload();
+            }
+        }
+
+        // --- КАРТЫ ---
+        function openMapModal(name) {
+            const coords = geoDict[name];
+            let iframeSrc = "";
+            if (coords) {
+                iframeSrc = `https://yandex.ru/map-widget/v1/?ll=${coords[0]},${coords[1]}&z=6&pt=${coords[0]},${coords[1]},pm2rdm`;
+            } else {
+                iframeSrc = `https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(name + ' историческое место')}&z=6`;
+            }
+            document.getElementById('yandex-map-iframe').src = iframeSrc;
+            document.getElementById('map-modal-title').innerText = name;
+            const m = document.getElementById('map-modal');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+        
+        function closeMapModal() { 
+            document.getElementById('map-modal').classList.add('opacity-0'); 
+            setTimeout(() => document.getElementById('map-modal').classList.add('hidden'), 300); 
+        }
+
+        document.addEventListener('DOMContentLoaded', initStorage);
+        window.onload = generateTable;
+    </script>
+
+    <!-- ИНТЕГРАЦИЯ БАЗЫ ДАННЫХ (FIREBASE) ДЛЯ ТЕЛЕГРАМА -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let app, auth, db, appId;
+        let fbUser = null;
+        let unsubscribeTeacher = null;
+
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+            if (firebaseConfig) {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+
+                onAuthStateChanged(auth, async (user) => {
+                    fbUser = user;
+                    if (user) {
+                        // Как только пользователь авторизован, стягиваем его сохранение из облака
+                        await window.loadProgressFromCloud();
+                        window.syncProgressToCloud();
+                    }
+                });
+            }
+        } catch(e) { console.error("Firebase init failed", e); }
+
+        window.loadProgressFromCloud = async function() {
+            if (!fbUser || !db) return;
+            let tgUser = window.tg && window.tg.initDataUnsafe && window.tg.initDataUnsafe.user;
+            let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
+            
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Если в облаке больше решенных заданий, значит там более свежий прогресс (с другого устройства)
+                    if (data.totalSolved > (window.state.stats.totalSolvedEver || 0) && data.fullStateJson) {
+                        const cloudState = JSON.parse(data.fullStateJson);
+                        window.state.stats = cloudState.stats;
+                        window.state.mistakesPool = cloudState.mistakesPool;
+                        window.state.hideLearned = cloudState.hideLearned;
+                        
+                        // Сохраняем облачные данные в локальный кэш
+                        localStorage.setItem('ege_final_storage_v4', data.fullStateJson); 
+                        
+                        document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
+                        updateGlobalUI();
+                    }
+                }
+            } catch(e) { console.error("Error loading from cloud:", e); }
+        };
+
+        window.syncProgressToCloud = async function() {
+            if (!fbUser || !db) return;
+            
+            const s = window.state.stats;
+            if (!s) return;
+
+            // Вытягиваем данные из Telegram (если открыто в ТГ)
+            let tgUser = window.tg && window.tg.initDataUnsafe && window.tg.initDataUnsafe.user;
+            let studentName = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Ученик (Вне Telegram)';
+            let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
+            let username = tgUser && tgUser.username ? '@' + tgUser.username : '';
+
+            const learnedCount = Object.values(s.factStreaks || {}).filter(val => (typeof val === 'number' ? val : val.streak) >= 3).length;
+
+            // Упаковываем все глубокие данные (пул ошибок, времена и тд) в одну JSON строку для переноса между устройствами
+            const fullStateJson = JSON.stringify({
+                stats: window.state.stats,
+                mistakesPool: window.state.mistakesPool,
+                hideLearned: window.state.hideLearned
+            });
+
+            const progressData = {
+                name: studentName,
+                username: username,
+                tgId: studentId,
+                totalSolved: s.totalSolvedEver || 0,
+                bestStreak: s.streak || 0,
+                timeSpent: s.totalTimeSpent || 0,
+                learnedCount: learnedCount,
+                lastActive: new Date().toISOString(),
+                fullStateJson: fullStateJson
+            };
+
+            try {
+                // Сохраняем в публичную коллекцию, чтобы учитель мог прочитать
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+                await setDoc(docRef, progressData, { merge: true });
+            } catch(e) { console.error("Error saving to cloud:", e); }
+        };
+
+        window.loadClassProgress = function() {
+            if (!fbUser || !db) {
+                document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-gray-500 text-center mt-5">Нет подключения к облачной базе данных.</p>';
+                return;
+            }
+
+            const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+            document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-gray-500 text-center mt-5">⏳ Загрузка данных класса...</p>';
+
+            if (unsubscribeTeacher) unsubscribeTeacher();
+
+            // Подписываемся на обновления в реальном времени
+            unsubscribeTeacher = onSnapshot(collRef, (snapshot) => {
+                let students = [];
+                snapshot.forEach(doc => students.push(doc.data()));
+
+                // Сортировка: кто решил больше всех, тот молодец
+                students.sort((a, b) => b.totalSolved - a.totalSolved);
+
+                let html = '';
+                students.forEach((st, idx) => {
+                    const activeDate = new Date(st.lastActive).toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit'});
+                    const timeMin = Math.floor(st.timeSpent / 60);
+                    
+                    html += `
+                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-lg mb-2 shadow-sm flex items-center justify-between">
+                            <div>
+                                <div class="font-bold text-sm text-examBlue dark:text-blue-300">
+                                    ${idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : ''))} 
+                                    ${st.name} <span class="text-xs font-normal text-gray-400">${st.username}</span>
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                    Решено: <strong class="text-green-600 dark:text-green-400">${st.totalSolved}</strong> • 
+                                    Выучено: <strong>${st.learnedCount}</strong> • 
+                                    Время: <strong>${timeMin} мин</strong>
+                                </div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">В сети: ${activeDate}</div>
+                            </div>
+                            <div class="text-center bg-gray-50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700">
+                                <div class="text-[9px] text-gray-500 uppercase">Стрик</div>
+                                <div class="text-lg font-black text-orange-500 leading-none">${st.bestStreak}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (students.length === 0) {
+                    html = '<p class="text-sm text-gray-500 text-center py-4">Ваши ученики еще не начали тренировку.</p>';
+                }
+
+                document.getElementById('teacher-class-stats').innerHTML = html;
+            }, (error) => {
+                console.error("Sync error:", error);
+                document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-red-500 text-center mt-5">Ошибка загрузки данных.</p>';
+            });
+        };
+        
+        window.stopClassProgressSync = function() {
+            if (unsubscribeTeacher) {
+                unsubscribeTeacher();
+                unsubscribeTeacher = null;
+            }
+        };
+    </script>
+</body>
+</html>
