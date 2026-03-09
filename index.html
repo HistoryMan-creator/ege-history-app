@@ -552,7 +552,7 @@
             { c: '20th', event: "Первое сражение русской армии в Восточной Пруссии в начале Первой мировой войны", geo: "Гумбиннен", year: "1914 г." },
             { c: '20th', event: "Окружение и разгром 2-й русской армии генерала А.В. Самсонова", geo: "Танненберг", year: "1914 г." },
             { c: '20th', event: "Успешное крупное наступление войск русского фронта под командованием А.А. Брусилова", geo: "Юго-Западный фронт", year: "1916 г." },
-            { c: '20th', event: "Вооруженное восстание, завершившееся арестом министров Временного правительства", geo: "Петроград", year: "1917 г." },
+            { c: '20th', event: "Вооруженное восстание, завершившее арестом министров Временного правительства", geo: "Петроград", year: "1917 г." },
             { c: '20th', event: "Подписание унизительного сепаратного мирного договора с Германией", geo: "Брест-Литовск", year: "1918 г." },
             { c: '20th', event: "Расстрел царской семьи большевиками", geo: "Екатеринбург", year: "1918 г." },
             { c: '20th', event: "Антибольшевистское восстание гарнизона военно-морской крепости", geo: "Кронштадт", year: "1921 г." },
@@ -600,7 +600,7 @@
             { c: '20th', event: "Размещение советских ядерных ракет, спровоцировавшее острейший международный кризис", geo: "остров Куба", year: "1962 г." },
             { c: '20th', event: "Вооруженный пограничный конфликт между СССР и КНР", geo: "остров Даманский", year: "1969 г." },
             { c: '20th', event: "Начало масштабного строительства Байкало-Амурской магистрали (БАМ)", geo: "Восточная Сибирь", year: "1974 г." },
-            { c: '20th', event: "Подписание Заключительного акта Совещания по безопасности и сотрудничеству в Европе", geo: "Хельсинки", year: "1975 г." },
+            { c: '20th', event: "Подписание Заключительного акта Совещания по безопасности и сотрудниству в Европе", geo: "Хельсинки", year: "1975 г." },
             { c: '20th', event: "Ввод ограниченного контингента советских войск, приведший к десятилетней войне", geo: "Афганистан", year: "1979 г." },
             { c: '20th', event: "Проведение XXII летних Олимпийских игр, бойкотированных рядом западных стран", geo: "Москва", year: "1980 г." },
             { c: '20th', event: "Крупнейшая радиационная техногенная катастрофа на атомной электростанции", geo: "Чернобыль", year: "1986 г." },
@@ -1776,7 +1776,7 @@
                 html += `<div style="background: #f0fdf4; border: 2px dashed #4ade80; color: #166534; padding: 20px; text-align: center; border-radius: 12px; font-weight: bold; font-size: 16px;">Ошибок в памяти тренажера нет! Отличная работа! 🎉</div>`;
             }
             
-            html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в ULTIMATE Тренажере ЕГЭ</div></div>`;
+            html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в UL ট্রТренижере ЕГЭ</div></div>`;
             
             container.innerHTML = html;
             
@@ -1826,31 +1826,37 @@
         let unsubscribeTeacher = null;
 
         try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            if (firebaseConfig) {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const firebaseConfig = {
+                apiKey: "AIzaSyDdxtpuznCSK5a6CvcJdbt9pzKMXbUVl08",
+                authDomain: "ege-history-bot.firebaseapp.com",
+                projectId: "ege-history-bot",
+                storageBucket: "ege-history-bot.firebasestorage.app",
+                messagingSenderId: "489223236202",
+                appId: "1:489223236202:web:48110779742d40d748f813",
+                measurementId: "G-T2JL7EZ0W9"
+            };
 
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = "ege-history-bot";
 
-                onAuthStateChanged(auth, async (user) => {
-                    fbUser = user;
-                    if (user) {
-                        // Как только пользователь авторизован, стягиваем его сохранение из облака
-                        await window.loadProgressFromCloud();
-                        window.syncProgressToCloud();
-                    }
-                });
-            }
+            const initAuth = async () => {
+                try {
+                    await signInAnonymously(auth);
+                } catch (e) {
+                    console.error("Ошибка авторизации:", e);
+                }
+            };
+            initAuth();
+
+            onAuthStateChanged(auth, async (user) => {
+                fbUser = user;
+                if (user) {
+                    await window.loadProgressFromCloud();
+                    window.syncProgressToCloud();
+                }
+            });
         } catch(e) { console.error("Firebase init failed", e); }
 
         window.loadProgressFromCloud = async function() {
@@ -1864,16 +1870,13 @@
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    // Если в облаке больше решенных заданий, значит там более свежий прогресс (с другого устройства)
                     if (data.totalSolved > (window.state.stats.totalSolvedEver || 0) && data.fullStateJson) {
                         const cloudState = JSON.parse(data.fullStateJson);
                         window.state.stats = cloudState.stats;
                         window.state.mistakesPool = cloudState.mistakesPool;
                         window.state.hideLearned = cloudState.hideLearned;
                         
-                        // Сохраняем облачные данные в локальный кэш
                         localStorage.setItem('ege_final_storage_v4', data.fullStateJson); 
-                        
                         document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
                         updateGlobalUI();
                     }
@@ -1887,7 +1890,6 @@
             const s = window.state.stats;
             if (!s) return;
 
-            // Вытягиваем данные из Telegram (если открыто в ТГ)
             let tgUser = window.tg && window.tg.initDataUnsafe && window.tg.initDataUnsafe.user;
             let studentName = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Ученик (Вне Telegram)';
             let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
@@ -1895,7 +1897,6 @@
 
             const learnedCount = Object.values(s.factStreaks || {}).filter(val => (typeof val === 'number' ? val : val.streak) >= 3).length;
 
-            // Упаковываем все глубокие данные (пул ошибок, времена и тд) в одну JSON строку для переноса между устройствами
             const fullStateJson = JSON.stringify({
                 stats: window.state.stats,
                 mistakesPool: window.state.mistakesPool,
@@ -1915,7 +1916,6 @@
             };
 
             try {
-                // Сохраняем в публичную коллекцию, чтобы учитель мог прочитать
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
                 await setDoc(docRef, progressData, { merge: true });
             } catch(e) { console.error("Error saving to cloud:", e); }
@@ -1932,12 +1932,10 @@
 
             if (unsubscribeTeacher) unsubscribeTeacher();
 
-            // Подписываемся на обновления в реальном времени
             unsubscribeTeacher = onSnapshot(collRef, (snapshot) => {
                 let students = [];
                 snapshot.forEach(doc => students.push(doc.data()));
 
-                // Сортировка: кто решил больше всех, тот молодец
                 students.sort((a, b) => b.totalSolved - a.totalSolved);
 
                 let html = '';
@@ -1986,5 +1984,4 @@
         };
     </script>
 </body>
-
 </html>
