@@ -269,50 +269,54 @@
     </main>
 
     <!-- Modals -->
-    <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
-        <div class="bg-white dark:bg-slate-800 rounded-xl w-[95%] max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-             <div class="p-3 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900">
-                <h2 class="font-bold text-sm sm:text-lg">👨‍🏫 Кабинет учителя</h2>
-                <button onclick="closeTeacherModal()" class="text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
+    
+    <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-[95%] max-w-3xl h-[85vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-100 shadow-2xl border border-gray-200 dark:border-slate-700">
+             <!-- Header -->
+             <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900 shrink-0">
+                <h2 class="font-black text-base sm:text-xl flex items-center gap-2">👨‍🏫 Кабинет учителя</h2>
+                <button onclick="closeTeacherModal()" class="text-3xl text-gray-400 hover:text-red-500 transition-colors leading-none">&times;</button>
              </div>
              
              <!-- Табы учителя -->
-             <div class="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                 <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="flex-1 py-2 text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors">📝 Конструктор ДЗ</button>
-                 <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">📊 Прогресс класса</button>
+             <div class="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
+                 <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide">📝 Конструктор ДЗ</button>
+                 <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide">📊 Прогресс класса</button>
              </div>
 
              <!-- Конструктор ДЗ -->
-             <div class="flex-grow p-4 overflow-y-auto custom-scroll flex flex-col" id="teacher-tab-hw">
+             <div class="flex-grow p-4 overflow-y-auto custom-scroll flex flex-col bg-white dark:bg-slate-800 relative" id="teacher-tab-hw">
                  <div id="teacher-facts-list" class="flex-grow"></div>
-                 <div class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 flex flex-col gap-2">
+                 <div class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 flex flex-col gap-2 shrink-0 bg-white dark:bg-slate-800 sticky bottom-0 pb-2">
                     <div id="teacher-link-container" class="hidden mb-2">
-                        <input type="text" id="teacher-generated-url" readonly class="w-full p-2 text-[10px] border border-gray-300 rounded dark:bg-slate-700 dark:border-slate-600 mb-2">
-                        <button onclick="copyHomeworkLink()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold transition-colors">Копировать ссылку</button>
+                        <input type="text" id="teacher-generated-url" readonly class="w-full p-3 text-[11px] sm:text-xs font-mono border border-gray-300 rounded-lg dark:bg-slate-700 dark:border-slate-600 mb-2 outline-none">
+                        <button onclick="copyHomeworkLink()" class="w-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-300 hover:bg-blue-200 py-3 rounded-lg text-sm font-bold transition-colors">📋 Копировать ссылку для учеников</button>
                     </div>
-                    <button onclick="generateHomeworkLink()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded font-bold text-xs transition-colors">Создать ДЗ</button>
+                    <button onclick="generateHomeworkLink()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-black text-sm transition-colors shadow-md uppercase tracking-wider">Создать ДЗ</button>
                  </div>
              </div>
 
              <!-- Прогресс Класса (Cloud) -->
-             <div class="flex-grow p-4 overflow-y-auto custom-scroll hidden bg-gray-100 dark:bg-slate-900" id="teacher-tab-stats">
-                 <p class="text-[10px] sm:text-xs text-gray-500 mb-3 text-center">Статистика обновляется в реальном времени. Данные привязаны к аккаунтам Telegram.</p>
-                 <div id="teacher-class-stats" class="flex flex-col gap-2">
+             <div class="flex-grow p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-slate-900 relative" id="teacher-tab-stats">
+                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-center">
+                    <p class="text-[10px] sm:text-xs text-blue-800 dark:text-blue-300 font-medium">Статистика обновляется в реальном времени. Если ученик зашел не из Telegram, его имя подтянется из того, что он укажет в настройках профиля.</p>
+                 </div>
+                 <div id="teacher-class-stats" class="flex flex-col gap-3">
                      <!-- Ученики будут рендериться здесь -->
                  </div>
              </div>
         </div>
     </div>
 
-    <!-- Модалка ввода имени для отчета -->
-    <div id="name-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+    <!-- Модалка ввода имени для отчета/профиля -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
-            <h3 class="font-black text-lg dark:text-white text-center">🎓 Дневник достижений</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 text-center -mt-3">Проверьте имя для отчета учителю</p>
-            <input type="text" id="student-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+            <h3 class="font-black text-lg dark:text-white text-center">👤 Профиль ученика</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center -mt-3">Как вас зовут? Учитель увидит это имя в своей статистике.</p>
+            <input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
             <div class="flex gap-2 mt-2">
-                <button onclick="closeNameModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 rounded-xl font-bold transition-colors">Отмена</button>
-                <button onclick="submitNameAndPrint()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Готово</button>
+                <button onclick="closeProfileModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 rounded-xl font-bold transition-colors">Отмена</button>
+                <button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Сохранить</button>
             </div>
         </div>
     </div>
@@ -323,14 +327,20 @@
                 <h2 class="text-lg font-black text-gray-800 dark:text-white">📊 Прогресс</h2>
                 <button onclick="closeStatsModal()" class="text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
             </div>
+            
+            <!-- Кнопка настройки имени внутри аналитики -->
+            <button onclick="openProfileModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 py-2.5 rounded-xl text-xs font-bold transition-colors mb-4 flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800 shadow-sm">
+                👤 Настроить имя для рейтинга
+            </button>
+
             <div id="stats-era-container" class="space-y-3 mb-4"></div>
             
             <div class="flex gap-2 mb-2">
-                <button onclick="openNameModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
+                <button onclick="printPDFReport()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
                 <button onclick="copyTextReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📋 Копировать</button>
             </div>
             
-            <button onclick="resetAllProgress()" class="text-[9px] text-red-400 hover:text-red-600 uppercase font-bold text-center py-2 transition-colors">Сбросить всё</button>
+            <button onclick="resetAllProgress()" class="text-[9px] text-red-400 hover:text-red-600 uppercase font-bold text-center py-2 transition-colors w-full mt-2">Сбросить всё</button>
         </div>
     </div>
 
@@ -750,7 +760,6 @@
             "Рапалло": [9.23, 44.35], "Иваново-Вознесенск": [40.97, 56.99]
         };
 
-        // Словарь ловушек (коварных дистракторов) для усложнения
         const trapDict = {
             "Ништадт": ["Або", "Верель"],
             "Медный бунт": ["Соляной бунт", "Чумной бунт"],
@@ -781,7 +790,6 @@
             "река Угра": ["река Дон"]
         };
 
-        // Выводим state в window, чтобы Firebase скрипт тоже имел к нему доступ
         window.state = {
             selectedChip: null,
             stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0 },
@@ -799,6 +807,7 @@
         };
 
         const tg = window.Telegram ? window.Telegram.WebApp : null;
+        window.tgApp = tg; // ДЕЛАЕМ TG ГЛОБАЛЬНО ДОСТУПНЫМ ДЛЯ БАЗЫ ДАННЫХ
 
         function haptic(type) {
             if (tg && tg.HapticFeedback) {
@@ -832,18 +841,15 @@
                     if (parsed.hideLearned !== undefined) window.state.hideLearned = parsed.hideLearned;
                     if (parsed.totalTimeSpent === undefined) window.state.stats.totalTimeSpent = 0;
                     
-                    // Миграция данных и интервальное повторение (Кривая забывания Эббингауза)
                     const now = Date.now();
                     const ONE_DAY = 24 * 60 * 60 * 1000;
                     for (let key in window.state.stats.factStreaks) {
                         let data = window.state.stats.factStreaks[key];
-                        // Преобразуем старые числа в объекты с отметкой времени
                         if (typeof data === 'number') {
                             window.state.stats.factStreaks[key] = { streak: data, lastUpdated: now };
                         } else if (data && data.streak > 0) {
                             let daysPassed = Math.floor((now - data.lastUpdated) / ONE_DAY);
                             if (daysPassed >= 3) {
-                                // Если факт не повторяли 3 дня, он начинает "забываться" (-1 балл, или -2 если прошла неделя)
                                 window.state.stats.factStreaks[key].streak = Math.max(0, data.streak - (daysPassed >= 7 ? 2 : 1));
                                 window.state.stats.factStreaks[key].lastUpdated = now;
                             }
@@ -875,8 +881,6 @@
                 hideLearned: window.state.hideLearned,
                 totalTimeSpent: window.state.stats.totalTimeSpent
             }));
-            
-            // Синхронизация с облаком (Firebase)
             if (window.syncProgressToCloud) window.syncProgressToCloud();
         }
 
@@ -967,7 +971,6 @@
             let missing = [];
             let hiddenRowsData = [];
 
-            // Распределяем 6 пропусков на строки, чтобы было СТРОГО 2 гео, 2 события, 2 даты
             let blanksPerRow = [];
             let availableTypes = [];
             let requiredFakes = { geo: 0, event: 0, year: 0 };
@@ -975,9 +978,8 @@
             if (target.length === 4) {
                 blanksPerRow = [2, 2, 1, 1].sort(() => Math.random() - 0.5);
                 availableTypes = ['geo', 'geo', 'event', 'event', 'year', 'year'];
-                requiredFakes = { geo: 1, event: 1, year: 1 }; // В пуле должно быть по 3 каждого (2 скрыто + 1 фейк)
+                requiredFakes = { geo: 1, event: 1, year: 1 };
             } else {
-                // Для нестандартного числа строк (например 6 или 10)
                 blanksPerRow = Array(target.length).fill(1);
                 let remainingBlanks = Math.floor(target.length * 1.5) - target.length;
                 while(remainingBlanks > 0) {
@@ -989,14 +991,9 @@
                 let types = ['geo', 'event', 'year'];
                 for(let i=0; i<total; i++) availableTypes.push(types[i%3]);
                 
-                // Считаем сколько нужно фейков, чтобы каждого типа было хотя бы по максимуму
                 let counts = { geo: availableTypes.filter(x=>x==='geo').length, event: availableTypes.filter(x=>x==='event').length, year: availableTypes.filter(x=>x==='year').length };
                 let maxCount = Math.max(counts.geo, counts.event, counts.year, 3);
-                requiredFakes = { 
-                    geo: maxCount - counts.geo, 
-                    event: maxCount - counts.event, 
-                    year: maxCount - counts.year 
-                };
+                requiredFakes = { geo: maxCount - counts.geo, event: maxCount - counts.event, year: maxCount - counts.year };
             }
 
             let letterIndex = 0;
@@ -1045,7 +1042,6 @@
                 tbody.appendChild(tr);
             });
 
-            // УМНЫЕ ДИСТРАКТОРЫ И ЛОВУШКИ (Trap System)
             let poolItems = [...missing];
             const targetEras = [...new Set(target.map(t => t.c))];
             const plausibleFacts = bigData.filter(d => targetEras.includes(d.c));
@@ -1056,7 +1052,6 @@
                     let found = false;
                     let attempts = 0;
                     
-                    // Шанс 35% использовать ловушку, если она существует для этого факта
                     let relevantHidden = hiddenRowsData.find(h => h.types.includes(type));
                     let trapVal = null;
                     if (relevantHidden && Math.random() < 0.35) {
@@ -1067,13 +1062,11 @@
                         }
                     }
 
-                    // Добавляем ловушку, если её еще нет в пуле
                     if (trapVal && !poolItems.includes(trapVal)) {
                         poolItems.push(trapVal);
                         continue; 
                     }
 
-                    // Если ловушка не сработала или её нет - берем просто из той же эпохи
                     while(!found && attempts < 50) {
                         let randFact = plausibleFacts[Math.floor(Math.random()*plausibleFacts.length)];
                         let val = randFact[type];
@@ -1092,19 +1085,16 @@
                 chip.innerText = txt;
                 chip.onclick = (e) => {
                     haptic('light');
-
                     const now = Date.now();
                     const timeSinceLastClick = now - (chip._lastClickTime || 0);
                     chip._lastClickTime = now;
 
-                    // 1. Если плашка зачеркнута — любой тап оживляет её
                     if (chip.classList.contains('crossed-out')) {
                         chip.classList.remove('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
                         e.stopPropagation();
                         return;
                     }
 
-                    // 2. Если кликнули по плашке в слоте — возвращаем в пул
                     if (chip.classList.contains('in-slot')) {
                         e.stopPropagation();
                         const slot = chip.parentElement;
@@ -1119,7 +1109,6 @@
                         return;
                     }
 
-                    // 3. Быстрый двойной тап по плашке в пуле — зачеркиваем
                     if (timeSinceLastClick < 300) {
                         chip.classList.add('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
                         chip.classList.remove('selected');
@@ -1129,7 +1118,6 @@
                         return;
                     }
 
-                    // 4. Обычное выделение
                     document.querySelectorAll('.dnd-chip').forEach(c => {
                         if (c !== chip) c.classList.remove('selected');
                     });
@@ -1226,7 +1214,6 @@
                     if(!window.state.stats.eraStats[fact.c]) window.state.stats.eraStats[fact.c] = { correct: 0, total: 0 };
                     window.state.stats.eraStats[fact.c].total++;
                     
-                    // Обновленная логика объекта факта (Кривая Эббингауза)
                     let factData = window.state.stats.factStreaks[fact.event];
                     if (typeof factData === 'number') factData = { streak: factData, lastUpdated: Date.now() };
                     if (!factData) factData = { streak: 0, lastUpdated: Date.now() };
@@ -1235,8 +1222,6 @@
                     
                     if (rowAllCorrect && rowFilledCount === slots.length) {
                         window.state.stats.eraStats[fact.c].correct++;
-                        
-                        // Метакогнитивный анализ: Уверен = +1 балл, Сомневаюсь = +0.5 балла
                         factData.streak += isSure ? 1 : 0.5;
                         factData.lastUpdated = Date.now();
                         window.state.stats.factStreaks[fact.event] = factData;
@@ -1471,7 +1456,7 @@
             });
 
             document.getElementById('teacher-link-container').classList.add('hidden');
-            switchTeacherTab('hw'); // По умолчанию открываем вкладку ДЗ
+            switchTeacherTab('hw');
             
             modal.classList.remove('hidden'); modal.classList.add('flex');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -1483,16 +1468,16 @@
                 document.getElementById('teacher-tab-hw').classList.add('flex');
                 document.getElementById('teacher-tab-stats').classList.add('hidden');
                 
-                document.getElementById('tab-btn-hw').className = "flex-1 py-2 text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors";
-                document.getElementById('tab-btn-stats').className = "flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors";
+                document.getElementById('tab-btn-hw').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide";
+                document.getElementById('tab-btn-stats').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide";
                 if(window.stopClassProgressSync) window.stopClassProgressSync();
             } else {
                 document.getElementById('teacher-tab-hw').classList.add('hidden');
                 document.getElementById('teacher-tab-hw').classList.remove('flex');
                 document.getElementById('teacher-tab-stats').classList.remove('hidden');
                 
-                document.getElementById('tab-btn-stats').className = "flex-1 py-2 text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors";
-                document.getElementById('tab-btn-hw').className = "flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors";
+                document.getElementById('tab-btn-stats').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide";
+                document.getElementById('tab-btn-hw').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide";
                 
                 if (window.loadClassProgress) window.loadClassProgress();
             }
@@ -1536,7 +1521,6 @@
             alert("Ссылка скопирована в буфер обмена!");
         }
 
-        // --- РЕЖИМЫ ---
         function toggleMode(mode) {
             if (mode === 'mistakes' && window.state.mistakesPool.length === 0) {
                 showToast('🎉', 'У вас нет ошибок! Вы идеальны!', 'bg-green-600', 'border-green-800');
@@ -1584,6 +1568,37 @@
 
         function updateLivesUI() { 
             document.getElementById('stat-lives').innerText = '❤️'.repeat(window.state.lives) + '🖤'.repeat(3 - window.state.lives); 
+        }
+
+        // --- УСТАНОВКА ИМЕНИ ПРОФИЛЯ ---
+        function openProfileModal() {
+            closeStatsModal();
+            let manualName = localStorage.getItem('student_manual_name');
+            if (manualName) {
+                document.getElementById('profile-name-input').value = manualName;
+            } else if (window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) {
+                document.getElementById('profile-name-input').value = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
+            }
+            setTimeout(() => {
+                const modal = document.getElementById('profile-modal');
+                modal.classList.remove('hidden'); modal.classList.add('flex');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            }, 300);
+        }
+
+        function closeProfileModal() {
+            const m = document.getElementById('profile-modal');
+            m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
+        }
+
+        function saveProfileName() {
+            const name = document.getElementById('profile-name-input').value.trim();
+            if(name) {
+                localStorage.setItem('student_manual_name', name);
+                if(window.syncProgressToCloud) window.syncProgressToCloud();
+                showToast('✅', 'Имя сохранено', 'bg-green-600', 'border-green-800');
+            }
+            closeProfileModal();
         }
 
         // --- СТАТИСТИКА, КОПИРОВАНИЕ ТЕКСТА И ПЕЧАТЬ ДНЕВНИКА ---
@@ -1665,12 +1680,12 @@
 
         function openNameModal() {
             closeStatsModal();
-            
-            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const tgName = [tg.initDataUnsafe.user.first_name, tg.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
-                if (tgName) document.getElementById('student-name-input').value = tgName;
+            let manualName = localStorage.getItem('student_manual_name');
+            if (manualName) {
+                document.getElementById('student-name-input').value = manualName;
+            } else if (window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) {
+                document.getElementById('student-name-input').value = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
             }
-
             setTimeout(() => {
                 const modal = document.getElementById('name-modal');
                 modal.classList.remove('hidden'); modal.classList.add('flex');
@@ -1683,8 +1698,20 @@
             m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
         }
 
+        function printPDFReport() {
+            let manualName = localStorage.getItem('student_manual_name');
+            if (!manualName && (!window.tgApp || !window.tgApp.initDataUnsafe || !window.tgApp.initDataUnsafe.user)) {
+                openNameModal();
+            } else {
+                submitNameAndPrint();
+            }
+        }
+
         function submitNameAndPrint() {
-            const name = document.getElementById('student-name-input').value || 'Ученик';
+            let name = document.getElementById('student-name-input').value.trim();
+            if(!name) name = localStorage.getItem('student_manual_name');
+            if(!name) name = 'Ученик';
+            
             closeNameModal();
             
             const container = document.getElementById('printable-report');
@@ -1776,7 +1803,7 @@
                 html += `<div style="background: #f0fdf4; border: 2px dashed #4ade80; color: #166534; padding: 20px; text-align: center; border-radius: 12px; font-weight: bold; font-size: 16px;">Ошибок в памяти тренажера нет! Отличная работа! 🎉</div>`;
             }
             
-            html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в UL ট্রТренижере ЕГЭ</div></div>`;
+            html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в ULTIMATE Тренажере ЕГЭ</div></div>`;
             
             container.innerHTML = html;
             
@@ -1818,7 +1845,7 @@
     <!-- ИНТЕГРАЦИЯ БАЗЫ ДАННЫХ (FIREBASE) ДЛЯ ТЕЛЕГРАМА -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let app, auth, db, appId;
@@ -1832,8 +1859,7 @@
                 projectId: "ege-history-bot",
                 storageBucket: "ege-history-bot.firebasestorage.app",
                 messagingSenderId: "489223236202",
-                appId: "1:489223236202:web:48110779742d40d748f813",
-                measurementId: "G-T2JL7EZ0W9"
+                appId: "1:489223236202:web:48110779742d40d748f813"
             };
 
             app = initializeApp(firebaseConfig);
@@ -1861,7 +1887,7 @@
 
         window.loadProgressFromCloud = async function() {
             if (!fbUser || !db) return;
-            let tgUser = window.tg && window.tg.initDataUnsafe && window.tg.initDataUnsafe.user;
+            let tgUser = window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user;
             let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
             
             try {
@@ -1890,12 +1916,16 @@
             const s = window.state.stats;
             if (!s) return;
 
-            let tgUser = window.tg && window.tg.initDataUnsafe && window.tg.initDataUnsafe.user;
-            let studentName = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Ученик (Вне Telegram)';
+            let tgUser = window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user;
+            let manualName = localStorage.getItem('student_manual_name');
+            
+            // Логика имени: Приоритет ручному вводу -> Потом имя из ТГ -> Потом дефолт
+            let studentName = manualName || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Ученик (Без имени)');
             let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
             let username = tgUser && tgUser.username ? '@' + tgUser.username : '';
 
             const learnedCount = Object.values(s.factStreaks || {}).filter(val => (typeof val === 'number' ? val : val.streak) >= 3).length;
+            const mistakesCount = window.state.mistakesPool ? window.state.mistakesPool.length : 0;
 
             const fullStateJson = JSON.stringify({
                 stats: window.state.stats,
@@ -1911,6 +1941,7 @@
                 bestStreak: s.streak || 0,
                 timeSpent: s.totalTimeSpent || 0,
                 learnedCount: learnedCount,
+                mistakesCount: mistakesCount,
                 lastActive: new Date().toISOString(),
                 fullStateJson: fullStateJson
             };
@@ -1942,24 +1973,27 @@
                 students.forEach((st, idx) => {
                     const activeDate = new Date(st.lastActive).toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit'});
                     const timeMin = Math.floor(st.timeSpent / 60);
+                    const mistakes = st.mistakesCount || 0;
                     
                     html += `
                         <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-lg mb-2 shadow-sm flex items-center justify-between">
-                            <div>
-                                <div class="font-bold text-sm text-examBlue dark:text-blue-300">
-                                    ${idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : ''))} 
-                                    ${st.name} <span class="text-xs font-normal text-gray-400">${st.username}</span>
+                            <div class="flex-grow overflow-hidden pr-2">
+                                <div class="font-bold text-sm text-examBlue dark:text-blue-300 flex items-center gap-1.5 mb-1.5">
+                                    ${idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '👤'))} 
+                                    <span class="truncate">${st.name}</span>
+                                    <span class="text-[10px] font-normal text-gray-400 truncate">${st.username}</span>
                                 </div>
-                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    Решено: <strong class="text-green-600 dark:text-green-400">${st.totalSolved}</strong> • 
-                                    Выучено: <strong>${st.learnedCount}</strong> • 
-                                    Время: <strong>${timeMin} мин</strong>
+                                <div class="flex flex-wrap gap-1.5 text-[10px] font-medium tracking-wide">
+                                    <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-1.5 py-0.5 rounded border border-green-200 dark:border-green-800">✅ ${st.totalSolved} строк</span>
+                                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">🧠 Выучил: ${st.learnedCount}</span>
+                                    ${mistakes > 0 ? `<span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-800">⚠️ Ошибок: ${mistakes}</span>` : `<span class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Без ошибок</span>`}
+                                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600">⏱ ${timeMin} мин</span>
                                 </div>
-                                <div class="text-[10px] text-gray-400 mt-0.5">В сети: ${activeDate}</div>
+                                <div class="text-[9px] text-gray-400 mt-2 uppercase tracking-wider">Был(а): ${activeDate}</div>
                             </div>
-                            <div class="text-center bg-gray-50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700">
-                                <div class="text-[9px] text-gray-500 uppercase">Стрик</div>
-                                <div class="text-lg font-black text-orange-500 leading-none">${st.bestStreak}</div>
+                            <div class="text-center bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 shrink-0 min-w-[65px]">
+                                <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-0.5">Стрик</div>
+                                <div class="text-2xl font-black text-orange-500 leading-none">${st.bestStreak}</div>
                             </div>
                         </div>
                     `;
