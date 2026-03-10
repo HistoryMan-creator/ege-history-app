@@ -107,9 +107,7 @@
             .no-print { display: none !important; }
         }
 
-        /* =========================================
-           ВИЗУАЛЬНАЯ КАСТОМИЗАЦИЯ (СКИНЫ)
-           ========================================= */
+        /* ВИЗУАЛЬНАЯ КАСТОМИЗАЦИЯ (СКИНЫ) */
         body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
         body.skin-beresta header { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; }
         body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-slate-800, body.skin-beresta .dark\:bg-slate-900, body.skin-beresta .dark\:bg-slate-700 { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
@@ -246,7 +244,7 @@
         <!-- Controls Area -->
         <div id="controls-area" class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col gap-3 transition-colors duration-400">
             
-            <!-- Выбор задания (Новая архитектура Хаба) -->
+            <!-- Выбор задания -->
             <div class="flex flex-wrap gap-2 w-full mb-2 bg-gray-100 dark:bg-slate-700/50 p-1.5 rounded-xl border border-gray-200 dark:border-slate-600">
                 <button onclick="setTask('task4')" id="tab-task4" class="flex-1 bg-white dark:bg-slate-600 text-examBlue dark:text-blue-300 font-black py-2 rounded-lg shadow-sm text-xs sm:text-sm transition-all border-2 border-blue-400">📍 Задание 4 (География)</button>
                 <button onclick="setTask('task5')" id="tab-task5" class="flex-1 bg-transparent text-gray-500 hover:bg-white/50 dark:hover:bg-slate-600/50 font-bold py-2 rounded-lg text-xs sm:text-sm transition-all border-2 border-transparent">👤 Задание 5 (Личности)</button>
@@ -492,7 +490,6 @@
         // МЕГА-БАЗЫ ДАННЫХ
         // =========================================================================
         
-        // --- ЗАДАНИЕ 4 (ГЕОГРАФИЯ) ---
         const bigData = [
             // Древность и Удельная Русь
             { c: 'early', event: "Призвание варяжского князя Рюрика на княжение", geo: "Новгород", year: "862 г." },
@@ -921,7 +918,16 @@
             { event: "Подписание Беловежских соглашений", person: "Б.Н. Ельцин", year: "1991" },
             { event: "Радикальные экономические реформы 1990-х", person: "Е.Т. Гайдар", year: "1992" },
             { event: "Политический кризис 1993 года", person: "Р. И. Хасбулатов", year: "1993" },
-            { event: "Выборы Президента РФ 1996 года", person: "Г. А. Зюганов", year: "1996" }
+            { event: "Выборы Президента РФ 1996 года", person: "Г. А. Зюганов", year: "1996" },
+            
+            // НОВЕЙШАЯ ИСТОРИЯ И СВО (Канон ЕГЭ)
+            { event: "Создание партии «Единая Россия»", person: "С.К. Шойгу", year: "2001" },
+            { event: "Выступление с Мюнхенской речью", person: "В.В. Путин", year: "2007" },
+            { event: "Принятие Республики Крым в состав РФ", person: "С.В. Аксёнов", year: "2014" },
+            { event: "Специальная военная операция (командир батальона «Спарта»)", person: "В.А. Жога", year: "2022" },
+            { event: "Специальная военная операция (взятие Мариуполя)", person: "А.Н. Мордвичев", year: "2022" },
+            { event: "Специальная военная операция (командир арт. дивизиона, Корса)", person: "О.С. Качура", year: "2022" },
+            { event: "Подписание договоров о принятии новых регионов в состав РФ", person: "Д.В. Пушилин", year: "2022" }
         ];
 
         // Пре-обработка task5Data для совместимости фильтров
@@ -996,13 +1002,7 @@
             "Казахская ССР": [66.92, 48.01], "Харбин": [126.63, 45.75], "озеро Хасан": [130.60, 42.43],
             "остров Даманский": [133.84, 46.48], "Восточная Сибирь": [110.00, 60.00], "река Сальница": [37.20, 49.10],
             "Шанхай": [121.47, 31.23], "Сочи": [39.72, 43.58], "Керченский пролив": [36.60, 45.30], 
-            "Донбасс": [37.80, 48.00], "Санкт-Петербург — Царское Село": [30.40, 59.72], 
-            "Маньчжурия": [125.00, 45.00], "Обнинск": [36.61, 55.10], "село Трилесы": [29.84, 49.95], 
-            "Бухарест": [26.10, 44.43], "Ункяр-Искелеси": [29.08, 41.15], "Тамбовская губерния": [41.45, 52.72],
-            "Новгородская губерния": [31.27, 58.52], "СССР": [37.61, 55.75],
-            "Берёзов": [65.04, 63.93], "Ходынское поле": [37.53, 55.78], "село Шушенское": [91.93, 53.32],
-            "Магнитогорск": [58.98, 53.41], "Тольятти": [49.41, 53.52], "Набережные Челны": [52.33, 55.73],
-            "Рапалло": [9.23, 44.35], "Иваново-Вознесенск": [40.97, 56.99]
+            "Донбасс": [37.80, 48.00]
         };
 
         const trapDict = {
@@ -1024,7 +1024,7 @@
 
         window.state = {
             selectedChip: null,
-            currentTask: 'task4', // 'task4' or 'task5'
+            currentTask: 'task4', 
             stats: { 
                 streak: 0, rowsSolved: 0, totalSolvedEver: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0,
                 points: 0, unlockedSkins: ['classic'], currentSkin: 'classic'
@@ -1054,6 +1054,17 @@
                     tg.HapticFeedback.notificationOccurred(type);
                 }
             }
+        }
+        
+        // Утилитная функция для правильного перемешивания массива (вместо Math.random() - 0.5)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         }
 
         function initStorage() {
@@ -1170,7 +1181,6 @@
             return m ? parseInt(m[0], 10) : 9999;
         }
 
-        // Общая функция обработки клика по плашке
         window.onChipClick = function(chip, e) {
             haptic('light');
             const now = Date.now();
@@ -1231,7 +1241,7 @@
             } else {
                 btn5.className = "flex-1 bg-white dark:bg-slate-600 text-examBlue dark:text-blue-300 font-black py-2 rounded-lg shadow-sm text-xs sm:text-sm transition-all border-2 border-blue-400";
                 btn4.className = "flex-1 bg-transparent text-gray-500 hover:bg-white/50 dark:hover:bg-slate-600/50 font-bold py-2 rounded-lg text-xs sm:text-sm transition-all border-2 border-transparent";
-                document.getElementById('filter-rows').disabled = true; // Задание 5 всегда 4 строки
+                document.getElementById('filter-rows').disabled = true;
             }
             
             if (window.state.currentMode === 'flashcards') window.nextFlashcard();
@@ -1279,7 +1289,7 @@
 
             if (allowed.length < 4) {
                  if (window.state.hideLearned) {
-                        alert('Вы выучили почти все факты в этой эпохе! Фильтр отключен.');
+                        showToast('ℹ️', 'Почти все факты выучены! Фильтр скрыт.', 'bg-blue-600', 'border-blue-800');
                         document.getElementById('toggle-hide-learned').checked = false;
                         window.state.hideLearned = false;
                         generateTask5Table();
@@ -1287,18 +1297,54 @@
                   }
             }
 
-            // Выбираем 4 уникальных события
             let target = [];
             let usedEvents = new Set();
-            let shuffled = allowed.sort(() => Math.random() - 0.5);
-            for (let f of shuffled) {
-                if (!usedEvents.has(f.event)) {
-                    target.push(f);
-                    usedEvents.add(f.event);
+            let usedTargetPersons = new Set();
+
+            // КАНОН ЕГЭ: Если решаем всё подряд, 1 факт ОБЯЗАН быть про ВОВ (1941-1945)
+            if (period === 'all' && !window.state.isHomeworkMode && window.state.currentMode !== 'mistakes') {
+                let vovPool = allowed.filter(d => {
+                    let y = parseInt(d.year);
+                    return y >= 1941 && y <= 1945;
+                });
+                let othersPool = allowed.filter(d => {
+                    let y = parseInt(d.year);
+                    return y < 1941 || y > 1945;
+                });
+
+                // Гарантированно берем 1 факт по ВОВ
+                if (vovPool.length > 0) {
+                    let vovFact = vovPool[Math.floor(Math.random() * vovPool.length)];
+                    target.push(vovFact);
+                    usedEvents.add(vovFact.event);
+                    usedTargetPersons.add(vovFact.person);
                 }
-                if (target.length === 4) break;
+
+                // Добираем остальные 3 факта из других эпох
+                let shuffledOthers = shuffleArray([...othersPool]);
+                for (let f of shuffledOthers) {
+                    if (!usedEvents.has(f.event) && !usedTargetPersons.has(f.person)) {
+                        target.push(f);
+                        usedEvents.add(f.event);
+                        usedTargetPersons.add(f.person);
+                    }
+                    if (target.length === 4) break;
+                }
+            } else {
+                // Если выбран конкретный период или мы в режиме ДЗ / Ошибок
+                let shuffled = shuffleArray([...allowed]);
+                for (let f of shuffled) {
+                    if (!usedEvents.has(f.event) && !usedTargetPersons.has(f.person)) {
+                        target.push(f);
+                        usedEvents.add(f.event);
+                        usedTargetPersons.add(f.person);
+                    }
+                    if (target.length === 4) break;
+                }
             }
-            if(target.length < 4) target = allowed.slice(0, 4); // Фолбэк
+
+            if(target.length < 4) target = allowed.slice(0, 4);
+            target = shuffleArray(target); // Перемешиваем, чтобы ВОВ не всегда была буквой "А"
 
             window.state.currentTargetData = target;
 
@@ -1327,7 +1373,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Добавляем 2 дистрактора
             let poolItems = [...missing];
             let attempts = 0;
             let allPersons = [...new Set(task5Data.map(d => d.person))];
@@ -1341,7 +1386,7 @@
                 attempts++;
             }
 
-            poolItems.sort(() => Math.random() - 0.5).forEach((txt, idx) => {
+            shuffleArray(poolItems).forEach((txt, idx) => {
                 const chip = document.createElement('div');
                 chip.className = "dnd-chip";
                 chip.innerText = txt;
@@ -1385,7 +1430,7 @@
             } else if (window.state.currentMode === 'mistakes') {
                 let allowed = window.state.mistakesPool.filter(m => m.task !== 'task5').map(m => m.fact);
                 let count = Math.min(4, allowed.length);
-                target = allowed.sort(() => Math.random() - 0.5).slice(0, count);
+                target = shuffleArray([...allowed]).slice(0, count);
             } else {
                 let allowed = [];
                 if (period === 'all') allowed = [...bigData];
@@ -1404,14 +1449,14 @@
 
                 if (allowed.length < rowsCount) {
                     if (window.state.hideLearned) {
-                        alert('Вы выучили почти все факты в этой эпохе! Фильтр отключен.');
+                        showToast('ℹ️', 'Почти все факты выучены! Фильтр скрыт.', 'bg-blue-600', 'border-blue-800');
                         document.getElementById('toggle-hide-learned').checked = false;
                         window.state.hideLearned = false;
                         generateTable();
                         return;
                     }
                 }
-                target = allowed.sort(() => Math.random() - 0.5).slice(0, rowsCount);
+                target = shuffleArray([...allowed]).slice(0, rowsCount);
             }
             
             window.state.currentTargetData = target;
@@ -1423,7 +1468,7 @@
             let requiredFakes = { geo: 0, event: 0, year: 0 };
 
             if (target.length === 4) {
-                blanksPerRow = [2, 2, 1, 1].sort(() => Math.random() - 0.5);
+                blanksPerRow = shuffleArray([2, 2, 1, 1]);
                 availableTypes = ['geo', 'geo', 'event', 'event', 'year', 'year'];
                 requiredFakes = { geo: 1, event: 1, year: 1 };
             } else {
@@ -1526,7 +1571,7 @@
                 }
             });
 
-            poolItems.sort(() => Math.random() - 0.5).forEach(txt => {
+            shuffleArray(poolItems).forEach(txt => {
                 const chip = document.createElement('div');
                 chip.className = "dnd-chip";
                 chip.innerText = txt;
@@ -1660,9 +1705,8 @@
                 haptic('success');
                 window.state.stats.streak++;
                 window.state.stats.totalSolvedEver += rows.length;
-                window.state.stats.points += rows.length; // ДОБАВЛЕНИЕ БАЛЛОВ
+                window.state.stats.points += rows.length; 
 
-                // Бонус за стрик
                 if (window.state.stats.streak % 5 === 0 && window.state.stats.streak > 0 && !window.state.isHomeworkMode) {
                     window.state.stats.points += 10;
                     setTimeout(() => showToast('🎁', '+10 бонусных баллов!', 'bg-purple-600', 'border-purple-800'), 2500);
@@ -1820,7 +1864,6 @@
             clearInterval(window.state.timerInterval);
             document.getElementById('modal-score').innerText = window.state.stats.streak;
             
-            // Фиксация рекорда спидрана
             if (window.state.currentMode === 'speedrun') {
                 if (window.state.stats.streak > (window.state.stats.bestSpeedrunScore || 0)) {
                     window.state.stats.bestSpeedrunScore = window.state.stats.streak;
@@ -2010,10 +2053,10 @@
         function generateHomeworkLink() {
             const checked = document.querySelectorAll('.hw-checkbox:checked');
             if (checked.length === 0) {
-                alert("Выберите хотя бы один факт!"); return;
+                showToast('⚠️', 'Выберите хотя бы один факт!', 'bg-red-600', 'border-red-800'); return;
             }
             if (checked.length > 50) {
-                alert("Слишком много фактов для одной ссылки (максимум 50)."); return;
+                showToast('⚠️', 'Слишком много фактов для одной ссылки (максимум 50).', 'bg-red-600', 'border-red-800'); return;
             }
 
             const indices = Array.from(checked).map(c => c.value).join(',');
@@ -2028,9 +2071,25 @@
 
         function copyHomeworkLink() {
             const input = document.getElementById('teacher-generated-url');
-            input.select();
-            document.execCommand('copy');
-            showToast('📋', 'Ссылка скопирована!', 'bg-emerald-600', 'border-emerald-800');
+            const text = input.value;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('📋', 'Ссылка скопирована!', 'bg-emerald-600', 'border-emerald-800');
+                }).catch(() => fallbackCopyTextToClipboard(input));
+            } else {
+                fallbackCopyTextToClipboard(input);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(inputElement) {
+            inputElement.select();
+            try {
+                document.execCommand('copy');
+                showToast('📋', 'Ссылка скопирована!', 'bg-emerald-600', 'border-emerald-800');
+            } catch (err) {
+                showToast('❌', 'Не удалось скопировать', 'bg-red-600', 'border-red-800');
+            }
         }
 
         function toggleMode(mode) {
@@ -2361,28 +2420,42 @@
                 text += `\n🎉 Ошибок нет! Идеальная работа!\n`;
             }
 
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('📋', 'Текст отчета скопирован в буфер!', 'bg-emerald-600', 'border-emerald-800');
+                }).catch(() => fallbackCopyText(text));
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+        
+        function fallbackCopyText(text) {
             const ta = document.createElement('textarea');
             ta.value = text;
             ta.style.position = 'fixed';
             ta.style.top = '-9999px';
             document.body.appendChild(ta);
             ta.select();
-            
             try {
                 document.execCommand('copy');
                 showToast('📋', 'Текст отчета скопирован в буфер!', 'bg-emerald-600', 'border-emerald-800');
             } catch (err) {
-                alert('Не удалось скопировать. К сожалению, ваш браузер блокирует буфер обмена.');
+                showToast('❌', 'Браузер заблокировал копирование.', 'bg-red-600', 'border-red-800');
             }
             document.body.removeChild(ta);
         }
 
         // Универсальная функция генерации HTML для печати
         function generatePDFFromData(name, statsObj, mistakesArray) {
+            // Проверка на мобильные платформы
+            if (window.tgApp && window.tgApp.platform !== 'desktop' && window.tgApp.platform !== 'unknown') {
+                showToast('⚠️', 'Печать PDF доступна только с компьютера', 'bg-orange-500', 'border-orange-700');
+                return;
+            }
+
             const container = document.getElementById('printable-report');
             const timeMinutes = Math.floor((statsObj.totalTimeSpent || 0) / 60);
             
-            // Защита от старых структур
             const safeFactStreaks = statsObj.factStreaks || {};
             const learnedCount = Object.values(safeFactStreaks).filter(val => (typeof val === 'number' ? val : (val ? val.streak : 0)) >= 3).length;
             const safeTotalSolved = statsObj.totalSolvedEver || 0;
@@ -2497,14 +2570,23 @@
                 const state = JSON.parse(st.fullStateJson);
                 generatePDFFromData(st.name, state.stats, state.mistakesPool);
             } else {
-                alert("Нет подробных данных для этого ученика.");
+                showToast('⚠️', 'Нет подробных данных для этого ученика.', 'bg-orange-500', 'border-orange-700');
             }
         };
 
         function resetAllProgress() {
-            if(confirm("Очистить всю статистику и выученные факты?")) {
-                localStorage.removeItem('ege_final_storage_v4');
-                location.reload();
+            if (window.tgApp && window.tgApp.showConfirm) {
+                window.tgApp.showConfirm("Очистить всю статистику и выученные факты?", (ok) => {
+                    if(ok) {
+                        localStorage.removeItem('ege_final_storage_v4');
+                        location.reload();
+                    }
+                });
+            } else {
+                if(confirm("Очистить всю статистику и выученные факты?")) {
+                    localStorage.removeItem('ege_final_storage_v4');
+                    location.reload();
+                }
             }
         }
 
@@ -2545,7 +2627,7 @@
 
         try {
             const firebaseConfig = {
-                apiKey: "AIzaSyDdxtpuznCSK5a6CvcJdbt9pzKMXbUVl08",
+                apiKey: "AIzaSyDdxtpuznCSK5a6CvcJdbt9pzKMXbUVl08", // Рекомендуется установить HTTP restrictions в Google Cloud Console!
                 authDomain: "ege-history-bot.firebaseapp.com",
                 projectId: "ege-history-bot",
                 storageBucket: "ege-history-bot.firebasestorage.app",
@@ -2662,7 +2744,7 @@
                 snapshot.forEach(doc => students.push(doc.data()));
                 window.loadedStudentsData = students;
 
-                // --- 1. ОТРИСОВКА ВЛАДКИ "КЛАСС" ---
+                // --- 1. ОТРИСОВКА ВКЛАДКИ "КЛАСС" ---
                 let filterClass = document.getElementById('teacher-filter-class').checked;
                 let teacherCode = document.getElementById('teacher-class-code-input').value.trim();
                 
@@ -2682,51 +2764,50 @@
                         <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-lg mb-2 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div class="flex-grow overflow-hidden pr-2 w-full">
                                 <div class="font-bold text-sm text-examBlue dark:text-blue-300 flex items-center gap-1.5 mb-1.5">
-                                    ${idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '👤'))} 
+                                    ${idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '👤'))}
                                     <span class="truncate">${st.name}</span>
-                                    <span class="text-[10px] font-normal text-gray-400 truncate">${st.username}</span>
                                 </div>
-                                <div class="flex flex-wrap gap-1.5 text-[10px] font-medium tracking-wide">
-                                    <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-1.5 py-0.5 rounded border border-green-200 dark:border-green-800">✅ ${st.totalSolved} строк</span>
-                                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">🧠 Выучил: ${st.learnedCount}</span>
-                                    ${mistakes > 0 ? `<span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-800">⚠️ Ошибок: ${mistakes}</span>` : `<span class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Без ошибок</span>`}
-                                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600">⏱ ${timeMin} мин</span>
+                                <div class="text-[10px] text-gray-500 dark:text-gray-400 grid grid-cols-2 gap-1">
+                                    <div>Выучено: <span class="font-bold text-green-600 dark:text-green-400">${st.learnedCount || 0}</span></div>
+                                    <div>Ошибок: <span class="font-bold text-red-500 dark:text-red-400">${mistakes}</span></div>
+                                    <div>Стрик: <span class="font-bold text-yellow-500 dark:text-yellow-400">${st.bestStreak || 0}</span></div>
+                                    <div>Время: <span class="font-bold">${timeMin} мин</span></div>
                                 </div>
-                                <div class="flex justify-between items-center mt-2">
-                                    <div class="text-[9px] text-gray-400 uppercase tracking-wider">Был(а): ${activeDate}</div>
-                                    <button onclick="window.downloadStudentPDF('${st.tgId}')" class="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 dark:text-indigo-300 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-800 transition-colors flex items-center gap-1 shadow-sm">
-                                        📄 Отчет PDF
-                                    </button>
-                                </div>
+                                <div class="text-[9px] text-gray-400 mt-1.5">Был(а): ${activeDate}</div>
                             </div>
-                            <div class="text-center bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 shrink-0 min-w-[70px] self-end sm:self-auto">
-                                <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-0.5">Стрик</div>
-                                <div class="text-2xl font-black text-orange-500 leading-none">${st.bestStreak}</div>
-                            </div>
+                            <div class="flex sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
+                                <div class="text-center bg-blue-50 dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-slate-600 flex-1">
+                                    <div class="text-[8px] text-blue-600 dark:text-blue-300 uppercase font-bold tracking-widest mb-0.5">Решено</div>
+                                    <div class="text-lg font-black text-examBlue dark:text-blue-100 leading-none">${st.totalSolved}</div>
+                                </div>
+                                <button onclick="window.downloadStudentPDF('${st.tgId}')" class="bg-gray-100 hover:bg-gray-200 dark:bg-slate-600 dark:hover:bg-slate-500 text-gray-700 dark:text-gray-200 p-2 rounded-lg text-xs font-bold transition-colors border border-gray-200 dark:border-slate-500 flex-1 flex justify-center items-center gap-1">
+                                    📥 PDF
+                                </button></div>
                         </div>
                     `;
                 });
 
                 if (filteredStudents.length === 0) {
-                    html = filterClass 
-                        ? '<p class="text-sm text-gray-500 text-center py-4">В вашем классе пока никого нет. Дайте ученикам ваш код!</p>'
-                        : '<p class="text-sm text-gray-500 text-center py-4">Здесь пока никого нет.</p>';
+                    html = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Нет данных для отображения.</p>';
                 }
                 document.getElementById('teacher-class-stats').innerHTML = html;
 
-                // --- 2. ОТРИСОВКА ВЛАДКИ "ТОП СПИДРАНА" ---
-                let speedrunHtml = '';
-                let speedrunStudents = students.filter(s => (s.bestSpeedrun || 0) > 0);
+                // --- 2. ОТРИСОВКА ВКЛАДКИ "СПИДРАН" ---
+                let speedrunStudents = [...students].filter(s => s.bestSpeedrun > 0);
+                if (filterClass && teacherCode) {
+                    speedrunStudents = speedrunStudents.filter(s => s.classCode === teacherCode);
+                }
                 speedrunStudents.sort((a, b) => b.bestSpeedrun - a.bestSpeedrun);
-                
-                speedrunStudents.slice(0, 50).forEach((st, idx) => {
-                    let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🔥'));
+
+                let speedrunHtml = '';
+                speedrunStudents.slice(0, 10).forEach((st, idx) => {
+                    let rankIcon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🏅'));
                     speedrunHtml += `
-                        <div class="bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800 border border-purple-100 dark:border-purple-800/50 p-3 rounded-lg mb-2 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="text-2xl w-8 text-center">${medal}</div>
-                                <div>
-                                    <div class="font-bold text-sm text-gray-800 dark:text-gray-200">${st.name} <span class="text-[10px] text-gray-400 font-normal">${st.username}</span></div>
+                        <div class="bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-900/50 p-3 rounded-lg mb-2 shadow-sm flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="text-2xl">${rankIcon}</div>
+                                <div class="truncate">
+                                    <div class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">${st.name} ${st.username ? `<span class="text-gray-400 text-xs font-normal">(${st.username})</span>` : ''}</div>
                                     <div class="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-wider mt-0.5">Ранг: ${idx + 1}</div>
                                 </div>
                             </div>
@@ -2739,7 +2820,7 @@
                 });
 
                 if (speedrunStudents.length === 0) {
-                    speedrunHtml = '<p class="text-sm text-gray-500 text-center py-4">Пока никто не играл в Спидран. Будьте первым!</p>';
+                    speedrunHtml = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Пока никто не играл в Спидран. Будьте первым!</p>';
                 }
                 document.getElementById('speedrun-class-stats').innerHTML = speedrunHtml;
 
@@ -2748,7 +2829,7 @@
                 document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-red-500 text-center mt-5">Ошибка загрузки данных.</p>';
             });
         };
-        
+
         window.stopClassProgressSync = function() {
             if (unsubscribeTeacher) {
                 unsubscribeTeacher();
