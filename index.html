@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Тренажер ЕГЭ: Задание 4 (ULTIMATE)</title>
+    <title>Тренажер ЕГЭ: История (ULTIMATE)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,7 +84,7 @@
         .dnd-chip {
             padding: 0.4rem 0.6rem; background-color: white; border: 2px solid #e2e8f0; 
             border-radius: 0.6rem; font-weight: 600; font-size: 0.75rem; cursor: pointer;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease; user-select: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.1s ease; user-select: none;
             color: #334155; text-align: center; touch-action: manipulation;
         }
         .dark .dnd-chip { background-color: #1e293b; border-color: #334155; color: #e2e8f0; }
@@ -110,65 +110,59 @@
         /* =========================================
            ВИЗУАЛЬНАЯ КАСТОМИЗАЦИЯ (СКИНЫ)
            ========================================= */
-
-        /* 1. Береста (Древняя Русь) */
         body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
         body.skin-beresta header { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; }
-        body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-slate-800 { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
-        body.skin-beresta .text-gray-800, body.skin-beresta .dark\:text-white, body.skin-beresta .text-gray-900 { color: #4a3525 !important; }
+        body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-slate-800, body.skin-beresta .dark\:bg-slate-900, body.skin-beresta .dark\:bg-slate-700 { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
+        body.skin-beresta .text-gray-800, body.skin-beresta .dark\:text-white, body.skin-beresta .dark\:text-gray-100, body.skin-beresta .dark\:text-gray-200, body.skin-beresta .dark\:text-gray-300, body.skin-beresta .dark\:text-gray-400, body.skin-beresta .text-gray-900, body.skin-beresta .text-gray-700, body.skin-beresta .text-gray-600 { color: #4a3525 !important; }
         body.skin-beresta header .text-white { color: #fffaf0 !important; }
         body.skin-beresta .dnd-slot { background-color: #faebd7 !important; border-color: #cdaa7d !important; }
         body.skin-beresta .dnd-chip { background-color: #ffdead !important; border-color: #deb887 !important; color: #5c4033 !important; }
 
-        /* 2. Империя (Российская Империя) */
         body.skin-empire { background-color: #fcfbf8 !important; }
         body.skin-empire header { background-color: #6b151e !important; border-bottom-color: #d4af37 !important; }
         body.skin-empire header .text-white { color: #fdf5e6 !important; }
-        body.skin-empire .bg-white, body.skin-empire .dark\:bg-slate-800 { background-color: #ffffff !important; border-color: #d4af37 !important; box-shadow: 0 4px 15px rgba(107,21,30,0.1) !important; }
+        body.skin-empire .bg-white, body.skin-empire .dark\:bg-slate-800, body.skin-empire .dark\:bg-slate-900, body.skin-empire .dark\:bg-slate-700 { background-color: #ffffff !important; border-color: #d4af37 !important; box-shadow: 0 4px 15px rgba(107,21,30,0.1) !important; }
+        body.skin-empire .text-gray-800, body.skin-empire .dark\:text-white, body.skin-empire .dark\:text-gray-100, body.skin-empire .dark\:text-gray-200, body.skin-empire .dark\:text-gray-300, body.skin-empire .dark\:text-gray-400, body.skin-empire .text-gray-900, body.skin-empire .text-gray-700, body.skin-empire .text-gray-600 { color: #2b1b17 !important; }
         body.skin-empire .dnd-chip { background-color: #fdfbf7 !important; border-color: #d4af37 !important; color: #6b151e !important; }
 
-        /* 3. СССР (Авангард) */
         body.skin-ussr { background-color: #f4f4f4 !important; }
         body.skin-ussr header { background-color: #cc0000 !important; border-bottom-color: #ffcc00 !important; }
         body.skin-ussr header .text-white { color: #ffcc00 !important; }
+        body.skin-ussr .text-gray-800, body.skin-ussr .dark\:text-white, body.skin-ussr .dark\:text-gray-100, body.skin-ussr .dark\:text-gray-200, body.skin-ussr .dark\:text-gray-300, body.skin-ussr .dark\:text-gray-400, body.skin-ussr .text-gray-900, body.skin-ussr .text-gray-700, body.skin-ussr .text-gray-600 { color: #111111 !important; }
         body.skin-ussr .dnd-chip { background-color: #ffe6e6 !important; border-color: #cc0000 !important; color: #cc0000 !important; font-family: monospace; font-weight: 900; text-transform: uppercase; border-radius: 0 !important; }
         body.skin-ussr .dnd-slot { border-radius: 0 !important; border-width: 3px !important; }
-        body.skin-ussr .bg-white, body.skin-ussr .dark\:bg-slate-800 { border-radius: 0 !important; border-color: #cc0000 !important; }
+        body.skin-ussr .bg-white, body.skin-ussr .dark\:bg-slate-800, body.skin-ussr .dark\:bg-slate-900, body.skin-ussr .dark\:bg-slate-700 { background-color: #ffffff !important; border-radius: 0 !important; border-color: #cc0000 !important; }
 
-        /* 4. Киберпанк */
         body.skin-cyberpunk { background-color: #0d0221 !important; color: #00f0ff !important; }
         body.skin-cyberpunk header { background-color: #240046 !important; border-bottom-color: #ff003c !important; }
-        body.skin-cyberpunk .bg-white, body.skin-cyberpunk .dark\:bg-slate-800 { background-color: #1a0b2e !important; border-color: #00f0ff !important; color: #ffffff !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15) !important; }
-        body.skin-cyberpunk .text-gray-800, body.skin-cyberpunk .dark\:text-white, body.skin-cyberpunk .text-gray-900 { color: #00f0ff !important; text-shadow: 0 0 3px rgba(0,240,255,0.5); }
+        body.skin-cyberpunk .bg-white, body.skin-cyberpunk .dark\:bg-slate-800, body.skin-cyberpunk .dark\:bg-slate-900, body.skin-cyberpunk .dark\:bg-slate-700 { background-color: #1a0b2e !important; border-color: #00f0ff !important; color: #ffffff !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15) !important; }
+        body.skin-cyberpunk .text-gray-800, body.skin-cyberpunk .dark\:text-white, body.skin-cyberpunk .dark\:text-gray-100, body.skin-cyberpunk .dark\:text-gray-200, body.skin-cyberpunk .dark\:text-gray-300, body.skin-cyberpunk .dark\:text-gray-400, body.skin-cyberpunk .text-gray-900, body.skin-cyberpunk .text-gray-700, body.skin-cyberpunk .text-gray-600 { color: #00f0ff !important; text-shadow: 0 0 3px rgba(0,240,255,0.5); }
         body.skin-cyberpunk .dnd-chip { background-color: #240046 !important; border-color: #ff003c !important; color: #ff003c !important; text-transform: uppercase; font-family: monospace; }
         body.skin-cyberpunk .dnd-slot { background-color: rgba(36,0,70,0.5) !important; border-color: #00f0ff !important; }
         body.skin-cyberpunk header .text-white { color: #00f0ff !important; text-shadow: 0 0 8px #00f0ff; }
 
-        /* 5. Матрица */
         body.skin-matrix { background-color: #000000 !important; font-family: monospace !important; color: #00ff41 !important; }
         body.skin-matrix header { background-color: #001100 !important; border-bottom-color: #00ff41 !important; }
-        body.skin-matrix .bg-white, body.skin-matrix .dark\:bg-slate-800 { background-color: #001100 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
-        body.skin-matrix .text-gray-800, body.skin-matrix .dark\:text-white, body.skin-matrix .text-gray-900 { color: #00ff41 !important; }
+        body.skin-matrix .bg-white, body.skin-matrix .dark\:bg-slate-800, body.skin-matrix .dark\:bg-slate-900, body.skin-matrix .dark\:bg-slate-700 { background-color: #001100 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
+        body.skin-matrix .text-gray-800, body.skin-matrix .dark\:text-white, body.skin-matrix .dark\:text-gray-100, body.skin-matrix .dark\:text-gray-200, body.skin-matrix .dark\:text-gray-300, body.skin-matrix .dark\:text-gray-400, body.skin-matrix .text-gray-900, body.skin-matrix .text-gray-700, body.skin-matrix .text-gray-600 { color: #00ff41 !important; }
         body.skin-matrix .dnd-chip { background-color: #000000 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
         body.skin-matrix .dnd-slot { background-color: #001100 !important; border-color: #008f11 !important; border-radius: 0 !important; }
         body.skin-matrix header .text-white { color: #00ff41 !important; }
 
-        /* 6. Космос */
-        body.skin-space { background: radial-gradient(circle at bottom, #1b2735 0%, #0b0c10 100%) !important; color: #c5c6c7 !important; }
+        body.skin-space { background: #0b0c10 !important; color: #c5c6c7 !important; }
         body.skin-space header { background-color: #0b0c10 !important; border-bottom-color: #45a29e !important; }
-        body.skin-space .bg-white, body.skin-space .dark\:bg-slate-800 { background-color: rgba(31,40,51,0.85) !important; border-color: #45a29e !important; color: #ffffff !important; backdrop-filter: blur(8px); border-radius: 1rem !important; }
-        body.skin-space .text-gray-800, body.skin-space .dark\:text-white, body.skin-space .text-gray-900 { color: #66fcf1 !important; }
+        body.skin-space .bg-white, body.skin-space .dark\:bg-slate-800, body.skin-space .dark\:bg-slate-900, body.skin-space .dark\:bg-slate-700 { background-color: rgba(31,40,51,0.95) !important; border-color: #45a29e !important; border-radius: 1rem !important; }
+        body.skin-space .text-gray-800, body.skin-space .dark\:text-white, body.skin-space .dark\:text-gray-100, body.skin-space .dark\:text-gray-200, body.skin-space .dark\:text-gray-300, body.skin-space .dark\:text-gray-400, body.skin-space .text-gray-900, body.skin-space .text-gray-700, body.skin-space .text-gray-600 { color: #66fcf1 !important; }
         body.skin-space .dnd-chip { background-color: #1f2833 !important; border-color: #45a29e !important; color: #66fcf1 !important; border-radius: 20px !important; }
         body.skin-space .dnd-slot { background-color: rgba(11,12,16,0.6) !important; border-color: #66fcf1 !important; border-radius: 20px !important; }
         body.skin-space header .text-white { color: #66fcf1 !important; }
 
-        /* 7. Золотой век */
-        body.skin-golden { background: linear-gradient(135deg, #fff9e6, #fff0c2) !important; }
-        body.skin-golden header { background: linear-gradient(90deg, #b8860b, #ffd700) !important; border-bottom-color: #ffffff !important; }
+        body.skin-golden { background: #fff9e6 !important; }
+        body.skin-golden header { background: #b8860b !important; border-bottom-color: #ffffff !important; }
         body.skin-golden header .text-white { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        body.skin-golden .bg-white, body.skin-golden .dark\:bg-slate-800 { background-color: #ffffff !important; border-color: #daa520 !important; box-shadow: 0 10px 30px rgba(218,165,32,0.2) !important; border-radius: 1rem !important; }
-        body.skin-golden .dnd-chip { background: linear-gradient(to bottom, #ffffff, #fff9e6) !important; border-color: #daa520 !important; color: #b8860b !important; box-shadow: 0 2px 5px rgba(218,165,32,0.2) !important; }
-        body.skin-golden .text-gray-800, body.skin-golden .dark\:text-white, body.skin-golden .text-gray-900 { color: #b8860b !important; }
+        body.skin-golden .bg-white, body.skin-golden .dark\:bg-slate-800, body.skin-golden .dark\:bg-slate-900, body.skin-golden .dark\:bg-slate-700 { background-color: #ffffff !important; border-color: #daa520 !important; box-shadow: 0 10px 30px rgba(218,165,32,0.2) !important; border-radius: 1rem !important; }
+        body.skin-golden .dnd-chip { background: #fff9e6 !important; border-color: #daa520 !important; color: #b8860b !important; box-shadow: 0 2px 5px rgba(218,165,32,0.2) !important; }
+        body.skin-golden .text-gray-800, body.skin-golden .dark\:text-white, body.skin-golden .dark\:text-gray-100, body.skin-golden .dark\:text-gray-200, body.skin-golden .dark\:text-gray-300, body.skin-golden .dark\:text-gray-400, body.skin-golden .text-gray-900, body.skin-golden .text-gray-700, body.skin-golden .text-gray-600 { color: #b8860b !important; }
         body.skin-golden .dnd-slot { background-color: #fffaeb !important; border-color: #ffd700 !important; }
 
         /* ЗАЩИТА ЦВЕТОВ ПРОВЕРКИ ОТ СВЕРХ-КАСТОМИЗАЦИИ */
@@ -186,8 +180,8 @@
                 <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="openShopModal()" title="Магазин скинов">
                     <span class="text-xl sm:text-3xl hover:scale-110 transition-transform">🎨</span>
                     <div class="text-left">
-                        <h1 class="text-sm sm:text-xl font-bold tracking-tight leading-tight">Тренажер Задания 4</h1>
-                        <p class="text-blue-200 dark:text-slate-400 text-[9px] sm:text-xs">PRO | Подготовка к ЕГЭ</p>
+                        <h1 class="text-sm sm:text-xl font-bold tracking-tight leading-tight">Тренажер ЕГЭ</h1>
+                        <p class="text-blue-200 dark:text-slate-400 text-[9px] sm:text-xs">PRO | Подготовка к истории</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -251,6 +245,13 @@
         
         <!-- Controls Area -->
         <div id="controls-area" class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col gap-3 transition-colors duration-400">
+            
+            <!-- Выбор задания (Новая архитектура Хаба) -->
+            <div class="flex flex-wrap gap-2 w-full mb-2 bg-gray-100 dark:bg-slate-700/50 p-1.5 rounded-xl border border-gray-200 dark:border-slate-600">
+                <button onclick="setTask('task4')" id="tab-task4" class="flex-1 bg-white dark:bg-slate-600 text-examBlue dark:text-blue-300 font-black py-2 rounded-lg shadow-sm text-xs sm:text-sm transition-all border-2 border-blue-400">📍 Задание 4 (География)</button>
+                <button onclick="setTask('task5')" id="tab-task5" class="flex-1 bg-transparent text-gray-500 hover:bg-white/50 dark:hover:bg-slate-600/50 font-bold py-2 rounded-lg text-xs sm:text-sm transition-all border-2 border-transparent">👤 Задание 5 (Личности)</button>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="sm:col-span-1">
                     <label class="block text-[9px] sm:text-xs font-bold text-gray-500 uppercase mb-1">Период</label>
@@ -267,7 +268,7 @@
                     </select>
                 </div>
                 <div class="sm:col-span-1">
-                    <label class="block text-[9px] sm:text-xs font-bold text-gray-500 uppercase mb-1">Объем</label>
+                    <label class="block text-[9px] sm:text-xs font-bold text-gray-500 uppercase mb-1">Объем (только для Зад. 4)</label>
                     <select id="filter-rows" onchange="generateTable()" class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-xs sm:text-sm rounded-lg p-2 outline-none font-semibold">
                         <option value="4" selected>4 строки (ЕГЭ)</option>
                         <option value="6">6 строк</option>
@@ -301,12 +302,8 @@
             <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors duration-400">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse table-fixed">
-                        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 transition-colors">
-                            <tr>
-                                <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] text-center">🗺️ Объект</th>
-                                <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[45%] border-l border-gray-300 dark:border-slate-600 text-center">📜 Событие</th>
-                                <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] border-l border-gray-300 dark:border-slate-600 text-center">⏳ Дата</th>
-                            </tr>
+                        <thead id="table-head" class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 transition-colors">
+                            <!-- Заголовок подменяется через JS -->
                         </thead>
                         <tbody id="task-table-body">
                             <!-- JS content here -->
@@ -378,22 +375,20 @@
         </div>
     </div>
 
+    <!-- Кабинет учителя -->
     <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white dark:bg-slate-800 rounded-xl w-[95%] max-w-3xl h-[85vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-100 shadow-2xl border border-gray-200 dark:border-slate-700">
-             <!-- Header -->
              <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900 shrink-0">
                 <h2 class="font-black text-base sm:text-xl flex items-center gap-2">👨‍🏫 Кабинет учителя</h2>
                 <button onclick="closeTeacherModal()" class="text-3xl text-gray-400 hover:text-red-500 transition-colors leading-none">&times;</button>
              </div>
              
-             <!-- Табы учителя -->
              <div class="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0 overflow-x-auto custom-scroll">
                  <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide">📝 ДЗ</button>
                  <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide">📊 Класс</button>
                  <button id="tab-btn-speedrun" onclick="switchTeacherTab('speedrun')" class="flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide">🏆 Топ Спидрана</button>
              </div>
 
-             <!-- Конструктор ДЗ -->
              <div class="flex-grow p-4 overflow-y-auto custom-scroll flex flex-col bg-white dark:bg-slate-800 relative" id="teacher-tab-hw">
                  <div id="teacher-facts-list" class="flex-grow"></div>
                  <div class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 flex flex-col gap-2 shrink-0 bg-white dark:bg-slate-800 sticky bottom-0 pb-2">
@@ -405,7 +400,6 @@
                  </div>
              </div>
 
-             <!-- Прогресс Класса (Cloud) -->
              <div class="flex-grow p-3 sm:p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-slate-900 relative" id="teacher-tab-stats">
                  <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-3 mb-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3">
                     <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
@@ -417,39 +411,31 @@
                         <span class="text-[10px] sm:text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">Только мой класс</span>
                     </label>
                  </div>
-                 <div id="teacher-class-stats" class="flex flex-col gap-3">
-                     <!-- Ученики будут рендериться здесь -->
-                 </div>
+                 <div id="teacher-class-stats" class="flex flex-col gap-3"></div>
              </div>
 
-             <!-- Топ Спидрана (Cloud) -->
              <div class="flex-grow p-3 sm:p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-slate-900 relative" id="teacher-tab-speedrun">
                 <div class="text-center mb-4">
                     <h3 class="font-black text-xl text-purple-600 dark:text-purple-400">🔥 Зал Славы Спидрана</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Глобальный рейтинг лучших результатов</p>
                 </div>
-                <div id="speedrun-class-stats" class="flex flex-col gap-3">
-                    <!-- Топ будет здесь -->
-                </div>
+                <div id="speedrun-class-stats" class="flex flex-col gap-3"></div>
             </div>
         </div>
     </div>
 
-    <!-- Модалка ввода имени для отчета/профиля -->
+    <!-- Модалка профиля -->
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
             <h3 class="font-black text-lg dark:text-white text-center">👤 Профиль ученика</h3>
-            
             <div>
                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Имя и Фамилия</label>
                 <input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
             </div>
-
             <div>
                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Код класса (выдает учитель)</label>
                 <input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-3 font-mono border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold">
             </div>
-
             <div class="flex gap-2 mt-2">
                 <button onclick="closeProfileModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 rounded-xl font-bold transition-colors">Отмена</button>
                 <button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Сохранить</button>
@@ -463,19 +449,14 @@
                 <h2 class="text-lg font-black text-gray-800 dark:text-white">📊 Прогресс</h2>
                 <button onclick="closeStatsModal()" class="text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-white">&times;</button>
             </div>
-            
-            <!-- Кнопка настройки имени внутри аналитики -->
             <button onclick="openProfileModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 py-2.5 rounded-xl text-xs font-bold transition-colors mb-4 flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800 shadow-sm">
                 👤 Настройки профиля и класса
             </button>
-
             <div id="stats-era-container" class="space-y-3 mb-4"></div>
-            
             <div class="flex gap-2 mb-2">
                 <button onclick="printPDFReportSelf()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
                 <button onclick="copyTextReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📋 Копировать</button>
             </div>
-            
             <button onclick="resetAllProgress()" class="text-[9px] text-red-400 hover:text-red-600 uppercase font-bold text-center py-2 transition-colors w-full mt-2">Сбросить всё</button>
         </div>
     </div>
@@ -508,10 +489,12 @@
 
     <script>
         // =========================================================================
-        // МЕГА-БАЗА ДАННЫХ
+        // МЕГА-БАЗЫ ДАННЫХ
         // =========================================================================
+        
+        // --- ЗАДАНИЕ 4 (ГЕОГРАФИЯ) ---
         const bigData = [
-            // --- ДРЕВНОСТЬ И УДЕЛЬНАЯ РУСЬ ---
+            // Древность и Удельная Русь
             { c: 'early', event: "Призвание варяжского князя Рюрика на княжение", geo: "Новгород", year: "862 г." },
             { c: 'early', event: "Поход князя Олега, завершившийся объединением двух главных центров Руси", geo: "Киев", year: "882 г." },
             { c: 'early', event: "Подписание первого письменного договора Руси с Византией", geo: "Константинополь", year: "911 г." },
@@ -557,7 +540,7 @@
             { c: 'early', event: "Присоединение княжества, бывшего главным соперником Москвы, к единому государству", geo: "Тверь", year: "1485 г." },
             { c: 'early', event: "Победа московского войска над литовским, приведшая к перемирию", geo: "река Ведрошь", year: "1500 г." },
 
-            // --- РОССИЙСКОЕ ГОСУДАРСТВО (XVI - XVII вв.) ---
+            // Российское государство (XVI-XVII вв.)
             { c: 'early', event: "Взятие важнейшей западной крепости войсками Василия III", geo: "Смоленск", year: "1514 г." },
             { c: 'early', event: "Ликвидация независимости второй крупной вечевой республики", geo: "Псков", year: "1510 г." },
             { c: 'early', event: "Присоединение последнего крупного удела (княжества) к Московскому государству", geo: "Рязань", year: "1521 г." },
@@ -605,7 +588,7 @@
             { c: 'early', event: "Овладение турецкой крепостью в результате второго похода молодого Петра I", geo: "Азов", year: "1696 г." },
             { c: 'early', event: "Основание первой русской военно-морской базы на Азовском море", geo: "Таганрог", year: "1698 г." },
 
-            // --- ИМПЕРИЯ: XVIII ВЕК ---
+            // Империя XVIII век
             { c: '18th', event: "Тяжелое поражение русской армии от войск Карла XII в самом начале Северной войны", geo: "Нарва", year: "1700 г." },
             { c: '18th', event: "Взятие шведской крепости Нотебург (Орешек) войсками Петра I", geo: "исток Невы", year: "1702 г." },
             { c: '18th', event: "Взятие шведской крепости Ниеншанц", geo: "устье Невы", year: "1703 г." },
@@ -647,7 +630,7 @@
             { c: '18th', event: "Знаменитый переход русской армии через обледенелые горные перевалы", geo: "Швейцарские Альпы", year: "1799 г." },
             { c: '18th', event: "Взятие неприступной островной крепости русским флотом Ф. Ушакова", geo: "Корфу", year: "1799 г." },
 
-            // --- ИМПЕРИЯ: XIX ВЕК ---
+            // Империя XIX век
             { c: '19th', event: "Сражение «трех императоров», завершившееся тяжелым поражением русской армии", geo: "Аустерлиц", year: "1805 г." },
             { c: '19th', event: "Кровопролитное сражение без явного победителя в ходе Войны четвертой коалиции", geo: "Прейсиш-Эйлау", year: "1807 г." },
             { c: '19th', event: "Поражение русской армии, вынудившее Александра I пойти на мир с Францией", geo: "Фридланд", year: "1807 г." },
@@ -688,7 +671,7 @@
             { c: '19th', event: "Крупнейшая стачка текстильщиков, приведшая к появлению рабочего законодательства", geo: "Орехово-Зуево", year: "1885 г." },
             { c: '19th', event: "Начало строительства Великой Сибирской магистрали (Транссиба)", geo: "Владивосток", year: "1891 г." },
 
-            // --- XX ВЕК И НОВЕЙШАЯ ИСТОРИЯ ---
+            // XX век и Новейшая история
             { c: '20th', event: "Многомесячная героическая оборона русской военно-морской базы на Ляодунском полуострове", geo: "Порт-Артур", year: "1904 г." },
             { c: '20th', event: "Крупнейшее сухопутное сражение Русско-японской войны", geo: "Мукден", year: "1905 г." },
             { c: '20th', event: "Разгром Второй Тихоокеанской эскадры адмирала З.П. Рожественского", geo: "Цусима", year: "1905 г." },
@@ -711,7 +694,7 @@
             { c: '20th', event: "Локальный вооруженный конфликт с Японией у границ союзной Монголии (командующий Г.К. Жуков)", geo: "река Халхин-Гол", year: "1939 г." },
             { c: '20th', event: "Прорыв глубоко эшелонированной «линии Маннергейма» в ходе Зимней войны", geo: "Карельский перешеек", year: "1940 г." },
             
-            // --- ВЕЛИКАЯ ОТЕЧЕСТВЕННАЯ ВОЙНА ---
+            // Великая Отечественная война
             { c: '20th', event: "Героическая оборона пограничной крепости в первые дни Великой Отечественной войны", geo: "Брест", year: "1941 г." },
             { c: '20th', event: "Тяжелое оборонительное сражение, задержавшее продвижение врага к столице на два месяца", geo: "Смоленск", year: "1941 г." },
             { c: '20th', event: "Проведение знаменитого парада войск, уходивших прямо на фронт", geo: "Москва", year: "1941 г." },
@@ -740,7 +723,7 @@
             { c: '20th', event: "Конференция стран-победительниц, утвердившая демилитаризацию и денацификацию Германии", geo: "Потсдам", year: "1945 г." },
             { c: '20th', event: "Начало Международного военного трибунала над главными нацистскими преступниками", geo: "Нюрнберг", year: "1945 г." },
             
-            // --- ПОСЛЕВОЕННОЕ ВРЕМЯ ---
+            // Послевоенное время и Новейшая история
             { c: '20th', event: "Подписание договора о создании военно-политического блока социалистических стран", geo: "Варшава", year: "1955 г." },
             { c: '20th', event: "Первый в истории полет человека в космос (Юрий Гагарин)", geo: "Байконур", year: "1961 г." },
             { c: '20th', event: "Размещение советских ядерных ракет, спровоцировавшее острейший международный кризис", geo: "остров Куба", year: "1962 г." },
@@ -751,9 +734,6 @@
             { c: '20th', event: "Проведение XXII летних Олимпийских игр, бойкотированных рядом западных стран", geo: "Москва", year: "1980 г." },
             { c: '20th', event: "Крупнейшая радиационная техногенная катастрофа на атомной электростанции", geo: "Чернобыль", year: "1986 г." },
             { c: '20th', event: "Подписание главами трех республик соглашения о прекращении существования СССР", geo: "Беловежская пуща", year: "1991 г." },
-            
-            // --- НОВЫЕ ФАКТЫ ОТ ПОЛЬЗОВАТЕЛЯ ---
-            // Новейшая история
             { c: '20th', event: "Подписание Федеративного договора", geo: "Москва", year: "1992 г." },
             { c: '20th', event: "Принятие Конституции Российской Федерации", geo: "Москва", year: "1993 г." },
             { c: '20th', event: "Учреждение Шанхайской организации сотрудничества (ШОС)", geo: "Шанхай", year: "2001 г." },
@@ -761,67 +741,198 @@
             { c: '20th', event: "Подписание договора о принятии Республики Крым в состав РФ", geo: "Москва", year: "2014 г." },
             { c: '20th', event: "Открытие автомобильного сообщения по новому мосту", geo: "Керченский пролив", year: "2018 г." },
             { c: '20th', event: "Начало Специальной военной операции (СВО)", geo: "Донбасс", year: "2022 г." },
-            { c: '20th', event: "Подписание договоров о вхождении ДНР, ЛНР, Запорожской и Херсонской областей в РФ", geo: "Москва", year: "2022 г." },
-            // Экономика, Транспорт и Культура
-            { c: '18th', event: "Основание первого в России университета", geo: "Москва", year: "1755 г." },
-            { c: '18th', event: "Основание Академии наук и художеств", geo: "Санкт-Петербург", year: "1724 г." },
-            { c: '19th', event: "Открытие первой в России железной дороги", geo: "Санкт-Петербург — Царское Село", year: "1837 г." },
-            { c: '19th', event: "Начало строительства Китайско-Восточной железной дороги (КВЖД)", geo: "Маньчжурия", year: "1897 г." },
-            { c: '20th', event: "Строительство крупнейшей гидроэлектростанции на Днепре", geo: "Запорожье", year: "1927-1932 гг." },
-            { c: '20th', event: "Запуск первой в мире атомной электростанции (АЭС)", geo: "Обнинск", year: "1954 г." },
-            // Восстания и договоры
-            { c: '18th', event: "Начало казачьего восстания под предводительством К.А. Булавина", geo: "река Дон", year: "1707 г." },
-            { c: '18th', event: "Крупный бунт стрельцов и посадских людей", geo: "Астрахань", year: "1705-1706 гг." },
-            { c: '19th', event: "Выступление Черниговского полка (Южное общество декабристов)", geo: "село Трилесы", year: "1825-1826 гг." },
-            { c: '19th', event: "Крупное национально-освободительное восстание", geo: "Варшава", year: "1830-1831 гг." },
-            { c: '19th', event: "Подписание мирного договора после русско-турецкой войны (М.И. Кутузов)", geo: "Бухарест", year: "1812 г." },
-            { c: '19th', event: "Заключение союзного договора России и Османской империи", geo: "Ункяр-Искелеси", year: "1833 г." },
-            { c: '20th', event: "Масштабное крестьянское восстание против большевиков (Антоновщина)", geo: "Тамбовская губерния", year: "1920-1921 гг." },
-            { c: '20th', event: "Восстание матросов на эскадренном броненосце", geo: "Одесса", year: "1905 г." },
-            
-            // --- НОВЫЕ ФАКТЫ (ИЗ ПОСЛЕДНЕГО ЗАПРОСА) ---
-            { c: 'early', event: "Созыв первого Земского собора", geo: "Москва", year: "1549 г." },
-            { c: 'early', event: "Венчание на царство первого представителя династии Романовых", geo: "Москва", year: "1613 г." },
-            { c: '18th', event: "Учреждение Правительствующего Сената", geo: "Санкт-Петербург", year: "1711 г." },
-            { c: '18th', event: "Учреждение Святейшего Синода", geo: "Санкт-Петербург", year: "1721 г." },
-            { c: '18th', event: "Созыв Уложенной комиссии Екатериной II", geo: "Москва", year: "1767 г." },
-            { c: '19th', event: "Создание системы министерств", geo: "Санкт-Петербург", year: "1802 г." },
-            { c: '19th', event: "Учреждение Государственного совета", geo: "Санкт-Петербург", year: "1810 г." },
-            { c: '19th', event: "Создание военных поселений", geo: "Новгородская губерния", year: "1810-е гг." },
-            { c: '19th', event: "Утверждение Свода законов Российской империи", geo: "Санкт-Петербург", year: "1832 г." },
-            { c: '20th', event: "Начало работы Первой Государственной думы", geo: "Санкт-Петербург", year: "1906 г." },
-            { c: '20th', event: "Разгон Учредительного собрания", geo: "Петроград", year: "1918 г." },
-            { c: 'early', event: "Начало книгопечатания в России, издание «Апостола»", geo: "Москва", year: "1564 г." },
-            { c: 'early', event: "Основание Славяно-греко-латинской академии", geo: "Москва", year: "1687 г." },
-            { c: '18th', event: "Издание первой печатной русской газеты «Ведомости»", geo: "Москва", year: "1702 г." },
-            { c: '19th', event: "Открытие Императорского Царскосельского лицея", geo: "Царское Село", year: "1811 г." },
-            { c: '19th', event: "Открытие Высших женских курсов (Бестужевских)", geo: "Санкт-Петербург", year: "1878 г." },
-            { c: '19th', event: "Открытие Московского Художественного театра (МХТ)", geo: "Москва", year: "1898 г." },
-            { c: '20th', event: "Проведение первого съезда РСДРП", geo: "Минск", year: "1898 г." },
-            { c: '20th', event: "Проведение XX съезда КПСС (доклад о культе личности)", geo: "Москва", year: "1956 г." },
-            { c: '20th', event: "Проведение Всемирного фестиваля молодежи и студентов", geo: "Москва", year: "1957 г." },
-            { c: 'early', event: "Сражение при Клушине (поражение Василия Шуйского)", geo: "деревня Клушино", year: "1610 г." },
-            { c: '19th', event: "Образование Священного союза", geo: "Париж", year: "1815 г." },
-            { c: '20th', event: "Кровавое воскресение", geo: "Санкт-Петербург", year: "1905 г." },
-            { c: '20th', event: "Смертельное ранение П.А. Столыпина", geo: "Киев", year: "1911 г." },
-            { c: '20th', event: "Создание Совета экономической взаимопомощи (СЭВ)", geo: "Москва", year: "1949 г." },
-            { c: '20th', event: "Подписание договора об ограничении систем ПРО (ОСВ-1)", geo: "Москва", year: "1972 г." },
-
-            // --- НОВЫЕ ФАКТЫ (ССЫЛКИ, СТРОЙКИ, ЗАБАСТОВКИ) ---
-            { c: '18th', event: "Ссылка А.Д. Меншикова", geo: "Берёзов", year: "1727 г." },
-            { c: '19th', event: "Трагедия во время коронационных торжеств Николая II", geo: "Ходынское поле", year: "1896 г." },
-            { c: '19th', event: "Ссылка В.И. Ленина", geo: "село Шушенское", year: "1897-1900 гг." },
-            { c: '19th', event: "Начало работы крупнейшей ярмарки в Центральной России", geo: "Нижний Новгород", year: "1817 г." },
-            { c: '20th', event: "Строительство крупнейшего металлургического комбината первых пятилеток", geo: "Магнитогорск", year: "1930-е гг." },
-            { c: '20th', event: "Строительство Горьковского автомобильного завода (ГАЗ)", geo: "Нижний Новгород", year: "1932 г." },
-            { c: '20th', event: "Строительство Волжского автозавода (ВАЗ)", geo: "Тольятти", year: "1966-1970 гг." },
-            { c: '20th', event: "Строительство Камского автомобильного завода (КАМАЗ)", geo: "Набережные Челны", year: "1969 г." },
-            { c: '20th', event: "Установление дипломатических отношений РСФСР с Германией (Рапалльский договор)", geo: "Рапалло", year: "1922 г." },
-            { c: 'early', event: "Массовое движение старообрядцев против церковной реформы", geo: "Соловецкий монастырь", year: "1668-1676 гг." },
-            { c: '20th', event: "Создание первого Совета рабочих уполномоченных", geo: "Иваново-Вознесенск", year: "1905 г." },
-            { c: '20th', event: "Антибольшевистское восстание гарнизона крепости", geo: "Кронштадт", year: "1921 г." },
-            { c: '20th', event: "Выступление рабочих, приведшее к началу Февральской революции", geo: "Петроград", year: "1917 г." }
+            { c: '20th', event: "Подписание договоров о вхождении ДНР, ЛНР, Запорожской и Херсонской областей в РФ", geo: "Москва", year: "2022 г." }
         ];
+
+        // --- ЗАДАНИЕ 5 (ЛИЧНОСТИ) ---
+        const task5Data = [
+            { event: "Призвание варягов на Русь", person: "Рюрик", year: "862" },
+            { event: "Объединение Киева и Новгорода", person: "Олег Вещий", year: "882" },
+            { event: "Налоговая реформа (уроки и погосты)", person: "княгиня Ольга", year: "945" },
+            { event: "Восстание древлян", person: "Игорь Старый", year: "945" },
+            { event: "Разгром Хазарского каганата", person: "князь Святослав Игоревич", year: "965" },
+            { event: "Крещение Руси", person: "Владимир Святославич", year: "988" },
+            { event: "Составление Русской Правды", person: "Ярослав Мудрый", year: "1016" },
+            { event: "Разгром печенегов под Киевом", person: "Ярослав Мудрый", year: "1036" },
+            { event: "Написание «Слова о законе и благодати»", person: "митрополит Иларион", year: "1049" },
+            { event: "Съезд князей в Любече", person: "Владимир Мономах", year: "1097" },
+            { event: "Первое упоминание Москвы", person: "Юрий Долгорукий", year: "1147" },
+            { event: "Взятие и разграбление Киева", person: "Андрей Боголюбский", year: "1169" },
+            { event: "Расцвет Владимиро-Суздальского княжества", person: "Всеволод Большое Гнездо", year: "1176" },
+            { event: "Битва на реке Калке", person: "Мстислав Удалой", year: "1223" },
+            { event: "Объединение Галицко-Волынского княжества", person: "Даниил Романович Галицкий", year: "1238" },
+            { event: "Битва на реке Сити", person: "князь Юрий Всеволодович", year: "1238" },
+            { event: "Взятие Рязани", person: "Батый", year: "1237" },
+            { event: "Оборона Рязани от Батыя", person: "Евпатий Коловрат", year: "1237" },
+            { event: "Невская битва", person: "Александр Невский", year: "1240" },
+            { event: "Ледовое побоище", person: "Александр Невский", year: "1242" },
+            { event: "Перенос митрополичьей кафедры в Москву", person: "митрополит Пётр", year: "1326" },
+            { event: "Подавление антиордынского восстания в Твери", person: "Иван Калита", year: "1327" },
+            { event: "Битва на реке Воже", person: "Дмитрий Донской", year: "1378" },
+            { event: "Благословение войска перед Куликовской битвой", person: "Сергий Радонежский", year: "1380" },
+            { event: "Поединок с Челубеем на Куликовом поле", person: "Александр Пересвет", year: "1380" },
+            { event: "Разорение Москвы (1382 г.)", person: "хан Тохтамыш", year: "1382" },
+            { event: "Нашествие Едигея", person: "Василий I", year: "1408" },
+            { event: "Грюнвальдская битва", person: "Витовт", year: "1410" },
+            { event: "Феодальная война второй четверти XV в.", person: "Василий II", year: "1433" },
+            { event: "Междоусобная война второй четверти XV в.", person: "Василий Косой", year: "1433" },
+            { event: "Ослепление Василия II", person: "Дмитрий Шемяка", year: "1446" },
+            { event: "Битва на реке Шелони", person: "Марфа Борецкая", year: "1471" },
+            { event: "Присоединение Новгорода к Москве", person: "Иван III", year: "1478" },
+            { event: "Стояние на реке Угре", person: "Иван III", year: "1480" },
+            { event: "Стояние на реке Угре", person: "Ахмат", year: "1480" },
+            { event: "Присоединение Пскова к Москве", person: "Василий III", year: "1510" },
+            { event: "Введение единой монеты (копейки)", person: "Елена Глинская", year: "1535" },
+            { event: "Деятельность Избранной рады", person: "Алексей Адашев", year: "1549" },
+            { event: "Написание «Домостроя»", person: "священник Сильвестр", year: "1550" },
+            { event: "Созыв Стоглавого собора", person: "митрополит Макарий", year: "1551" },
+            { event: "Взятие Казани", person: "Иван IV", year: "1552" },
+            { event: "Ливонская война", person: "А.М. Курбский", year: "1558" },
+            { event: "Издание первой печатной книги «Апостол»", person: "Иван Фёдоров", year: "1564" },
+            { event: "Осуждение опричнины", person: "Филипп (Колычев)", year: "1568" },
+            { event: "Опричный террор", person: "Малюта Скуратов", year: "1570" },
+            { event: "Сожжение Москвы крымскими татарами", person: "Девлет-Гирей", year: "1571" },
+            { event: "Битва при Молодях", person: "М.И. Воротынский", year: "1572" },
+            { event: "Осада Пскова в ходе Ливонской войны", person: "Стефан Баторий", year: "1581" },
+            { event: "Поход казаков в Сибирь", person: "Ермак Тимофеевич", year: "1582" },
+            { event: "Учреждение патриаршества", person: "Б.Ф. Годунов", year: "1589" },
+            { event: "Строительство Смоленской крепостной стены", person: "Ф. С. Конь", year: "1595" },
+            { event: "Введение урочных лет", person: "царь Фёдор Иоаннович", year: "1597" },
+            { event: "Восстание в годы Смуты", person: "Иван Болотников", year: "1606" },
+            { event: "Подавление восстания Болотникова", person: "Василий Шуйский", year: "1607" },
+            { event: "Создание Тушинского лагеря", person: "Лжедмитрий II", year: "1608" },
+            { event: "События Смутного времени", person: "Марина Мнишек", year: "1606" },
+            { event: "Оборона Смоленска", person: "М.Б. Шеин", year: "1609" },
+            { event: "Снятие осады с Троице-Сергиева монастыря", person: "М.В. Скопин-Шуйский", year: "1610" },
+            { event: "Создание Второго земского ополчения", person: "К. Минин", year: "1611" },
+            { event: "Призыв к борьбе с интервентами в период Смуты", person: "патриарх Гермоген", year: "1611" },
+            { event: "Освобождение Москвы от интервентов", person: "Д.М. Пожарский", year: "1612" },
+            { event: "Смоленская война", person: "царь Михаил Фёдорович", year: "1632" },
+            { event: "Принятие Соборного уложения", person: "Алексей Михайлович", year: "1649" },
+            { event: "Церковная реформа XVII в.", person: "патриарх Никон", year: "1653" },
+            { event: "Переяславская рада", person: "Б.М. Хмельницкий", year: "1654" },
+            { event: "Церковный раскол", person: "Аввакум Петров", year: "1654" },
+            { event: "Поход «за зипунами»", person: "Степан Разин", year: "1667" },
+            { event: "Отмена местничества", person: "Фёдор Алексеевич", year: "1682" },
+            { event: "Заключение Вечного мира с Польшей", person: "царевна Софья", year: "1686" },
+            { event: "Крымские походы", person: "В.В. Голицын", year: "1687" },
+            { event: "Северная война", person: "Петр I", year: "1700" },
+            { event: "Подавление Астраханского восстания", person: "Б.П. Шереметев", year: "1706" },
+            { event: "Восстание казаков на Дону", person: "Кондратий Булавин", year: "1707" },
+            { event: "Сражение у деревни Лесной", person: "А. Д. Меншиков", year: "1708" },
+            { event: "Переход на сторону Карла XII в Северной войне", person: "И. Мазепа", year: "1708" },
+            { event: "Гангутское морское сражение", person: "Ф.М. Апраксин", year: "1714" },
+            { event: "Первая Камчатская экспедиция", person: "Витус Беринг", year: "1725" },
+            { event: "Ссылка А.Д. Меншикова", person: "А. Д. Меншиков", year: "1727" },
+            { event: "Открытие Московского университета", person: "императрица Елизавета Петровна", year: "1755" },
+            { event: "Открытие Московского университета (куратор)", person: "И. Шувалов", year: "1755" },
+            { event: "Создание Московского университета", person: "М.В. Ломоносов", year: "1755" },
+            { event: "Кунерсдорфское сражение", person: "П.С. Салтыков", year: "1759" },
+            { event: "Созыв Уложенной комиссии", person: "Екатерина II", year: "1767" },
+            { event: "Битва при Кагуле", person: "П.А. Румянцев", year: "1770" },
+            { event: "Чесменское сражение", person: "А.Г. Орлов", year: "1770" },
+            { event: "Осада Оренбурга", person: "Емельян Пугачёв", year: "1773" },
+            { event: "Восстание под предводительством Пугачева", person: "Салават Юлаев", year: "1773" },
+            { event: "Присоединение Крыма к России", person: "Г.А. Потёмкин", year: "1783" },
+            { event: "Взятие турецкой крепости Измаил", person: "А.В. Суворов", year: "1790" },
+            { event: "Издание книги «Путешествие из Петербурга в Москву»", person: "А. Н. Радищев, Н. И. Новиков", year: "1790" },
+            { event: "Сражение у мыса Калиакрия", person: "Ф.Ф. Ушаков", year: "1791" },
+            { event: "Издание указа о трехдневной барщине", person: "Павел I", year: "1797" },
+            { event: "Итальянский и Швейцарский походы", person: "А.В. Суворов", year: "1799" },
+            { event: "Взятие крепости Корфу", person: "Ф. Ф. Ушаков", year: "1799" },
+            { event: "Учреждение министерств", person: "Александр I", year: "1802" },
+            { event: "Тильзитский мир", person: "Александр I", year: "1807" },
+            { event: "Создание военных поселений", person: "А. А. Аракчеев", year: "1810" },
+            { event: "Учреждение Государственного совета", person: "М.М. Сперанский", year: "1810" },
+            { event: "Отечественная война", person: "М.И. Кутузов", year: "1812" },
+            { event: "Смоленское сражение", person: "М.Б. Барклай де Толли", year: "1812" },
+            { event: "Бородинская битва", person: "П. И. Багратион", year: "1812" },
+            { event: "Кавказская война", person: "А.П. Ермолов", year: "1817" },
+            { event: "Восстание декабристов", person: "П. И. Пестель", year: "1825" },
+            { event: "Восстание Черниговского полка", person: "С.И. Муравьёв-Апостол", year: "1825" },
+            { event: "Убийство генерала Милорадовича", person: "П.Г. Каховский", year: "1825" },
+            { event: "Подавление восстания декабристов", person: "Николай I", year: "1825" },
+            { event: "Создание III отделения С.Е.И.В. канцелярии", person: "А. Х. Бенкендорф", year: "1826" },
+            { event: "Создание теории официальной народности", person: "С.С. Уваров", year: "1833" },
+            { event: "Реформа государственных крестьян", person: "П. Д. Киселев", year: "1837" },
+            { event: "Финансовая реформа (серебряный рубль)", person: "Е.Ф. Канкрин", year: "1839" },
+            { event: "Синопское морское сражение", person: "П.С. Нахимов", year: "1853" },
+            { event: "Оборона Севастополя", person: "В. А. Корнилов", year: "1854" },
+            { event: "Крымская война (Оборона Севастополя)", person: "Э.И. Тотлебен", year: "1854" },
+            { event: "Отмена крепостного права", person: "Александр II", year: "1861" },
+            { event: "Отмена крепостного права", person: "Н.А. Милютин", year: "1861" },
+            { event: "Отмена ограничительных статей Парижского мира", person: "А.М. Горчаков", year: "1871" },
+            { event: "Русско-турецкая война (1877-1878)", person: "М.Д. Скобелев", year: "1877" },
+            { event: "Убийство Александра II", person: "С. Л. Перовская, А. И. Желябов", year: "1881" },
+            { event: "Проект «Конституции» при Александре II", person: "М.Т. Лорис-Меликов", year: "1881" },
+            { event: "Создание группы «Освобождение труда»", person: "Г.В. Плеханов", year: "1883" },
+            { event: "Издание циркуляра о «кухаркиных детях»", person: "Александр III", year: "1887" },
+            { event: "Введение золотого обеспечения рубля", person: "С. Ю. Витте", year: "1897" },
+            { event: "Создание партии эсеров", person: "В.М. Чернов", year: "1902" },
+            { event: "Оборона Порт-Артура", person: "С.О. Макаров", year: "1904" },
+            { event: "Кровавое воскресенье", person: "Г.А. Гапон", year: "1905" },
+            { event: "Создание партии октябристов", person: "А.И. Гучков", year: "1905" },
+            { event: "Создание партии кадетов", person: "П.Н. Милюков", year: "1905" },
+            { event: "Манифест 17 октября", person: "Николай II", year: "1905" },
+            { event: "Аграрная реформа", person: "П.А. Столыпин", year: "1906" },
+            { event: "Брусиловский прорыв", person: "А. А. Брусилов", year: "1916" },
+            { event: "Участие в убийстве Г. Распутина", person: "В.М. Пуришкевич", year: "1916" },
+            { event: "Формирование первого состава Временного правительства", person: "Г.Е. Львов", year: "1917" },
+            { event: "Создание Временного правительства", person: "А.Ф. Керенский", year: "1917" },
+            { event: "Октябрьское вооруженное восстание", person: "В.И. Ленин", year: "1917" },
+            { event: "Создание ВЧК", person: "Ф. Э. Дзержинский", year: "1917" },
+            { event: "Подписание Брестского мира", person: "Л.Д. Троцкий", year: "1918" },
+            { event: "Разгон Учредительного собрания", person: "А.Г. Железняков", year: "1918" },
+            { event: "Создание Первой Конной армии", person: "С. М. Будённый", year: "1919" },
+            { event: "Поход белой армии на Москву", person: "А.И. Деникин", year: "1919" },
+            { event: "Наступление белой армии на Петроград", person: "Н. Н. Юденич", year: "1919" },
+            { event: "Гражданская война (разгром Врангеля)", person: "М.В. Фрунзе", year: "1920" },
+            { event: "Эвакуация белой армии из Крыма", person: "П. Н. Врангель", year: "1920" },
+            { event: "Создание Главполитпросвета", person: "Н.К. Крупская", year: "1920" },
+            { event: "Подавление Кронштадтского восстания", person: "М.Н. Тухачевский", year: "1921" },
+            { event: "Подписание Рапалльского договора", person: "Г.В. Чичерин", year: "1922" },
+            { event: "Финансовая реформа (введение червонца)", person: "Г.Я. Сокольников", year: "1922" },
+            { event: "Создание «новой оппозиции»", person: "Г. Е. Зиновьев", year: "1925" },
+            { event: "Выступление против форсированной коллективизации", person: "Н.И. Бухарин", year: "1928" },
+            { event: "Статья «Головокружение от успехов»", person: "И. В. Сталин", year: "1930" },
+            { event: "Убийство, ставшее поводом для массовых репрессий", person: "С.М. Киров", year: "1934" },
+            { event: "Начало массового социалистического соревнования", person: "А.Г. Стаханов", year: "1935" },
+            { event: "Создание дрейфующей станции «Северный полюс-1»", person: "И. Д. Папанин", year: "1937" },
+            { event: "Подписание пакта о ненападении с Германией", person: "В.М. Молотов", year: "1939" },
+            { event: "Разгром Западного фронта летом 1941 г.", person: "Д.Г. Павлов", year: "1941" },
+            { event: "Сталинградская битва", person: "В.И. Чуйков", year: "1942" },
+            { event: "Курская битва", person: "Н.Ф. Ватутин", year: "1943" },
+            { event: "Операция «Багратион»", person: "К.К. Рокоссовский", year: "1944" },
+            { event: "Берлинская операция", person: "Г.К. Жуков", year: "1945" },
+            { event: "Берлинская операция", person: "И.С. Конев", year: "1945" },
+            { event: "Маньчжурская операция", person: "А.М. Василевский", year: "1945" },
+            { event: "Создание атомного оружия в СССР", person: "И.В. Курчатов", year: "1949" },
+            { event: "Борьба за власть после смерти И.В. Сталина", person: "Г. М. Маленков", year: "1953" },
+            { event: "Создание водородной бомбы", person: "А.Д. Cахаров", year: "1953" },
+            { event: "Выступление с докладом на XX съезде КПСС", person: "Н. С. Хрущёв", year: "1956" },
+            { event: "Запуск первого искусственного спутника Земли", person: "С. П. Королёв", year: "1957" },
+            { event: "Первый полет человека в космос", person: "Ю. А. Гагарин", year: "1961" },
+            { event: "Карибский кризис", person: "Н.С. Хрущев", year: "1962" },
+            { event: "Экономическая реформа в СССР 1965 года", person: "А. Н. Косыгин", year: "1965" },
+            { event: "Принятие Конституции «развитого социализма»", person: "Л. И. Брежнев", year: "1977" },
+            { event: "Кампания по укреплению трудовой дисциплины", person: "Ю. В. Андропов", year: "1982" },
+            { event: "Политика Перестройки", person: "М.С. Горбачев", year: "1985" },
+            { event: "Разработка программы «500 дней»", person: "Г. А. Явлинский", year: "1990" },
+            { event: "Подписание Беловежских соглашений", person: "Б.Н. Ельцин", year: "1991" },
+            { event: "Радикальные экономические реформы 1990-х", person: "Е.Т. Гайдар", year: "1992" },
+            { event: "Политический кризис 1993 года", person: "Р. И. Хасбулатов", year: "1993" },
+            { event: "Выборы Президента РФ 1996 года", person: "Г. А. Зюганов", year: "1996" }
+        ];
+
+        // Пре-обработка task5Data для совместимости фильтров
+        function getEra(yearStr) {
+            let y = parseInt(yearStr, 10);
+            if (y <= 1700) return 'early';
+            if (y <= 1800) return '18th';
+            if (y <= 1900) return '19th';
+            return '20th';
+        }
+        task5Data.forEach(d => d.c = getEra(d.year));
 
         const geoDict = {
             "Новгород": [31.27, 58.52], "Великий Новгород": [31.27, 58.52], "Киев": [30.52, 50.45], 
@@ -889,44 +1000,17 @@
             "Маньчжурия": [125.00, 45.00], "Обнинск": [36.61, 55.10], "село Трилесы": [29.84, 49.95], 
             "Бухарест": [26.10, 44.43], "Ункяр-Искелеси": [29.08, 41.15], "Тамбовская губерния": [41.45, 52.72],
             "Новгородская губерния": [31.27, 58.52], "СССР": [37.61, 55.75],
-
-            // Новые локации
             "Берёзов": [65.04, 63.93], "Ходынское поле": [37.53, 55.78], "село Шушенское": [91.93, 53.32],
             "Магнитогорск": [58.98, 53.41], "Тольятти": [49.41, 53.52], "Набережные Челны": [52.33, 55.73],
             "Рапалло": [9.23, 44.35], "Иваново-Вознесенск": [40.97, 56.99]
         };
 
         const trapDict = {
-            "Ништадт": ["Або", "Верель"],
-            "Медный бунт": ["Соляной бунт", "Чумной бунт"],
-            "Соляной бунт": ["Медный бунт"],
-            "1240 г.": ["1242 г.", "1223 г."],
-            "1242 г.": ["1240 г.", "1237 г."],
-            "1380 г.": ["1382 г.", "1378 г."],
-            "1382 г.": ["1380 г."],
-            "Взятие Казани Иваном IV": ["Взятие Астрахани Иваном IV"],
-            "Взятие Астрахани Иваном IV": ["Взятие Казани Иваном IV"],
-            "Тильзит": ["Фридрихсгам", "Эрфурт"],
-            "Аустерлиц": ["Фридланд", "Прейсиш-Эйлау"],
-            "Кючук-Кайнарджи": ["Яссы", "Сан-Стефано"],
-            "Яссы": ["Кючук-Кайнарджи", "Бухарест"],
-            "Сан-Стефано": ["Берлин"],
-            "Берлин": ["Сан-Стефано", "Париж"],
-            "1905 г.": ["1904 г.", "1914 г."],
-            "1914 г.": ["1916 г.", "1918 г."],
-            "1941 г.": ["1942 г.", "1939 г."],
-            "1943 г.": ["1944 г.", "1945 г."],
-            "Полтава": ["Лесная", "Нарва"],
-            "Нарва": ["Полтава"],
-            "Смоленск": ["Псков", "Киев"],
-            "Псков": ["Смоленск", "Новгород"],
-            "река Калка": ["река Сить", "река Вожа"],
-            "река Сить": ["река Калка"],
-            "река Дон": ["река Угра", "река Вожа"],
-            "река Угра": ["река Дон"]
+            "Ништадт": ["Або", "Верель"], "Медный бунт": ["Соляной бунт", "Чумной бунт"],
+            "Соляной бунт": ["Медный бунт"], "1240 г.": ["1242 г.", "1223 г."],
+            "1242 г.": ["1240 г.", "1237 г."], "1380 г.": ["1382 г.", "1378 г."], "1382 г.": ["1380 г."]
         };
 
-        // ДАННЫЕ ДЛЯ МАГАЗИНА СКИНОВ
         const skinsList = [
             { id: 'classic', name: 'Классика', price: 0, icon: '🏛️', desc: 'Стандартный вид' },
             { id: 'beresta', name: 'Древняя Русь', price: 50, icon: '📜', desc: 'Берестяные грамоты' },
@@ -940,6 +1024,7 @@
 
         window.state = {
             selectedChip: null,
+            currentTask: 'task4', // 'task4' or 'task5'
             stats: { 
                 streak: 0, rowsSolved: 0, totalSolvedEver: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0,
                 points: 0, unlockedSkins: ['classic'], currentSkin: 'classic'
@@ -989,7 +1074,6 @@
                     if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
                     if (parsed.hideLearned !== undefined) window.state.hideLearned = parsed.hideLearned;
                     
-                    // Дефолтные значения для новых полей
                     if (window.state.stats.totalTimeSpent === undefined) window.state.stats.totalTimeSpent = 0;
                     if (window.state.stats.bestSpeedrunScore === undefined) window.state.stats.bestSpeedrunScore = 0;
                     if (window.state.stats.points === undefined) window.state.stats.points = window.state.stats.totalSolvedEver || 0;
@@ -1016,7 +1100,7 @@
             const isDark = localStorage.getItem('ege_theme') === 'dark';
             if (isDark) document.documentElement.classList.add('dark');
             
-            applySkin(); // Применяем скин
+            applySkin();
 
             document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
             updateGlobalUI();
@@ -1086,7 +1170,191 @@
             return m ? parseInt(m[0], 10) : 9999;
         }
 
+        // Общая функция обработки клика по плашке
+        window.onChipClick = function(chip, e) {
+            haptic('light');
+            const now = Date.now();
+            const timeSinceLastClick = now - (chip._lastClickTime || 0);
+            chip._lastClickTime = now;
+
+            if (chip.classList.contains('crossed-out')) {
+                chip.classList.remove('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
+                e.stopPropagation();
+                return;
+            }
+
+            if (chip.classList.contains('in-slot')) {
+                e.stopPropagation();
+                const slot = chip.parentElement;
+                if (slot.classList.contains('correct-slot') || slot.classList.contains('revealed-slot')) return;
+
+                chip.classList.remove('in-slot', 'selected');
+                document.getElementById('pool-container').appendChild(chip);
+                slot.innerHTML = '';
+                slot.classList.remove('has-item', 'incorrect-slot');
+                if (window.state.selectedChip === chip) window.state.selectedChip = null;
+                updateSlotGlow();
+                return;
+            }
+
+            if (timeSinceLastClick < 300) {
+                chip.classList.add('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
+                chip.classList.remove('selected');
+                if (window.state.selectedChip === chip) window.state.selectedChip = null;
+                updateSlotGlow();
+                e.stopPropagation();
+                return;
+            }
+
+            document.querySelectorAll('.dnd-chip').forEach(c => {
+                if (c !== chip) c.classList.remove('selected');
+            });
+            if (window.state.selectedChip !== chip) {
+                window.state.selectedChip = chip;
+                chip.classList.add('selected');
+            } else {
+                window.state.selectedChip = null;
+                chip.classList.remove('selected');
+            }
+            updateSlotGlow();
+        };
+
+        window.setTask = function(taskName) {
+            window.state.currentTask = taskName;
+            const btn4 = document.getElementById('tab-task4');
+            const btn5 = document.getElementById('tab-task5');
+            
+            if (taskName === 'task4') {
+                btn4.className = "flex-1 bg-white dark:bg-slate-600 text-examBlue dark:text-blue-300 font-black py-2 rounded-lg shadow-sm text-xs sm:text-sm transition-all border-2 border-blue-400";
+                btn5.className = "flex-1 bg-transparent text-gray-500 hover:bg-white/50 dark:hover:bg-slate-600/50 font-bold py-2 rounded-lg text-xs sm:text-sm transition-all border-2 border-transparent";
+                document.getElementById('filter-rows').disabled = false;
+            } else {
+                btn5.className = "flex-1 bg-white dark:bg-slate-600 text-examBlue dark:text-blue-300 font-black py-2 rounded-lg shadow-sm text-xs sm:text-sm transition-all border-2 border-blue-400";
+                btn4.className = "flex-1 bg-transparent text-gray-500 hover:bg-white/50 dark:hover:bg-slate-600/50 font-bold py-2 rounded-lg text-xs sm:text-sm transition-all border-2 border-transparent";
+                document.getElementById('filter-rows').disabled = true; // Задание 5 всегда 4 строки
+            }
+            
+            if (window.state.currentMode === 'flashcards') window.nextFlashcard();
+            else generateTable();
+        };
+
+        function generateTask5Table() {
+            const period = document.getElementById('filter-period').value;
+            const tbody = document.getElementById('task-table-body');
+            const pool = document.getElementById('pool-container');
+            
+            window.state.answersRevealed = false;
+            document.getElementById('check-buttons').classList.remove('hidden');
+            document.getElementById('check-buttons').classList.add('flex');
+            const revealBtn = document.getElementById('reveal-btn');
+            revealBtn.className = "hidden bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-300 font-bold py-2 px-6 rounded-xl shadow-sm active:scale-95 text-xs sm:text-sm w-full transition-colors flex items-center justify-center gap-2";
+            revealBtn.innerHTML = '👀 Показать ответы';
+            document.getElementById('next-btn').classList.add('hidden');
+
+            tbody.innerHTML = ''; pool.innerHTML = '';
+
+            document.getElementById('table-head').innerHTML = `
+                <tr>
+                    <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[60%] text-left pl-4">📜 Процесс (явление, событие)</th>
+                    <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[40%] border-l border-gray-300 dark:border-slate-600 text-center">👤 Участник</th>
+                </tr>
+            `;
+
+            let allowed = [];
+            if (period === 'all') allowed = [...task5Data];
+            else if (period === 'upTo15') allowed = task5Data.filter(d => parseInt(d.year) <= 1500);
+            else if (period === 'upTo16') allowed = task5Data.filter(d => parseInt(d.year) <= 1600);
+            else if (period === 'upTo17') allowed = task5Data.filter(d => parseInt(d.year) <= 1700);
+            else if (period === 'upTo18') allowed = task5Data.filter(d => parseInt(d.year) <= 1800);
+            else if (period === 'upTo19') allowed = task5Data.filter(d => parseInt(d.year) <= 1900);
+            else allowed = task5Data.filter(d => d.c === period);
+
+            if (window.state.hideLearned) {
+                 allowed = allowed.filter(f => {
+                    let fData = window.state.stats.factStreaks["t5_" + f.event];
+                    let streakVal = fData ? (typeof fData === 'number' ? fData : fData.streak) : 0;
+                    return streakVal < 3;
+                });
+            }
+
+            if (allowed.length < 4) {
+                 if (window.state.hideLearned) {
+                        alert('Вы выучили почти все факты в этой эпохе! Фильтр отключен.');
+                        document.getElementById('toggle-hide-learned').checked = false;
+                        window.state.hideLearned = false;
+                        generateTask5Table();
+                        return;
+                  }
+            }
+
+            // Выбираем 4 уникальных события
+            let target = [];
+            let usedEvents = new Set();
+            let shuffled = allowed.sort(() => Math.random() - 0.5);
+            for (let f of shuffled) {
+                if (!usedEvents.has(f.event)) {
+                    target.push(f);
+                    usedEvents.add(f.event);
+                }
+                if (target.length === 4) break;
+            }
+            if(target.length < 4) target = allowed.slice(0, 4); // Фолбэк
+
+            window.state.currentTargetData = target;
+
+            let missing = []; 
+            let usedPersons = new Set();
+            const letters = ['А', 'Б', 'В', 'Г'];
+
+            target.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/50";
+                tr.dataset.index = idx;
+                
+                missing.push(row.person);
+                usedPersons.add(row.person);
+
+                const td1 = document.createElement('td');
+                td1.className = "p-2 sm:p-4 align-middle text-left border-r border-gray-100 dark:border-slate-700";
+                td1.innerHTML = `<span class="text-[11px] sm:text-sm font-bold text-gray-800 dark:text-gray-200">${letters[idx]}) ${row.event}</span>`;
+                tr.appendChild(td1);
+
+                const td2 = document.createElement('td');
+                td2.className = "p-1.5 sm:p-4 align-middle text-center overflow-hidden";
+                td2.innerHTML = `<div class="dnd-slot relative" data-expected="${row.person}" data-letter="?" onclick="handleSlotClick(this)"></div>`;
+                tr.appendChild(td2);
+
+                tbody.appendChild(tr);
+            });
+
+            // Добавляем 2 дистрактора
+            let poolItems = [...missing];
+            let attempts = 0;
+            let allPersons = [...new Set(task5Data.map(d => d.person))];
+            
+            while(poolItems.length < 6 && attempts < 100) {
+                let randPerson = allPersons[Math.floor(Math.random() * allPersons.length)];
+                if (!usedPersons.has(randPerson)) {
+                    poolItems.push(randPerson);
+                    usedPersons.add(randPerson);
+                }
+                attempts++;
+            }
+
+            poolItems.sort(() => Math.random() - 0.5).forEach((txt, idx) => {
+                const chip = document.createElement('div');
+                chip.className = "dnd-chip";
+                chip.innerText = txt;
+                chip.onclick = (e) => window.onChipClick(chip, e);
+                pool.appendChild(chip);
+            });
+        }
+
         function generateTable() {
+            if (window.state.currentTask === 'task5') {
+                return generateTask5Table();
+            }
+
             const period = document.getElementById('filter-period').value;
             const rowsCount = parseInt(document.getElementById('filter-rows').value);
             const tbody = document.getElementById('task-table-body');
@@ -1101,13 +1369,21 @@
             document.getElementById('next-btn').classList.add('hidden');
 
             tbody.innerHTML = ''; pool.innerHTML = '';
+
+            document.getElementById('table-head').innerHTML = `
+                <tr>
+                    <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] text-center">🗺️ Объект</th>
+                    <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[45%] border-l border-gray-300 dark:border-slate-600 text-center">📜 Событие</th>
+                    <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] border-l border-gray-300 dark:border-slate-600 text-center">⏳ Дата</th>
+                </tr>
+            `;
             
             let target = [];
             if (window.state.isHomeworkMode) {
                 let count = Math.min(4, window.state.hwCurrentPool.length);
                 window.state.hwCurrentPool.slice(0, count).forEach(i => target.push(bigData[i]));
             } else if (window.state.currentMode === 'mistakes') {
-                let allowed = window.state.mistakesPool.map(m => m.fact);
+                let allowed = window.state.mistakesPool.filter(m => m.task !== 'task5').map(m => m.fact);
                 let count = Math.min(4, allowed.length);
                 target = allowed.sort(() => Math.random() - 0.5).slice(0, count);
             } else {
@@ -1254,53 +1530,7 @@
                 const chip = document.createElement('div');
                 chip.className = "dnd-chip";
                 chip.innerText = txt;
-                chip.onclick = (e) => {
-                    haptic('light');
-                    const now = Date.now();
-                    const timeSinceLastClick = now - (chip._lastClickTime || 0);
-                    chip._lastClickTime = now;
-
-                    if (chip.classList.contains('crossed-out')) {
-                        chip.classList.remove('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
-                        e.stopPropagation();
-                        return;
-                    }
-
-                    if (chip.classList.contains('in-slot')) {
-                        e.stopPropagation();
-                        const slot = chip.parentElement;
-                        if (slot.classList.contains('correct-slot') || slot.classList.contains('revealed-slot')) return;
-
-                        chip.classList.remove('in-slot', 'selected');
-                        document.getElementById('pool-container').appendChild(chip);
-                        slot.innerHTML = '';
-                        slot.classList.remove('has-item', 'incorrect-slot');
-                        if (window.state.selectedChip === chip) window.state.selectedChip = null;
-                        updateSlotGlow();
-                        return;
-                    }
-
-                    if (timeSinceLastClick < 300) {
-                        chip.classList.add('crossed-out', 'opacity-30', 'line-through', 'grayscale', 'scale-90');
-                        chip.classList.remove('selected');
-                        if (window.state.selectedChip === chip) window.state.selectedChip = null;
-                        updateSlotGlow();
-                        e.stopPropagation();
-                        return;
-                    }
-
-                    document.querySelectorAll('.dnd-chip').forEach(c => {
-                        if (c !== chip) c.classList.remove('selected');
-                    });
-                    if (window.state.selectedChip !== chip) {
-                        window.state.selectedChip = chip;
-                        chip.classList.add('selected');
-                    } else {
-                        window.state.selectedChip = null;
-                        chip.classList.remove('selected');
-                    }
-                    updateSlotGlow();
-                };
+                chip.onclick = (e) => window.onChipClick(chip, e);
                 pool.appendChild(chip);
             });
         }
@@ -1385,24 +1615,25 @@
                     if(!window.state.stats.eraStats[fact.c]) window.state.stats.eraStats[fact.c] = { correct: 0, total: 0 };
                     window.state.stats.eraStats[fact.c].total++;
                     
-                    let factData = window.state.stats.factStreaks[fact.event];
+                    let factKey = window.state.currentTask === 'task5' ? 't5_' + fact.event : fact.event;
+                    let factData = window.state.stats.factStreaks[factKey];
                     if (typeof factData === 'number') factData = { streak: factData, lastUpdated: Date.now() };
                     if (!factData) factData = { streak: 0, lastUpdated: Date.now() };
 
-                    let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event);
+                    let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
                     
                     if (rowAllCorrect && rowFilledCount === slots.length) {
                         window.state.stats.eraStats[fact.c].correct++;
                         factData.streak += isSure ? 1 : 0.5;
                         factData.lastUpdated = Date.now();
-                        window.state.stats.factStreaks[fact.event] = factData;
+                        window.state.stats.factStreaks[factKey] = factData;
                         
                         if(mIdx !== -1) {
                             window.state.mistakesPool[mIdx].streak++;
                             if(window.state.mistakesPool[mIdx].streak >= 2) window.state.mistakesPool.splice(mIdx, 1);
                         }
                         
-                        if(geoDict[fact.geo] && !tr.children[0].querySelector('.map-trigger-btn')) {
+                        if(window.state.currentTask !== 'task5' && geoDict[fact.geo] && !tr.children[0].querySelector('.map-trigger-btn')) {
                             const btn = document.createElement('button');
                             btn.className = "map-trigger-btn mt-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-700 dark:text-blue-300 text-[9px] sm:text-xs font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1 mx-auto transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-600 w-full";
                             btn.innerHTML = `🗺️ На карте`;
@@ -1412,10 +1643,10 @@
                     } else {
                         factData.streak = 0; 
                         factData.lastUpdated = Date.now();
-                        window.state.stats.factStreaks[fact.event] = factData;
+                        window.state.stats.factStreaks[factKey] = factData;
 
                         if (mIdx === -1) {
-                            window.state.mistakesPool.push({ fact: fact, streak: 0 });
+                            window.state.mistakesPool.push({ fact: fact, streak: 0, task: window.state.currentTask });
                         } else {
                             window.state.mistakesPool[mIdx].streak = 0;
                         }
@@ -1525,7 +1756,7 @@
                         }
                     });
                     
-                    if(geoDict[fact.geo] && !tr.children[0].querySelector('.map-trigger-btn')) {
+                    if(window.state.currentTask !== 'task5' && geoDict[fact.geo] && !tr.children[0].querySelector('.map-trigger-btn')) {
                         const mBtn = document.createElement('button');
                         mBtn.className = "map-trigger-btn mt-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-700 dark:text-blue-300 text-[9px] sm:text-xs font-bold py-1 px-2 rounded-lg flex items-center justify-center gap-1 mx-auto transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-600 w-full";
                         mBtn.innerHTML = `🗺️ На карте`;
@@ -1699,8 +1930,10 @@
                 { id: '20th', name: 'XX век' }
             ];
 
+            const currentDataPool = window.state.currentTask === 'task5' ? task5Data : bigData;
+
             periods.forEach(p => {
-                const factsInPeriod = bigData.map((fact, index) => ({ fact, index })).filter(item => item.fact.c === p.id);
+                const factsInPeriod = currentDataPool.map((fact, index) => ({ fact, index })).filter(item => item.fact.c === p.id);
                 if (factsInPeriod.length === 0) return;
 
                 let html = `
@@ -1713,12 +1946,13 @@
                 `;
 
                 factsInPeriod.forEach(item => {
+                    let subText = window.state.currentTask === 'task5' ? item.fact.person : `${item.fact.geo} | ${item.fact.year}`;
                     html += `
                         <label class="flex items-start gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 p-1.5 rounded transition-colors">
                             <input type="checkbox" value="${item.index}" class="hw-checkbox mt-0.5 w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
                             <div class="text-xs text-gray-800 dark:text-gray-200 leading-tight">
                                 <span class="font-bold">${item.fact.event}</span><br>
-                                <span class="text-gray-500 dark:text-gray-400">${item.fact.geo} | ${item.fact.year}</span>
+                                <span class="text-gray-500 dark:text-gray-400">${subText}</span>
                             </div>
                         </label>
                     `;
@@ -1809,9 +2043,9 @@
                 window.state.currentMode = 'normal';
                 document.getElementById('timer-container').classList.add('hidden');
                 document.getElementById('lives-container').classList.add('hidden');
-                document.getElementById('filter-rows').disabled = false;
                 document.getElementById('filter-period').disabled = false;
                 document.getElementById('btn-update').disabled = false;
+                if(window.state.currentTask === 'task4') document.getElementById('filter-rows').disabled = false;
                 clearInterval(window.state.timerInterval);
                 
                 document.getElementById('classic-task-area').classList.remove('hidden');
@@ -1874,18 +2108,21 @@
         // --- ЛОГИКА ФЛЕШ-КАРТОЧЕК ---
         window.nextFlashcard = function() {
             const period = document.getElementById('filter-period').value;
+            const currentDataPool = window.state.currentTask === 'task5' ? task5Data : bigData;
+            
             let allowed = [];
-            if (period === 'all') allowed = [...bigData];
-            else if (period === 'upTo15') allowed = bigData.filter(d => getYearFromFact(d) <= 1500);
-            else if (period === 'upTo16') allowed = bigData.filter(d => getYearFromFact(d) <= 1600);
-            else if (period === 'upTo17') allowed = bigData.filter(d => getYearFromFact(d) <= 1700);
-            else if (period === 'upTo18') allowed = bigData.filter(d => getYearFromFact(d) <= 1800);
-            else if (period === 'upTo19') allowed = bigData.filter(d => getYearFromFact(d) <= 1900);
-            else allowed = bigData.filter(d => d.c === period);
+            if (period === 'all') allowed = [...currentDataPool];
+            else if (period === 'upTo15') allowed = currentDataPool.filter(d => getYearFromFact(d) <= 1500);
+            else if (period === 'upTo16') allowed = currentDataPool.filter(d => getYearFromFact(d) <= 1600);
+            else if (period === 'upTo17') allowed = currentDataPool.filter(d => getYearFromFact(d) <= 1700);
+            else if (period === 'upTo18') allowed = currentDataPool.filter(d => getYearFromFact(d) <= 1800);
+            else if (period === 'upTo19') allowed = currentDataPool.filter(d => getYearFromFact(d) <= 1900);
+            else allowed = currentDataPool.filter(d => d.c === period);
             
             if (window.state.hideLearned) {
                 allowed = allowed.filter(f => {
-                    let fData = window.state.stats.factStreaks[f.event];
+                    let factKey = window.state.currentTask === 'task5' ? 't5_' + f.event : f.event;
+                    let fData = window.state.stats.factStreaks[factKey];
                     let streakVal = fData ? (typeof fData === 'number' ? fData : fData.streak) : 0;
                     return streakVal < 3;
                 });
@@ -1899,7 +2136,7 @@
                     window.nextFlashcard();
                     return;
                 } else {
-                    allowed = [...bigData];
+                    allowed = [...currentDataPool];
                 }
             }
 
@@ -1925,13 +2162,21 @@
             haptic('medium');
             
             const fact = window.state.currentFlashcardFact;
+            const isTask5 = window.state.currentTask === 'task5';
             
             card.className = "w-full max-w-md bg-blue-50 dark:bg-slate-800/80 rounded-3xl shadow-xl p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-blue-900/50 transition-all duration-300 relative flipped";
             card.onclick = null; 
             
-            card.innerHTML = `
-                <span class="text-xs font-black text-blue-400 dark:text-blue-500 uppercase tracking-[0.2em] absolute top-4">Ответ</span>
-                <div class="flex flex-col gap-3 w-full mt-4">
+            let cardContent = '';
+            if (isTask5) {
+                cardContent = `
+                    <div class="bg-white dark:bg-slate-700/50 p-5 rounded-2xl shadow-sm border border-purple-100 dark:border-slate-600 w-full text-center">
+                        <span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Участник</span>
+                        <span class="text-2xl font-black text-purple-700 dark:text-purple-400">${fact.person}</span>
+                    </div>
+                `;
+            } else {
+                cardContent = `
                     <div class="bg-white dark:bg-slate-700/50 p-5 rounded-2xl shadow-sm border border-blue-100 dark:border-slate-600">
                         <span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Год</span>
                         <span class="text-3xl font-black text-examBlue dark:text-blue-300">${fact.year}</span>
@@ -1941,6 +2186,13 @@
                         <span class="text-xl font-bold text-green-700 dark:text-green-400">${fact.geo}</span>
                         <button onclick="window.openMapModal('${fact.geo}')" class="mt-2 bg-blue-100 hover:bg-blue-200 dark:bg-slate-600 dark:hover:bg-slate-500 text-blue-700 dark:text-blue-300 text-[10px] font-bold py-1 px-3 rounded-lg flex items-center justify-center gap-1 transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-500 w-auto">🗺️ Показать на карте</button>
                     </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <span class="text-xs font-black text-blue-400 dark:text-blue-500 uppercase tracking-[0.2em] absolute top-4">Ответ</span>
+                <div class="flex flex-col gap-3 w-full mt-4">
+                    ${cardContent}
                 </div>
                 <div class="flex gap-3 w-full mt-6">
                     <button onclick="window.answerFlashcard(false, event)" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:text-red-400 py-4 rounded-2xl font-black text-sm sm:text-base transition-transform active:scale-95 shadow-sm uppercase tracking-wide">❌ Забыл</button>
@@ -1952,12 +2204,13 @@
         window.answerFlashcard = function(isCorrect, e) {
             e.stopPropagation();
             const fact = window.state.currentFlashcardFact;
+            let factKey = window.state.currentTask === 'task5' ? 't5_' + fact.event : fact.event;
             
-            let factData = window.state.stats.factStreaks[fact.event];
+            let factData = window.state.stats.factStreaks[factKey];
             if (typeof factData === 'number') factData = { streak: factData, lastUpdated: Date.now() };
             if (!factData) factData = { streak: 0, lastUpdated: Date.now() };
             
-            let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event);
+            let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
 
             if (isCorrect) {
                 haptic('success');
@@ -1969,13 +2222,6 @@
                 }
                 
                 window.state.stats.streak++;
-                window.state.stats.points++; // Начисляем баллы
-                
-                if (window.state.stats.streak % 5 === 0 && window.state.stats.streak > 0) {
-                    window.state.stats.points += 10;
-                    setTimeout(() => showToast('🎁', '+10 бонусных баллов!', 'bg-purple-600', 'border-purple-800'), 2500);
-                }
-
                 const praises = {
                     3: {e: '👀', t: 'Три подряд! Рюрик одобряет.'},
                     5: {e: '📜', t: 'Стрик 5! Прям Нестор Летописец!'},
@@ -1998,7 +2244,7 @@
                 factData.streak = 0;
                 factData.lastUpdated = Date.now();
                 if (mIdx === -1) {
-                    window.state.mistakesPool.push({ fact: fact, streak: 0 });
+                    window.state.mistakesPool.push({ fact: fact, streak: 0, task: window.state.currentTask });
                 } else {
                     window.state.mistakesPool[mIdx].streak = 0;
                 }
@@ -2006,7 +2252,7 @@
                 showToast('🔄', 'Повторим позже', 'bg-orange-500', 'border-orange-700');
             }
             
-            window.state.stats.factStreaks[fact.event] = factData;
+            window.state.stats.factStreaks[factKey] = factData;
             window.state.stats.totalSolvedEver += 1;
             
             saveProgress();
@@ -2108,7 +2354,8 @@
             if (window.state.mistakesPool.length > 0) {
                 text += `\n⚠️ Ошибки для повторения:\n`;
                 window.state.mistakesPool.forEach((m, idx) => {
-                    text += `${idx + 1}. ${m.fact.geo} | ${m.fact.event} | ${m.fact.year}\n`;
+                    let errorLine = m.fact.person ? `${m.fact.event} ➡️ ${m.fact.person}` : `${m.fact.geo} | ${m.fact.event} | ${m.fact.year}`;
+                    text += `${idx + 1}. ${errorLine}\n`;
                 });
             } else {
                 text += `\n🎉 Ошибок нет! Идеальная работа!\n`;
@@ -2147,7 +2394,7 @@
                 <div style="font-family: Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; border-bottom: 3px solid #0f4c81; padding-bottom: 15px; margin-bottom: 30px;">
                         <h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #0f4c81; text-transform: uppercase;">Официальный отчет</h1>
-                        <p style="font-size: 14px; color: #666; margin-top: 5px;">Тренажер ЕГЭ по истории (Задание 4)</p>
+                        <p style="font-size: 14px; color: #666; margin-top: 5px;">Тренажер ЕГЭ по истории (Задания 4 и 5)</p>
                     </div>
                     
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
@@ -2206,19 +2453,18 @@
                     <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                         <thead>
                             <tr style="background: #fff1f2; text-align: left;">
-                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239; width: 25%;">География</th>
-                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239;">Событие</th>
-                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239; width: 15%;">Дата</th>
+                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239; width: 60%;">Событие</th>
+                                <th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239;">Детали</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
                 mistakesArray.forEach(m => {
+                    let errorDetails = m.fact.person ? `👤 ${m.fact.person}` : `🗺️ ${m.fact.geo} | ⏳ ${m.fact.year}`;
                     html += `
                         <tr>
-                            <td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.geo}</td>
-                            <td style="padding: 8px; border: 1px solid #fecdd3;">${m.fact.event}</td>
-                            <td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.year}</td>
+                            <td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.event}</td>
+                            <td style="padding: 8px; border: 1px solid #fecdd3;">${errorDetails}</td>
                         </tr>
                     `;
                 });
@@ -2349,7 +2595,7 @@
                         
                         localStorage.setItem('ege_final_storage_v4', data.fullStateJson); 
                         document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
-                        applySkin(); // Применяем скин из облака
+                        if(window.applySkin) window.applySkin();
                         updateGlobalUI();
                     }
                 }
