@@ -33,7 +33,7 @@
         }
     </script>
     <style>
-        html, body { overscroll-behavior-y: none; }
+        html, body { overscroll-behavior-y: none; transition: background-color 0.4s, color 0.4s; }
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -106,16 +106,85 @@
             #printable-report { display: block !important; position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px; font-family: sans-serif; }
             .no-print { display: none !important; }
         }
+
+        /* =========================================
+           ВИЗУАЛЬНАЯ КАСТОМИЗАЦИЯ (СКИНЫ)
+           ========================================= */
+
+        /* 1. Береста (Древняя Русь) */
+        body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
+        body.skin-beresta header { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; }
+        body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-slate-800 { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
+        body.skin-beresta .text-gray-800, body.skin-beresta .dark\:text-white, body.skin-beresta .text-gray-900 { color: #4a3525 !important; }
+        body.skin-beresta header .text-white { color: #fffaf0 !important; }
+        body.skin-beresta .dnd-slot { background-color: #faebd7 !important; border-color: #cdaa7d !important; }
+        body.skin-beresta .dnd-chip { background-color: #ffdead !important; border-color: #deb887 !important; color: #5c4033 !important; }
+
+        /* 2. Империя (Российская Империя) */
+        body.skin-empire { background-color: #fcfbf8 !important; }
+        body.skin-empire header { background-color: #6b151e !important; border-bottom-color: #d4af37 !important; }
+        body.skin-empire header .text-white { color: #fdf5e6 !important; }
+        body.skin-empire .bg-white, body.skin-empire .dark\:bg-slate-800 { background-color: #ffffff !important; border-color: #d4af37 !important; box-shadow: 0 4px 15px rgba(107,21,30,0.1) !important; }
+        body.skin-empire .dnd-chip { background-color: #fdfbf7 !important; border-color: #d4af37 !important; color: #6b151e !important; }
+
+        /* 3. СССР (Авангард) */
+        body.skin-ussr { background-color: #f4f4f4 !important; }
+        body.skin-ussr header { background-color: #cc0000 !important; border-bottom-color: #ffcc00 !important; }
+        body.skin-ussr header .text-white { color: #ffcc00 !important; }
+        body.skin-ussr .dnd-chip { background-color: #ffe6e6 !important; border-color: #cc0000 !important; color: #cc0000 !important; font-family: monospace; font-weight: 900; text-transform: uppercase; border-radius: 0 !important; }
+        body.skin-ussr .dnd-slot { border-radius: 0 !important; border-width: 3px !important; }
+        body.skin-ussr .bg-white, body.skin-ussr .dark\:bg-slate-800 { border-radius: 0 !important; border-color: #cc0000 !important; }
+
+        /* 4. Киберпанк */
+        body.skin-cyberpunk { background-color: #0d0221 !important; color: #00f0ff !important; }
+        body.skin-cyberpunk header { background-color: #240046 !important; border-bottom-color: #ff003c !important; }
+        body.skin-cyberpunk .bg-white, body.skin-cyberpunk .dark\:bg-slate-800 { background-color: #1a0b2e !important; border-color: #00f0ff !important; color: #ffffff !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15) !important; }
+        body.skin-cyberpunk .text-gray-800, body.skin-cyberpunk .dark\:text-white, body.skin-cyberpunk .text-gray-900 { color: #00f0ff !important; text-shadow: 0 0 3px rgba(0,240,255,0.5); }
+        body.skin-cyberpunk .dnd-chip { background-color: #240046 !important; border-color: #ff003c !important; color: #ff003c !important; text-transform: uppercase; font-family: monospace; }
+        body.skin-cyberpunk .dnd-slot { background-color: rgba(36,0,70,0.5) !important; border-color: #00f0ff !important; }
+        body.skin-cyberpunk header .text-white { color: #00f0ff !important; text-shadow: 0 0 8px #00f0ff; }
+
+        /* 5. Матрица */
+        body.skin-matrix { background-color: #000000 !important; font-family: monospace !important; color: #00ff41 !important; }
+        body.skin-matrix header { background-color: #001100 !important; border-bottom-color: #00ff41 !important; }
+        body.skin-matrix .bg-white, body.skin-matrix .dark\:bg-slate-800 { background-color: #001100 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
+        body.skin-matrix .text-gray-800, body.skin-matrix .dark\:text-white, body.skin-matrix .text-gray-900 { color: #00ff41 !important; }
+        body.skin-matrix .dnd-chip { background-color: #000000 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
+        body.skin-matrix .dnd-slot { background-color: #001100 !important; border-color: #008f11 !important; border-radius: 0 !important; }
+        body.skin-matrix header .text-white { color: #00ff41 !important; }
+
+        /* 6. Космос */
+        body.skin-space { background: radial-gradient(circle at bottom, #1b2735 0%, #0b0c10 100%) !important; color: #c5c6c7 !important; }
+        body.skin-space header { background-color: #0b0c10 !important; border-bottom-color: #45a29e !important; }
+        body.skin-space .bg-white, body.skin-space .dark\:bg-slate-800 { background-color: rgba(31,40,51,0.85) !important; border-color: #45a29e !important; color: #ffffff !important; backdrop-filter: blur(8px); border-radius: 1rem !important; }
+        body.skin-space .text-gray-800, body.skin-space .dark\:text-white, body.skin-space .text-gray-900 { color: #66fcf1 !important; }
+        body.skin-space .dnd-chip { background-color: #1f2833 !important; border-color: #45a29e !important; color: #66fcf1 !important; border-radius: 20px !important; }
+        body.skin-space .dnd-slot { background-color: rgba(11,12,16,0.6) !important; border-color: #66fcf1 !important; border-radius: 20px !important; }
+        body.skin-space header .text-white { color: #66fcf1 !important; }
+
+        /* 7. Золотой век */
+        body.skin-golden { background: linear-gradient(135deg, #fff9e6, #fff0c2) !important; }
+        body.skin-golden header { background: linear-gradient(90deg, #b8860b, #ffd700) !important; border-bottom-color: #ffffff !important; }
+        body.skin-golden header .text-white { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        body.skin-golden .bg-white, body.skin-golden .dark\:bg-slate-800 { background-color: #ffffff !important; border-color: #daa520 !important; box-shadow: 0 10px 30px rgba(218,165,32,0.2) !important; border-radius: 1rem !important; }
+        body.skin-golden .dnd-chip { background: linear-gradient(to bottom, #ffffff, #fff9e6) !important; border-color: #daa520 !important; color: #b8860b !important; box-shadow: 0 2px 5px rgba(218,165,32,0.2) !important; }
+        body.skin-golden .text-gray-800, body.skin-golden .dark\:text-white, body.skin-golden .text-gray-900 { color: #b8860b !important; }
+        body.skin-golden .dnd-slot { background-color: #fffaeb !important; border-color: #ffd700 !important; }
+
+        /* ЗАЩИТА ЦВЕТОВ ПРОВЕРКИ ОТ СВЕРХ-КАСТОМИЗАЦИИ */
+        body[class*='skin-'] .correct-slot { background-color: rgba(34,197,94,0.15) !important; border-color: #22c55e !important; }
+        body[class*='skin-'] .incorrect-slot { background-color: rgba(239,68,68,0.15) !important; border-color: #ef4444 !important; }
+        body[class*='skin-'] .revealed-slot { background-color: rgba(245,158,11,0.15) !important; border-color: #f59e0b !important; }
     </style>
 </head>
-<body class="bg-examBg dark:bg-slate-900 text-ink dark:text-gray-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-examBg dark:bg-slate-900 text-ink dark:text-gray-100 font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="bg-examBlue dark:bg-slate-950 text-white shadow-md border-b-2 sm:border-b-4 border-examRed sticky top-0 z-50 no-print">
+    <header class="bg-examBlue dark:bg-slate-950 text-white shadow-md border-b-2 sm:border-b-4 border-examRed sticky top-0 z-50 no-print transition-colors duration-400">
         <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="text-xl sm:text-3xl">🧩</span>
+                <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="openShopModal()" title="Магазин скинов">
+                    <span class="text-xl sm:text-3xl hover:scale-110 transition-transform">🎨</span>
                     <div class="text-left">
                         <h1 class="text-sm sm:text-xl font-bold tracking-tight leading-tight">Тренажер Задания 4</h1>
                         <p class="text-blue-200 dark:text-slate-400 text-[9px] sm:text-xs">PRO | Подготовка к ЕГЭ</p>
@@ -125,27 +194,33 @@
                     <button onclick="openTeacherModal()" class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-ink font-bold text-[10px] sm:text-xs rounded-md transition-colors shadow-sm">
                         👨‍🏫 Учителю
                     </button>
-                    <button onclick="toggleTheme()" id="theme-toggle" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full text-sm">
+                    <button onclick="toggleTheme()" id="theme-toggle" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full text-sm transition-colors">
                         🌙
                     </button>
                 </div>
             </div>
             
-            <div class="flex gap-2 sm:gap-4 bg-white/10 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-white/20 w-full sm:w-auto justify-around">
+            <div class="flex gap-2 sm:gap-4 bg-white/10 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-white/20 w-full sm:w-auto justify-around items-center">
                 <div class="text-center cursor-pointer" onclick="openStatsModal()">
                     <p class="text-[8px] sm:text-[10px] text-blue-200 uppercase font-bold">Ошибки</p>
                     <p class="text-sm sm:text-xl font-black text-red-300 leading-none" id="stat-mistakes">0</p>
                 </div>
-                <div class="w-px bg-white/30"></div>
+                <div class="w-px h-6 bg-white/30"></div>
                 <div class="text-center">
                     <p class="text-[8px] sm:text-[10px] text-blue-200 uppercase font-bold">Стрик</p>
                     <p class="text-sm sm:text-xl font-black text-yellow-300 leading-none" id="stat-streak">0</p>
                 </div>
-                <div class="w-px bg-white/30"></div>
+                <div class="w-px h-6 bg-white/30"></div>
                 <div class="text-center">
                     <p class="text-[8px] sm:text-[10px] text-green-200 uppercase font-bold">Решено</p>
                     <p class="text-sm sm:text-xl font-black text-green-300 leading-none" id="stat-solved">0</p>
                 </div>
+                <div class="w-px h-6 bg-white/30"></div>
+                <div class="text-center cursor-pointer hover:scale-105 transition-transform" onclick="openShopModal()">
+                    <p class="text-[8px] sm:text-[10px] text-purple-200 uppercase font-bold">Баллы 🪙</p>
+                    <p class="text-sm sm:text-xl font-black text-purple-300 leading-none" id="stat-points">0</p>
+                </div>
+
                 <div id="timer-container" class="hidden flex-row gap-2 items-center ml-2 border-l border-white/30 pl-2">
                     <div class="text-center">
                         <p class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">Таймер</p>
@@ -175,13 +250,15 @@
     <main class="no-print flex-grow max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 w-full flex flex-col gap-4">
         
         <!-- Controls Area -->
-        <div id="controls-area" class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col gap-3">
+        <div id="controls-area" class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col gap-3 transition-colors duration-400">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="sm:col-span-1">
                     <label class="block text-[9px] sm:text-xs font-bold text-gray-500 uppercase mb-1">Период</label>
-                    <select id="filter-period" onchange="generateTable()" class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-xs sm:text-sm rounded-lg p-2 outline-none font-semibold">
+                    <select id="filter-period" onchange="window.state.currentMode === 'flashcards' ? window.nextFlashcard() : generateTable()" class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-xs sm:text-sm rounded-lg p-2 outline-none font-semibold">
                         <option value="all">🌍 Вся история</option>
-                        <option value="upTo17">⚔️ До XVII в.</option>
+                        <option value="upTo15">🏹 До XV в.</option>
+                        <option value="upTo16">⚔️ До XVI в.</option>
+                        <option value="upTo17">🛡️ До XVII в.</option>
                         <option value="upTo18">👑 До XVIII в.</option>
                         <option value="upTo19">🚂 До XIX в.</option>
                         <option value="18th">👑 XVIII век</option>
@@ -198,7 +275,7 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <label class="flex items-center gap-2 cursor-pointer w-full bg-blue-50 dark:bg-slate-700/50 p-2 rounded-lg border border-blue-100 dark:border-slate-600 h-[38px] sm:h-[42px]">
+                    <label class="flex items-center gap-2 cursor-pointer w-full bg-blue-50 dark:bg-slate-700/50 p-2 rounded-lg border border-blue-100 dark:border-slate-600 h-[38px] sm:h-[42px] transition-colors">
                         <input type="checkbox" id="toggle-hide-learned" onchange="toggleHideLearned()" class="w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
                         <span class="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-tight">🙈 Скрыть выученное</span>
                     </label>
@@ -206,23 +283,25 @@
             </div>
             
             <div class="flex flex-wrap gap-2">
-                <button onclick="generateTable()" id="btn-update" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-gray-800 dark:text-white font-bold py-2 px-3 rounded-lg border text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors">🔄 Обновить</button>
-                <button onclick="openStatsModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">📊 Аналитика</button>
-                <button onclick="toggleMode('mistakes')" id="btn-mistakes" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">🔥 Ошибки</button>
-                <button onclick="toggleMode('speedrun')" id="btn-speedrun" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">⚡ Спидран</button>
-                <button onclick="toggleMode('survival')" id="btn-survival" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[90px] transition-colors shadow-sm">❤️ Выживание</button>
+                <button onclick="generateTable()" id="btn-update" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-gray-800 dark:text-white font-bold py-2 px-3 rounded-lg border text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors">🔄 Обновить</button>
+                <button onclick="openStatsModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors shadow-sm">📊 Аналитика</button>
+                <button onclick="openShopModal()" id="btn-shop" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors shadow-sm">🎨 Магазин</button>
+                <button onclick="toggleMode('mistakes')" id="btn-mistakes" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors shadow-sm">🔥 Ошибки</button>
+                <button onclick="toggleMode('speedrun')" id="btn-speedrun" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors shadow-sm">⚡ Спидран</button>
+                <button onclick="toggleMode('survival')" id="btn-survival" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors shadow-sm">❤️ Выживание</button>
+                <button onclick="toggleMode('flashcards')" id="btn-flashcards" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-3 rounded-lg text-[10px] sm:text-xs flex-1 min-w-[80px] transition-colors shadow-sm">🃏 Карточки</button>
             </div>
         </div>
 
-        <!-- Task Area -->
-        <div class="flex flex-col lg:flex-row flex-grow relative gap-4 items-start">
-            <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl"></div>
+        <!-- Classic Task Area -->
+        <div id="classic-task-area" class="flex flex-col lg:flex-row flex-grow relative gap-4 items-start w-full">
+            <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
 
             <!-- Таблица -->
-            <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors duration-400">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse table-fixed">
-                        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200">
+                        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 transition-colors">
                             <tr>
                                 <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[27.5%] text-center">🗺️ Объект</th>
                                 <th class="p-2 sm:p-4 text-[10px] sm:text-sm font-bold border-b border-gray-300 dark:border-slate-600 w-[45%] border-l border-gray-300 dark:border-slate-600 text-center">📜 Событие</th>
@@ -237,7 +316,7 @@
             </div>
 
             <!-- Pool of answers -->
-            <div class="w-full lg:w-1/3 bg-white dark:bg-slate-800 flex flex-col sticky bottom-0 z-40 p-4 border border-gray-200 dark:border-slate-700 rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md">
+            <div class="w-full lg:w-1/3 bg-white dark:bg-slate-800 flex flex-col sticky bottom-0 z-40 p-4 border border-gray-200 dark:border-slate-700 rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400">
                 <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
                     <h3 class="font-black text-gray-800 dark:text-white flex items-center gap-1.5 text-xs sm:text-base">
                         <span>🧩</span> ВАРИАНТЫ
@@ -266,10 +345,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Flashcard Area -->
+        <div id="flashcard-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative">
+            <!-- Динамический контент карточек -->
+        </div>
     </main>
 
     <!-- Modals -->
     
+    <!-- Магазин Скинов -->
+    <div id="shop-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900 shrink-0">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-white flex items-center gap-2">🎨 Кастомизация</h2>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Зарабатывай баллы, решая задания!</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-pink-100 dark:bg-pink-900/30 border border-pink-300 dark:border-pink-800 text-pink-800 dark:text-pink-300 px-3 py-1.5 rounded-lg text-sm font-black shadow-sm">
+                        🪙 <span id="shop-points-display">0</span>
+                    </div>
+                    <button onclick="closeShopModal()" class="text-3xl text-gray-400 hover:text-red-500 transition-colors leading-none">&times;</button>
+                </div>
+            </div>
+            
+            <div class="flex-grow p-4 overflow-y-auto custom-scroll bg-gray-100 dark:bg-slate-900">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="shop-grid">
+                    <!-- Скины рендерятся здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white dark:bg-slate-800 rounded-xl w-[95%] max-w-3xl h-[85vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-100 shadow-2xl border border-gray-200 dark:border-slate-700">
              <!-- Header -->
@@ -279,9 +387,10 @@
              </div>
              
              <!-- Табы учителя -->
-             <div class="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
-                 <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide">📝 Конструктор ДЗ</button>
-                 <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide">📊 Прогресс класса</button>
+             <div class="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0 overflow-x-auto custom-scroll">
+                 <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide">📝 ДЗ</button>
+                 <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide">📊 Класс</button>
+                 <button id="tab-btn-speedrun" onclick="switchTeacherTab('speedrun')" class="flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide">🏆 Топ Спидрана</button>
              </div>
 
              <!-- Конструктор ДЗ -->
@@ -297,14 +406,32 @@
              </div>
 
              <!-- Прогресс Класса (Cloud) -->
-             <div class="flex-grow p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-slate-900 relative" id="teacher-tab-stats">
-                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-center">
-                    <p class="text-[10px] sm:text-xs text-blue-800 dark:text-blue-300 font-medium">Статистика обновляется в реальном времени. Если ученик зашел не из Telegram, его имя подтянется из того, что он укажет в настройках профиля.</p>
+             <div class="flex-grow p-3 sm:p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-slate-900 relative" id="teacher-tab-stats">
+                 <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-3 mb-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3">
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
+                        <span class="text-xs font-bold text-gray-600 dark:text-gray-300">Ваш код класса:</span>
+                        <input type="text" id="teacher-class-code-input" class="w-24 text-center font-mono font-black text-examBlue dark:text-blue-300 text-sm p-1.5 border border-gray-300 rounded dark:bg-slate-700 dark:border-slate-600 outline-none focus:ring-2 focus:ring-blue-500" onchange="saveTeacherClassCode()">
+                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800 w-full sm:w-auto justify-center">
+                        <input type="checkbox" id="teacher-filter-class" onchange="window.loadClassProgress()" class="w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
+                        <span class="text-[10px] sm:text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">Только мой класс</span>
+                    </label>
                  </div>
                  <div id="teacher-class-stats" class="flex flex-col gap-3">
                      <!-- Ученики будут рендериться здесь -->
                  </div>
              </div>
+
+             <!-- Топ Спидрана (Cloud) -->
+             <div class="flex-grow p-3 sm:p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-slate-900 relative" id="teacher-tab-speedrun">
+                <div class="text-center mb-4">
+                    <h3 class="font-black text-xl text-purple-600 dark:text-purple-400">🔥 Зал Славы Спидрана</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Глобальный рейтинг лучших результатов</p>
+                </div>
+                <div id="speedrun-class-stats" class="flex flex-col gap-3">
+                    <!-- Топ будет здесь -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -312,8 +439,17 @@
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
             <h3 class="font-black text-lg dark:text-white text-center">👤 Профиль ученика</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 text-center -mt-3">Как вас зовут? Учитель увидит это имя в своей статистике.</p>
-            <input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Имя и Фамилия</label>
+                <input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Код класса (выдает учитель)</label>
+                <input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-3 font-mono border border-gray-300 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold">
+            </div>
+
             <div class="flex gap-2 mt-2">
                 <button onclick="closeProfileModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 rounded-xl font-bold transition-colors">Отмена</button>
                 <button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-colors shadow-md">Сохранить</button>
@@ -330,13 +466,13 @@
             
             <!-- Кнопка настройки имени внутри аналитики -->
             <button onclick="openProfileModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 py-2.5 rounded-xl text-xs font-bold transition-colors mb-4 flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800 shadow-sm">
-                👤 Настроить имя для рейтинга
+                👤 Настройки профиля и класса
             </button>
 
             <div id="stats-era-container" class="space-y-3 mb-4"></div>
             
             <div class="flex gap-2 mb-2">
-                <button onclick="printPDFReport()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
+                <button onclick="printPDFReportSelf()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
                 <button onclick="copyTextReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📋 Копировать</button>
             </div>
             
@@ -790,9 +926,24 @@
             "река Угра": ["река Дон"]
         };
 
+        // ДАННЫЕ ДЛЯ МАГАЗИНА СКИНОВ
+        const skinsList = [
+            { id: 'classic', name: 'Классика', price: 0, icon: '🏛️', desc: 'Стандартный вид' },
+            { id: 'beresta', name: 'Древняя Русь', price: 50, icon: '📜', desc: 'Берестяные грамоты' },
+            { id: 'empire', name: 'Российская Империя', price: 150, icon: '👑', desc: 'Имперское величие' },
+            { id: 'ussr', name: 'СССР', price: 300, icon: '⚒️', desc: 'Советский авангард' },
+            { id: 'cyberpunk', name: 'Киберпанк', price: 500, icon: '🤖', desc: 'Неоновое будущее' },
+            { id: 'matrix', name: 'Матрица', price: 750, icon: '💻', desc: 'Взлом симуляции' },
+            { id: 'space', name: 'Космос', price: 1000, icon: '🌌', desc: 'Просторы вселенной' },
+            { id: 'golden', name: 'Золотой Век', price: 1500, icon: '🏆', desc: 'Роскошь и блеск' }
+        ];
+
         window.state = {
             selectedChip: null,
-            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0 },
+            stats: { 
+                streak: 0, rowsSolved: 0, totalSolvedEver: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0,
+                points: 0, unlockedSkins: ['classic'], currentSkin: 'classic'
+            },
             mistakesPool: [],
             currentTargetData: [],
             currentMode: 'normal',
@@ -807,7 +958,8 @@
         };
 
         const tg = window.Telegram ? window.Telegram.WebApp : null;
-        window.tgApp = tg; // ДЕЛАЕМ TG ГЛОБАЛЬНО ДОСТУПНЫМ ДЛЯ БАЗЫ ДАННЫХ
+        window.tgApp = tg; 
+        window.loadedStudentsData = []; 
 
         function haptic(type) {
             if (tg && tg.HapticFeedback) {
@@ -827,9 +979,6 @@
                     document.documentElement.classList.add('dark');
                     localStorage.setItem('ege_theme', 'dark');
                 }
-                if (tg.setHeaderColor) {
-                    tg.setHeaderColor(document.documentElement.classList.contains('dark') ? '#020617' : '#0f4c81');
-                }
             }
 
             try {
@@ -839,7 +988,13 @@
                     Object.assign(window.state.stats, parsed);
                     if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
                     if (parsed.hideLearned !== undefined) window.state.hideLearned = parsed.hideLearned;
-                    if (parsed.totalTimeSpent === undefined) window.state.stats.totalTimeSpent = 0;
+                    
+                    // Дефолтные значения для новых полей
+                    if (window.state.stats.totalTimeSpent === undefined) window.state.stats.totalTimeSpent = 0;
+                    if (window.state.stats.bestSpeedrunScore === undefined) window.state.stats.bestSpeedrunScore = 0;
+                    if (window.state.stats.points === undefined) window.state.stats.points = window.state.stats.totalSolvedEver || 0;
+                    if (!window.state.stats.unlockedSkins) window.state.stats.unlockedSkins = ['classic'];
+                    if (!window.state.stats.currentSkin) window.state.stats.currentSkin = 'classic';
                     
                     const now = Date.now();
                     const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -860,6 +1015,9 @@
             
             const isDark = localStorage.getItem('ege_theme') === 'dark';
             if (isDark) document.documentElement.classList.add('dark');
+            
+            applySkin(); // Применяем скин
+
             document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
             updateGlobalUI();
             checkURLForHomework();
@@ -872,6 +1030,13 @@
             }, 1000);
         }
 
+        function applySkin() {
+            document.body.className = document.body.className.replace(/skin-\w+/g, '');
+            if (window.state.stats.currentSkin && window.state.stats.currentSkin !== 'classic') {
+                document.body.classList.add('skin-' + window.state.stats.currentSkin);
+            }
+        }
+
         function saveProgress() {
             localStorage.setItem('ege_final_storage_v4', JSON.stringify({
                 totalSolvedEver: window.state.stats.totalSolvedEver,
@@ -879,7 +1044,11 @@
                 factStreaks: window.state.stats.factStreaks,
                 mistakesPool: window.state.mistakesPool,
                 hideLearned: window.state.hideLearned,
-                totalTimeSpent: window.state.stats.totalTimeSpent
+                totalTimeSpent: window.state.stats.totalTimeSpent,
+                bestSpeedrunScore: window.state.stats.bestSpeedrunScore,
+                points: window.state.stats.points,
+                unlockedSkins: window.state.stats.unlockedSkins,
+                currentSkin: window.state.stats.currentSkin
             }));
             if (window.syncProgressToCloud) window.syncProgressToCloud();
         }
@@ -900,15 +1069,21 @@
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('ege_theme', isDark ? 'dark' : 'light');
-            if (tg && tg.setHeaderColor) {
-                tg.setHeaderColor(isDark ? '#020617' : '#0f4c81');
-            }
         }
 
         function toggleHideLearned() {
             window.state.hideLearned = document.getElementById('toggle-hide-learned').checked;
             saveProgress();
-            generateTable();
+            if (window.state.currentMode === 'flashcards') {
+                window.nextFlashcard();
+            } else {
+                generateTable();
+            }
+        }
+
+        function getYearFromFact(fact) {
+            let m = fact.year.match(/\d+/);
+            return m ? parseInt(m[0], 10) : 9999;
         }
 
         function generateTable() {
@@ -937,17 +1112,13 @@
                 target = allowed.sort(() => Math.random() - 0.5).slice(0, count);
             } else {
                 let allowed = [];
-                if (period === 'all') {
-                    allowed = [...bigData];
-                } else if (period === 'upTo17') {
-                    allowed = bigData.filter(d => d.c === 'early');
-                } else if (period === 'upTo18') {
-                    allowed = bigData.filter(d => ['early', '18th'].includes(d.c));
-                } else if (period === 'upTo19') {
-                    allowed = bigData.filter(d => ['early', '18th', '19th'].includes(d.c));
-                } else {
-                    allowed = bigData.filter(d => d.c === period);
-                }
+                if (period === 'all') allowed = [...bigData];
+                else if (period === 'upTo15') allowed = bigData.filter(d => getYearFromFact(d) <= 1500);
+                else if (period === 'upTo16') allowed = bigData.filter(d => getYearFromFact(d) <= 1600);
+                else if (period === 'upTo17') allowed = bigData.filter(d => getYearFromFact(d) <= 1700);
+                else if (period === 'upTo18') allowed = bigData.filter(d => getYearFromFact(d) <= 1800);
+                else if (period === 'upTo19') allowed = bigData.filter(d => getYearFromFact(d) <= 1900);
+                else allowed = bigData.filter(d => d.c === period);
                 
                 if (window.state.hideLearned) allowed = allowed.filter(f => {
                     let fData = window.state.stats.factStreaks[f.event];
@@ -1258,6 +1429,13 @@
                 haptic('success');
                 window.state.stats.streak++;
                 window.state.stats.totalSolvedEver += rows.length;
+                window.state.stats.points += rows.length; // ДОБАВЛЕНИЕ БАЛЛОВ
+
+                // Бонус за стрик
+                if (window.state.stats.streak % 5 === 0 && window.state.stats.streak > 0 && !window.state.isHomeworkMode) {
+                    window.state.stats.points += 10;
+                    setTimeout(() => showToast('🎁', '+10 бонусных баллов!', 'bg-purple-600', 'border-purple-800'), 2500);
+                }
                 
                 if (window.state.currentMode === 'speedrun') {
                     window.state.timeLeft += 25;
@@ -1265,7 +1443,21 @@
                 } else if (window.state.currentMode === 'survival') {
                     showToast('❤️', 'Идеально!', 'bg-rose-600', 'border-rose-800');
                 } else {
-                    if (isSure) {
+                    const praises = {
+                        3: {e: '👀', t: 'Три подряд! Рюрик одобряет.'},
+                        5: {e: '📜', t: 'Стрик 5! Прям Нестор Летописец!'},
+                        10: {e: '🔥', t: 'Десяточка! Историчка ставит 5 в журнал.'},
+                        15: {e: '🧠', t: 'Твой мозг захватит Константинополь!'},
+                        20: {e: '👑', t: 'Стрик 20! Петр I жмет тебе руку.'},
+                        30: {e: '🎓', t: '30! Бюджетное место уже выехало!'},
+                        42: {e: '👽', t: '42... Ты познал смысл истории.'},
+                        50: {e: '⏳', t: '50! Ты путешественник во времени?'}
+                    };
+
+                    if (praises[window.state.stats.streak]) {
+                        let p = praises[window.state.stats.streak];
+                        showToast(p.e, p.t, 'bg-yellow-500', 'border-yellow-700');
+                    } else if (isSure) {
                         showToast('✅', 'Верно!', 'bg-green-600', 'border-green-800');
                     } else {
                         showToast('👌', 'Угадали! Но нужно повторить.', 'bg-indigo-500', 'border-indigo-700');
@@ -1380,6 +1572,7 @@
             document.getElementById('stat-mistakes').innerText = window.state.mistakesPool.length;
             document.getElementById('stat-streak').innerText = window.state.stats.streak;
             document.getElementById('stat-solved').innerText = window.state.stats.totalSolvedEver;
+            document.getElementById('stat-points').innerText = window.state.stats.points;
             if (window.state.isHomeworkMode) document.getElementById('hw-remaining').innerText = window.state.hwCurrentPool.length;
         }
 
@@ -1395,6 +1588,15 @@
         function endGame() {
             clearInterval(window.state.timerInterval);
             document.getElementById('modal-score').innerText = window.state.stats.streak;
+            
+            // Фиксация рекорда спидрана
+            if (window.state.currentMode === 'speedrun') {
+                if (window.state.stats.streak > (window.state.stats.bestSpeedrunScore || 0)) {
+                    window.state.stats.bestSpeedrunScore = window.state.stats.streak;
+                    saveProgress();
+                }
+            }
+
             const modal = document.getElementById('game-over-modal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -1414,8 +1616,78 @@
             window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`);
         }
 
-        // --- ФУНКЦИИ УЧИТЕЛЯ ---
+        // --- МАГАЗИН СКИНОВ ---
+        function openShopModal() {
+            const modal = document.getElementById('shop-modal');
+            document.getElementById('shop-points-display').innerText = window.state.stats.points;
+            const grid = document.getElementById('shop-grid');
+            grid.innerHTML = '';
+
+            skinsList.forEach(s => {
+                const isUnlocked = window.state.stats.unlockedSkins.includes(s.id);
+                const isSelected = window.state.stats.currentSkin === s.id;
+                
+                let btnHtml = '';
+                if (isSelected) {
+                    btnHtml = `<button disabled class="w-full bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-bold py-2 rounded-lg cursor-not-allowed text-xs sm:text-sm">Выбрано</button>`;
+                } else if (isUnlocked) {
+                    btnHtml = `<button onclick="selectSkin('${s.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors shadow-sm text-xs sm:text-sm">Выбрать</button>`;
+                } else {
+                    const canAfford = window.state.stats.points >= s.price;
+                    btnHtml = `<button onclick="buySkin('${s.id}', ${s.price})" class="w-full ${canAfford ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'} text-white font-bold py-2 rounded-lg transition-colors flex justify-center items-center gap-1 shadow-sm text-xs sm:text-sm">
+                        Купить за ${s.price} 🪙
+                    </button>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="border-2 ${isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'} rounded-xl p-4 flex flex-col items-center text-center shadow-sm relative transition-all hover:-translate-y-1">
+                        <div class="text-4xl mb-2 drop-shadow-md">${s.icon}</div>
+                        <h4 class="font-black text-sm text-gray-800 dark:text-gray-200 mb-1">${s.name}</h4>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-4 leading-tight">${s.desc}</p>
+                        <div class="mt-auto w-full">
+                            ${btnHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeShopModal() {
+            const m = document.getElementById('shop-modal');
+            m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
+        }
+
+        window.buySkin = function(id, price) {
+            if (window.state.stats.points >= price) {
+                window.state.stats.points -= price;
+                window.state.stats.unlockedSkins.push(id);
+                window.state.stats.currentSkin = id;
+                saveProgress();
+                applySkin();
+                openShopModal();
+                updateGlobalUI();
+                showToast('🎉', 'Скин разблокирован!', 'bg-green-600', 'border-green-800');
+            } else {
+                showToast('⚠️', 'Не хватает баллов!', 'bg-red-600', 'border-red-800');
+            }
+        };
+
+        window.selectSkin = function(id) {
+            window.state.stats.currentSkin = id;
+            saveProgress();
+            applySkin();
+            openShopModal();
+        };
+
+        // --- ФУНКЦИИ УЧИТЕЛЯ И СТАТИСТИКИ КЛАССА ---
         function openTeacherModal() {
+            let tc = localStorage.getItem('teacher_class_code');
+            if(!tc) { tc = Math.floor(1000 + Math.random() * 9000).toString(); localStorage.setItem('teacher_class_code', tc); }
+            document.getElementById('teacher-class-code-input').value = tc;
+
             const modal = document.getElementById('teacher-modal');
             const listContainer = document.getElementById('teacher-facts-list');
             listContainer.innerHTML = '';
@@ -1463,22 +1735,20 @@
         }
 
         function switchTeacherTab(tab) {
+            const tabs = ['hw', 'stats', 'speedrun'];
+            tabs.forEach(t => {
+                document.getElementById(`teacher-tab-${t}`).classList.add('hidden');
+                document.getElementById(`teacher-tab-${t}`).classList.remove('flex');
+                document.getElementById(`tab-btn-${t}`).className = "flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide";
+            });
+
+            document.getElementById(`teacher-tab-${tab}`).classList.remove('hidden');
+            if(tab === 'hw') document.getElementById(`teacher-tab-${tab}`).classList.add('flex');
+            document.getElementById(`tab-btn-${tab}`).className = "flex-1 min-w-[120px] py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide";
+
             if (tab === 'hw') {
-                document.getElementById('teacher-tab-hw').classList.remove('hidden');
-                document.getElementById('teacher-tab-hw').classList.add('flex');
-                document.getElementById('teacher-tab-stats').classList.add('hidden');
-                
-                document.getElementById('tab-btn-hw').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide";
-                document.getElementById('tab-btn-stats').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide";
                 if(window.stopClassProgressSync) window.stopClassProgressSync();
             } else {
-                document.getElementById('teacher-tab-hw').classList.add('hidden');
-                document.getElementById('teacher-tab-hw').classList.remove('flex');
-                document.getElementById('teacher-tab-stats').classList.remove('hidden');
-                
-                document.getElementById('tab-btn-stats').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide";
-                document.getElementById('tab-btn-hw').className = "flex-1 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors uppercase tracking-wide";
-                
                 if (window.loadClassProgress) window.loadClassProgress();
             }
         }
@@ -1487,6 +1757,14 @@
             if(window.stopClassProgressSync) window.stopClassProgressSync();
             const m = document.getElementById('teacher-modal');
             m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
+        }
+
+        window.saveTeacherClassCode = function() {
+            const code = document.getElementById('teacher-class-code-input').value.trim();
+            if(code) {
+                localStorage.setItem('teacher_class_code', code);
+                if (window.loadClassProgress) window.loadClassProgress();
+            }
         }
 
         function toggleEraCheckbox(eraId) {
@@ -1518,7 +1796,7 @@
             const input = document.getElementById('teacher-generated-url');
             input.select();
             document.execCommand('copy');
-            alert("Ссылка скопирована в буфер обмена!");
+            showToast('📋', 'Ссылка скопирована!', 'bg-emerald-600', 'border-emerald-800');
         }
 
         function toggleMode(mode) {
@@ -1535,6 +1813,12 @@
                 document.getElementById('filter-period').disabled = false;
                 document.getElementById('btn-update').disabled = false;
                 clearInterval(window.state.timerInterval);
+                
+                document.getElementById('classic-task-area').classList.remove('hidden');
+                document.getElementById('classic-task-area').classList.add('flex', 'lg:flex-row');
+                document.getElementById('flashcard-area').classList.add('hidden');
+                document.getElementById('flashcard-area').classList.remove('flex');
+                
                 generateTable();
                 return;
             }
@@ -1542,43 +1826,207 @@
             window.state.currentMode = mode;
             window.state.stats.streak = 0; updateGlobalUI();
             
-            document.getElementById('filter-rows').value = "4";
-            document.getElementById('filter-rows').disabled = true;
-            document.getElementById('filter-period').value = "all";
-            document.getElementById('filter-period').disabled = true;
-            document.getElementById('btn-update').disabled = true;
-
             document.getElementById('timer-container').classList.add('hidden');
             document.getElementById('lives-container').classList.add('hidden');
+            clearInterval(window.state.timerInterval);
 
-            if(mode === 'survival') {
-                window.state.lives = 3; document.getElementById('lives-container').classList.remove('hidden'); updateLivesUI();
-            } else if(mode === 'speedrun') {
-                window.state.timeLeft = 180; document.getElementById('timer-container').classList.remove('hidden');
-                clearInterval(window.state.timerInterval);
-                window.state.timerInterval = setInterval(() => {
-                    window.state.timeLeft--;
-                    const min = Math.floor(window.state.timeLeft/60); const sec = window.state.timeLeft%60;
-                    document.getElementById('stat-timer').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-                    if(window.state.timeLeft <= 0) endGame();
-                }, 1000);
+            if (mode === 'flashcards') {
+                document.getElementById('filter-rows').disabled = true;
+                document.getElementById('filter-period').disabled = false;
+                document.getElementById('btn-update').disabled = true;
+
+                document.getElementById('classic-task-area').classList.add('hidden');
+                document.getElementById('classic-task-area').classList.remove('flex', 'lg:flex-row');
+                document.getElementById('flashcard-area').classList.remove('hidden');
+                document.getElementById('flashcard-area').classList.add('flex');
+                window.nextFlashcard();
+            } else {
+                document.getElementById('filter-rows').value = "4";
+                document.getElementById('filter-rows').disabled = true;
+                document.getElementById('filter-period').value = "all";
+                document.getElementById('filter-period').disabled = true;
+                document.getElementById('btn-update').disabled = true;
+
+                document.getElementById('classic-task-area').classList.remove('hidden');
+                document.getElementById('classic-task-area').classList.add('flex', 'lg:flex-row');
+                document.getElementById('flashcard-area').classList.add('hidden');
+                document.getElementById('flashcard-area').classList.remove('flex');
+
+                if(mode === 'survival') {
+                    window.state.lives = 3; document.getElementById('lives-container').classList.remove('hidden'); updateLivesUI();
+                } else if(mode === 'speedrun') {
+                    window.state.timeLeft = 180; document.getElementById('timer-container').classList.remove('hidden');
+                    window.state.timerInterval = setInterval(() => {
+                        window.state.timeLeft--;
+                        const min = Math.floor(window.state.timeLeft/60); const sec = window.state.timeLeft%60;
+                        document.getElementById('stat-timer').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                        if(window.state.timeLeft <= 0) endGame();
+                    }, 1000);
+                }
+                generateTable();
             }
-            generateTable();
         }
 
         function updateLivesUI() { 
             document.getElementById('stat-lives').innerText = '❤️'.repeat(window.state.lives) + '🖤'.repeat(3 - window.state.lives); 
         }
 
-        // --- УСТАНОВКА ИМЕНИ ПРОФИЛЯ ---
+        // --- ЛОГИКА ФЛЕШ-КАРТОЧЕК ---
+        window.nextFlashcard = function() {
+            const period = document.getElementById('filter-period').value;
+            let allowed = [];
+            if (period === 'all') allowed = [...bigData];
+            else if (period === 'upTo15') allowed = bigData.filter(d => getYearFromFact(d) <= 1500);
+            else if (period === 'upTo16') allowed = bigData.filter(d => getYearFromFact(d) <= 1600);
+            else if (period === 'upTo17') allowed = bigData.filter(d => getYearFromFact(d) <= 1700);
+            else if (period === 'upTo18') allowed = bigData.filter(d => getYearFromFact(d) <= 1800);
+            else if (period === 'upTo19') allowed = bigData.filter(d => getYearFromFact(d) <= 1900);
+            else allowed = bigData.filter(d => d.c === period);
+            
+            if (window.state.hideLearned) {
+                allowed = allowed.filter(f => {
+                    let fData = window.state.stats.factStreaks[f.event];
+                    let streakVal = fData ? (typeof fData === 'number' ? fData : fData.streak) : 0;
+                    return streakVal < 3;
+                });
+            }
+
+            if (allowed.length === 0) {
+                if (window.state.hideLearned) {
+                    showToast('🏆', 'В этой эпохе всё выучено!', 'bg-green-600', 'border-green-800');
+                    document.getElementById('toggle-hide-learned').checked = false;
+                    window.state.hideLearned = false;
+                    window.nextFlashcard();
+                    return;
+                } else {
+                    allowed = [...bigData];
+                }
+            }
+
+            const fact = allowed[Math.floor(Math.random() * allowed.length)];
+            
+            const fcArea = document.getElementById('flashcard-area');
+            fcArea.innerHTML = `
+                <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-8 min-h-[300px] flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 relative group" onclick="window.flipFlashcard(this)">
+                    <div class="absolute top-4 right-4 text-gray-300 dark:text-gray-600 group-hover:text-blue-400 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </div>
+                    <span class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Событие</span>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">${fact.event}</h2>
+                    <p class="text-xs font-bold text-blue-500 mt-8 opacity-70 animate-pulse uppercase tracking-wider">Коснись, чтобы перевернуть</p>
+                </div>
+            `;
+            window.state.currentFlashcardFact = fact;
+        };
+
+        window.flipFlashcard = function(card) {
+            if (card.classList.contains('flipped')) return;
+            card.classList.add('flipped');
+            haptic('medium');
+            
+            const fact = window.state.currentFlashcardFact;
+            
+            card.className = "w-full max-w-md bg-blue-50 dark:bg-slate-800/80 rounded-3xl shadow-xl p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-blue-900/50 transition-all duration-300 relative flipped";
+            card.onclick = null; 
+            
+            card.innerHTML = `
+                <span class="text-xs font-black text-blue-400 dark:text-blue-500 uppercase tracking-[0.2em] absolute top-4">Ответ</span>
+                <div class="flex flex-col gap-3 w-full mt-4">
+                    <div class="bg-white dark:bg-slate-700/50 p-5 rounded-2xl shadow-sm border border-blue-100 dark:border-slate-600">
+                        <span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Год</span>
+                        <span class="text-3xl font-black text-examBlue dark:text-blue-300">${fact.year}</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-700/50 p-5 rounded-2xl shadow-sm border border-green-100 dark:border-slate-600 flex flex-col items-center">
+                        <span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Место</span>
+                        <span class="text-xl font-bold text-green-700 dark:text-green-400">${fact.geo}</span>
+                        <button onclick="window.openMapModal('${fact.geo}')" class="mt-2 bg-blue-100 hover:bg-blue-200 dark:bg-slate-600 dark:hover:bg-slate-500 text-blue-700 dark:text-blue-300 text-[10px] font-bold py-1 px-3 rounded-lg flex items-center justify-center gap-1 transition-transform active:scale-95 shadow-sm border border-blue-200 dark:border-slate-500 w-auto">🗺️ Показать на карте</button>
+                    </div>
+                </div>
+                <div class="flex gap-3 w-full mt-6">
+                    <button onclick="window.answerFlashcard(false, event)" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:text-red-400 py-4 rounded-2xl font-black text-sm sm:text-base transition-transform active:scale-95 shadow-sm uppercase tracking-wide">❌ Забыл</button>
+                    <button onclick="window.answerFlashcard(true, event)" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-black text-sm sm:text-base transition-transform active:scale-95 shadow-md uppercase tracking-wide">✅ Помню</button>
+                </div>
+            `;
+        };
+
+        window.answerFlashcard = function(isCorrect, e) {
+            e.stopPropagation();
+            const fact = window.state.currentFlashcardFact;
+            
+            let factData = window.state.stats.factStreaks[fact.event];
+            if (typeof factData === 'number') factData = { streak: factData, lastUpdated: Date.now() };
+            if (!factData) factData = { streak: 0, lastUpdated: Date.now() };
+            
+            let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event);
+
+            if (isCorrect) {
+                haptic('success');
+                factData.streak += 1;
+                factData.lastUpdated = Date.now();
+                if(mIdx !== -1) {
+                    window.state.mistakesPool[mIdx].streak++;
+                    if(window.state.mistakesPool[mIdx].streak >= 2) window.state.mistakesPool.splice(mIdx, 1);
+                }
+                
+                window.state.stats.streak++;
+                window.state.stats.points++; // Начисляем баллы
+                
+                if (window.state.stats.streak % 5 === 0 && window.state.stats.streak > 0) {
+                    window.state.stats.points += 10;
+                    setTimeout(() => showToast('🎁', '+10 бонусных баллов!', 'bg-purple-600', 'border-purple-800'), 2500);
+                }
+
+                const praises = {
+                    3: {e: '👀', t: 'Три подряд! Рюрик одобряет.'},
+                    5: {e: '📜', t: 'Стрик 5! Прям Нестор Летописец!'},
+                    10: {e: '🔥', t: 'Десяточка! Историчка ставит 5 в журнал.'},
+                    15: {e: '🧠', t: 'Твой мозг захватит Константинополь!'},
+                    20: {e: '👑', t: 'Стрик 20! Петр I жмет тебе руку.'},
+                    30: {e: '🎓', t: '30! Бюджетное место уже выехало!'},
+                    42: {e: '👽', t: '42... Ты познал смысл истории.'},
+                    50: {e: '⏳', t: '50! Ты путешественник во времени?'}
+                };
+                if (praises[window.state.stats.streak]) {
+                    let p = praises[window.state.stats.streak];
+                    showToast(p.e, p.t, 'bg-yellow-500', 'border-yellow-700');
+                } else {
+                    showToast('🧠', 'Отлично!', 'bg-green-600', 'border-green-800');
+                }
+
+            } else {
+                haptic('error');
+                factData.streak = 0;
+                factData.lastUpdated = Date.now();
+                if (mIdx === -1) {
+                    window.state.mistakesPool.push({ fact: fact, streak: 0 });
+                } else {
+                    window.state.mistakesPool[mIdx].streak = 0;
+                }
+                window.state.stats.streak = 0;
+                showToast('🔄', 'Повторим позже', 'bg-orange-500', 'border-orange-700');
+            }
+            
+            window.state.stats.factStreaks[fact.event] = factData;
+            window.state.stats.totalSolvedEver += 1;
+            
+            saveProgress();
+            updateGlobalUI();
+            window.nextFlashcard();
+        };
+
+        // --- УСТАНОВКА ИМЕНИ И КЛАССА ПРОФИЛЯ ---
         function openProfileModal() {
             closeStatsModal();
             let manualName = localStorage.getItem('student_manual_name');
+            let classCode = localStorage.getItem('student_class_code');
+            
             if (manualName) {
                 document.getElementById('profile-name-input').value = manualName;
             } else if (window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) {
                 document.getElementById('profile-name-input').value = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
             }
+            if (classCode) document.getElementById('profile-class-code').value = classCode;
+
             setTimeout(() => {
                 const modal = document.getElementById('profile-modal');
                 modal.classList.remove('hidden'); modal.classList.add('flex');
@@ -1593,11 +2041,15 @@
 
         function saveProfileName() {
             const name = document.getElementById('profile-name-input').value.trim();
-            if(name) {
-                localStorage.setItem('student_manual_name', name);
-                if(window.syncProgressToCloud) window.syncProgressToCloud();
-                showToast('✅', 'Имя сохранено', 'bg-green-600', 'border-green-800');
+            const code = document.getElementById('profile-class-code').value.trim();
+            if(name) localStorage.setItem('student_manual_name', name);
+            if(code) {
+                localStorage.setItem('student_class_code', code);
+            } else {
+                localStorage.removeItem('student_class_code');
             }
+            if(window.syncProgressToCloud) window.syncProgressToCloud();
+            showToast('✅', 'Профиль обновлен', 'bg-green-600', 'border-green-800');
             closeProfileModal();
         }
 
@@ -1678,45 +2130,17 @@
             document.body.removeChild(ta);
         }
 
-        function openNameModal() {
-            closeStatsModal();
-            let manualName = localStorage.getItem('student_manual_name');
-            if (manualName) {
-                document.getElementById('student-name-input').value = manualName;
-            } else if (window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) {
-                document.getElementById('student-name-input').value = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
-            }
-            setTimeout(() => {
-                const modal = document.getElementById('name-modal');
-                modal.classList.remove('hidden'); modal.classList.add('flex');
-                setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            }, 300);
-        }
-
-        function closeNameModal() { 
-            const m = document.getElementById('name-modal');
-            m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); 
-        }
-
-        function printPDFReport() {
-            let manualName = localStorage.getItem('student_manual_name');
-            if (!manualName && (!window.tgApp || !window.tgApp.initDataUnsafe || !window.tgApp.initDataUnsafe.user)) {
-                openNameModal();
-            } else {
-                submitNameAndPrint();
-            }
-        }
-
-        function submitNameAndPrint() {
-            let name = document.getElementById('student-name-input').value.trim();
-            if(!name) name = localStorage.getItem('student_manual_name');
-            if(!name) name = 'Ученик';
-            
-            closeNameModal();
-            
+        // Универсальная функция генерации HTML для печати
+        function generatePDFFromData(name, statsObj, mistakesArray) {
             const container = document.getElementById('printable-report');
-            const timeMinutes = Math.floor((window.state.stats.totalTimeSpent || 0) / 60);
-            const learnedCount = Object.values(window.state.stats.factStreaks).filter(val => (typeof val === 'number' ? val : val.streak) >= 3).length;
+            const timeMinutes = Math.floor((statsObj.totalTimeSpent || 0) / 60);
+            
+            // Защита от старых структур
+            const safeFactStreaks = statsObj.factStreaks || {};
+            const learnedCount = Object.values(safeFactStreaks).filter(val => (typeof val === 'number' ? val : (val ? val.streak : 0)) >= 3).length;
+            const safeTotalSolved = statsObj.totalSolvedEver || 0;
+            const safeStreak = statsObj.streak || 0;
+            
             const today = new Date().toLocaleDateString('ru-RU');
             
             let html = `
@@ -1734,20 +2158,20 @@
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
                         <tr>
                             <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
-                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Время в тренажере</div>
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Время</div>
                                 <div style="font-size: 24px; font-weight: 900; color: #0f4c81; margin-top: 5px;">${timeMinutes} мин</div>
                             </td>
                             <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
                                 <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Решено заданий</div>
-                                <div style="font-size: 24px; font-weight: 900; color: #00a86b; margin-top: 5px;">${window.state.stats.totalSolvedEver}</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #00a86b; margin-top: 5px;">${safeTotalSolved}</div>
                             </td>
                             <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
-                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Твердо выучено</div>
-                                <div style="font-size: 24px; font-weight: 900; color: #8b5cf6; margin-top: 5px;">${learnedCount} ф.</div>
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Выучено фактов</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #8b5cf6; margin-top: 5px;">${learnedCount}</div>
                             </td>
                             <td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 25%;">
-                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Лучший стрик</div>
-                                <div style="font-size: 24px; font-weight: 900; color: #f59e0b; margin-top: 5px;">${window.state.stats.streak}</div>
+                                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Рекорд спидрана</div>
+                                <div style="font-size: 24px; font-weight: 900; color: #f59e0b; margin-top: 5px;">${statsObj.bestSpeedrunScore || 0}</div>
                             </td>
                         </tr>
                     </table>
@@ -1758,7 +2182,7 @@
             
             const eras = {'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'};
             Object.entries(eras).forEach(([key, eraName]) => {
-                const data = window.state.stats.eraStats[key] || { correct: 0, total: 0 };
+                const data = (statsObj.eraStats && statsObj.eraStats[key]) || { correct: 0, total: 0 };
                 const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
                 let barColor = percent >= 80 ? '#00a86b' : (percent >= 50 ? '#f59e0b' : '#b91d47');
                 
@@ -1776,7 +2200,7 @@
             });
             html += `</ul>`;
             
-            if (window.state.mistakesPool.length > 0) {
+            if (mistakesArray && mistakesArray.length > 0) {
                 html += `
                     <h3 style="font-size: 18px; color: #b91d47; border-bottom: 2px solid #fecdd3; padding-bottom: 8px; margin-bottom: 15px;">⚠️ Незакрытые ошибки (требуют повторения):</h3>
                     <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -1789,7 +2213,7 @@
                         </thead>
                         <tbody>
                 `;
-                window.state.mistakesPool.forEach(m => {
+                mistakesArray.forEach(m => {
                     html += `
                         <tr>
                             <td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.geo}</td>
@@ -1806,9 +2230,30 @@
             html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в ULTIMATE Тренажере ЕГЭ</div></div>`;
             
             container.innerHTML = html;
-            
             setTimeout(() => { window.print(); }, 500);
         }
+
+        // Скачать свой собственный отчет
+        function printPDFReportSelf() {
+            let name = localStorage.getItem('student_manual_name');
+            if(!name && window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) {
+                name = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
+            }
+            if(!name) name = 'Ученик (Имя не указано)';
+            closeStatsModal();
+            generatePDFFromData(name, window.state.stats, window.state.mistakesPool);
+        }
+
+        // Учитель скачивает отчет ученика
+        window.downloadStudentPDF = function(tgId) {
+            const st = window.loadedStudentsData.find(s => s.tgId === tgId);
+            if(st && st.fullStateJson) {
+                const state = JSON.parse(st.fullStateJson);
+                generatePDFFromData(st.name, state.stats, state.mistakesPool);
+            } else {
+                alert("Нет подробных данных для этого ученика.");
+            }
+        };
 
         function resetAllProgress() {
             if(confirm("Очистить всю статистику и выученные факты?")) {
@@ -1904,6 +2349,7 @@
                         
                         localStorage.setItem('ege_final_storage_v4', data.fullStateJson); 
                         document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
+                        applySkin(); // Применяем скин из облака
                         updateGlobalUI();
                     }
                 }
@@ -1918,8 +2364,8 @@
 
             let tgUser = window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user;
             let manualName = localStorage.getItem('student_manual_name');
+            let classCode = localStorage.getItem('student_class_code') || '';
             
-            // Логика имени: Приоритет ручному вводу -> Потом имя из ТГ -> Потом дефолт
             let studentName = manualName || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Ученик (Без имени)');
             let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
             let username = tgUser && tgUser.username ? '@' + tgUser.username : '';
@@ -1937,8 +2383,10 @@
                 name: studentName,
                 username: username,
                 tgId: studentId,
+                classCode: classCode,
                 totalSolved: s.totalSolvedEver || 0,
                 bestStreak: s.streak || 0,
+                bestSpeedrun: s.bestSpeedrunScore || 0,
                 timeSpent: s.totalTimeSpent || 0,
                 learnedCount: learnedCount,
                 mistakesCount: mistakesCount,
@@ -1959,25 +2407,34 @@
             }
 
             const collRef = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-gray-500 text-center mt-5">⏳ Загрузка данных класса...</p>';
+            document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-gray-500 text-center mt-5">⏳ Загрузка данных...</p>';
 
             if (unsubscribeTeacher) unsubscribeTeacher();
 
             unsubscribeTeacher = onSnapshot(collRef, (snapshot) => {
                 let students = [];
                 snapshot.forEach(doc => students.push(doc.data()));
+                window.loadedStudentsData = students;
 
-                students.sort((a, b) => b.totalSolved - a.totalSolved);
+                // --- 1. ОТРИСОВКА ВЛАДКИ "КЛАСС" ---
+                let filterClass = document.getElementById('teacher-filter-class').checked;
+                let teacherCode = document.getElementById('teacher-class-code-input').value.trim();
+                
+                let filteredStudents = students;
+                if (filterClass && teacherCode) {
+                    filteredStudents = students.filter(s => s.classCode === teacherCode);
+                }
+                filteredStudents.sort((a, b) => b.totalSolved - a.totalSolved);
 
                 let html = '';
-                students.forEach((st, idx) => {
+                filteredStudents.forEach((st, idx) => {
                     const activeDate = new Date(st.lastActive).toLocaleString('ru-RU', {day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit'});
                     const timeMin = Math.floor(st.timeSpent / 60);
                     const mistakes = st.mistakesCount || 0;
                     
                     html += `
-                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-lg mb-2 shadow-sm flex items-center justify-between">
-                            <div class="flex-grow overflow-hidden pr-2">
+                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-lg mb-2 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div class="flex-grow overflow-hidden pr-2 w-full">
                                 <div class="font-bold text-sm text-examBlue dark:text-blue-300 flex items-center gap-1.5 mb-1.5">
                                     ${idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '👤'))} 
                                     <span class="truncate">${st.name}</span>
@@ -1989,9 +2446,14 @@
                                     ${mistakes > 0 ? `<span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-800">⚠️ Ошибок: ${mistakes}</span>` : `<span class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Без ошибок</span>`}
                                     <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600">⏱ ${timeMin} мин</span>
                                 </div>
-                                <div class="text-[9px] text-gray-400 mt-2 uppercase tracking-wider">Был(а): ${activeDate}</div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <div class="text-[9px] text-gray-400 uppercase tracking-wider">Был(а): ${activeDate}</div>
+                                    <button onclick="window.downloadStudentPDF('${st.tgId}')" class="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 dark:text-indigo-300 px-2 py-1 rounded border border-indigo-200 dark:border-indigo-800 transition-colors flex items-center gap-1 shadow-sm">
+                                        📄 Отчет PDF
+                                    </button>
+                                </div>
                             </div>
-                            <div class="text-center bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 shrink-0 min-w-[65px]">
+                            <div class="text-center bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 shrink-0 min-w-[70px] self-end sm:self-auto">
                                 <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-0.5">Стрик</div>
                                 <div class="text-2xl font-black text-orange-500 leading-none">${st.bestStreak}</div>
                             </div>
@@ -1999,11 +2461,42 @@
                     `;
                 });
 
-                if (students.length === 0) {
-                    html = '<p class="text-sm text-gray-500 text-center py-4">Ваши ученики еще не начали тренировку.</p>';
+                if (filteredStudents.length === 0) {
+                    html = filterClass 
+                        ? '<p class="text-sm text-gray-500 text-center py-4">В вашем классе пока никого нет. Дайте ученикам ваш код!</p>'
+                        : '<p class="text-sm text-gray-500 text-center py-4">Здесь пока никого нет.</p>';
                 }
-
                 document.getElementById('teacher-class-stats').innerHTML = html;
+
+                // --- 2. ОТРИСОВКА ВЛАДКИ "ТОП СПИДРАНА" ---
+                let speedrunHtml = '';
+                let speedrunStudents = students.filter(s => (s.bestSpeedrun || 0) > 0);
+                speedrunStudents.sort((a, b) => b.bestSpeedrun - a.bestSpeedrun);
+                
+                speedrunStudents.slice(0, 50).forEach((st, idx) => {
+                    let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🔥'));
+                    speedrunHtml += `
+                        <div class="bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/20 dark:to-slate-800 border border-purple-100 dark:border-purple-800/50 p-3 rounded-lg mb-2 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="text-2xl w-8 text-center">${medal}</div>
+                                <div>
+                                    <div class="font-bold text-sm text-gray-800 dark:text-gray-200">${st.name} <span class="text-[10px] text-gray-400 font-normal">${st.username}</span></div>
+                                    <div class="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase tracking-wider mt-0.5">Ранг: ${idx + 1}</div>
+                                </div>
+                            </div>
+                            <div class="text-center bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md shrink-0">
+                                <div class="text-[8px] text-purple-200 uppercase font-bold tracking-widest mb-0.5">Рекорд</div>
+                                <div class="text-xl font-black leading-none">${st.bestSpeedrun}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (speedrunStudents.length === 0) {
+                    speedrunHtml = '<p class="text-sm text-gray-500 text-center py-4">Пока никто не играл в Спидран. Будьте первым!</p>';
+                }
+                document.getElementById('speedrun-class-stats').innerHTML = speedrunHtml;
+
             }, (error) => {
                 console.error("Sync error:", error);
                 document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-red-500 text-center mt-5">Ошибка загрузки данных.</p>';
