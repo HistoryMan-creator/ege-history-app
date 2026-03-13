@@ -159,49 +159,75 @@
 <body class="bg-examBg dark:bg-[#181a1b] text-ink dark:text-slate-200 font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header id="main-header" class="bg-examBlue dark:bg-[#121415] text-white shadow-md border-b-2 sm:border-b-4 border-examRed sticky top-0 z-50 no-print transition-transform transition-colors duration-400">
-        <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex flex-row justify-between items-center gap-2">
-            <div class="flex items-center gap-3">
-                <span class="text-xl sm:text-3xl cursor-pointer select-none transition-transform active:scale-90" onclick="handleSecretTeacherClick()">🏛️</span>
-                <div class="text-left">
-                    <h1 class="text-sm sm:text-xl font-bold tracking-tight leading-tight">Тренажер ЕГЭ</h1>
-                    <p class="text-blue-200 dark:text-slate-400 text-[9px] sm:text-[11px]">PRO | Подготовка к истории</p>
+    <header id="main-header" class="bg-examBlue dark:bg-[#121415] text-white shadow-md border-b-2 sm:border-b-4 border-examRed sticky top-0 z-50 no-print transition-colors duration-400">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
+            <!-- Верхняя строка на мобильных (Лого + Кнопки) -->
+            <div class="flex justify-between items-center w-full sm:w-auto">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <span class="text-xl sm:text-3xl cursor-pointer select-none transition-transform active:scale-90" onclick="handleSecretTeacherClick()">🏛️</span>
+                    <div class="text-left">
+                        <h1 class="text-sm sm:text-xl font-bold tracking-tight leading-tight">Тренажер ЕГЭ</h1>
+                        <p class="text-blue-200 dark:text-slate-400 text-[9px] sm:text-[11px]">PRO | Подготовка к истории</p>
+                    </div>
+                </div>
+                <!-- Кнопки управления (только для мобильных в этой строке) -->
+                <div class="flex sm:hidden items-center gap-1">
+                    <button onclick="toggleFocusMode()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs" title="Режим фокуса (Дзен)">🧘</button>
+                    <button onclick="openTeacherModal()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs" title="Кабинет учителя">👨‍🏫</button>
+                    <button onclick="toggleTheme()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs" title="Сменить тему">🌙</button>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div class="flex gap-3 bg-white/10 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-white/20 items-center text-center cursor-pointer" onclick="openStatsModal()">
+            <!-- Статистика и кнопки для ПК -->
+            <div class="flex items-center gap-2 sm:gap-4 justify-between sm:justify-end w-full sm:w-auto">
+                <!-- Контейнер статистики -->
+                <div class="flex gap-2 sm:gap-3 bg-white/10 dark:bg-white/5 px-2 sm:px-3 py-1.5 rounded-lg border border-white/20 items-center text-center cursor-pointer flex-grow justify-around sm:justify-start" onclick="openStatsModal()">
                     <div>
-                        <p class="text-[8px] sm:text-[10px] text-yellow-200 uppercase font-bold">Стрик</p>
-                        <p class="text-sm sm:text-xl font-black text-yellow-300 leading-none" id="stat-streak">0</p>
+                        <p class="text-[7px] sm:text-[10px] text-yellow-200 uppercase font-bold">Стрик</p>
+                        <p class="text-xs sm:text-xl font-black text-yellow-300 leading-none" id="stat-streak">0</p>
                     </div>
-                    <div class="w-px h-6 bg-white/30"></div>
+                    <div class="w-px h-5 sm:h-6 bg-white/30"></div>
                     <div>
-                        <p class="text-[8px] sm:text-[10px] text-emerald-200 uppercase font-bold">Решено</p>
-                        <p class="text-sm sm:text-xl font-black text-emerald-300 leading-none" id="stat-solved">0</p>
+                        <p class="text-[7px] sm:text-[10px] text-emerald-200 uppercase font-bold">Решено</p>
+                        <p class="text-xs sm:text-xl font-black text-emerald-300 leading-none" id="stat-solved">0</p>
                     </div>
-                    <div class="w-px h-6 bg-white/30"></div>
+                    <div class="w-px h-5 sm:h-6 bg-white/30"></div>
                     <div>
-                        <p class="text-[8px] sm:text-[10px] text-purple-200 uppercase font-bold" title="Баллы для магазина">Баллы 🪙</p>
-                        <p class="text-sm sm:text-xl font-black text-purple-300 leading-none flex items-center justify-center gap-0.5"><span id="stat-points">0</span></p>
+                        <p class="text-[7px] sm:text-[10px] text-purple-200 uppercase font-bold" title="Баллы для магазина">Баллы</p>
+                        <p class="text-xs sm:text-xl font-black text-purple-300 leading-none flex items-center justify-center gap-0.5"><span id="stat-points">0</span></p>
                     </div>
-                    <div class="w-px h-6 bg-white/30"></div>
+                    <div class="w-px h-5 sm:h-6 bg-white/30"></div>
                     <div>
-                        <p class="text-[8px] sm:text-[10px] text-pink-200 uppercase font-bold" title="Тонус памяти (доля не забытых фактов)">Память</p>
-                        <p class="text-sm sm:text-xl font-black text-pink-300 leading-none flex items-center gap-0.5"><span id="stat-memory">100%</span></p>
+                        <p class="text-[7px] sm:text-[10px] text-pink-200 uppercase font-bold" title="Тонус памяти (доля не забытых фактов)">Память</p>
+                        <p class="text-xs sm:text-xl font-black text-pink-300 leading-none flex items-center gap-0.5"><span id="stat-memory">100%</span></p>
                     </div>
-                    <div id="timer-container" class="hidden pl-3 border-l border-white/30">
-                        <p class="text-[8px] sm:text-[10px] text-rose-300 uppercase font-bold">Спидран</p>
-                        <p class="text-sm sm:text-xl font-black text-rose-400 leading-none" id="stat-timer">03:00</p>
+                    <div id="timer-container" class="hidden pl-2 sm:pl-3 border-l border-white/30">
+                        <p class="text-[7px] sm:text-[10px] text-rose-300 uppercase font-bold">Спидран</p>
+                        <p class="text-xs sm:text-xl font-black text-rose-400 leading-none" id="stat-timer">03:00</p>
                     </div>
                 </div>
 
-                <button onclick="toggleFocusMode()" id="focus-toggle" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Режим фокуса (Дзен)">🧘</button>
-                <button onclick="openTeacherModal()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Кабинет учителя">👨‍🏫</button>
-                <button onclick="toggleTheme()" id="theme-toggle" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Сменить тему">🌙</button>
+                <!-- Кнопки управления (ПК) -->
+                <div class="hidden sm:flex items-center gap-2">
+                    <button onclick="toggleFocusMode()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Режим фокуса (Дзен)">🧘</button>
+                    <button onclick="openTeacherModal()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Кабинет учителя">👨‍🏫</button>
+                    <button onclick="toggleTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Сменить тему">🌙</button>
+                </div>
             </div>
         </div>
     </header>
+
+    <!-- Zen Bar (Минималистичная плашка) -->
+    <div id="zen-bar" class="hidden fixed top-0 left-0 w-full bg-examBlue dark:bg-[#121415] text-white px-4 py-2 justify-between items-center shadow-md border-b-2 sm:border-b-4 border-examRed z-50 transition-colors duration-400">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">🧘</span>
+            <div class="text-xs sm:text-sm font-bold text-blue-200 uppercase tracking-wider hidden sm:block">Дзен-режим</div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-[11px] sm:text-sm font-black text-emerald-300 uppercase tracking-wider">Решено: <span id="zen-stat-solved" class="text-sm sm:text-lg text-white">0</span></div>
+            <button onclick="toggleFocusMode()" class="text-[10px] sm:text-xs bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider transition-colors">Выйти</button>
+        </div>
+    </div>
 
     <div id="joke-toast" class="no-print fixed top-16 right-0 transform translate-x-full transition-transform duration-300 z-[9999]">
         <div id="toast-content" class="text-slate-50 font-bold text-xs sm:text-sm px-4 py-2 rounded-l-lg shadow-lg flex items-center gap-2 border-y-2 border-l-2"></div>
@@ -461,15 +487,17 @@
              </div>
 
              <div class="flex-grow p-3 sm:p-4 overflow-y-auto custom-scroll hidden bg-gray-50 dark:bg-[#181a1b] relative" id="teacher-tab-stats">
-                 <div class="bg-white dark:bg-[#242729] border border-gray-200 dark:border-[#2a2e30] rounded-lg p-3 mb-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3">
-                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
-                        <span class="text-xs font-bold text-gray-600 dark:text-gray-300">Код класса:</span>
-                        <input type="text" id="teacher-class-code-input" class="w-24 text-center font-mono font-black text-examBlue dark:text-blue-300 text-sm p-1.5 border border-gray-300 rounded dark:bg-[#2a2e30] dark:border-[#2a2e30] outline-none focus:ring-2 focus:ring-blue-500" onchange="saveTeacherClassCode()">
+                 <div class="bg-white dark:bg-[#242729] border border-gray-200 dark:border-[#2a2e30] rounded-lg p-3 mb-4 flex flex-col shadow-sm gap-3">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
+                            <span class="text-xs font-bold text-gray-600 dark:text-gray-300">Код класса:</span>
+                            <input type="text" id="teacher-class-code-input" class="w-24 text-center font-mono font-black text-examBlue dark:text-blue-300 text-sm p-1.5 border border-gray-300 rounded dark:bg-[#2a2e30] dark:border-[#2a2e30] outline-none focus:ring-2 focus:ring-blue-500" onchange="saveTeacherClassCode()">
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800 w-full sm:w-auto justify-center">
+                            <input type="checkbox" id="teacher-filter-class" onchange="window.loadClassProgress()" class="w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">Только мой класс</span>
+                        </label>
                     </div>
-                    <label class="flex items-center gap-2 cursor-pointer bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800 w-full sm:w-auto justify-center">
-                        <input type="checkbox" id="teacher-filter-class" onchange="window.loadClassProgress()" class="w-4 h-4 text-examBlue bg-white border-gray-300 rounded focus:ring-examBlue">
-                        <span class="text-[11px] sm:text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">Только мой класс</span>
-                    </label>
                  </div>
                  <div id="teacher-class-stats" class="flex flex-col gap-3"></div>
              </div>
@@ -833,8 +861,8 @@
             { c: '20th',  year: "1993 г.",  geo: "Москва",                    event: "Принятие Конституции Российской Федерации" },
             { c: '20th',  year: "2001 г.",  geo: "Шанхай",                    event: "Учреждение Шанхайской организации сотрудничества (ШОС)" },
             { c: '20th',  year: "2014 г.",  geo: "Сочи",                      event: "Проведение XXII зимних Олимпийских игр" },
-            { c: '20th',  year: "2014 г.",  geo: "Москва",                    event: "Подписание договора о принятии Республики Крым в состав РФ" },            
-            { c: '20th',  year: "2018 г.",  geo: "Керченский пролив",         event: "Открытие автомобильного сообщения по новому мосту" },
+            { c: '20th',  year: "2014 г.",  geo: "Москва",                    event: "Подписание договора о принятии Республики Крым в состав РФ" },                        
+            { c: '20th',  year: "2018 г.",  geo: "Керченский пролив",         event: "Открытие автомобильного сообщения по новом мосту" },
             { c: '20th',  year: "2022 г.",  geo: "Донбасс",                   event: "Начало Специальной военной операции (СВО)" },
             { c: '20th',  year: "2022 г.",  geo: "Москва",                    event: "Подписание договоров о вхождении ДНР, ЛНР, Запорожской и Херсонской областей в РФ" }
         ];
@@ -843,7 +871,6 @@
             // --- Древность и Удельная Русь (до XV в.) ---
             { year: "862",  person: "Рюрик",                              event: "Призвание варягов на Русь" },
             { year: "882",  person: "Олег Вещий",                         event: "Объединение Киева и Новгорода" },
-            { year: "946",  person: "княгиня Ольга",                      event: "Налоговая реформа (уроки и погосты)" },
             { year: "965",  person: "Святослав Игоревич",                 event: "Разгром Хазарского каганата" },
             { year: "988",  person: "Владимир Святославич",               event: "Крещение Руси" },
             { year: "1016", person: "Ярослав Мудрый",                     event: "Составление Русской Правды" },
@@ -1408,6 +1435,8 @@
             document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
             document.getElementById('filter-task').value = window.state.currentTask;
             
+            DOM.zenSolved = document.getElementById('zen-stat-solved'); // Привязываем новый элемент
+
             setTimeout(() => document.querySelectorAll('.modal-content-hidden').forEach(el => el.classList.remove('modal-content-hidden')), 500);
 
             updateGlobalUI(); checkURLForHomework();
@@ -1417,20 +1446,8 @@
                 const today = getTodayString();
                 if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 };
                 window.state.stats.dailyStats[today].timeSpent++;
-                if (window.state.stats.totalTimeSpent % 15 === 0 && !window.state.isHomeworkMode) saveProgress();
+                if (window.state.stats.totalTimeSpent % 5 === 0 && !window.state.isHomeworkMode) saveProgress();
             }, 1000);
-
-            // Обработчик авто-скрытия шапки для режима фокуса
-            let lastScrollY = window.scrollY;
-            window.addEventListener('scroll', () => {
-                const header = document.getElementById('main-header');
-                if (window.state.focusMode && window.scrollY > 50 && window.scrollY > lastScrollY) {
-                    header.style.transform = 'translateY(-100%)';
-                } else {
-                    header.style.transform = 'translateY(0)';
-                }
-                lastScrollY = window.scrollY;
-            });
         }
 
         function applySkin() { document.body.className = document.body.className.replace(/skin-\w+/g, ''); if (window.state.stats.currentSkin !== 'classic') document.body.classList.add('skin-' + window.state.stats.currentSkin); }
@@ -1459,15 +1476,20 @@
         function toggleFocusMode() {
             window.state.focusMode = !window.state.focusMode;
             const controls = document.getElementById('controls-area');
-            const toggleBtn = document.getElementById('focus-toggle');
+            const header = document.getElementById('main-header');
+            const zenBar = document.getElementById('zen-bar');
             
             if (window.state.focusMode) {
                 controls.classList.add('hidden');
-                toggleBtn.classList.add('bg-blue-500');
+                header.classList.add('hidden');
+                zenBar.classList.remove('hidden');
+                zenBar.classList.add('flex');
                 showToast('🧘', 'Режим фокуса (Дзен)', 'bg-teal-500', 'border-teal-700');
             } else {
                 controls.classList.remove('hidden');
-                toggleBtn.classList.remove('bg-blue-500');
+                header.classList.remove('hidden');
+                zenBar.classList.add('hidden');
+                zenBar.classList.remove('flex');
             }
         }
 
@@ -1848,6 +1870,7 @@
         function updateGlobalUI() {
             updateText(DOM.streak, window.state.stats.streak);
             updateText(DOM.solved, window.state.stats.totalSolvedEver);
+            updateText(DOM.zenSolved, window.state.stats.totalSolvedEver);
             updateText(DOM.points, window.state.stats.points);
             updateText(DOM.modalSolved, window.state.stats.totalSolvedEver);
             updateText(DOM.modalMistakes, window.state.mistakesPool.length);
@@ -2297,7 +2320,7 @@
             try {
                 const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
                 const { getAuth, signInAnonymously, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
-                const { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                const { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, deleteDoc, getDocs } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
 
                 let fbUser = null, unsubscribeTeacher = null;
                 const appId = "ege-history-bot";
@@ -2313,14 +2336,28 @@
                 const app = initializeApp(firebaseConfig);
                 const auth = getAuth(app);
                 const db = getFirestore(app);
+
+                function getStableStudentId(fbUser) {
+                    let tgUser = window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user;
+                    if (tgUser && tgUser.id) {
+                        localStorage.setItem('stable_student_id', String(tgUser.id));
+                        return String(tgUser.id);
+                    }
+                    let savedId = localStorage.getItem('stable_student_id');
+                    if (savedId) {
+                        return savedId;
+                    }
+                    let fbId = fbUser ? fbUser.uid : 'unknown_' + Date.now();
+                    localStorage.setItem('stable_student_id', fbId);
+                    return fbId;
+                }
                 
                 signInAnonymously(auth).catch(e => console.error(e));
                 onAuthStateChanged(auth, async (user) => { fbUser = user; if (user) { await window.loadProgressFromCloud(); window.syncProgressToCloud(); } });
 
                 window.loadProgressFromCloud = async function() {
                     if (!fbUser || !db) return;
-                    let tgUser = window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user;
-                    let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
+                    let studentId = getStableStudentId(fbUser);
                     try {
                         const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId));
                         if (docSnap.exists()) {
@@ -2352,7 +2389,7 @@
                     if (!fbUser || !db) return;
                     const s = window.state.stats; if (!s) return;
                     let tgUser = window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user;
-                    let studentId = tgUser ? String(tgUser.id) : fbUser.uid;
+                    let studentId = getStableStudentId(fbUser);
                     try {
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId), {
                             name: localStorage.getItem('student_manual_name') || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : 'Ученик (Без имени)'), 
@@ -2387,10 +2424,54 @@
                     if (unsubscribeTeacher) unsubscribeTeacher();
 
                     unsubscribeTeacher = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snapshot) => {
-                        let students = []; snapshot.forEach(doc => students.push(doc.data())); window.loadedStudentsData = students;
+                        let students = [];
+                        let groups = {};
+                        
+                        snapshot.forEach(docSnap => {
+                            let data = docSnap.data();
+                            data._docId = docSnap.id; // Сохраняем ID документа для возможного удаления
+                            students.push(data);
+                            
+                            // Группируем по Telegram ID
+                            if (data.tgId && data.tgId.trim() !== '' && !data.tgId.startsWith('unknown_')) {
+                                if (!groups[data.tgId]) groups[data.tgId] = [];
+                                groups[data.tgId].push(data);
+                            }
+                        });
+
+                        // АВТО-ОЧИСТКА БАЗЫ ДАННЫХ В ФОНЕ (Удаляем старые пустышки, оставляем лучший аккаунт)
+                        for (const tgId in groups) {
+                            const docs = groups[tgId];
+                            if (docs.length > 1) {
+                                // Сортируем по убыванию прогресса (лучший будет нулевым)
+                                docs.sort((a, b) => (b.totalSolved || 0) - (a.totalSolved || 0));
+                                for (let i = 1; i < docs.length; i++) {
+                                    // Удаляем все кроме самого прокачанного (с индексом 0)
+                                    deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', docs[i]._docId)).catch(e => console.error(e));
+                                }
+                            }
+                        }
+
+                        // Локальная фильтрация дублей, чтобы они мгновенно исчезали из интерфейса учителя без мерцаний
+                        let uniqueStudentsMap = new Map();
+                        students.forEach(st => {
+                            if (st.tgId && st.tgId.trim() !== '' && !st.tgId.startsWith('unknown_')) {
+                                if (!uniqueStudentsMap.has(st.tgId)) uniqueStudentsMap.set(st.tgId, st);
+                                else {
+                                    let existing = uniqueStudentsMap.get(st.tgId);
+                                    if ((st.totalSolved || 0) > (existing.totalSolved || 0)) uniqueStudentsMap.set(st.tgId, st);
+                                }
+                            } else {
+                                uniqueStudentsMap.set(st._docId, st);
+                            }
+                        });
+                        
+                        let uniqueStudents = Array.from(uniqueStudentsMap.values());
+                        window.loadedStudentsData = uniqueStudents;
+                        
                         let filterClass = document.getElementById('teacher-filter-class').checked; let teacherCode = document.getElementById('teacher-class-code-input').value.trim();
                         
-                        let filtered = students.filter(s => (s.timeSpent || 0) >= 120);
+                        let filtered = uniqueStudents.filter(s => (s.timeSpent || 0) >= 120);
                         if (filterClass && teacherCode) filtered = filtered.filter(s => s.classCode === teacherCode);
                         filtered.sort((a, b) => b.totalSolved - a.totalSolved);
                         
@@ -2467,7 +2548,7 @@
                         });
                         document.getElementById('teacher-class-stats').innerHTML = filtered.length ? html : '<p class="text-sm text-gray-500 text-center py-4">Нет активных учеников.</p>';
 
-                        let speedrun = students.filter(s => s.bestSpeedrun > 0 && (s.timeSpent || 0) >= 120);
+                        let speedrun = uniqueStudents.filter(s => s.bestSpeedrun > 0 && (s.timeSpent || 0) >= 120);
                         if (filterClass && teacherCode) speedrun = speedrun.filter(s => s.classCode === teacherCode);
                         speedrun.sort((a, b) => b.bestSpeedrun - a.bestSpeedrun);
                         
