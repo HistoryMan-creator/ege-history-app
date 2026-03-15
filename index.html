@@ -64,8 +64,8 @@
         @media (min-width: 768px) { .dnd-chip { border-radius: 0.5rem; padding: 0.5rem 1rem; font-size: 0.9rem;} }
         
         .dnd-chip.selected { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
-        .dnd-chip.in-slot { border: none; box-shadow: none; background: transparent; padding: 0.15rem; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; transform: none;}
-        @media (min-width: 768px) { .dnd-chip.in-slot { font-size: 0.85rem; } }
+        .dnd-chip.in-slot { border: none; box-shadow: none; background: transparent; padding: 0.15rem; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 12px; transform: none;}
+        @media (min-width: 768px) { .dnd-chip.in-slot { font-size: 0.9rem; } }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -73,13 +73,210 @@
             75% { transform: translateX(4px); }
         }
 
-        @media print {
-            body * { visibility: hidden; }
-            #printable-report, #printable-report * { visibility: visible; }
-            #printable-report { display: block !important; position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px; font-family: sans-serif; }
-            .no-print { display: none !important; }
+        /* --- СТИЛИ ДЛЯ РЕЖИМА "СЛЕДОВАТЕЛЬ" --- */
+        body.mode-detective #table-container { 
+            background-color: #f3efe6 !important; 
+            border: none !important; 
+            font-family: 'Georgia', serif !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+            border-radius: 4px !important;
+        }
+        .dark body.mode-detective #table-container {
+            background-color: #dcd6c7 !important; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+        }
+        body.mode-detective #table-container, .dark body.mode-detective #table-container {
+            color: #2c241b !important;
+        }
+        body.mode-detective #classic-task-area tr { border-color: transparent !important; }
+        body.mode-detective #classic-task-area td { border: none !important; border-bottom: 1px dashed #d1c1a5 !important; }
+        
+        body.mode-detective .detective-slot {
+            background-color: rgba(239, 68, 68, 0.08) !important;
+            border: 2px dashed #ef4444 !important;
+            color: transparent !important;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px !important;
+            box-shadow: none !important;
+            display: inline-flex !important;
+            min-width: 180px;
+            height: 28px;
+            vertical-align: middle;
+            margin: 0 6px;
+        }
+        body.mode-detective .detective-slot::after {
+            content: 'ДАННЫЕ ЗАСЕКРЕЧЕНЫ';
+            position: absolute;
+            color: #ef4444;
+            font-family: 'Arial', sans-serif;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+        }
+        
+        body.mode-detective .detective-slot.has-item { 
+            background-color: transparent !important; 
+            min-width: auto; 
+            border: none !important; 
+            border-bottom: 2px solid #1d4ed8 !important; 
+            border-radius: 0 !important;
+            height: auto;
+        }
+        body.mode-detective .detective-slot.has-item::after { display: none; }
+        
+        body.mode-detective .detective-chip {
+            background: #facc15 !important;
+            border: 2px solid #ca8a04 !important;
+            font-family: 'Arial', sans-serif !important;
+            box-shadow: 2px 4px 0 rgba(202, 138, 4, 0.4) !important;
+            border-radius: 4px !important;
+            transform: rotate(-1deg);
+            color: #1c1917 !important;
+            font-weight: 900 !important;
+            text-transform: uppercase;
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.8rem !important;
+            transition: all 0.15s ease;
+        }
+        body.mode-detective .detective-chip:hover {
+            transform: translateY(-2px) rotate(0deg);
+            box-shadow: 2px 6px 0 rgba(202, 138, 4, 0.4) !important;
+        }
+        body.mode-detective .detective-chip.selected { 
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5) !important; 
+            transform: translateY(-2px) rotate(1deg); 
         }
 
+        body.mode-detective .detective-chip.in-slot {
+            transform: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: transparent !important;
+            color: #1d4ed8 !important; 
+            font-family: 'Courier New', Courier, monospace !important;
+            font-size: 15px !important;
+            font-weight: 900 !important;
+            padding: 0 0.2rem !important;
+            text-transform: none;
+        }
+
+        .detective-pool-panel {
+            background-color: #292524 !important;
+            border-color: #1c1917 !important;
+            color: #f5f5f4 !important;
+        }
+        .detective-pool-panel h3 { color: #facc15 !important; }
+        .detective-pool-panel .text-gray-500 { color: #a8a29e !important; }
+        .detective-pool-panel .bg-gray-100 { background-color: #44403c !important; color: #f5f5f4 !important;}
+
+        body.mode-detective .correct-slot { border-bottom-color: #10b981 !important; }
+        body.mode-detective .correct-slot .detective-chip.in-slot { color: #047857 !important; }
+        body.mode-detective .incorrect-slot { border-bottom-color: #ef4444 !important; }
+        body.mode-detective .incorrect-slot .detective-chip.in-slot { color: #b91c1c !important; }
+
+        /* --- СТИЛИ ДЛЯ РЕЖИМА "КРАСНЫЙ КАРАНДАШ" --- */
+        .paper-bg {
+            background-color: #f4ecd8;
+            color: #2c241b;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
+            background-image: radial-gradient(#d1c1a5 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0;
+            font-family: 'Georgia', serif;
+        }
+        .dark .paper-bg {
+            background-color: #2a2621;
+            color: #e5e0d8;
+            background-image: radial-gradient(#3d362d 1px, transparent 1px);
+        }
+        .paper-edges {
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 60px rgba(100, 70, 40, 0.15);
+            pointer-events: none;
+        }
+        .dark .paper-edges {
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        #rp-content {
+            user-select: none; /* Запрещаем выделение текста, чтобы удобно было тыкать */
+        }
+        .word-node, .plain-word {
+            display: inline-block; /* Необходимо для анимации тряски */
+            position: relative;
+            cursor: pointer; /* Делаем ВСЕ слова одинаково кликабельными, чтобы не было подсказок */
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        /* Убраны любые hover-эффекты и фоны. Слоты выглядят как обычный текст! */
+        
+        .word-node.crossed {
+            text-decoration: line-through;
+            text-decoration-color: #dc2626;
+            text-decoration-thickness: 3px;
+            color: #ef4444 !important;
+            cursor: default;
+        }
+        .correction-badge {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            font-size: 0.75rem;
+            background-color: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-family: 'Arial', sans-serif;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5);
+            z-index: 10;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 1px;
+        }
+        .word-node.show-correction .correction-badge {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-2px);
+        }
+        .rp-stamp {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 6px solid;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            display: inline-block;
+            opacity: 0;
+            animation: stampIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 5px;
+            pointer-events: none;
+            z-index: 1; /* На задний план под текст */
+        }
+        @media (min-width: 640px) { .rp-stamp { font-size: 5rem; border-width: 8px; } }
+        .dark .rp-stamp { mix-blend-mode: normal; }
+        .rp-stamp.approved { color: #16a34a; border-color: #16a34a; }
+        .rp-stamp.revealed { color: #f59e0b; border-color: #f59e0b; }
+        
+        @keyframes stampIn {
+            0% { opacity: 0; transform: translate(-50%, -50%) rotate(-25deg) scale(2); }
+            100% { opacity: 0.15; transform: translate(-50%, -50%) rotate(-10deg) scale(1); }
+        }
+        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+
+        /* --- СТИЛИ СКИНОВ --- */
         body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
         body.skin-beresta header { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; }
         body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-[#242729], body.skin-beresta .dark\:bg-[#181a1b], body.skin-beresta .dark\:bg-[#2a2e30] { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
@@ -228,7 +425,7 @@
         
         <div id="controls-area" class="bg-white dark:bg-[#242729] p-3 sm:p-5 rounded-xl shadow-sm border border-gray-300 dark:border-[#2a2e30] flex flex-col gap-3 transition-colors duration-400">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                <div>
+                <div id="filter-task-container">
                     <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Задание</label>
                     <select id="filter-task" onchange="handleTaskChange()" class="w-full bg-blue-50 dark:bg-[#2a2e30] border border-blue-400 dark:border-blue-500 text-blue-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
                         <option value="task4">📍 №4 (География)</option>
@@ -247,33 +444,56 @@
                         </optgroup>
                         <optgroup label="Изучение Эпох">
                             <option value="study">📖 Сюжетные карточки</option>
-                            <option value="timeline">⏳ Лента времени</option>
+                            <option value="detective">🕵️ Секретный архив</option>
+                            <option value="redpencil">🖍️ Красный карандаш</option>
                         </optgroup>
                     </select>
                 </div>
 
-                <div>
+                <div id="filter-period-container">
                     <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Период</label>
                     <select id="filter-period" onchange="handleSettingsChange()" class="w-full bg-gray-50 dark:bg-[#2a2e30] border border-gray-400 dark:border-gray-500 text-gray-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
                         <option value="all">🌍 Вся история</option>
-                        <option value="upTo15">🏹 До XV в.</option>
-                        <option value="upTo16">⚔️ До XVI в.</option>
-                        <option value="upTo17">🛡️ До XVII в.</option>
-                        <option value="upTo18">👑 До XVIII в.</option>
-                        <option value="upTo19">🚂 До XIX в.</option>
+                        <option value="custom">⚙️ Свой период</option>
+                        <option value="early">⚔️ Древность и Смута</option>
                         <option value="18th">👑 XVIII век</option>
                         <option value="19th">🚂 XIX век</option>
                         <option value="20th">🚀 XX век</option>
                     </select>
                 </div>
 
-                <div>
+                <div id="filter-rows-container">
                     <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Строк в таблице</label>
                     <select id="filter-rows" onchange="handleSettingsChange()" class="w-full bg-gray-50 dark:bg-[#2a2e30] border border-gray-400 dark:border-gray-500 text-gray-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
                         <option value="4" selected>4 строки (ЕГЭ)</option>
                         <option value="6">6 строк</option>
                         <option value="10">10 строк</option>
                     </select>
+                </div>
+
+                <div id="filter-case-container" class="hidden">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Материалы дела</label>
+                    <select id="filter-case" onchange="handleSettingsChange()" class="w-full bg-stone-100 dark:bg-[#2a2e30] border border-stone-400 dark:border-stone-500 text-stone-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm font-mono">
+                        <option value="rtw">⚔️ Русско-турецкие войны</option>
+                        <option value="sweden">🌊 Борьба за Балтику</option>
+                        <option value="smuta">👑 Смутное время</option>
+                        <option value="mongols">🐎 Ордынское иго</option>
+                        <option value="napoleon">🔥 Отечественная 1812 г.</option>
+                        <option value="palace">📜 Дворцовые перевороты</option>
+                        <option value="revolts">🔥 Бунташный век и Восстания</option>
+                        <option value="decembrists">❄️ Декабристы</option>
+                        <option value="ww1">💥 Первая мировая война</option>
+                        <option value="revolutions">🚩 Революции 1917 года</option>
+                        <option value="ww2">🎖️ Великая Отечественная война</option>
+                        <option value="coldwar">🌐 Холодная война</option>
+                    </select>
+                </div>
+
+                <div id="custom-period-container" class="hidden col-span-2 md:col-span-4 bg-stone-100 dark:bg-[#2a2e30] border border-stone-300 dark:border-stone-600 rounded-lg p-2 shadow-inner flex justify-center items-center gap-2">
+                    <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Года:</span>
+                    <input type="number" id="custom-year-start" value="862" class="w-16 sm:w-20 p-1 text-center font-bold text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-500 dark:bg-[#181a1b] dark:text-slate-200 outline-none" onchange="handleSettingsChange()">
+                    <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300">—</span>
+                    <input type="number" id="custom-year-end" value="2022" class="w-16 sm:w-20 p-1 text-center font-bold text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-500 dark:bg-[#181a1b] dark:text-slate-200 outline-none" onchange="handleSettingsChange()">
                 </div>
             </div>
             
@@ -294,8 +514,9 @@
         <div id="classic-task-area" class="flex flex-col lg:flex-row flex-grow relative gap-4 items-start w-full">
             <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-[#181a1b]/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
 
-            <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#242729] rounded-xl shadow-md border border-gray-300 dark:border-[#2a2e30] overflow-hidden transition-colors duration-400">
-                <div class="overflow-x-auto">
+            <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#242729] rounded-xl shadow-md border border-gray-300 dark:border-[#2a2e30] overflow-hidden transition-colors duration-400 relative">
+                <div id="detective-stamp" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 sm:border-8 border-red-600 text-red-600 font-black text-4xl sm:text-6xl uppercase tracking-widest px-4 py-2 transform -rotate-12 opacity-[0.07] dark:opacity-10 pointer-events-none z-0 font-mono text-center whitespace-nowrap" style="border-radius: 8px;">СОВЕРШЕННО<br>СЕКРЕТНО</div>
+                <div class="overflow-x-auto p-1 relative z-10">
                     <table class="w-full text-left border-collapse table-fixed">
                         <thead id="table-head" class="bg-gray-200 dark:bg-[#2a2e30] text-gray-800 dark:text-gray-100 transition-colors"></thead>
                         <tbody id="task-table-body"></tbody>
@@ -303,9 +524,9 @@
                 </div>
             </div>
 
-            <div class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400">
+            <div id="pool-panel" class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400">
                 <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
-                    <h3 class="font-black text-gray-800 dark:text-slate-200 flex items-center gap-1.5 text-xs sm:text-base">
+                    <h3 id="pool-title" class="font-black text-gray-800 dark:text-slate-200 flex items-center gap-1.5 text-xs sm:text-base">
                         <span>🧩</span> ВАРИАНТЫ
                     </h3>
                     <button id="pool-toggle-btn" class="lg:hidden text-gray-500 bg-gray-100 dark:bg-[#2a2e30] px-2 py-1 rounded text-[11px] font-bold">Свернуть</button>
@@ -315,10 +536,10 @@
                     <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 lg:gap-2 max-h-[45vh] sm:max-h-[50vh] lg:max-h-none overflow-y-auto custom-scroll pb-2"></div>
                     <div class="mt-4 pt-3 border-t border-gray-100 dark:border-[#2a2e30] flex flex-col gap-2">
                         <div id="check-buttons" class="flex gap-2 w-full">
-                            <button onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-xs sm:text-sm w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1">
+                            <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-xs sm:text-sm w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1">
                                 ✅ Уверен
                             </button>
-                            <button onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-[11px] sm:text-xs w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1 leading-tight">
+                            <button id="check-btn-doubt" onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-[11px] sm:text-xs w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1 leading-tight">
                                 🤔 Сомневаюсь
                             </button>
                         </div>
@@ -335,8 +556,27 @@
 
         <div id="flashcard-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative"></div>
 
-        <div id="timeline-area" class="hidden w-full max-w-4xl mx-auto flex-col gap-2 pb-8"></div>
         <div id="study-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative"></div>
+
+        <!-- ================= РЕЖИМ КРАСНЫЙ КАРАНДАШ ================= -->
+        <div id="redpencil-area" class="hidden flex-col flex-grow items-center w-full gap-4 relative">
+            <div class="flex items-center justify-between w-full max-w-4xl mb-2">
+                <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 truncate pr-4 uppercase tracking-widest" id="rp-title">Документ</h2>
+                <div class="text-xs sm:text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-900/30 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-rose-200 dark:border-rose-800/50 shadow-sm whitespace-nowrap" id="rp-counter">0 / 0</div>
+            </div>
+            
+            <div class="paper-bg relative w-full max-w-4xl rounded-xl shadow-lg p-6 sm:p-10 min-h-[50vh] flex flex-col border border-amber-200 dark:border-[#3d362d] overflow-hidden">
+                <div class="paper-edges rounded-xl"></div>
+                <div id="rp-content" class="relative z-10 flex-1 text-base sm:text-xl leading-relaxed sm:leading-[2.2] text-justify text-gray-900 dark:text-gray-100 font-serif"></div>
+                <div id="rp-stamp" class="rp-stamp hidden mt-8 self-center">ОДОБРЕНО</div>
+            </div>
+            
+            <div class="w-full max-w-4xl flex gap-3 mt-2 sm:mt-4 pb-10">
+                <button id="rp-giveup-btn" onclick="giveUpRedPencil()" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-black py-3 sm:py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-wider text-xs sm:text-sm">👀 Сдаюсь, покажите ошибки</button>
+                <button id="rp-next-btn" onclick="nextRedPencilCase()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 sm:py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-wider hidden text-xs sm:text-sm">➡️ Следующий документ</button>
+            </div>
+        </div>
+
     </main>
 
     <template id="flashcard-template-front">
@@ -358,17 +598,6 @@
             <button onclick="window.answerFlashcard(false, false, event)" class="flex-1 bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-wide border border-rose-200 dark:border-rose-800">❌ Забыл</button>
             <button onclick="window.answerFlashcard(true, false, event)" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-wide border border-indigo-200 dark:border-indigo-800">🤔 Сомневаюсь</button>
             <button onclick="window.answerFlashcard(true, true, event)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-50 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-md uppercase tracking-wide">✅ Помню</button>
-        </div>
-    </template>
-
-    <template id="timeline-node-template">
-        <div class="relative pl-6 sm:pl-8 py-3 sm:py-4 group tl-item">
-            <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-200 dark:bg-blue-900/50 tl-line"></div>
-            <div class="absolute left-[-5px] top-5 sm:top-6 w-3 h-3 bg-examBlue dark:bg-blue-500 rounded-full border-2 border-white dark:border-[#181a1b] shadow-sm transition-transform group-hover:scale-150 z-10"></div>
-            <div class="bg-white dark:bg-[#242729] p-4 rounded-xl shadow-sm border border-gray-200 dark:border-[#2a2e30] transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
-                <div class="text-xs font-bold text-blue-600 dark:text-blue-400 mb-1 tl-year-geo"></div>
-                <div class="text-sm sm:text-base font-bold text-gray-800 dark:text-slate-200 leading-relaxed tl-event"></div>
-            </div>
         </div>
     </template>
 
@@ -531,16 +760,15 @@
                 </div>
             </div>
             
-            <div class="flex gap-2 mb-2 shrink-0 pt-2 border-t border-gray-100 dark:border-[#2a2e30]">
-                <button onclick="printPDFReportSelf()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-slate-50 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📥 В PDF</button>
-                <button onclick="copyTextReport()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-50 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📋 Текст</button>
+            <div class="mb-2 shrink-0 pt-2 border-t border-gray-100 dark:border-[#2a2e30]">
+                <button onclick="copyTextReport()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-50 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-xs transition-colors shadow-md flex items-center justify-center gap-1">📋 Копировать текст отчета</button>
             </div>
             <button onclick="resetAllProgress()" class="shrink-0 text-[10px] text-rose-400 hover:text-rose-600 uppercase font-bold text-center py-2 transition-colors w-full mt-1">Сбросить всё</button>
         </div>
     </div>
 
     <div id="map-modal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
-        <div class="bg-white dark:bg-[#242729] rounded-xl w-[95%] h-[60vh] max-w-4xl flex flex-col overflow-hidden relative">
+        <div class="bg-white dark:bg-[#242729] rounded-xl w-[95%] h-[60vh] max-w-4 flex flex-col overflow-hidden relative">
             <div class="p-3 border-b border-gray-200 dark:border-[#2a2e30] flex justify-between items-center bg-gray-50 dark:bg-[#181a1b]">
                 <h2 class="text-xs font-bold text-gray-800 dark:text-slate-200" id="map-modal-title">Карта</h2>
                 <button onclick="closeMapModal()" class="text-xl text-gray-500 hover:text-gray-800 dark:hover:text-slate-200">&times;</button>
@@ -562,8 +790,6 @@
         </div>
     </div>
 
-    <div id="printable-report" class="hidden"></div>
-
     <script>
         function checkAchievements() {
             if (!window.state.stats.achievements) window.state.stats.achievements = [];
@@ -584,15 +810,15 @@
         function updateText(el, text) { if (el && el.innerText !== String(text)) el.innerText = text; }
 
         const precomputed = { task4: {}, task5: {} };
-        const periodsList = ['all', 'upTo15', 'upTo16', 'upTo17', 'upTo18', 'upTo19', '18th', '19th', '20th'];
+        const periodsList = ['all', 'early', '18th', '19th', '20th'];
         
         function initPrecomputed() {
+            if (typeof bigData === 'undefined' || typeof task5Data === 'undefined') {
+                console.error("ОШИБКА: База данных (data.js) не загрузилась!");
+                return;
+            }
             const filterData = (data, p) => {
                 if (p === 'all') return [...data];
-                if (p.startsWith('upTo')) {
-                    const maxC = parseInt(p.replace('upTo', '')) * 100;
-                    return data.filter(d => getYearFromFact(d) <= maxC);
-                }
                 return data.filter(d => d.c === p);
             };
             periodsList.forEach(p => { precomputed.task4[p] = filterData(bigData, p); precomputed.task5[p] = filterData(task5Data, p); });
@@ -754,6 +980,8 @@
                 window.state.stats.dailyStats[today].timeSpent++;
                 if (window.state.stats.totalTimeSpent % 5 === 0 && !window.state.isHomeworkMode) saveProgress();
             }, 1000);
+
+            if (window.generateTable) generateTable();
         }
 
         function applySkin() { 
@@ -768,6 +996,7 @@
                 themeBtns.forEach(b => b.style.display = '');
             }
         }
+
         function saveProgress() {
             localStorage.setItem('ege_final_storage_v4', JSON.stringify({
                 totalSolvedEver: window.state.stats.totalSolvedEver, flashcardsSolved: window.state.stats.flashcardsSolved, 
@@ -810,7 +1039,7 @@
             }
         }
 
-        function toggleHideLearned() { window.state.hideLearned = document.getElementById('toggle-hide-learned').checked; saveProgress(); if (window.state.currentMode === 'flashcards') window.nextFlashcard(); else generateTable(); }
+        function toggleHideLearned() { window.state.hideLearned = document.getElementById('toggle-hide-learned').checked; saveProgress(); handleSettingsChange(); }
 
         window.onChipClick = function(chip, e) {
             haptic('light'); const now = Date.now(); const timeSinceLastClick = now - (chip._lastClickTime || 0); chip._lastClickTime = now;
@@ -837,18 +1066,46 @@
         };
 
         window.handleTaskChange = function() { window.state.currentTask = document.getElementById('filter-task').value; document.getElementById('filter-rows').disabled = window.state.currentTask === 'task5'; if (window.state.currentMode === 'flashcards') window.nextFlashcard(); else generateTable(); };
-        window.handleModeChange = function() { const mode = document.getElementById('filter-mode').value; toggleMode(mode); };
+        
+        window.handleModeChange = function() { 
+            const mode = document.getElementById('filter-mode').value; 
+            toggleMode(mode); 
+        };
+        
         window.handleSettingsChange = function() { 
             const mode = window.state.currentMode;
-            if (mode === 'flashcards') window.nextFlashcard(); 
-            else if (mode === 'timeline') renderTimeline();
-            else if (mode === 'study') { window.state.studyIndex = 0; renderStudyCard(); }
-            else generateTable(); 
+            const isDetective = mode === 'detective';
+            const isSpeedrun = mode === 'speedrun';
+            const isRedPencil = mode === 'redpencil';
+            const periodVal = document.getElementById('filter-period').value;
+            
+            const customContainer = document.getElementById('custom-period-container');
+            if (customContainer) customContainer.classList.toggle('hidden', isDetective || isSpeedrun || periodVal !== 'custom');
+
+            if (mode === 'flashcards' && window.nextFlashcard) window.nextFlashcard(); 
+            else if (mode === 'study') { window.state.studyIndex = 0; if (window.renderStudyCard) renderStudyCard(); }
+            else if (mode === 'redpencil') { if (window.startRedPencilMode) startRedPencilMode(); }
+            else if (window.generateTable) generateTable(); 
         };
+
+        function getBasePool(period) {
+            let baseData = window.state.currentTask === 'task5' ? task5Data : bigData;
+            
+            if (period === 'custom') {
+                const startY = parseInt(document.getElementById('custom-year-start').value) || 0;
+                const endY = parseInt(document.getElementById('custom-year-end').value) || 3000;
+                
+                return baseData.filter(d => {
+                    const y = getYearFromFact(d);
+                    return y >= startY && y <= endY;
+                });
+            }
+            return precomputed[window.state.currentTask][period] || [];
+        }
 
         function getFilteredPool(period, limit = 0) {
             const now = Date.now();
-            let pool = [...precomputed[window.state.currentTask][period]];
+            let pool = getBasePool(period);
             
             if (window.state.currentMode === 'mistakes') {
                 let mistakes = window.state.mistakesPool.filter(m => m.task === window.state.currentTask).map(m => m.fact);
@@ -877,10 +1134,251 @@
             return pool;
         }
 
+        function toggleMode(mode) {
+            if (window.state.currentMode === mode) return; 
+            window.state.currentMode = mode; window.state.stats.streak = 0; updateGlobalUI();
+            
+            const timerContainer = document.getElementById('timer-container');
+            if(timerContainer) timerContainer.classList.add('hidden'); 
+            clearInterval(window.state.timerInterval);
+
+            const isFlashcards = mode === 'flashcards';
+            const isSpeedrun = mode === 'speedrun';
+            const isStudy = mode === 'study';
+            const isDetective = mode === 'detective';
+            const isRedPencil = mode === 'redpencil';
+            
+            document.getElementById('filter-task-container').classList.toggle('hidden', isDetective || isRedPencil);
+            document.getElementById('filter-period-container').classList.toggle('hidden', isDetective || isSpeedrun);
+            document.getElementById('filter-rows-container').classList.toggle('hidden', isDetective || isFlashcards || isSpeedrun || isStudy || isRedPencil);
+            document.getElementById('filter-case-container').classList.toggle('hidden', !isDetective);
+            
+            const periodVal = document.getElementById('filter-period').value;
+            const customContainer = document.getElementById('custom-period-container');
+            if (customContainer) customContainer.classList.toggle('hidden', isDetective || isSpeedrun || periodVal !== 'custom');
+            
+            document.body.classList.toggle('mode-detective', isDetective);
+
+            if (isSpeedrun) { 
+                document.getElementById('filter-rows').value = "4"; 
+                document.getElementById('filter-period').value = "all"; 
+            }
+
+            ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    if (id === 'classic-task-area') el.classList.remove('flex', 'lg:flex-row');
+                    if (id === 'flashcard-area' || id === 'study-area' || id === 'redpencil-area') el.classList.remove('flex');
+                }
+            });
+
+            if (isRedPencil) {
+                const rpa = document.getElementById('redpencil-area');
+                if (rpa) { rpa.classList.remove('hidden'); rpa.classList.add('flex'); }
+                if (window.startRedPencilMode) window.startRedPencilMode();
+            } else if (isFlashcards) {
+                const fa = document.getElementById('flashcard-area');
+                if (fa) { fa.classList.remove('hidden'); fa.classList.add('flex'); }
+                if (window.nextFlashcard) window.nextFlashcard();
+            } else if (isStudy) {
+                const sa = document.getElementById('study-area');
+                if (sa) { sa.classList.remove('hidden'); sa.classList.add('flex'); }
+                window.state.studyIndex = 0; 
+                if (window.renderStudyCard) window.renderStudyCard();
+            } else {
+                const ca = document.getElementById('classic-task-area');
+                if (ca) { ca.classList.remove('hidden'); ca.classList.add('flex', 'lg:flex-row'); }
+                if(isSpeedrun) {
+                    window.state.timeLeft = 180; 
+                    if(timerContainer) timerContainer.classList.remove('hidden');
+                    window.state.timerInterval = setInterval(() => {
+                        window.state.timeLeft--; const min = Math.floor(window.state.timeLeft/60); const sec = window.state.timeLeft%60;
+                        updateText(DOM.timer, `${min}:${sec < 10 ? '0' : ''}${sec}`);
+                        if(window.state.timeLeft <= 0) endGame();
+                    }, 1000);
+                }
+                if (window.generateTable) generateTable();
+            }
+        }
+
+        // --- ВОССТАНОВЛЕННЫЕ ФУНКЦИИ ФЛЕШ-КАРТОЧЕК ---
+        window.nextFlashcard = function() {
+            const period = document.getElementById('filter-period').value;
+            let allowed = getFilteredPool(period);
+            if (!allowed || allowed.length === 0) {
+                document.getElementById('flashcard-area').innerHTML = '<div class="text-center p-10 w-full"><h2 class="text-xl font-bold text-rose-500 bg-white dark:bg-[#242729] rounded-xl p-5 shadow">⚠️ В этом периоде нет событий!</h2></div>';
+                return;
+            }
+            
+            const fact = allowed[Math.floor(Math.random() * allowed.length)];
+            let fKey = factKey(fact); let d = window.state.stats.factStreaks[fKey];
+
+            const isTask5 = window.state.currentTask === 'task5';
+            const frontLabel = isTask5 ? 'Участник' : 'Событие';
+            const frontTitle = isTask5 ? fact.person : fact.event;
+
+            const tpl = document.getElementById('flashcard-template-front').content.cloneNode(true);
+            tpl.querySelector('.fc-level-badge').innerText = `Ур: ${d ? d.level || 0 : 0} | Балл: ${d ? (d.points||0).toFixed(1) : 0}/3`;
+            tpl.querySelector('.fc-label').innerText = frontLabel;
+            tpl.querySelector('.fc-title').innerText = frontTitle;
+            
+            const area = document.getElementById('flashcard-area');
+            area.innerHTML = '';
+            area.appendChild(tpl);
+            
+            window.state.currentFlashcardFact = fact;
+        };
+
+        window.flipFlashcard = function(card) {
+            if (card.classList.contains('flipped')) return; 
+            card.classList.add('flipped'); haptic('medium');
+            const fact = window.state.currentFlashcardFact; 
+            const isTask5 = window.state.currentTask === 'task5';
+            
+            card.className = "w-full max-w-md bg-blue-50 dark:bg-[#242729] rounded-3xl shadow-xl p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-[#2a2e30] transition-all duration-300 relative flipped"; 
+            card.onclick = null; 
+            
+            let mapLink = '';
+            if (!isTask5 && fact.geo && typeof geoDict !== 'undefined' && geoDict[fact.geo]) {
+                mapLink = `<span onclick="window.openMapModal('${fact.geo}')" class="mt-2 text-[12px] font-bold text-blue-600 underline decoration-dashed cursor-pointer">Показать на карте</span>`;
+            }
+
+            let cardContent = isTask5 
+                ? `<div class="bg-white dark:bg-[#2a2e30]/50 p-5 rounded-2xl shadow-sm border border-purple-100 dark:border-[#2a2e30] w-full text-center"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Событие</span><span class="text-lg sm:text-xl font-bold text-purple-700 dark:text-purple-400 leading-relaxed">${fact.event}</span></div>` 
+                : `<div class="bg-white dark:bg-[#2a2e30]/50 p-5 rounded-2xl shadow-sm border border-blue-100 dark:border-[#2a2e30] w-full mb-3"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Год</span><span class="text-3xl font-black text-examBlue dark:text-blue-300">${fact.year}</span></div><div class="bg-white dark:bg-[#2a2e30]/50 p-5 rounded-2xl shadow-sm border border-green-100 dark:border-[#2a2e30] flex flex-col items-center w-full"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Место</span><span class="text-xl font-bold text-emerald-700 dark:text-emerald-400 leading-relaxed">${fact.geo}</span>${mapLink}</div>`;
+            
+            const tpl = document.getElementById('flashcard-template-back').content.cloneNode(true);
+            tpl.querySelector('.fc-content').innerHTML = cardContent;
+            
+            card.innerHTML = '';
+            card.appendChild(tpl);
+        };
+
+        window.answerFlashcard = function(isCorrect, isSure, e) {
+            e.stopPropagation(); const fact = window.state.currentFlashcardFact; let fKey = factKey(fact); 
+            let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
+
+            if (isCorrect) { 
+                haptic('success'); 
+                let d = updateFactSRS(fKey, true, isSure);
+                if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1);
+                window.state.stats.streak++; 
+                if (d.level > 0) showToast('🧠', isSure ? 'Отлично! Уровень повышен' : 'Повторим завтра', 'bg-emerald-500', 'border-emerald-700');
+                else showToast(isSure ? '✅' : '🤔', isSure ? '+1.0 к прогрессу факта' : '+0.7 к прогрессу факта', isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700');
+            } else { 
+                haptic('error'); 
+                updateFactSRS(fKey, false, false);
+                if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); 
+                window.state.stats.streak = 0; showToast('🔄', 'Прогресс сброшен. Повторим!', 'bg-rose-500', 'border-rose-700'); 
+            }
+            
+            window.state.stats.flashcardsSolved = (window.state.stats.flashcardsSolved || 0) + 1; 
+            saveProgress(); updateGlobalUI(); checkAchievements(); window.nextFlashcard();
+        };
+
+        // --- ГЕНЕРАЦИЯ СЕКРЕТНОГО АРХИВА (СЛЕДОВАТЕЛЬ) ---
+        function generateDetectiveTable() {
+            window.state.tableHasMistake = false;
+            window.state.answersRevealed = false;
+            
+            document.getElementById('pool-title').innerHTML = `<span>🔎</span> УЛИКИ`;
+            document.getElementById('pool-panel').className = "w-full lg:w-1/3 flex flex-col sticky bottom-0 z-40 p-4 rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400 detective-pool-panel";
+
+            document.getElementById('check-buttons').classList.remove('hidden'); document.getElementById('check-buttons').classList.add('flex');
+            
+            document.getElementById('check-btn-sure').innerHTML = '✅ Вынести вердикт';
+            document.getElementById('check-btn-doubt').innerHTML = '🤔 Нужна экспертиза';
+            
+            document.getElementById('reveal-btn').className = "hidden text-orange-500 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline"; 
+            document.getElementById('reveal-btn').innerHTML = '👀 Запросить подсказку штаба';
+            document.getElementById('next-btn').classList.add('hidden');
+            
+            const stamp = document.getElementById('detective-stamp');
+            if (stamp) stamp.classList.remove('hidden');
+            
+            DOM.tbody.innerHTML = ''; DOM.pool.innerHTML = '';
+
+            if (typeof detectiveCases === 'undefined') {
+                document.getElementById('table-head').innerHTML = '';
+                DOM.tbody.innerHTML = `<tr><td class="text-center p-10 font-bold text-gray-500">Материалы дела загружаются или недоступны... Проверьте data.js</td></tr>`;
+                return;
+            }
+
+            const caseCategory = document.getElementById('filter-case').value;
+            const cases = detectiveCases[caseCategory];
+            
+            if(!cases || cases.length === 0) {
+                document.getElementById('table-head').innerHTML = '';
+                DOM.tbody.innerHTML = `<tr><td class="text-center p-10 font-bold text-gray-500">Материалы дела находятся в разработке...</td></tr>`;
+                return;
+            }
+
+            // Выбираем случайное дело из категории
+            const caseData = cases[Math.floor(Math.random() * cases.length)];
+            window.state.currentTargetData = caseData.items; 
+            
+            // Заголовок таблицы - это название дела
+            document.getElementById('table-head').innerHTML = `
+                <tr>
+                    <th class="p-4 sm:p-6 text-left relative bg-[#f3efe6] dark:bg-[#dcd6c7] rounded-t-lg">
+                        <div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1">Архив Главного Управления</div>
+                        <div class="text-2xl sm:text-3xl font-serif font-black text-[#3e352d] uppercase border-b-2 border-[#d1c1a5] pb-2">ДОСЬЕ №${Math.floor(Math.random()*900 + 100)}-${['К','А','М','С','Ж'][Math.floor(Math.random()*5)]}</div>
+                        <div class="text-sm font-bold text-[#3e352d] mt-3 flex items-center gap-2">
+                            <span class="text-xl">📁</span> ${caseData.title}
+                        </div>
+                    </th>
+                </tr>
+            `;
+
+            let missing = [];
+
+            const trFragment = document.createDocumentFragment();
+            caseData.items.forEach((item, idx) => {
+                const tr = document.createElement('tr'); 
+                tr.dataset.index = idx;
+
+                const td = document.createElement('td'); 
+                td.className = "p-4 sm:p-6 align-middle text-left leading-relaxed text-sm sm:text-base";
+                
+                missing.push(item.answer); 
+
+                // Заменяем маркер ### на слот, встроенный в текст
+                const textHtml = item.text.replace('###', `<div class="dnd-slot detective-slot" data-expected="${item.answer}" data-letter=""></div>`);
+                td.innerHTML = `<span class="font-bold mr-2 text-gray-500">${idx + 1}.</span> ${textHtml}`;
+                
+                tr.appendChild(td);
+                trFragment.appendChild(tr);
+            });
+            DOM.tbody.appendChild(trFragment);
+
+            // Пул: правильные + фейковые из файла data.js
+            let poolItems = [...missing, ...(caseData.fakes || [])]; 
+
+            const poolFragment = document.createDocumentFragment();
+            shuffleArray(poolItems).forEach(txt => { 
+                const chip = document.createElement('div'); 
+                chip.className = "dnd-chip detective-chip"; 
+                chip.innerText = txt; 
+                poolFragment.appendChild(chip); 
+            });
+            DOM.pool.appendChild(poolFragment);
+        }
+
         function generateTask5Table() {
             window.state.tableHasMistake = false;
             window.state.answersRevealed = false;
+            
+            document.getElementById('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`;
+            document.getElementById('pool-panel').className = "w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400";
+            
+            const stamp = document.getElementById('detective-stamp');
+            if (stamp) stamp.classList.add('hidden');
+            
             document.getElementById('check-buttons').classList.remove('hidden'); document.getElementById('check-buttons').classList.add('flex');
+            document.getElementById('check-btn-sure').innerHTML = '✅ Уверен';
+            document.getElementById('check-btn-doubt').innerHTML = '🤔 Сомневаюсь';
+            
             document.getElementById('reveal-btn').className = "hidden text-orange-500 dark:text-orange-400 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline"; document.getElementById('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы';
             document.getElementById('next-btn').classList.add('hidden');
             DOM.tbody.innerHTML = ''; DOM.pool.innerHTML = '';
@@ -889,7 +1387,12 @@
 
             const period = document.getElementById('filter-period').value;
             let allowed = getFilteredPool(period, 4);
-            if (!allowed) return; 
+            if (!allowed || allowed.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="2" class="p-10 text-center font-bold text-rose-500">⚠️ В выбранном периоде нет событий! Попробуйте расширить диапазон.</td>`;
+                DOM.tbody.appendChild(tr);
+                return;
+            }
 
             let target = []; let usedEvents = new Set(); let usedTargetPersons = new Set(); let svoCount = 0;
             
@@ -930,6 +1433,8 @@
             });
             DOM.tbody.appendChild(trFragment);
 
+            if (typeof task5Data === 'undefined') return;
+
             let poolItems = [...missing]; let attempts = 0; let allPersons = [...new Set(task5Data.map(d => d.person))];
             while(poolItems.length < 6 && attempts < 100) { let randPerson = allPersons[Math.floor(Math.random() * allPersons.length)]; if (!usedPersons.has(randPerson)) { poolItems.push(randPerson); usedPersons.add(randPerson); } attempts++; }
 
@@ -939,14 +1444,28 @@
         }
 
         function generateTable() {
+            if (window.state.currentMode === 'detective') return generateDetectiveTable();
             if (window.state.currentTask === 'task5') return generateTask5Table();
 
             window.state.tableHasMistake = false;
-            const period = document.getElementById('filter-period').value;
-            const rowsCount = parseInt(document.getElementById('filter-rows').value);
             window.state.answersRevealed = false;
+            
+            const period = document.getElementById('filter-period').value;
+            const rowsCount = parseInt(document.getElementById('filter-rows').value) || 4;
+            
+            document.getElementById('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`;
+            document.getElementById('pool-panel').className = "w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400";
+            
+            const stamp = document.getElementById('detective-stamp');
+            if (stamp) stamp.classList.add('hidden');
+            
             document.getElementById('check-buttons').classList.remove('hidden'); document.getElementById('check-buttons').classList.add('flex');
-            document.getElementById('reveal-btn').className = "hidden text-orange-500 dark:text-orange-400 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline"; document.getElementById('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы';
+            
+            document.getElementById('check-btn-sure').innerHTML = '✅ Уверен';
+            document.getElementById('check-btn-doubt').innerHTML = '🤔 Сомневаюсь';
+            
+            document.getElementById('reveal-btn').className = "hidden text-orange-500 dark:text-orange-400 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline"; 
+            document.getElementById('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы';
             document.getElementById('next-btn').classList.add('hidden');
             DOM.tbody.innerHTML = ''; DOM.pool.innerHTML = '';
 
@@ -957,7 +1476,12 @@
                 let count = Math.min(4, window.state.hwCurrentPool.length); window.state.hwCurrentPool.slice(0, count).forEach(i => target.push(bigData[i]));
             } else {
                 let allowed = getFilteredPool(period, rowsCount);
-                if (!allowed) return;
+                if (!allowed || allowed.length === 0) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td colspan="3" class="p-10 text-center font-bold text-rose-500">⚠️ В выбранном периоде нет событий! Попробуйте расширить диапазон.</td>`;
+                    DOM.tbody.appendChild(tr);
+                    return;
+                }
                 target = shuffleArray([...allowed]).slice(0, Math.min(rowsCount, allowed.length));
             }
             
@@ -989,7 +1513,7 @@
                     } else {
                         const style = key === 'year' ? "font-bold text-blue-800 dark:text-blue-300" : "text-gray-700 dark:text-slate-200";
                         let cellHtml = `<span class="text-[12px] sm:text-[14px] ${style} leading-relaxed block">${row[key]}</span>`;
-                        if (key === 'geo' && geoDict[row[key]]) cellHtml = `<span onclick="openMapModal('${row[key]}')" title="На карте" class="text-[12px] sm:text-[14px] font-bold text-blue-600 dark:text-blue-400 underline decoration-dashed decoration-blue-300 cursor-pointer leading-relaxed block transition-colors hover:text-blue-800">${row[key]}</span>`;
+                        if (key === 'geo' && typeof geoDict !== 'undefined' && geoDict[row[key]]) cellHtml = `<span onclick="openMapModal('${row[key]}')" title="На карте" class="text-[12px] sm:text-[14px] font-bold text-blue-600 dark:text-blue-400 underline decoration-dashed decoration-blue-300 cursor-pointer leading-relaxed block transition-colors hover:text-blue-800">${row[key]}</span>`;
                         td.innerHTML = cellHtml;
                     }
                     tr.appendChild(td);
@@ -998,11 +1522,13 @@
             });
             DOM.tbody.appendChild(trFragment);
 
+            if (typeof bigData === 'undefined') return;
+
             let poolItems = [...missing]; const plausibleFacts = bigData.filter(d => [...new Set(target.map(t => t.c))].includes(d.c));
             ['geo', 'event', 'year'].forEach(type => {
                 for(let i=0; i<requiredFakes[type]; i++) {
                     let found = false; let attempts = 0; let relevantHidden = hiddenRowsData.find(h => h.types.includes(type)); let trapVal = null;
-                    if (relevantHidden && Math.random() < 0.35) { let possibleTraps = trapDict[relevantHidden.row[type]]; if (possibleTraps && possibleTraps.length > 0) trapVal = possibleTraps[Math.floor(Math.random() * possibleTraps.length)]; }
+                    if (typeof trapDict !== 'undefined' && relevantHidden && Math.random() < 0.35) { let possibleTraps = trapDict[relevantHidden.row[type]]; if (possibleTraps && possibleTraps.length > 0) trapVal = possibleTraps[Math.floor(Math.random() * possibleTraps.length)]; }
                     if (trapVal && !poolItems.includes(trapVal)) { poolItems.push(trapVal); continue; }
                     while(!found && attempts < 50) { let randFact = plausibleFacts[Math.floor(Math.random()*plausibleFacts.length)]; let val = randFact[type]; if (!poolItems.includes(val)) { poolItems.push(val); found = true; } attempts++; }
                 }
@@ -1059,28 +1585,41 @@
                 if (!rowAllCorrect || rowFilledCount !== slots.length) allCorrect = false;
                 
                 if (!window.state.isHomeworkMode && rowFilledCount > 0 && !window.state.answersRevealed) {
-                    let fKey = factKey(fact); 
-                    let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
-                    
-                    if (!tr.dataset.scored) {
-                        if(!window.state.stats.eraStats[fact.c]) window.state.stats.eraStats[fact.c] = { correct: 0, total: 0 }; 
-                        window.state.stats.eraStats[fact.c].total++;
+                    if (window.state.currentMode !== 'detective') {
+                        let fKey = factKey(fact); 
+                        let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
+                        
+                        if (!tr.dataset.scored) {
+                            if(!window.state.stats.eraStats[fact.c]) window.state.stats.eraStats[fact.c] = { correct: 0, total: 0 }; 
+                            window.state.stats.eraStats[fact.c].total++;
 
-                        if (rowAllCorrect && rowFilledCount === slots.length) {
-                            window.state.stats.eraStats[fact.c].correct++;
-                            updateFactSRS(fKey, true, isSure);
+                            if (rowAllCorrect && rowFilledCount === slots.length) {
+                                window.state.stats.eraStats[fact.c].correct++;
+                                updateFactSRS(fKey, true, isSure);
+                                if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1);
+                                tr.dataset.scored = "correct";
+                                newlyCorrectRowsCount++; 
+                            } else {
+                                updateFactSRS(fKey, false, false);
+                                if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask });
+                                tr.dataset.scored = "incorrect"; 
+                            }
+                        } 
+                        else if (tr.dataset.scored === "incorrect" && rowAllCorrect && rowFilledCount === slots.length) {
+                            tr.dataset.scored = "fixed"; 
                             if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1);
-                            tr.dataset.scored = "correct";
-                            newlyCorrectRowsCount++; 
-                        } else {
-                            updateFactSRS(fKey, false, false);
-                            if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask });
-                            tr.dataset.scored = "incorrect"; 
                         }
-                    } 
-                    else if (tr.dataset.scored === "incorrect" && rowAllCorrect && rowFilledCount === slots.length) {
-                        tr.dataset.scored = "fixed"; 
-                        if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1);
+                    } else {
+                        if (!tr.dataset.scored) {
+                            if (rowAllCorrect && rowFilledCount === slots.length) {
+                                tr.dataset.scored = "correct";
+                                newlyCorrectRowsCount++;
+                            } else {
+                                tr.dataset.scored = "incorrect";
+                            }
+                        } else if (tr.dataset.scored === "incorrect" && rowAllCorrect && rowFilledCount === slots.length) {
+                            tr.dataset.scored = "fixed";
+                        }
                     }
                 }
             });
@@ -1088,7 +1627,7 @@
             let linesToReward = 0;
             let isPerfectHw = (!window.state.tableHasMistake && allCorrect);
 
-            if (window.state.currentTask === 'task5') {
+            if (window.state.currentTask === 'task5' || window.state.currentMode === 'detective') {
                 if (allCorrect && filled === total && !window.state.tableHasMistake && newlyCorrectRowsCount > 0) {
                     linesToReward = 2;
                 }
@@ -1120,6 +1659,8 @@
                     } else {
                         showToast('✅', 'Ошибки исправлены! (штраф времени)', 'bg-blue-500', 'border-blue-700');
                     }
+                } else if (window.state.currentMode === 'detective') {
+                    showToast('🕵️', 'Дело успешно закрыто!', 'bg-emerald-600', 'border-emerald-800');
                 } else { 
                     if (!window.state.tableHasMistake) {
                         showToast(isSure ? '✅' : '🤔', isSure ? 'Уверенно! (+1.0 к фактам)' : 'Засчитано! (+0.7 к фактам)', isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700'); 
@@ -1130,6 +1671,13 @@
                 
                 document.getElementById('check-buttons').classList.add('hidden'); document.getElementById('check-buttons').classList.remove('flex');
                 document.getElementById('reveal-btn').classList.add('hidden'); document.getElementById('next-btn').classList.remove('hidden');
+                
+                if(window.state.currentMode === 'detective') {
+                    document.getElementById('next-btn').innerHTML = '📂 Следующее дело';
+                } else {
+                    document.getElementById('next-btn').innerHTML = '➡️ Дальше';
+                }
+
                 if (window.state.isHomeworkMode) { window.state.hwCurrentPool.splice(0, rows.length); if (window.state.hwCurrentPool.length === 0) endGame(); } else saveProgress();
                 
                 checkAchievements(); 
@@ -1137,7 +1685,7 @@
                 haptic('error'); 
                 window.state.stats.streak = 0; 
                 window.state.tableHasMistake = true; 
-                showToast('❌', 'Ошибка! Прогресс сброшен.', 'bg-rose-500', 'border-rose-700'); 
+                showToast('❌', window.state.currentMode === 'detective' ? 'Улики не сходятся!' : 'Ошибка! Прогресс сброшен.', 'bg-rose-500', 'border-rose-700'); 
                 document.getElementById('reveal-btn').classList.remove('hidden'); 
             }
             updateGlobalUI();
@@ -1145,32 +1693,50 @@
 
         function toggleAnswers() {
             window.state.answersRevealed = !window.state.answersRevealed; const btn = document.getElementById('reveal-btn'); const rows = document.querySelectorAll('#task-table-body tr');
+            const isDetective = window.state.currentMode === 'detective';
+
             if (window.state.answersRevealed) {
                 window.state.tableHasMistake = true;
                 window.state.stats.streak = 0;
 
-                btn.innerHTML = '🙈 Скрыть ответы';
+                btn.innerHTML = isDetective ? '🙈 Скрыть улики' : '🙈 Скрыть ответы';
                 rows.forEach((tr, idx) => {
                     const fact = window.state.currentTargetData[idx]; 
                     
                     if (!window.state.isHomeworkMode && !tr.dataset.scored) {
                         tr.dataset.scored = "incorrect";
-                        updateFactSRS(factKey(fact), false, false);
-                        if (!window.state.mistakesPool.some(m => m.fact.event === fact.event && m.task === window.state.currentTask)) {
-                            window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask });
+                        if (window.state.currentMode !== 'detective') {
+                            updateFactSRS(factKey(fact), false, false);
+                            if (!window.state.mistakesPool.some(m => m.fact.event === fact.event && m.task === window.state.currentTask)) {
+                                window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask });
+                            }
                         }
                     }
 
                     const slots = tr.querySelectorAll('.dnd-slot');
-                    slots.forEach(slot => { if (!slot.classList.contains('correct-slot')) { slot._userChildren = Array.from(slot.childNodes); slot.innerHTML = `<div class="dnd-chip in-slot !bg-orange-100 !border-orange-400 !text-orange-900 dark:!bg-orange-900/40 dark:!text-orange-200 dark:!border-orange-700">${slot.dataset.expected}</div>`; slot.classList.remove('incorrect-slot'); slot.classList.add('revealed-slot', 'has-item'); } });
+                    slots.forEach(slot => { 
+                        if (!slot.classList.contains('correct-slot')) { 
+                            slot._userChildren = Array.from(slot.childNodes); 
+                            slot.innerHTML = `<div class="dnd-chip in-slot ${isDetective ? 'detective-chip !bg-red-100 !text-red-900 !border-red-500' : '!bg-orange-100 !border-orange-400 !text-orange-900 dark:!bg-orange-900/40 dark:!text-orange-200 dark:!border-orange-700'}">${slot.dataset.expected}</div>`; 
+                            slot.classList.remove('incorrect-slot'); slot.classList.add('revealed-slot', 'has-item'); 
+                            if(isDetective) slot.classList.add('incorrect-slot'); 
+                        } 
+                    });
                 });
                 
                 window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
 
                 document.getElementById('check-buttons').classList.add('hidden'); document.getElementById('check-buttons').classList.remove('flex'); document.getElementById('next-btn').classList.remove('hidden');
+                
+                if(isDetective) {
+                    document.getElementById('next-btn').innerHTML = '📂 Следующее дело';
+                } else {
+                    document.getElementById('next-btn').innerHTML = '➡️ Дальше';
+                }
+
                 updateGlobalUI(); saveProgress();
             } else {
-                btn.innerHTML = '👀 Сдаюсь, покажи ответы';
+                btn.innerHTML = isDetective ? '👀 Запросить подсказку штаба' : '👀 Сдаюсь, покажи ответы';
                 rows.forEach(tr => {
                     const slots = tr.querySelectorAll('.dnd-slot');
                     slots.forEach(slot => { if (slot.classList.contains('revealed-slot')) { slot.classList.remove('revealed-slot'); slot.innerHTML = ''; if (slot._userChildren && slot._userChildren.length > 0) { slot._userChildren.forEach(c => slot.appendChild(c)); slot.classList.add('has-item', 'incorrect-slot'); } else slot.classList.remove('has-item', 'incorrect-slot'); } });
@@ -1249,6 +1815,8 @@
             let listHtml = ''; const periods = [{ id: 'early', name: 'Древность и Смута (до XVII в.)' }, { id: '18th', name: 'XVIII век' }, { id: '19th', name: 'XIX век' }, { id: '20th', name: 'XX век' }];
             const currentDataPool = window.state.currentTask === 'task5' ? task5Data : bigData;
 
+            if (typeof currentDataPool === 'undefined') return;
+
             periods.forEach(p => {
                 const factsInPeriod = currentDataPool.map((fact, index) => ({ fact, index })).filter(item => item.fact.c === p.id);
                 if (factsInPeriod.length === 0) return;
@@ -1293,170 +1861,6 @@
             else { input.select(); document.execCommand('copy'); showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700'); }
         }
 
-        function toggleMode(mode) {
-            if (window.state.currentMode === mode) return; 
-            window.state.currentMode = mode; window.state.stats.streak = 0; updateGlobalUI();
-            document.getElementById('timer-container').classList.add('hidden'); clearInterval(window.state.timerInterval);
-
-            const isFlashcards = mode === 'flashcards';
-            const isSpeedrun = mode === 'speedrun';
-            const isTimeline = mode === 'timeline';
-            const isStudy = mode === 'study';
-            
-            document.getElementById('filter-rows').disabled = isFlashcards || isSpeedrun || isTimeline || isStudy; 
-            document.getElementById('filter-period').disabled = isSpeedrun;
-            if (isSpeedrun) { document.getElementById('filter-rows').value = "4"; document.getElementById('filter-period').value = "all"; }
-
-            ['classic-task-area', 'flashcard-area', 'timeline-area', 'study-area'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.add('hidden');
-                    if (id === 'classic-task-area') el.classList.remove('flex', 'lg:flex-row');
-                    if (id === 'flashcard-area' || id === 'study-area') el.classList.remove('flex');
-                }
-            });
-
-            if (isFlashcards) {
-                document.getElementById('flashcard-area').classList.remove('hidden'); document.getElementById('flashcard-area').classList.add('flex'); window.nextFlashcard();
-            } else if (isTimeline) {
-                document.getElementById('timeline-area').classList.remove('hidden'); renderTimeline();
-            } else if (isStudy) {
-                document.getElementById('study-area').classList.remove('hidden'); document.getElementById('study-area').classList.add('flex'); window.state.studyIndex = 0; renderStudyCard();
-            } else {
-                document.getElementById('classic-task-area').classList.remove('hidden'); document.getElementById('classic-task-area').classList.add('flex', 'lg:flex-row');
-                if(isSpeedrun) {
-                    window.state.timeLeft = 180; document.getElementById('timer-container').classList.remove('hidden');
-                    window.state.timerInterval = setInterval(() => {
-                        window.state.timeLeft--; const min = Math.floor(window.state.timeLeft/60); const sec = window.state.timeLeft%60;
-                        updateText(DOM.timer, `${min}:${sec < 10 ? '0' : ''}${sec}`);
-                        if(window.state.timeLeft <= 0) endGame();
-                    }, 1000);
-                }
-                generateTable();
-            }
-        }
-
-        window.nextFlashcard = function() {
-            const period = document.getElementById('filter-period').value;
-            let allowed = getFilteredPool(period);
-            if (!allowed) return;
-            
-            const fact = allowed[Math.floor(Math.random() * allowed.length)];
-            let fKey = factKey(fact); let d = window.state.stats.factStreaks[fKey];
-
-            const isTask5 = window.state.currentTask === 'task5';
-            const frontLabel = isTask5 ? 'Участник' : 'Событие';
-            const frontTitle = isTask5 ? fact.person : fact.event;
-
-            const tpl = document.getElementById('flashcard-template-front').content.cloneNode(true);
-            tpl.querySelector('.fc-level-badge').innerText = `Ур: ${d ? d.level || 0 : 0} | Балл: ${d ? (d.points||0).toFixed(1) : 0}/3`;
-            tpl.querySelector('.fc-label').innerText = frontLabel;
-            tpl.querySelector('.fc-title').innerText = frontTitle;
-            
-            const area = document.getElementById('flashcard-area');
-            area.innerHTML = '';
-            area.appendChild(tpl);
-            
-            window.state.currentFlashcardFact = fact;
-        };
-
-        window.flipFlashcard = function(card) {
-            if (card.classList.contains('flipped')) return; 
-            card.classList.add('flipped'); haptic('medium');
-            const fact = window.state.currentFlashcardFact; 
-            const isTask5 = window.state.currentTask === 'task5';
-            
-            card.className = "w-full max-w-md bg-blue-50 dark:bg-[#242729] rounded-3xl shadow-xl p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-[#2a2e30] transition-all duration-300 relative flipped"; 
-            card.onclick = null; 
-            
-            let cardContent = isTask5 
-                ? `<div class="bg-white dark:bg-[#2a2e30]/50 p-5 rounded-2xl shadow-sm border border-purple-100 dark:border-[#2a2e30] w-full text-center"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Событие</span><span class="text-lg sm:text-xl font-bold text-purple-700 dark:text-purple-400 leading-relaxed">${fact.event}</span></div>` 
-                : `<div class="bg-white dark:bg-[#2a2e30]/50 p-5 rounded-2xl shadow-sm border border-blue-100 dark:border-[#2a2e30] w-full mb-3"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Год</span><span class="text-3xl font-black text-examBlue dark:text-blue-300">${fact.year}</span></div><div class="bg-white dark:bg-[#2a2e30]/50 p-5 rounded-2xl shadow-sm border border-green-100 dark:border-[#2a2e30] flex flex-col items-center w-full"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Место</span><span class="text-xl font-bold text-emerald-700 dark:text-emerald-400 leading-relaxed">${fact.geo}</span><span onclick="window.openMapModal('${fact.geo}')" class="mt-2 text-[12px] font-bold text-blue-600 underline decoration-dashed cursor-pointer">Показать на карте</span></div>`;
-            
-            const tpl = document.getElementById('flashcard-template-back').content.cloneNode(true);
-            tpl.querySelector('.fc-content').innerHTML = cardContent;
-            
-            card.innerHTML = '';
-            card.appendChild(tpl);
-        };
-
-        window.answerFlashcard = function(isCorrect, isSure, e) {
-            e.stopPropagation(); const fact = window.state.currentFlashcardFact; let fKey = factKey(fact); 
-            let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
-
-            if (isCorrect) { 
-                haptic('success'); 
-                let d = updateFactSRS(fKey, true, isSure);
-                if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1);
-                window.state.stats.streak++; 
-                if (d.level > 0) showToast('🧠', isSure ? 'Отлично! Уровень повышен' : 'Повторим завтра', 'bg-emerald-500', 'border-emerald-700');
-                else showToast(isSure ? '✅' : '🤔', isSure ? '+1.0 к прогрессу факта' : '+0.7 к прогрессу факта', isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700');
-            } else { 
-                haptic('error'); 
-                updateFactSRS(fKey, false, false);
-                if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); 
-                window.state.stats.streak = 0; showToast('🔄', 'Прогресс сброшен. Повторим!', 'bg-rose-500', 'border-rose-700'); 
-            }
-            
-            window.state.stats.flashcardsSolved = (window.state.stats.flashcardsSolved || 0) + 1; 
-            saveProgress(); updateGlobalUI(); checkAchievements(); window.nextFlashcard();
-        };
-
-        function openProfileModal() {
-            closeStatsModal(); let manualName = localStorage.getItem('student_manual_name'); let classCode = localStorage.getItem('student_class_code');
-            if (manualName) document.getElementById('profile-name-input').value = manualName; else if (window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) document.getElementById('profile-name-input').value = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' ');
-            if (classCode) document.getElementById('profile-class-code').value = classCode; const modal = document.getElementById('profile-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
-        }
-        function closeProfileModal() { const m = document.getElementById('profile-modal'); m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); }
-        function saveProfileName() { const name = document.getElementById('profile-name-input').value.trim(); const code = document.getElementById('profile-class-code').value.trim(); if(name) localStorage.setItem('student_manual_name', name); if(code) localStorage.setItem('student_class_code', code); else localStorage.removeItem('student_class_code'); if(window.syncProgressToCloud) window.syncProgressToCloud(); showToast('✅', 'Профиль обновлен', 'bg-emerald-500', 'border-emerald-700'); closeProfileModal(); }
-
-        function openAchievementsModal() {
-            closeStatsModal();
-            let html = '';
-            achievementsList.forEach(ach => {
-                const isUnlocked = window.state.stats.achievements && window.state.stats.achievements.includes(ach.id);
-                html += `
-                <div class="achievement-card border-2 ${isUnlocked ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-[#2a2e30] bg-white dark:bg-[#242729] achievement-locked'} rounded-xl p-3 flex flex-col items-center text-center shadow-sm relative">
-                    <div class="text-3xl mb-1 drop-shadow-md">${ach.icon}</div>
-                    <h4 class="font-black text-[11px] sm:text-xs text-gray-800 dark:text-slate-200 mb-0.5 leading-tight">${ach.name}</h4>
-                    <p class="text-[9px] text-gray-500 dark:text-gray-400 leading-tight mt-auto">${ach.desc}</p>
-                </div>`;
-            });
-            document.getElementById('achievements-grid').innerHTML = html;
-            const modal = document.getElementById('achievements-modal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
-        }
-        function closeAchievementsModal() { const m = document.getElementById('achievements-modal'); m.classList.add('opacity-0'); setTimeout(() => m.classList.add('hidden'), 300); }
-
-        function openStatsModal() {
-            const modal = document.getElementById('stats-modal'); updateText(DOM.modalSolved, window.state.stats.totalSolvedEver || 0); updateText(DOM.modalMistakes, window.state.mistakesPool.length);
-            
-            let eraHtml = ''; const eras = {'early': 'Древность', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'};
-            Object.entries(eras).forEach(([key, name]) => {
-                const data = window.state.stats.eraStats[key] || { correct: 0, total: 0 }; const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
-                eraHtml += `<div class="mb-3"><div class="flex justify-between text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1"><span>${name}</span><span>${percent}%</span></div><div class="w-full bg-gray-100 dark:bg-[#2a2e30] h-1.5 rounded-full overflow-hidden shadow-inner"><div class="h-full bg-examBlue dark:bg-blue-500" style="width: ${percent}%"></div></div></div>`;
-            });
-            
-            let totalLearned = 0; let freshLearned = 0; const now = Date.now();
-            Object.values(window.state.stats.factStreaks || {}).forEach(d => { if (window.isFactLearned(d)) { totalLearned++; if (d.nextReview > now) freshLearned++; } });
-            let health = totalLearned === 0 ? 100 : Math.round((freshLearned / totalLearned) * 100);
-            let healthColorClass = health >= 80 ? 'bg-emerald-500' : (health >= 50 ? 'bg-yellow-500' : 'bg-rose-500');
-            eraHtml = `<div class="mb-4"><div class="flex justify-between items-end mb-1"><span class="text-xs font-black text-gray-800 dark:text-slate-200">🧠 Тонус памяти</span><span class="text-xs font-bold text-gray-500">${freshLearned} / ${totalLearned} фактов</span></div><div class="w-full bg-gray-200 dark:bg-[#2a2e30] h-2.5 rounded-full overflow-hidden shadow-inner"><div class="h-full ${healthColorClass} transition-all duration-500" style="width: ${health}%"></div></div><p class="text-[9px] text-gray-400 mt-1">Тонус падает, если долго не повторять забытые факты.</p></div>` + eraHtml;
-
-            document.getElementById('stats-era-container').innerHTML = eraHtml;
-            
-            let dailyHtml = ''; const ds = window.state.stats.dailyStats || {}; const dates = Object.keys(ds).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7);
-            if (dates.length === 0) dailyHtml = '<p class="text-xs text-gray-500">Пока нет данных.</p>';
-            else {
-                dates.forEach(d => {
-                    const stats = ds[d]; const min = Math.floor(stats.timeSpent / 60); const formattedDate = new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' });
-                    dailyHtml += `<div class="flex items-center justify-between bg-gray-50 dark:bg-[#2a2e30] p-2 rounded-lg border border-gray-100 dark:border-[#2a2e30] mb-2"><span class="text-xs font-bold text-gray-600 dark:text-gray-300 w-16">${formattedDate}</span><div class="flex-grow flex justify-end gap-3 text-xs"><span class="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-1 rounded font-bold">${stats.solved} линий</span><span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300 px-2 py-1 rounded font-bold">${min} мин</span></div></div>`;
-                });
-            }
-            document.getElementById('stats-daily-container').innerHTML = dailyHtml;
-            modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
-        }
-        function closeStatsModal() { document.getElementById('stats-modal').classList.add('opacity-0'); setTimeout(() => document.getElementById('stats-modal').classList.add('hidden'), 300); }
-
         function copyTextReport() {
             const timeMinutes = Math.floor((window.state.stats.totalTimeSpent || 0) / 60); const learnedCount = Object.values(window.state.stats.factStreaks || {}).filter(window.isFactLearned).length;
             let text = `🎓 Отчет: Тренажер Задания 4 (ЕГЭ История)\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n⏱ Время в тренажере: ${timeMinutes} мин\n✅ Решено заданий (строк): ${window.state.stats.totalSolvedEver}\n🃏 Решено карточек: ${window.state.stats.flashcardsSolved || 0}\n🔥 Лучший стрик: ${window.state.stats.streak}\n🧠 Выведено на Уровень 1+: ${learnedCount} фактов\n\n📊 Успеваемость по эпохам:\n`;
@@ -1465,58 +1869,22 @@
             if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700')).catch(() => { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700'); }); 
         }
 
-        function generatePDFFromData(name, statsObj, mistakesArray) {
-            if (window.tgApp && window.tgApp.platform !== 'desktop' && window.tgApp.platform !== 'unknown') return showToast('⚠️', 'Печать PDF доступна только с ПК', 'bg-orange-500', 'border-orange-700');
-            const timeMinutes = Math.floor((statsObj.totalTimeSpent || 0) / 60); const learnedCount = Object.values(statsObj.factStreaks || {}).filter(window.isFactLearned).length;
-            let html = `<div style="font-family: Arial, sans-serif; color: #333; max-width: 800px; margin: 0 auto; padding: 20px;"><div style="text-align: center; border-bottom: 3px solid #0f4c81; padding-bottom: 15px; margin-bottom: 30px;"><h1 style="font-size: 28px; font-weight: 900; margin: 0; color: #0f4c81; text-transform: uppercase;">Официальный отчет</h1><p style="font-size: 14px; color: #666; margin-top: 5px;">Тренажер ЕГЭ по истории (Задания 4 и 5)</p></div><div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px;"><h2 style="margin-top: 0; font-size: 20px; color: #1e293b;">Ученик: <span style="border-bottom: 1px solid #333; padding-bottom: 2px;">${name}</span></h2><p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Дата: <strong>${new Date().toLocaleDateString('ru-RU')}</strong></p></div><table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;"><tr><td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 20%;"><div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Время</div><div style="font-size: 24px; font-weight: 900; color: #0f4c81; margin-top: 5px;">${timeMinutes} мин</div></td><td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 20%;"><div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Решено заданий</div><div style="font-size: 24px; font-weight: 900; color: #00a86b; margin-top: 5px;">${statsObj.totalSolvedEver || 0}</div></td><td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 20%;"><div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Карточек</div><div style="font-size: 24px; font-weight: 900; color: #a855f7; margin-top: 5px;">${statsObj.flashcardsSolved || 0}</div></td><td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 20%;"><div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Выучено фактов</div><div style="font-size: 24px; font-weight: 900; color: #8b5cf6; margin-top: 5px;">${learnedCount}</div></td><td style="padding: 15px; border: 1px solid #e2e8f0; text-align: center; width: 20%;"><div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Рекорд спидрана</div><div style="font-size: 24px; font-weight: 900; color: #f59e0b; margin-top: 5px;">${statsObj.bestSpeedrunScore || 0}</div></td></tr></table><h3 style="font-size: 18px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px;">📊 Успеваемость по эпохам:</h3><ul style="list-style-type: none; padding: 0; margin-bottom: 30px;">`;
-            Object.entries({'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'}).forEach(([key, eraName]) => { const data = (statsObj.eraStats && statsObj.eraStats[key]) || { correct: 0, total: 0 }; const percent = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0; html += `<li style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; font-weight: bold;"><span>${eraName}</span><span>${percent}% (${data.correct} из ${data.total})</span></div><div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden;"><div style="width: ${percent}%; background: ${percent >= 80 ? '#00a86b' : (percent >= 50 ? '#f59e0b' : '#b91d47')}; height: 100%;"></div></div></li>`; }); html += `</ul>`;
-            if (mistakesArray && mistakesArray.length > 0) { html += `<h3 style="font-size: 18px; color: #b91d47; border-bottom: 2px solid #fecdd3; padding-bottom: 8px; margin-bottom: 15px;">⚠️ Незакрытые ошибки:</h3><table style="width: 100%; border-collapse: collapse; font-size: 13px;"><thead><tr style="background: #fff1f2; text-align: left;"><th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239; width: 60%;">Событие</th><th style="padding: 8px; border: 1px solid #fecdd3; color: #9f1239;">Детали</th></tr></thead><tbody>`; mistakesArray.forEach(m => { html += `<tr><td style="padding: 8px; border: 1px solid #fecdd3; font-weight: bold;">${m.fact.event}</td><td style="padding: 8px; border: 1px solid #fecdd3;">${m.fact.person ? `👤 ${m.fact.person}` : `🗺️ ${m.fact.geo} | ⏳ ${m.fact.year}`}</td></tr>`; }); html += `</tbody></table>`; } else html += `<div style="background: #f0fdf4; border: 2px dashed #4ade80; color: #166534; padding: 20px; text-align: center; border-radius: 12px; font-weight: bold; font-size: 16px;">Ошибок нет! Отличная работа! 🎉</div>`;
-            html += `<div style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">Сгенерировано в ULTIMATE Тренажере ЕГЭ</div></div>`; document.getElementById('printable-report').innerHTML = html; setTimeout(() => window.print(), 500);
-        }
-        function printPDFReportSelf() { let name = localStorage.getItem('student_manual_name'); if(!name && window.tgApp && window.tgApp.initDataUnsafe && window.tgApp.initDataUnsafe.user) name = [window.tgApp.initDataUnsafe.user.first_name, window.tgApp.initDataUnsafe.user.last_name].filter(Boolean).join(' '); closeStatsModal(); generatePDFFromData(name || 'Ученик (Без имени)', window.state.stats, window.state.mistakesPool); }
-        window.downloadStudentPDF = function(tgId) { const st = window.loadedStudentsData.find(s => s.tgId === tgId); if(st && st.fullStateJson) generatePDFFromData(st.name, JSON.parse(st.fullStateJson).stats, JSON.parse(st.fullStateJson).mistakesPool); else showToast('⚠️', 'Нет данных для отчета.', 'bg-rose-500', 'border-rose-700'); };
         function resetAllProgress() { const ok = window.tgApp && window.tgApp.showConfirm ? window.tgApp.showConfirm("Очистить всю статистику?") : confirm("Очистить всю статистику?"); if(ok) { localStorage.removeItem('ege_final_storage_v4'); location.reload(); } }
 
-        function openMapModal(name) { const coords = geoDict[name]; document.getElementById('yandex-map-iframe').src = coords ? `https://yandex.ru/map-widget/v1/?ll=${coords[0]},${coords[1]}&z=6&pt=${coords[0]},${coords[1]},pm2rdm` : `https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(name + ' историческое место')}&z=6`; document.getElementById('map-modal-title').innerText = name; const m = document.getElementById('map-modal'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.classList.remove('opacity-0'), 10); }
+        function openMapModal(name) { const coords = typeof geoDict !== 'undefined' ? geoDict[name] : null; document.getElementById('yandex-map-iframe').src = coords ? `https://yandex.ru/map-widget/v1/?ll=${coords[0]},${coords[1]}&z=6&pt=${coords[0]},${coords[1]},pm2rdm` : `https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(name + ' историческое место')}&z=6`; document.getElementById('map-modal-title').innerText = name; const m = document.getElementById('map-modal'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => m.classList.remove('opacity-0'), 10); }
         function closeMapModal() { document.getElementById('map-modal').classList.add('opacity-0'); setTimeout(() => document.getElementById('map-modal').classList.add('hidden'), 300); }
-
-        function renderTimeline() {
-            const period = document.getElementById('filter-period').value;
-            let pool = precomputed[window.state.currentTask][period] || [];
-            
-            let sorted = [...pool].sort((a,b) => getYearFromFact(a) - getYearFromFact(b));
-            
-            const area = document.getElementById('timeline-area');
-            area.innerHTML = '<div class="text-center mb-6 mt-2"><h2 class="text-2xl font-black text-gray-800 dark:text-slate-200">⏳ Хронология событий</h2><p class="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Прокрутите вниз, чтобы изучить эпоху</p></div>';
-            
-            const container = document.createElement('div');
-            container.className = "pl-2 flex flex-col";
-
-            sorted.forEach((item, idx) => {
-                const tpl = document.getElementById('timeline-node-template').content.cloneNode(true);
-                const isTask5 = window.state.currentTask === 'task5';
-                const titleText = isTask5 ? `${item.year} г. — ${item.person}` : `${item.year} — ${item.geo}`;
-                
-                tpl.querySelector('.tl-year-geo').innerText = titleText;
-                tpl.querySelector('.tl-event').innerText = item.event;
-                
-                if (idx === sorted.length - 1) {
-                    tpl.querySelector('.tl-line').classList.add('h-full');
-                    tpl.querySelector('.tl-line').classList.remove('bottom-0');
-                }
-                
-                container.appendChild(tpl);
-            });
-            
-            area.appendChild(container);
-        }
 
         window.renderStudyCard = function() {
             const period = document.getElementById('filter-period').value;
-            let pool = precomputed[window.state.currentTask][period] || [];
+            let pool = getBasePool(period);
+            
+            if (pool.length === 0) {
+                document.getElementById('study-area').innerHTML = '<div class="text-center p-10"><h2 class="text-xl font-bold text-rose-500">⚠️ В этом периоде нет событий!</h2></div>';
+                return;
+            }
+            
             let sorted = [...pool].sort((a,b) => getYearFromFact(a) - getYearFromFact(b));
 
-            if (sorted.length === 0) return;
             if (window.state.studyIndex >= sorted.length) {
                 window.state.studyIndex = 0; 
                 showToast('🎉', 'Эпоха пройдена! Начинаем заново.', 'bg-emerald-500', 'border-emerald-700');
@@ -1552,6 +1920,256 @@
             window.renderStudyCard();
         };
 
+        // --- ЛОГИКА РЕЖИМА "КРАСНЫЙ КАРАНДАШ" ---
+        let currentRPCaseIndex = 0;
+        let rpFakesTotal = 0;
+        let rpFakesFound = 0;
+        let rpCasesShuffled = [];
+
+        window.startRedPencilMode = function() {
+            if (typeof redPencilCases === 'undefined') {
+                document.getElementById('rp-content').innerHTML = '<div class="text-center text-red-500 font-bold py-10">База данных Красного карандаша не найдена. Проверьте data.js</div>';
+                return;
+            }
+
+            const period = document.getElementById('filter-period').value;
+            let filteredCases = [];
+
+            if (period === 'all') {
+                filteredCases = [...redPencilCases];
+            } else if (period === 'custom') {
+                const startY = parseInt(document.getElementById('custom-year-start').value) || 0;
+                const endY = parseInt(document.getElementById('custom-year-end').value) || 3000;
+                filteredCases = redPencilCases.filter(c => c.year >= startY && c.year <= endY);
+            } else {
+                filteredCases = redPencilCases.filter(c => {
+                    let y = c.year;
+                    if (period === 'early' && y <= 1700) return true;
+                    if (period === '18th' && y > 1700 && y <= 1800) return true;
+                    if (period === '19th' && y > 1800 && y <= 1900) return true;
+                    if (period === '20th' && y > 1900) return true;
+                    return false;
+                });
+            }
+
+            if (filteredCases.length === 0) {
+                 document.getElementById('rp-content').innerHTML = '<div class="text-center text-rose-500 font-bold py-10">⚠️ В выбранном периоде нет документов! Расширьте период.</div>';
+                 document.getElementById('rp-giveup-btn').classList.add('hidden');
+                 return;
+            }
+
+            rpCasesShuffled = [...filteredCases];
+            for (let i = rpCasesShuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rpCasesShuffled[i], rpCasesShuffled[j]] = [rpCasesShuffled[j], rpCasesShuffled[i]];
+            }
+            
+            currentRPCaseIndex = 0;
+            window.loadRPCase(currentRPCaseIndex);
+        };
+
+        window.loadRPCase = function(index) {
+            // Сбрасываем флаг ошибок при загрузке нового документа
+            if(window.state) window.state.rpHasMistake = false; 
+            
+            if (index >= rpCasesShuffled.length) {
+                index = 0;
+                currentRPCaseIndex = 0;
+                for (let i = rpCasesShuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [rpCasesShuffled[i], rpCasesShuffled[j]] = [rpCasesShuffled[j], rpCasesShuffled[i]];
+                }
+            }
+            const caseData = rpCasesShuffled[index];
+            document.getElementById('rp-title').innerText = caseData.title + ' • ' + caseData.year + ' г.';
+            
+            // НОВАЯ ЛОГИКА СЛУЧАЙНЫХ ОШИБОК
+            let potentialFakes = caseData.slots.filter(s => s.current !== s.correct);
+            let fixedTruths = caseData.slots.filter(s => s.current === s.correct);
+            
+            let targetFakesCount = Math.floor(Math.random() * 5) + 2; // от 2 до 6
+            targetFakesCount = Math.min(targetFakesCount, potentialFakes.length);
+            targetFakesCount = Math.max(1, targetFakesCount); // на случай если в базе меньше 2 ошибок
+            
+            let shuffledFakes = shuffleArray([...potentialFakes]);
+            let activeFakes = shuffledFakes.slice(0, targetFakesCount);
+            let convertedTruths = shuffledFakes.slice(targetFakesCount);
+            
+            let finalSlots = {};
+            activeFakes.forEach(s => finalSlots[s.id] = { ...s, isFake: true });
+            convertedTruths.forEach(s => finalSlots[s.id] = { ...s, isFake: false, current: s.correct });
+            fixedTruths.forEach(s => finalSlots[s.id] = { ...s, isFake: false, current: s.correct });
+
+            rpFakesTotal = activeFakes.length;
+            rpFakesFound = 0;
+            window.updateRPCounter();
+
+            let htmlContent = caseData.text;
+            caseData.slots.forEach(slot => {
+                const finalSlot = finalSlots[slot.id];
+                const nodeStr = `<span class="word-node target-node" data-id="${finalSlot.id}" data-type="${finalSlot.isFake ? 'fake' : 'truth'}" data-correct="${finalSlot.correct}">${finalSlot.current}</span>`;
+                htmlContent = htmlContent.replace(`{${finalSlot.id}}`, nodeStr);
+            });
+
+            // "Минное поле": оборачиваем все остальные обычные слова в кликабельные элементы
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            function wrapTextNodes(node) {
+                if (node.nodeType === 3) { 
+                    const text = node.nodeValue;
+                    if (!text.trim()) return;
+                    
+                    const wordsAndSpaces = text.split(/([\s.,!?;:«»"—]+)/);
+                    const frag = document.createDocumentFragment();
+                    
+                    wordsAndSpaces.forEach(str => {
+                        if (str.trim().length > 0 && !/^[\s.,!?;:«»"—]+$/.test(str)) {
+                            const s = document.createElement('span');
+                            s.className = 'plain-word';
+                            s.textContent = str;
+                            frag.appendChild(s);
+                        } else {
+                            frag.appendChild(document.createTextNode(str));
+                        }
+                    });
+                    node.parentNode.replaceChild(frag, node);
+                } else if (node.nodeType === 1 && !node.classList.contains('word-node')) {
+                    Array.from(node.childNodes).forEach(wrapTextNodes);
+                }
+            }
+            
+            Array.from(tempDiv.childNodes).forEach(wrapTextNodes);
+            
+            document.getElementById('rp-content').innerHTML = tempDiv.innerHTML;
+            
+            const stamp = document.getElementById('rp-stamp');
+            stamp.classList.add('hidden');
+            stamp.classList.remove('approved', 'revealed');
+            
+            document.getElementById('rp-next-btn').classList.add('hidden');
+            document.getElementById('rp-giveup-btn').classList.remove('hidden');
+
+            document.querySelectorAll('#rp-content .word-node').forEach(node => {
+                node.addEventListener('click', window.handleRPWordClick);
+            });
+            document.querySelectorAll('#rp-content .plain-word').forEach(node => {
+                node.addEventListener('click', window.handleRPPlainClick);
+            });
+        };
+
+        window.handleRPWordClick = function(e) {
+            const node = e.currentTarget;
+            if (!node || node.classList.contains('crossed')) return;
+
+            const type = node.dataset.type;
+            
+            if (type === 'fake') {
+                node.classList.add('crossed');
+                const correctText = node.dataset.correct;
+                node.classList.add('show-correction');
+                node.innerHTML += `<span class="correction-badge">${correctText}</span>`;
+                
+                rpFakesFound++;
+                window.updateRPCounter();
+                
+                if (window.tgApp?.HapticFeedback) {
+                    window.tgApp.HapticFeedback.notificationOccurred('success');
+                }
+
+                if (rpFakesFound === rpFakesTotal) {
+                    window.winRPCase();
+                }
+            } else {
+                // Если тыкнул на слот-обманку (слово из слота, но правильное)
+                window.handleRPPlainClick({ currentTarget: node });
+            }
+        };
+
+        window.handleRPPlainClick = function(e) {
+            const node = e.currentTarget;
+            if (node.classList.contains('shaking') || node.classList.contains('crossed')) return; 
+            
+            node.classList.add('animate-shake', 'text-rose-600', 'dark:text-rose-400');
+            node.classList.add('shaking');
+            
+            if(window.state) {
+                window.state.stats.streak = 0; 
+                window.state.rpHasMistake = true; // Фиксируем ошибку, чтобы в конце не дать балл
+                if (window.updateGlobalUI) window.updateGlobalUI();
+                if (window.saveProgress) window.saveProgress();
+            }
+
+            setTimeout(() => {
+                node.classList.remove('animate-shake', 'text-rose-600', 'dark:text-rose-400', 'shaking');
+            }, 500);
+            
+            if (window.tgApp?.HapticFeedback) {
+                window.tgApp.HapticFeedback.notificationOccurred('error');
+            }
+            showToast('❌', 'Это подлинный исторический факт!', 'bg-rose-500', 'border-rose-700');
+        };
+
+        window.winRPCase = function() {
+            const stamp = document.getElementById('rp-stamp');
+            stamp.innerText = 'ЦЕНЗУРА ПРОЙДЕНА';
+            stamp.classList.remove('hidden', 'revealed');
+            stamp.classList.add('approved');
+            
+            document.getElementById('rp-next-btn').classList.remove('hidden');
+            document.getElementById('rp-giveup-btn').classList.add('hidden');
+
+            // Начисляем 1 балл (строку) только если не было совершено ошибок
+            if(window.state && !window.state.rpHasMistake) {
+                if (typeof updateScoreAndStats === 'function') {
+                    updateScoreAndStats(1, true);
+                }
+                window.state.stats.streak = (window.state.stats.streak || 0) + 1;
+                
+                if (window.updateGlobalUI) window.updateGlobalUI();
+                if (window.saveProgress) window.saveProgress();
+                if (window.checkAchievements) window.checkAchievements();
+            }
+            
+            if (window.tgApp?.HapticFeedback) {
+                window.tgApp.HapticFeedback.notificationOccurred('success');
+            }
+            showToast('🎉', 'Все фальшивки найдены!', 'bg-emerald-500', 'border-emerald-700');
+        };
+
+        window.giveUpRedPencil = function() {
+            document.querySelectorAll('#rp-content .target-node[data-type="fake"]').forEach(node => {
+                if (!node.classList.contains('crossed')) {
+                    node.classList.add('crossed');
+                    const correctText = node.dataset.correct;
+                    node.classList.add('show-correction');
+                    node.innerHTML += `<span class="correction-badge">${correctText}</span>`;
+                }
+            });
+
+            rpFakesFound = rpFakesTotal;
+            window.updateRPCounter();
+
+            const stamp = document.getElementById('rp-stamp');
+            stamp.innerText = 'РАССЕКРЕЧЕНО';
+            stamp.classList.remove('hidden', 'approved');
+            stamp.classList.add('revealed');
+            
+            if(window.state) {
+                window.state.stats.streak = 0;
+                if (window.updateGlobalUI) window.updateGlobalUI();
+                if (window.saveProgress) window.saveProgress();
+            }
+
+            document.getElementById('rp-next-btn').classList.remove('hidden');
+            document.getElementById('rp-giveup-btn').classList.add('hidden');
+        };
+
+        window.nextRedPencilCase = function() {
+            currentRPCaseIndex++;
+            window.loadRPCase(currentRPCaseIndex);
+        };
+
         window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud = async function() {}; window.stopClassProgressSync = function() {};
         window.loadClassProgress = function() { document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-gray-500 text-center mt-5">Синхронизация с облаком... Подождите пару секунд.</p>'; };
         
@@ -1560,7 +2178,6 @@
         };
 
         document.addEventListener('DOMContentLoaded', initStorage);
-        window.onload = generateTable;
     </script>
 
     <script type="module">
@@ -1707,22 +2324,17 @@
                             rawStudents.push(data);
                         });
 
-                        // --- УМНАЯ ДЕДУПЛИКАЦИЯ ДЛЯ ОТОБРАЖЕНИЯ ---
                         let studentsObjList = [];
                         
                         rawStudents.forEach(st => {
-                            // Очищаем имя от спецсимволов для точного сравнения (Ученики без имени не склеиваются по имени)
                             let nameKey = (st.name && st.name !== 'Ученик (Без имени)') ? st.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                            // Настоящий TG ID должен быть только из цифр
                             let tgKey = isRealTgId(st.tgId) ? String(st.tgId) : null;
 
                             let foundIdx = studentsObjList.findIndex(existing => {
                                 let existingNameKey = (existing.name && existing.name !== 'Ученик (Без имени)') ? existing.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
                                 let existingTgKey = isRealTgId(existing.tgId) ? String(existing.tgId) : null;
 
-                                // Склеиваем, если 100% совпал реальный Telegram ID
                                 if (tgKey && existingTgKey && tgKey === existingTgKey) return true;
-                                // Склеиваем, если на 100% совпало имя
                                 if (nameKey && existingNameKey && nameKey === existingNameKey) return true;
                                 return false;
                             });
@@ -1730,7 +2342,6 @@
                             if (foundIdx !== -1) {
                                 let existing = studentsObjList[foundIdx];
                                 
-                                // Выбираем чей прогресс оставить (где больше решено)
                                 let stScore = st.totalSolved || 0;
                                 let exScore = existing.totalSolved || 0;
 
@@ -1804,7 +2415,7 @@
                                         </div>
                                         
                                         <div class="text-[10px] text-gray-500 dark:text-gray-400 grid grid-cols-2 gap-1 mb-1 mt-1.5">
-                                            <div>Всего строк: <span class="font-black text-examBlue dark:text-blue-300 text-xs">${st.totalSolved || 0}</span></div>
+                                            <div>Всего строк: <span class="font-bold text-examBlue dark:text-blue-300 text-xs">${st.totalSolved || 0}</span></div>
                                             <div>Был: <span class="font-bold text-gray-700 dark:text-gray-300">${lastActiveStr}</span></div>
                                         </div>
 
@@ -1821,7 +2432,6 @@
                                     </div>
                                     <div class="flex flex-col gap-1 shrink-0 text-center w-20">
                                         ${assignHwBtn}
-                                        <button onclick="window.downloadStudentPDF('${st.tgId}')" class="text-[10px] bg-white border border-gray-200 py-1.5 rounded shadow-sm text-gray-700 dark:bg-slate-600 dark:text-white dark:border-[#2a2e30] w-full font-bold">📄 PDF</button>
                                     </div>
                                 </div>
                             </div>`;
