@@ -14,7 +14,6 @@
 
     <style>
         html, body { overscroll-behavior-y: none; transition: background-color 0.4s, color 0.4s; }
-        body { padding-bottom: 90px; } /* Место под нижний бар */
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -207,27 +206,64 @@
             box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
         }
         
-        #rp-content { user-select: none; }
-        .word-node, .plain-word {
-            display: inline-block; position: relative; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease;
+        #rp-content {
+            user-select: none; /* Запрещаем выделение текста, чтобы удобно было тыкать */
         }
+        .word-node, .plain-word {
+            display: inline-block; /* Необходимо для анимации тряски */
+            position: relative;
+            cursor: pointer; /* Делаем ВСЕ слова одинаково кликабельными, чтобы не было подсказок */
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        /* Убраны любые hover-эффекты и фоны. Слоты выглядят как обычный текст! */
+        
         .word-node.crossed {
-            text-decoration: line-through; text-decoration-color: #dc2626; text-decoration-thickness: 3px;
-            color: #ef4444 !important; cursor: default;
+            text-decoration: line-through;
+            text-decoration-color: #dc2626;
+            text-decoration-thickness: 3px;
+            color: #ef4444 !important;
+            cursor: default;
         }
         .correction-badge {
-            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(5px);
-            font-size: 0.75rem; background-color: #10b981; color: white; padding: 2px 8px; border-radius: 4px;
-            white-space: nowrap; font-family: 'Arial', sans-serif; font-weight: 900;
-            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5); z-index: 10; opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); letter-spacing: 1px;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            font-size: 0.75rem;
+            background-color: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-family: 'Arial', sans-serif;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5);
+            z-index: 10;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 1px;
         }
-        .word-node.show-correction .correction-badge { opacity: 1; transform: translateX(-50%) translateY(-2px); }
+        .word-node.show-correction .correction-badge {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-2px);
+        }
         .rp-stamp {
-            position: absolute; top: 50%; left: 50%; font-size: 3rem; font-weight: 900; text-transform: uppercase;
-            border: 6px solid; padding: 1rem 2rem; border-radius: 12px; display: inline-block; opacity: 0;
-            animation: stampIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; font-family: 'Courier New', monospace;
-            letter-spacing: 5px; pointer-events: none; z-index: 1;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 6px solid;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            display: inline-block;
+            opacity: 0;
+            animation: stampIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 5px;
+            pointer-events: none;
+            z-index: 1; /* На задний план под текст */
         }
         @media (min-width: 640px) { .rp-stamp { font-size: 5rem; border-width: 8px; } }
         .dark .rp-stamp { mix-blend-mode: normal; }
@@ -240,10 +276,9 @@
         }
         .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 
-        /* --- СТИЛИ СКИНОВ И НАВИГАЦИИ --- */
+        /* --- СТИЛИ СКИНОВ --- */
         body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
         body.skin-beresta header { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; }
-        body.skin-beresta #bottom-nav { background-color: #fffaf0 !important; border-top-color: #d2b48c !important; }
         body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-[#242729], body.skin-beresta .dark\:bg-[#181a1b], body.skin-beresta .dark\:bg-[#2a2e30] { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
         body.skin-beresta .text-gray-800, body.skin-beresta .dark\:text-slate-200, body.skin-beresta .dark\:text-gray-100, body.skin-beresta .dark\:text-gray-200, body.skin-beresta .dark\:text-gray-300, body.skin-beresta .dark\:text-gray-400, body.skin-beresta .text-gray-900, body.skin-beresta .text-gray-700, body.skin-beresta .text-gray-600 { color: #4a3525 !important; }
         body.skin-beresta header .text-white { color: #fffaf0 !important; }
@@ -252,7 +287,6 @@
 
         body.skin-empire { background-color: #fcfbf8 !important; }
         body.skin-empire header { background-color: #6b151e !important; border-bottom-color: #d4af37 !important; }
-        body.skin-empire #bottom-nav { background-color: #ffffff !important; border-top-color: #d4af37 !important; box-shadow: 0 -4px 15px rgba(107,21,30,0.1) !important; }
         body.skin-empire header .text-white { color: #fdf5e6 !important; }
         body.skin-empire .bg-white, body.skin-empire .dark\:bg-[#242729], body.skin-empire .dark\:bg-[#181a1b], body.skin-empire .dark\:bg-[#2a2e30] { background-color: #ffffff !important; border-color: #d4af37 !important; box-shadow: 0 4px 15px rgba(107,21,30,0.1) !important; }
         body.skin-empire .text-gray-800, body.skin-empire .dark\:text-slate-200, body.skin-empire .dark\:text-gray-100, body.skin-empire .dark\:text-gray-200, body.skin-empire .dark\:text-gray-300, body.skin-empire .dark\:text-gray-400, body.skin-empire .text-gray-900, body.skin-empire .text-gray-700, body.skin-empire .text-gray-600 { color: #2b1b17 !important; }
@@ -260,7 +294,6 @@
 
         body.skin-ussr { background-color: #f4f4f4 !important; }
         body.skin-ussr header { background-color: #cc0000 !important; border-bottom-color: #ffcc00 !important; }
-        body.skin-ussr #bottom-nav { background-color: #ffffff !important; border-top-color: #cc0000 !important; border-width: 3px 0 0 0 !important; }
         body.skin-ussr header .text-white { color: #ffcc00 !important; }
         body.skin-ussr .text-gray-800, body.skin-ussr .dark\:text-slate-200, body.skin-ussr .dark\:text-gray-100, body.skin-ussr .dark\:text-gray-200, body.skin-ussr .dark\:text-gray-300, body.skin-ussr .dark\:text-gray-400, body.skin-ussr .text-gray-900, body.skin-ussr .text-gray-700, body.skin-ussr .text-gray-600 { color: #111111 !important; }
         body.skin-ussr .dnd-chip { background-color: #ffe6e6 !important; border-color: #cc0000 !important; color: #cc0000 !important; font-family: monospace; font-weight: 900; text-transform: uppercase; border-radius: 0 !important; }
@@ -269,7 +302,6 @@
 
         body.skin-cyberpunk { background-color: #0d0221 !important; color: #00f0ff !important; }
         body.skin-cyberpunk header { background-color: #240046 !important; border-bottom-color: #ff003c !important; }
-        body.skin-cyberpunk #bottom-nav { background-color: #1a0b2e !important; border-top-color: #00f0ff !important; box-shadow: 0 -4px 15px rgba(0, 240, 255, 0.15) !important;}
         body.skin-cyberpunk .bg-white, body.skin-cyberpunk .dark\:bg-[#242729], body.skin-cyberpunk .dark\:bg-[#181a1b], body.skin-cyberpunk .dark\:bg-[#2a2e30] { background-color: #1a0b2e !important; border-color: #00f0ff !important; color: #ffffff !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15) !important; }
         body.skin-cyberpunk .text-gray-800, body.skin-cyberpunk .dark\:text-slate-200, body.skin-cyberpunk .dark\:text-gray-100, body.skin-cyberpunk .dark\:text-gray-200, body.skin-cyberpunk .dark\:text-gray-300, body.skin-cyberpunk .dark\:text-gray-400, body.skin-cyberpunk .text-gray-900, body.skin-cyberpunk .text-gray-700, body.skin-cyberpunk .text-gray-600 { color: #00f0ff !important; text-shadow: 0 0 3px rgba(0,240,255,0.5); }
         body.skin-cyberpunk .dnd-chip { background-color: #240046 !important; border-color: #ff003c !important; color: #ff003c !important; text-transform: uppercase; font-family: monospace; }
@@ -278,7 +310,6 @@
 
         body.skin-matrix { background-color: #000000 !important; font-family: monospace !important; color: #00ff41 !important; }
         body.skin-matrix header { background-color: #001100 !important; border-bottom-color: #00ff41 !important; }
-        body.skin-matrix #bottom-nav { background-color: #001100 !important; border-top-color: #00ff41 !important;}
         body.skin-matrix .bg-white, body.skin-matrix .dark\:bg-[#242729], body.skin-matrix .dark\:bg-[#181a1b], body.skin-matrix .dark\:bg-[#2a2e30] { background-color: #001100 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
         body.skin-matrix .text-gray-800, body.skin-matrix .dark\:text-slate-200, body.skin-matrix .dark\:text-gray-100, body.skin-matrix .dark\:text-gray-200, body.skin-matrix .dark\:text-gray-300, body.skin-matrix .dark\:text-gray-400, body.skin-matrix .text-gray-900, body.skin-matrix .text-gray-700, body.skin-matrix .text-gray-600 { color: #00ff41 !important; }
         body.skin-matrix .dnd-chip { background-color: #000000 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
@@ -287,16 +318,14 @@
 
         body.skin-space { background: #0b0c10 !important; color: #c5c6c7 !important; }
         body.skin-space header { background-color: #0b0c10 !important; border-bottom-color: #45a29e !important; }
-        body.skin-space #bottom-nav { background-color: #0b0c10 !important; border-top-color: #45a29e !important;}
         body.skin-space .bg-white, body.skin-space .dark\:bg-[#242729], body.skin-space .dark\:bg-[#181a1b], body.skin-space .dark\:bg-[#2a2e30] { background-color: rgba(31,40,51,0.95) !important; border-color: #45a29e !important; border-radius: 1rem !important; }
-        body.skin-space .text-gray-800, body.skin-space .dark\:text-slate-200, body.skin-space .dark\:text-gray-100, body.space .dark\:text-gray-200, body.skin-space .dark\:text-gray-300, body.skin-space .dark\:text-gray-400, body.skin-space .text-gray-900, body.skin-space .text-gray-700, body.skin-space .text-gray-600 { color: #66fcf1 !important; }
+        body.skin-space .text-gray-800, body.skin-space .dark\:text-slate-200, body.skin-space .dark\:text-gray-100, body.skin-space .dark\:text-gray-200, body.skin-space .dark\:text-gray-300, body.skin-space .dark\:text-gray-400, body.skin-space .text-gray-900, body.skin-space .text-gray-700, body.skin-space .text-gray-600 { color: #66fcf1 !important; }
         body.skin-space .dnd-chip { background-color: #1f2833 !important; border-color: #45a29e !important; color: #66fcf1 !important; border-radius: 20px !important; }
         body.skin-space .dnd-slot { background-color: rgba(11,12,16,0.6) !important; border-color: #66fcf1 !important; border-radius: 20px !important; }
         body.skin-space header .text-white { color: #66fcf1 !important; }
 
         body.skin-golden { background: #fff9e6 !important; }
         body.skin-golden header { background: #b8860b !important; border-bottom-color: #ffffff !important; }
-        body.skin-golden #bottom-nav { background-color: #fff9e6 !important; border-top-color: #daa520 !important;}
         body.skin-golden header .text-white { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
         body.skin-golden .bg-white, body.skin-golden .dark\:bg-[#242729], body.skin-golden .dark\:bg-[#181a1b], body.skin-golden .dark\:bg-[#2a2e30] { background-color: #ffffff !important; border-color: #daa520 !important; box-shadow: 0 10px 30px rgba(218,165,32,0.2) !important; border-radius: 1rem !important; }
         body.skin-golden .dnd-chip { background: #fff9e6 !important; border-color: #daa520 !important; color: #b8860b !important; box-shadow: 0 2px 5px rgba(218,165,32,0.2) !important; }
@@ -307,18 +336,11 @@
         body[class*='skin-'] .incorrect-slot { background-color: rgba(244,63,94,0.15) !important; border-color: #f43f5e !important; }
         body[class*='skin-'] .revealed-slot { background-color: rgba(245,158,11,0.15) !important; border-color: #f59e0b !important; }
         
+        .modal-content-hidden { content-visibility: hidden; }
+        
         .achievement-card { transition: transform 0.2s, box-shadow 0.2s; }
         .achievement-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
-
-        /* Эффекты для карточек лобби */
-        .lobby-card { transition: transform 0.2s, box-shadow 0.2s; }
-        .lobby-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .dark .lobby-card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .lobby-card:active { transform: translateY(0) scale(0.98); }
-        
-        .bottom-nav-item { transition: color 0.2s, transform 0.1s; }
-        .bottom-nav-item:active { transform: scale(0.9); }
     </style>
 </head>
 <body class="bg-examBg dark:bg-[#181a1b] text-ink dark:text-slate-200 font-sans antialiased min-h-screen flex flex-col relative">
@@ -334,6 +356,8 @@
                     </div>
                 </div>
                 <div class="flex sm:hidden items-center gap-1">
+                    <button onclick="toggleFocusMode()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs" title="Режим фокуса (Дзен)">🧘</button>
+                    <button onclick="openTeacherModal()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs" title="Кабинет учителя">👨‍🏫</button>
                     <button onclick="toggleTheme()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs" title="Сменить тему">🌙</button>
                 </div>
             </div>
@@ -366,11 +390,24 @@
                 </div>
 
                 <div class="hidden sm:flex items-center gap-2">
+                    <button onclick="toggleFocusMode()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Режим фокуса (Дзен)">🧘</button>
+                    <button onclick="openTeacherModal()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Кабинет учителя">👨‍🏫</button>
                     <button onclick="toggleTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Сменить тему">🌙</button>
                 </div>
             </div>
         </div>
     </header>
+
+    <div id="zen-bar" class="hidden fixed top-0 left-0 w-full bg-examBlue dark:bg-[#121415] text-white px-4 py-2 justify-between items-center shadow-md border-b-2 sm:border-b-4 border-examRed z-50 transition-colors duration-400">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">🧘</span>
+            <div class="text-xs sm:text-sm font-bold text-blue-200 uppercase tracking-wider hidden sm:block">Дзен-режим</div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-[11px] sm:text-sm font-black text-emerald-300 uppercase tracking-wider">Решено: <span id="zen-stat-solved" class="text-sm sm:text-lg text-white">0</span></div>
+            <button onclick="toggleFocusMode()" class="text-[10px] sm:text-xs bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider transition-colors">Выйти</button>
+        </div>
+    </div>
 
     <div id="joke-toast" class="no-print fixed top-16 right-0 transform translate-x-full transition-transform duration-300 z-[9999]">
         <div id="toast-content" class="text-slate-50 font-bold text-xs sm:text-sm px-4 py-2 rounded-l-lg shadow-lg flex items-center gap-2 border-y-2 border-l-2"></div>
@@ -384,208 +421,40 @@
         🔥 ДОЛГ УЧИТЕЛЮ: решите <span id="personal-hw-remaining" class="text-rose-600 dark:text-rose-400 font-black text-sm">0</span> линий!
     </div>
 
-    <main class="no-print flex-grow max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 w-full flex flex-col gap-4 relative">
+    <main class="no-print flex-grow max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 w-full flex flex-col gap-4">
         
-        <!-- ================= ЛОББИ (ВЫБОР РЕЖИМА) ================= -->
-        <div id="lobby-area" class="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-fade-in">
-            <h2 class="text-xl sm:text-2xl font-black text-center text-gray-800 dark:text-slate-200 uppercase tracking-widest mb-2">ВЫБЕРИТЕ РЕЖИМ</h2>
-            
-            <!-- Базовые задания -->
-            <div>
-                <h3 class="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 pl-1">Базовые задания ЕГЭ</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div onclick="openSetup('task4', 'normal')" class="lobby-card bg-white dark:bg-[#242729] p-5 rounded-2xl shadow-sm border-2 border-blue-200 dark:border-[#2a2e30] flex flex-col items-center justify-center gap-2 cursor-pointer relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-blue-50 dark:bg-blue-900/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                        <span class="text-4xl relative z-10">📍</span>
-                        <span class="font-black text-lg text-gray-800 dark:text-slate-200 relative z-10">№4 География</span>
-                        <span class="text-xs font-bold text-gray-400 relative z-10">Таблица 3 столбца</span>
-                    </div>
-                    <div onclick="openSetup('task5', 'normal')" class="lobby-card bg-white dark:bg-[#242729] p-5 rounded-2xl shadow-sm border-2 border-purple-200 dark:border-[#2a2e30] flex flex-col items-center justify-center gap-2 cursor-pointer relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-purple-50 dark:bg-purple-900/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                        <span class="text-4xl relative z-10">👤</span>
-                        <span class="font-black text-lg text-gray-800 dark:text-slate-200 relative z-10">№5 Личности</span>
-                        <span class="text-xs font-bold text-gray-400 relative z-10">Сопоставление</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Прокачка -->
-            <div>
-                <h3 class="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 pl-1">Прокачка и тренировка</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                    <div onclick="openSetup('task4', 'speedrun')" class="lobby-card bg-white dark:bg-[#242729] p-4 rounded-xl shadow-sm border border-gray-200 dark:border-[#2a2e30] flex flex-col items-center text-center gap-1 cursor-pointer">
-                        <span class="text-3xl mb-1">⚡</span>
-                        <span class="font-black text-sm text-gray-800 dark:text-slate-200">Спидран</span>
-                        <span class="text-[10px] font-bold text-gray-400">Гонка со временем</span>
-                    </div>
-                    <div onclick="openSetup('task4', 'flashcards')" class="lobby-card bg-white dark:bg-[#242729] p-4 rounded-xl shadow-sm border border-gray-200 dark:border-[#2a2e30] flex flex-col items-center text-center gap-1 cursor-pointer">
-                        <span class="text-3xl mb-1">🃏</span>
-                        <span class="font-black text-sm text-gray-800 dark:text-slate-200">Карточки</span>
-                        <span class="text-[10px] font-bold text-gray-400">Интервальное повт.</span>
-                    </div>
-                    <div onclick="openSetup('task4', 'mistakes')" class="lobby-card bg-white dark:bg-[#242729] p-4 rounded-xl shadow-sm border border-rose-200 dark:border-rose-900/50 flex flex-col items-center text-center gap-1 cursor-pointer">
-                        <span class="text-3xl mb-1">🔥</span>
-                        <span class="font-black text-sm text-rose-600 dark:text-rose-400">Ошибки</span>
-                        <span class="text-[10px] font-bold text-gray-400">Проработка слабых</span>
-                    </div>
-                    <div onclick="openSetup('task4', 'study')" class="lobby-card bg-white dark:bg-[#242729] p-4 rounded-xl shadow-sm border border-emerald-200 dark:border-emerald-900/50 flex flex-col items-center text-center gap-1 cursor-pointer">
-                        <span class="text-3xl mb-1">📖</span>
-                        <span class="font-black text-sm text-emerald-600 dark:text-emerald-400">Сюжеты</span>
-                        <span class="text-[10px] font-bold text-gray-400">Изучение базы</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Спецрежимы -->
-            <div>
-                <h3 class="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 pl-1">Спецоперации (Мини-игры)</h3>
-                <div class="flex flex-col gap-3">
-                    <div onclick="openSetup('task4', 'detective')" class="lobby-card bg-[#f3efe6] dark:bg-[#dcd6c7] p-4 sm:p-5 rounded-xl shadow-md border-l-4 border-[#3e352d] flex items-center gap-4 cursor-pointer relative overflow-hidden">
-                        <div class="absolute right-[-20px] top-[-10px] opacity-10 text-8xl font-serif text-red-600 rotate-12 pointer-events-none">СЕКРЕТНО</div>
-                        <span class="text-4xl z-10">🕵️</span>
-                        <div class="flex flex-col z-10">
-                            <span class="font-black text-lg text-[#3e352d] uppercase">Секретный архив</span>
-                            <span class="text-xs font-bold text-[#6d6154]">Восстановите скрытые улики в документах</span>
-                        </div>
-                    </div>
-                    
-                    <div onclick="openSetup('task4', 'redpencil')" class="lobby-card paper-bg p-4 sm:p-5 rounded-xl shadow-md border border-amber-200 dark:border-[#3d362d] flex items-center gap-4 cursor-pointer relative overflow-hidden">
-                        <span class="text-4xl z-10">🖍️</span>
-                        <div class="flex flex-col z-10">
-                            <span class="font-black text-lg text-rose-700 dark:text-rose-500 uppercase">Красный карандаш</span>
-                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Найдите исторические фальсификации в тексте</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= ИГРОВАЯ ЗОНА (КОНТЕЙНЕР) ================= -->
-        <div id="game-container" class="hidden flex-col w-full h-full pb-8">
-            <!-- Шапка текущей игры -->
-            <div id="active-game-header" class="flex justify-between items-center bg-white dark:bg-[#242729] px-4 py-3 rounded-xl shadow-sm border border-gray-200 dark:border-[#2a2e30] mb-4 shrink-0 transition-colors duration-400">
-                <button onclick="backToLobby()" class="text-xs sm:text-sm font-bold text-gray-500 hover:text-blue-500 flex items-center gap-1 py-1 px-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2e30] transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> 
-                    <span class="hidden sm:inline">В меню</span>
-                </button>
-                <span id="active-game-title" class="font-black text-sm sm:text-base uppercase tracking-widest text-gray-800 dark:text-slate-200 truncate">Режим</span>
-                <button onclick="openSetupModalFromGame()" class="text-xl text-gray-400 hover:text-blue-500 p-1 transition-colors" title="Настройки режима">⚙️</button>
-            </div>
-
-            <!-- ИСПРАВЛЕНИЕ: Пул вариантов больше не перекрывается меню -->
-            <div id="classic-task-area" class="hidden flex-col lg:flex-row flex-grow relative gap-4 items-start w-full">
-                <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-[#181a1b]/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
-
-                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#242729] rounded-xl shadow-md border border-gray-300 dark:border-[#2a2e30] overflow-hidden transition-colors duration-400 relative">
-                    <div id="detective-stamp" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 sm:border-8 border-red-600 text-red-600 font-black text-4xl sm:text-6xl uppercase tracking-widest px-4 py-2 transform -rotate-12 opacity-[0.07] dark:opacity-10 pointer-events-none z-0 font-mono text-center whitespace-nowrap" style="border-radius: 8px;">СОВЕРШЕННО<br>СЕКРЕТНО</div>
-                    <div class="overflow-x-auto p-1 relative z-10">
-                        <table class="w-full text-left border-collapse table-fixed">
-                            <thead id="table-head" class="bg-gray-200 dark:bg-[#2a2e30] text-gray-800 dark:text-gray-100 transition-colors"></thead>
-                            <tbody id="task-table-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Sticky bottom-[85px] обеспечивает зазор снизу (как раз размер нижнего меню) -->
-                <div id="pool-panel" class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-[85px] lg:bottom-4 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-2xl lg:rounded-xl shadow-[0_-4px_15px_rgba(0,0,0,0.08)] lg:shadow-md transition-colors duration-400">
-                    <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
-                        <h3 id="pool-title" class="font-black text-gray-800 dark:text-slate-200 flex items-center gap-1.5 text-xs sm:text-base">
-                            <span>🧩</span> ВАРИАНТЫ
-                        </h3>
-                        <button id="pool-toggle-btn" class="lg:hidden text-gray-500 bg-gray-100 dark:bg-[#2a2e30] px-2 py-1 rounded text-[11px] font-bold">Свернуть</button>
-                    </div>
-                    
-                    <div id="pool-content-wrapper">
-                        <!-- Ограничили высоту панели на мобильном, чтобы не съедала весь экран -->
-                        <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 lg:gap-2 max-h-[35vh] lg:max-h-none overflow-y-auto custom-scroll pb-2"></div>
-                        <div class="mt-4 pt-3 border-t border-gray-100 dark:border-[#2a2e30] flex flex-col gap-2">
-                            <div id="check-buttons" class="flex gap-2 w-full">
-                                <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-xs sm:text-sm w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1">
-                                    ✅ Уверен
-                                </button>
-                                <button id="check-btn-doubt" onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-[11px] sm:text-xs w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1 leading-tight">
-                                    🤔 Сомневаюсь
-                                </button>
-                            </div>
-                            <button id="reveal-btn" onclick="toggleAnswers()" class="hidden text-orange-500 dark:text-orange-400 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline">
-                                👀 Сдаюсь, покажи ответы
-                            </button>
-                            <button id="next-btn" onclick="generateTable()" class="hidden bg-blue-600 hover:bg-blue-700 text-slate-50 font-bold py-3 px-6 rounded-xl shadow-md active:scale-95 text-xs sm:text-base w-full uppercase tracking-wider transition-colors">
-                                ➡️ Дальше
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="flashcard-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative pb-10"></div>
-            <div id="study-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative pb-10"></div>
-
-            <div id="redpencil-area" class="hidden flex-col flex-grow items-center w-full gap-4 relative pb-16">
-                <div class="flex items-center justify-between w-full max-w-4xl mb-2">
-                    <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 truncate pr-4 uppercase tracking-widest" id="rp-title">Документ</h2>
-                    <div class="text-xs sm:text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-900/30 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-rose-200 dark:border-rose-800/50 shadow-sm whitespace-nowrap" id="rp-counter">0 / 0</div>
+        <div id="controls-area" class="bg-white dark:bg-[#242729] p-3 sm:p-5 rounded-xl shadow-sm border border-gray-300 dark:border-[#2a2e30] flex flex-col gap-3 transition-colors duration-400">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                <div id="filter-task-container">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Задание</label>
+                    <select id="filter-task" onchange="handleTaskChange()" class="w-full bg-blue-50 dark:bg-[#2a2e30] border border-blue-400 dark:border-blue-500 text-blue-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
+                        <option value="task4">📍 №4 (География)</option>
+                        <option value="task5">👤 №5 (Личности)</option>
+                    </select>
                 </div>
                 
-                <div class="paper-bg relative w-full max-w-4xl rounded-xl shadow-lg p-6 sm:p-10 min-h-[50vh] flex flex-col border border-amber-200 dark:border-[#3d362d] overflow-hidden">
-                    <div class="paper-edges rounded-xl"></div>
-                    <div id="rp-content" class="relative z-10 flex-1 text-base sm:text-xl leading-relaxed sm:leading-[2.2] text-justify text-gray-900 dark:text-gray-100 font-serif"></div>
-                    <div id="rp-stamp" class="rp-stamp hidden mt-8 self-center">ОДОБРЕНО</div>
-                </div>
-                
-                <div class="w-full max-w-4xl flex gap-3 mt-2 sm:mt-4 pb-10">
-                    <button id="rp-giveup-btn" onclick="giveUpRedPencil()" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-black py-3 sm:py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-wider text-xs sm:text-sm">👀 Сдаюсь, покажите ошибки</button>
-                    <button id="rp-next-btn" onclick="nextRedPencilCase()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 sm:py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-wider hidden text-xs sm:text-sm">➡️ Следующий документ</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- ================= НИЖНИЙ БАР НАВИГАЦИИ ================= -->
-    <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white/95 dark:bg-[#181a1b]/95 backdrop-blur-md border-t border-gray-200 dark:border-[#2a2e30] z-50 flex justify-around items-center pb-[env(safe-area-inset-bottom)] transition-colors duration-400 h-[80px]">
-        <div onclick="backToLobby()" class="bottom-nav-item flex flex-col items-center justify-center w-1/4 h-full cursor-pointer text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-            <span class="text-2xl mb-1 leading-none">🏠</span>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Главная</span>
-        </div>
-        <div onclick="window.location.href='https://historyman-creator.github.io/tsar-tinder/'" class="bottom-nav-item flex flex-col items-center justify-center w-1/4 h-full cursor-pointer text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-            <span class="text-2xl mb-1 leading-none">🩸</span>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Тиндер</span>
-        </div>
-        <div onclick="openShopModal()" class="bottom-nav-item flex flex-col items-center justify-center w-1/4 h-full cursor-pointer text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 relative">
-            <span class="text-2xl mb-1 leading-none">🛒</span>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Магазин</span>
-        </div>
-        <div onclick="openStatsModal()" class="bottom-nav-item flex flex-col items-center justify-center w-1/4 h-full cursor-pointer text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">
-            <span class="text-2xl mb-1 leading-none">📊</span>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Профиль</span>
-        </div>
-    </nav>
-
-    <!-- Модальное окно настроек перед стартом (Bottom Sheet) -->
-    <div id="setup-modal" class="fixed inset-0 bg-black/70 z-[10002] hidden flex-col justify-end sm:justify-center items-center backdrop-blur-sm opacity-0 transition-opacity no-print">
-        <div class="bg-white dark:bg-[#242729] w-full sm:w-[90%] max-w-md rounded-t-3xl sm:rounded-2xl p-6 flex flex-col shadow-2xl transform transition-transform translate-y-full sm:translate-y-0" id="setup-modal-content">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black text-gray-800 dark:text-slate-200" id="setup-title">Настройка</h2>
-                <button onclick="closeSetup()" class="text-2xl text-gray-400 hover:text-rose-500 transition-colors leading-none">&times;</button>
-            </div>
-
-            <div class="flex flex-col gap-4 mb-6">
-                <input type="hidden" id="setup-task-input" value="task4">
-                <input type="hidden" id="setup-mode-input" value="normal">
-
-                <div id="setup-task-container" class="hidden">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 pl-1">Тип задания</label>
-                    <div class="flex bg-gray-100 dark:bg-[#1a1c1d] p-1 rounded-xl">
-                        <button onclick="setSetupTask('task4')" id="btn-setup-task4" class="flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-white dark:bg-[#2a2e30] text-blue-600 transition-colors">📍 №4 Гео</button>
-                        <button onclick="setSetupTask('task5')" id="btn-setup-task5" class="flex-1 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-700 transition-colors">👤 №5 Личности</button>
-                    </div>
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Режим игры</label>
+                    <select id="filter-mode" onchange="handleModeChange()" class="w-full bg-purple-50 dark:bg-[#2a2e30] border border-purple-400 dark:border-purple-500 text-purple-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
+                        <optgroup label="Тренировка и Проверка">
+                            <option value="normal">🎓 Обучение</option>
+                            <option value="mistakes">🔥 Работа над ошибками</option>
+                            <option value="speedrun">⚡ Спидран</option>
+                            <option value="flashcards">🃏 Флеш-карточки</option>
+                        </optgroup>
+                        <optgroup label="Изучение Эпох">
+                            <option value="study">📖 Сюжетные карточки</option>
+                            <option value="detective">🕵️ Секретный архив</option>
+                            <option value="redpencil">🖍️ Красный карандаш</option>
+                        </optgroup>
+                    </select>
                 </div>
 
-                <div id="setup-period-container">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 pl-1">Период истории</label>
-                    <select id="filter-period" onchange="handleSetupSettingsChange()" class="w-full bg-gray-50 dark:bg-[#1a1c1d] border border-gray-200 dark:border-[#2a2e30] text-gray-900 dark:text-slate-200 text-sm rounded-xl p-3 outline-none font-bold shadow-sm focus:border-blue-500 transition-colors">
-                        <option value="all" selected>🌍 Вся история</option>
-                        <option value="custom">⚙️ Свой период (года)</option>
+                <div id="filter-period-container">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Период</label>
+                    <select id="filter-period" onchange="handleSettingsChange()" class="w-full bg-gray-50 dark:bg-[#2a2e30] border border-gray-400 dark:border-gray-500 text-gray-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
+                        <option value="all">🌍 Вся история</option>
+                        <option value="custom">⚙️ Свой период</option>
                         <option value="early">⚔️ Древность и Смута</option>
                         <option value="18th">👑 XVIII век</option>
                         <option value="19th">🚂 XIX век</option>
@@ -593,9 +462,18 @@
                     </select>
                 </div>
 
-                <div id="setup-case-container" class="hidden">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 pl-1">Материалы дела</label>
-                    <select id="filter-case" class="w-full bg-stone-50 dark:bg-[#1a1c1d] border border-stone-200 dark:border-[#2a2e30] text-stone-900 dark:text-slate-200 text-sm rounded-xl p-3 outline-none font-bold shadow-sm font-mono focus:border-red-500">
+                <div id="filter-rows-container">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Строк в таблице</label>
+                    <select id="filter-rows" onchange="handleSettingsChange()" class="w-full bg-gray-50 dark:bg-[#2a2e30] border border-gray-400 dark:border-gray-500 text-gray-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm">
+                        <option value="4" selected>4 строки (ЕГЭ)</option>
+                        <option value="6">6 строк</option>
+                        <option value="10">10 строк</option>
+                    </select>
+                </div>
+
+                <div id="filter-case-container" class="hidden">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase mb-1">Материалы дела</label>
+                    <select id="filter-case" onchange="handleSettingsChange()" class="w-full bg-stone-100 dark:bg-[#2a2e30] border border-stone-400 dark:border-stone-500 text-stone-900 dark:text-slate-200 text-xs sm:text-sm rounded-lg p-2 outline-none font-bold shadow-sm font-mono">
                         <option value="rtw">⚔️ Русско-турецкие войны</option>
                         <option value="sweden">🌊 Борьба за Балтику</option>
                         <option value="smuta">👑 Смутное время</option>
@@ -611,40 +489,98 @@
                     </select>
                 </div>
 
-                <div id="custom-period-container" class="hidden bg-gray-50 dark:bg-[#1a1c1d] border border-gray-200 dark:border-[#2a2e30] rounded-xl p-3 shadow-inner flex justify-center items-center gap-3">
-                    <input type="number" id="custom-year-start" value="862" class="w-20 p-2 text-center font-bold text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-[#242729] dark:text-slate-200 outline-none focus:border-blue-500">
-                    <span class="text-sm font-bold text-gray-500">—</span>
-                    <input type="number" id="custom-year-end" value="2022" class="w-20 p-2 text-center font-bold text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-[#242729] dark:text-slate-200 outline-none focus:border-blue-500">
+                <div id="custom-period-container" class="hidden col-span-2 md:col-span-4 bg-stone-100 dark:bg-[#2a2e30] border border-stone-300 dark:border-stone-600 rounded-lg p-2 shadow-inner flex justify-center items-center gap-2">
+                    <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Года:</span>
+                    <input type="number" id="custom-year-start" value="862" class="w-16 sm:w-20 p-1 text-center font-bold text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-500 dark:bg-[#181a1b] dark:text-slate-200 outline-none" onchange="handleSettingsChange()">
+                    <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300">—</span>
+                    <input type="number" id="custom-year-end" value="2022" class="w-16 sm:w-20 p-1 text-center font-bold text-xs sm:text-sm rounded border border-gray-300 dark:border-gray-500 dark:bg-[#181a1b] dark:text-slate-200 outline-none" onchange="handleSettingsChange()">
                 </div>
-
-                <div id="setup-rows-container">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 pl-1">Размер таблицы</label>
-                    <div class="flex gap-2">
-                        <button type="button" onclick="setSetupRows(4)" id="btn-row-4" class="flex-1 py-2 text-sm font-bold rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 transition-colors">4 стр</button>
-                        <button type="button" onclick="setSetupRows(6)" id="btn-row-6" class="flex-1 py-2 text-sm font-bold rounded-lg border-2 border-gray-200 bg-white text-gray-600 dark:border-[#2a2e30] dark:bg-[#1a1c1d] dark:text-gray-400 transition-colors">6 стр</button>
-                        <button type="button" onclick="setSetupRows(10)" id="btn-row-10" class="flex-1 py-2 text-sm font-bold rounded-lg border-2 border-gray-200 bg-white text-gray-600 dark:border-[#2a2e30] dark:bg-[#1a1c1d] dark:text-gray-400 transition-colors">10 стр</button>
-                    </div>
-                    <input type="hidden" id="filter-rows" value="4">
+            </div>
+            
+            <div class="flex items-center justify-between mt-1 flex-wrap gap-2">
+                <label class="flex items-center gap-2 cursor-pointer bg-gray-100 dark:bg-[#2a2e30] px-3 py-1.5 rounded-lg border border-gray-300 dark:border-slate-500 shadow-sm w-full sm:w-auto justify-center sm:justify-start">
+                    <input type="checkbox" id="toggle-hide-learned" onchange="toggleHideLearned()" class="w-4 h-4 text-examBlue bg-white border-gray-400 rounded focus:ring-examBlue">
+                    <span class="text-[11px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight" title="Скрывает только свежие факты. Забытые факты вернутся!">🙈 Скрывать уже выученное</span>
+                </label>
+                
+                <div class="flex gap-2 sm:gap-3 flex-wrap w-full sm:w-auto justify-center sm:justify-end">
+                    <button onclick="window.location.href='https://historyman-creator.github.io/tsar-tinder/'" class="bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-900/60 px-3 py-1.5 rounded-lg border border-red-300 dark:border-red-700 text-[11px] sm:text-xs font-black transition-colors shadow-sm flex items-center gap-1">🩸 Царь-Тиндер</button>
+                    <button onclick="openStatsModal()" class="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60 px-3 py-1.5 rounded-lg border border-blue-300 dark:border-blue-700 text-[11px] sm:text-xs font-black transition-colors shadow-sm">📊 Прогресс</button>
+                    <button onclick="openShopModal()" class="bg-pink-100 dark:bg-pink-900/40 text-pink-800 dark:text-pink-200 hover:bg-pink-200 dark:hover:bg-pink-900/60 px-3 py-1.5 rounded-lg border border-pink-300 dark:border-pink-700 text-[11px] sm:text-xs font-black transition-colors shadow-sm">🎨 Магазин</button>
                 </div>
+            </div>
+        </div>
 
-                <div id="setup-hide-learned-container" class="mt-2">
-                    <label class="flex items-center gap-3 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-4 py-3 rounded-xl border border-blue-100 dark:border-blue-800/50 shadow-sm w-full transition-colors">
-                        <input type="checkbox" id="toggle-hide-learned" onchange="toggleHideLearned()" class="w-5 h-5 text-examBlue bg-white border-gray-400 rounded focus:ring-examBlue">
-                        <div class="flex flex-col">
-                            <span class="text-sm font-bold text-blue-900 dark:text-blue-200">🙈 Скрывать выученное</span>
-                            <span class="text-[10px] font-medium text-blue-600 dark:text-blue-400 leading-tight">Пропуск свежих фактов. Забытые вернутся!</span>
-                        </div>
-                    </label>
+        <div id="classic-task-area" class="flex flex-col lg:flex-row flex-grow relative gap-4 items-start w-full">
+            <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-[#181a1b]/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
+
+            <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#242729] rounded-xl shadow-md border border-gray-300 dark:border-[#2a2e30] overflow-hidden transition-colors duration-400 relative">
+                <div id="detective-stamp" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 sm:border-8 border-red-600 text-red-600 font-black text-4xl sm:text-6xl uppercase tracking-widest px-4 py-2 transform -rotate-12 opacity-[0.07] dark:opacity-10 pointer-events-none z-0 font-mono text-center whitespace-nowrap" style="border-radius: 8px;">СОВЕРШЕННО<br>СЕКРЕТНО</div>
+                <div class="overflow-x-auto p-1 relative z-10">
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead id="table-head" class="bg-gray-200 dark:bg-[#2a2e30] text-gray-800 dark:text-gray-100 transition-colors"></thead>
+                        <tbody id="task-table-body"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <button onclick="startGameFromSetup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-widest text-base">СТАРТ 🚀</button>
+            <div id="pool-panel" class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400">
+                <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
+                    <h3 id="pool-title" class="font-black text-gray-800 dark:text-slate-200 flex items-center gap-1.5 text-xs sm:text-base">
+                        <span>🧩</span> ВАРИАНТЫ
+                    </h3>
+                    <button id="pool-toggle-btn" class="lg:hidden text-gray-500 bg-gray-100 dark:bg-[#2a2e30] px-2 py-1 rounded text-[11px] font-bold">Свернуть</button>
+                </div>
+                
+                <div id="pool-content-wrapper">
+                    <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 lg:gap-2 max-h-[45vh] sm:max-h-[50vh] lg:max-h-none overflow-y-auto custom-scroll pb-2"></div>
+                    <div class="mt-4 pt-3 border-t border-gray-100 dark:border-[#2a2e30] flex flex-col gap-2">
+                        <div id="check-buttons" class="flex gap-2 w-full">
+                            <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-xs sm:text-sm w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1">
+                                ✅ Уверен
+                            </button>
+                            <button id="check-btn-doubt" onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-slate-50 font-bold py-3 px-2 rounded-xl shadow-md active:scale-95 text-[11px] sm:text-xs w-full uppercase tracking-wider transition-colors flex justify-center items-center gap-1 leading-tight">
+                                🤔 Сомневаюсь
+                            </button>
+                        </div>
+                        <button id="reveal-btn" onclick="toggleAnswers()" class="hidden text-orange-500 dark:text-orange-400 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline">
+                            👀 Сдаюсь, покажи ответы
+                        </button>
+                        <button id="next-btn" onclick="generateTable()" class="hidden bg-blue-600 hover:bg-blue-700 text-slate-50 font-bold py-3 px-6 rounded-xl shadow-md active:scale-95 text-xs sm:text-base w-full uppercase tracking-wider transition-colors">
+                            ➡️ Дальше
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
+        <div id="flashcard-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative"></div>
+
+        <div id="study-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative"></div>
+
+        <!-- ================= РЕЖИМ КРАСНЫЙ КАРАНДАШ ================= -->
+        <div id="redpencil-area" class="hidden flex-col flex-grow items-center w-full gap-4 relative">
+            <div class="flex items-center justify-between w-full max-w-4xl mb-2">
+                <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 truncate pr-4 uppercase tracking-widest" id="rp-title">Документ</h2>
+                <div class="text-xs sm:text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-900/30 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-rose-200 dark:border-rose-800/50 shadow-sm whitespace-nowrap" id="rp-counter">0 / 0</div>
+            </div>
+            
+            <div class="paper-bg relative w-full max-w-4xl rounded-xl shadow-lg p-6 sm:p-10 min-h-[50vh] flex flex-col border border-amber-200 dark:border-[#3d362d] overflow-hidden">
+                <div class="paper-edges rounded-xl"></div>
+                <div id="rp-content" class="relative z-10 flex-1 text-base sm:text-xl leading-relaxed sm:leading-[2.2] text-justify text-gray-900 dark:text-gray-100 font-serif"></div>
+                <div id="rp-stamp" class="rp-stamp hidden mt-8 self-center">ОДОБРЕНО</div>
+            </div>
+            
+            <div class="w-full max-w-4xl flex gap-3 mt-2 sm:mt-4 pb-10">
+                <button id="rp-giveup-btn" onclick="giveUpRedPencil()" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-black py-3 sm:py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-wider text-xs sm:text-sm">👀 Сдаюсь, покажите ошибки</button>
+                <button id="rp-next-btn" onclick="nextRedPencilCase()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 sm:py-4 rounded-xl shadow-lg transition-transform active:scale-95 uppercase tracking-wider hidden text-xs sm:text-sm">➡️ Следующий документ</button>
+            </div>
+        </div>
+
+    </main>
 
     <template id="flashcard-template-front">
-        <div class="w-full max-w-md mx-auto bg-white dark:bg-[#242729] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-8 min-h-[350px] flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed border-gray-300 dark:border-[#2a2e30] hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 relative group" onclick="window.flipFlashcard(this)">
+        <div class="w-full max-w-md bg-white dark:bg-[#242729] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-8 min-h-[300px] flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed border-gray-300 dark:border-[#2a2e30] hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 relative group" onclick="window.flipFlashcard(this)">
             <div class="absolute top-4 left-4 bg-gray-100 dark:bg-[#2a2e30] px-2 py-1 rounded text-[12px] font-bold text-gray-500 shadow-sm border border-gray-200 dark:border-[#2a2e30] fc-level-badge"></div>
             <div class="absolute top-4 right-4 text-gray-300 dark:text-gray-600 group-hover:text-blue-400 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -660,13 +596,13 @@
         <div class="fc-content flex flex-col w-full mt-6 mb-4 items-center justify-center flex-grow"></div>
         <div class="flex gap-2 w-full mt-auto shrink-0">
             <button onclick="window.answerFlashcard(false, false, event)" class="flex-1 bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-wide border border-rose-200 dark:border-rose-800">❌ Забыл</button>
-            <button onclick="window.answerFlashcard(true, false, event)" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-wide border border-indigo-200 dark:border-indigo-800">🤔 Сомн.</button>
+            <button onclick="window.answerFlashcard(true, false, event)" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-wide border border-indigo-200 dark:border-indigo-800">🤔 Сомневаюсь</button>
             <button onclick="window.answerFlashcard(true, true, event)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-50 py-3 rounded-xl font-black text-[12px] sm:text-sm transition-transform active:scale-95 shadow-md uppercase tracking-wide">✅ Помню</button>
         </div>
     </template>
 
     <template id="study-card-template">
-        <div class="w-full max-w-lg mx-auto bg-white dark:bg-[#242729] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] overflow-hidden border border-gray-200 dark:border-[#2a2e30] flex flex-col transition-all duration-300 min-h-[400px]">
+        <div class="w-full max-w-lg bg-white dark:bg-[#242729] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] overflow-hidden border border-gray-200 dark:border-[#2a2e30] flex flex-col transition-all duration-300 min-h-[400px]">
             <div class="h-32 sm:h-40 flex items-center justify-center text-7xl shadow-inner st-bg transition-colors">
                 <span class="drop-shadow-lg st-emoji hover:scale-110 transition-transform cursor-default">👑</span>
             </div>
@@ -682,16 +618,15 @@
                 </button>
             </div>
         </div>
-        <div class="mt-4 text-center text-xs font-bold text-gray-400 bg-white/50 dark:bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm st-progress shadow-sm mx-auto w-max"></div>
+        <div class="mt-4 text-xs font-bold text-gray-400 bg-white/50 dark:bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm st-progress shadow-sm"></div>
     </template>
 
-    <!-- Остальные модальные окна (Магазин, Ачивки, Учитель, Профиль, Стата) -->
-    <div id="shop-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+    <div id="shop-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#242729] rounded-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="p-4 border-b border-gray-200 dark:border-[#2a2e30] flex justify-between items-center bg-gray-50 dark:bg-[#181a1b] shrink-0">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 flex items-center gap-2">🎨 Магазин</h2>
-                    <p class="text-[11px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Кастомизация тренажера</p>
+                    <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 flex items-center gap-2">🎨 Кастомизация</h2>
+                    <p class="text-[11px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Зарабатывай баллы, решая задания!</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="bg-pink-100 dark:bg-pink-900/30 border border-pink-300 dark:border-pink-800 text-pink-800 dark:text-pink-300 px-3 py-1.5 rounded-lg text-sm font-black shadow-sm">
@@ -706,11 +641,12 @@
         </div>
     </div>
 
-    <div id="achievements-modal" class="fixed inset-0 bg-black/80 z-[10006] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+    <div id="achievements-modal" class="fixed inset-0 bg-black/80 z-[10006] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#242729] rounded-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="p-4 border-b border-gray-200 dark:border-[#2a2e30] flex justify-between items-center bg-gray-50 dark:bg-[#181a1b] shrink-0">
                 <div>
                     <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 flex items-center gap-2">🏆 Зал Славы (Ачивки)</h2>
+                    <p class="text-[11px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Собери их все, чтобы стать Легендой!</p>
                 </div>
                 <button onclick="closeAchievementsModal()" class="text-3xl text-gray-400 hover:text-rose-500 transition-colors leading-none">&times;</button>
             </div>
@@ -720,7 +656,7 @@
         </div>
     </div>
 
-    <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+    <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#242729] rounded-xl w-[95%] max-w-3xl h-[85vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-100 shadow-2xl border border-gray-200 dark:border-[#2a2e30]">
              <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-[#2a2e30] flex justify-between items-center bg-gray-50 dark:bg-[#181a1b] shrink-0">
                 <h2 class="font-black text-base sm:text-xl flex items-center gap-2">👨‍🏫 Кабинет учителя</h2>
@@ -771,7 +707,7 @@
         </div>
     </div>
 
-    <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+    <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#242729] rounded-2xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
             <h3 class="font-black text-lg dark:text-slate-200 text-center">👤 Профиль ученика</h3>
             <div>
@@ -789,10 +725,10 @@
         </div>
     </div>
 
-    <div id="stats-modal" class="fixed inset-0 bg-black/70 z-[10001] hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity no-print">
+    <div id="stats-modal" class="fixed inset-0 bg-black/70 z-[10001] hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#242729] rounded-2xl w-[90%] max-w-md p-5 flex flex-col shadow-2xl overflow-hidden max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
-                <h2 class="text-lg font-black text-gray-800 dark:text-slate-200">📊 Прогресс</h2>
+                <h2 class="text-lg font-black text-gray-800 dark:text-slate-200">📊 Аналитика</h2>
                 <button onclick="closeStatsModal()" class="text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-slate-200">&times;</button>
             </div>
             <div class="flex-grow overflow-y-auto custom-scroll pr-1">
@@ -831,7 +767,7 @@
         </div>
     </div>
 
-    <div id="map-modal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print">
+    <div id="map-modal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#242729] rounded-xl w-[95%] h-[60vh] max-w-4 flex flex-col overflow-hidden relative">
             <div class="p-3 border-b border-gray-200 dark:border-[#2a2e30] flex justify-between items-center bg-gray-50 dark:bg-[#181a1b]">
                 <h2 class="text-xs font-bold text-gray-800 dark:text-slate-200" id="map-modal-title">Карта</h2>
@@ -850,11 +786,10 @@
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.94z"/></svg>
                 Поделиться
             </button>
-            <button onclick="backToLobbyFromGameEnd()" class="w-full bg-examBlue hover:bg-blue-800 text-white py-3 rounded-xl font-bold transition-transform active:scale-95 shadow-md">В меню</button>
+            <button onclick="closeModal()" class="w-full bg-examBlue hover:bg-blue-800 text-white py-3 rounded-xl font-bold transition-transform active:scale-95 shadow-md">Закрыть</button>
         </div>
     </div>
 
-    <!-- ЕДИНСТВЕННЫЙ БЛОК СКРИПТОВ (Дубликаты удалены) -->
     <script>
         function checkAchievements() {
             if (!window.state.stats.achievements) window.state.stats.achievements = [];
@@ -897,7 +832,7 @@
                 achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 }
             },
             mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
-            isTeacherAdmin: false, focusMode: false, studyIndex: 0, rpHasMistake: false
+            isTeacherAdmin: false, focusMode: false, studyIndex: 0
         };
 
         const tg = window.Telegram ? window.Telegram.WebApp : null;
@@ -913,7 +848,6 @@
             if (window.secretClicks === 5) {
                 window.state.isTeacherAdmin = true;
                 showToast('👨‍🏫', 'Кабинет учителя открыт!', 'bg-purple-600', 'border-purple-800');
-                openTeacherModal(); 
                 if (window.loadClassProgress) window.loadClassProgress();
             }
         };
@@ -1031,28 +965,28 @@
             applySkin();
 
             document.getElementById('toggle-hide-learned').checked = window.state.hideLearned;
+            document.getElementById('filter-task').value = window.state.currentTask;
             
-            updateGlobalUI(); 
-            checkURLForHomework();
+            DOM.zenSolved = document.getElementById('zen-stat-solved'); 
+
+            setTimeout(() => document.querySelectorAll('.modal-content-hidden').forEach(el => el.classList.remove('modal-content-hidden')), 500);
+
+            updateGlobalUI(); checkURLForHomework();
 
             setInterval(() => {
-                if (window.state.currentScreen === 'game') {
-                    window.state.stats.totalTimeSpent = (window.state.stats.totalTimeSpent || 0) + 1;
-                    const today = getTodayString();
-                    if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 };
-                    window.state.stats.dailyStats[today].timeSpent++;
-                    if (window.state.stats.totalTimeSpent % 5 === 0 && !window.state.isHomeworkMode) saveProgress();
-                }
+                window.state.stats.totalTimeSpent = (window.state.stats.totalTimeSpent || 0) + 1;
+                const today = getTodayString();
+                if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 };
+                window.state.stats.dailyStats[today].timeSpent++;
+                if (window.state.stats.totalTimeSpent % 5 === 0 && !window.state.isHomeworkMode) saveProgress();
             }, 1000);
-            
-            if(!window.state.isHomeworkMode) {
-                window.state.currentScreen = 'lobby';
-            }
+
+            if (window.generateTable) generateTable();
         }
 
         function applySkin() { 
             document.body.className = document.body.className.replace(/skin-\w+/g, ''); 
-            const themeBtns = document.querySelectorAll('button[title="Сменить тему"]');
+            const themeBtns = document.querySelectorAll('button[onclick="toggleTheme()"]');
             if (window.state.stats.currentSkin !== 'classic') { 
                 document.body.classList.add('skin-' + window.state.stats.currentSkin);
                 document.documentElement.classList.remove('dark');
@@ -1078,24 +1012,34 @@
         function checkURLForHomework() {
             const hw = new URLSearchParams(window.location.search).get('hw');
             if (hw) {
-                window.state.isHomeworkMode = true; 
-                window.state.hwTargetIndices = hw.split(',').map(Number); 
-                window.state.hwCurrentPool = [...window.state.hwTargetIndices];
-                
-                document.getElementById('lobby-area').classList.add('hidden'); 
-                document.getElementById('game-container').classList.remove('hidden');
-                document.getElementById('game-container').classList.add('flex');
-                document.getElementById('hw-alert').classList.remove('hidden'); 
-                updateText(DOM.hwRemaining, window.state.hwCurrentPool.length);
-                
-                window.state.currentTask = 'task4'; 
-                toggleMode('normal');
+                window.state.isHomeworkMode = true; window.state.hwTargetIndices = hw.split(',').map(Number); window.state.hwCurrentPool = [...window.state.hwTargetIndices];
+                document.getElementById('controls-area').classList.add('hidden'); document.getElementById('hw-alert').classList.remove('hidden'); updateText(DOM.hwRemaining, window.state.hwCurrentPool.length);
             }
         }
 
         function toggleTheme() { localStorage.setItem('ege_theme', document.documentElement.classList.toggle('dark') ? 'dark' : 'light'); }
         
-        function toggleHideLearned() { window.state.hideLearned = document.getElementById('toggle-hide-learned').checked; saveProgress(); }
+        function toggleFocusMode() {
+            window.state.focusMode = !window.state.focusMode;
+            const controls = document.getElementById('controls-area');
+            const header = document.getElementById('main-header');
+            const zenBar = document.getElementById('zen-bar');
+            
+            if (window.state.focusMode) {
+                controls.classList.add('hidden');
+                header.classList.add('hidden');
+                zenBar.classList.remove('hidden');
+                zenBar.classList.add('flex');
+                showToast('🧘', 'Режим фокуса (Дзен)', 'bg-teal-500', 'border-teal-700');
+            } else {
+                controls.classList.remove('hidden');
+                header.classList.remove('hidden');
+                zenBar.classList.add('hidden');
+                zenBar.classList.remove('flex');
+            }
+        }
+
+        function toggleHideLearned() { window.state.hideLearned = document.getElementById('toggle-hide-learned').checked; saveProgress(); handleSettingsChange(); }
 
         window.onChipClick = function(chip, e) {
             haptic('light'); const now = Date.now(); const timeSinceLastClick = now - (chip._lastClickTime || 0); chip._lastClickTime = now;
@@ -1121,134 +1065,27 @@
             updateSlotGlow();
         };
 
-        const modeTitles = {
-            'normal': 'Тренировка',
-            'mistakes': 'Работа над ошибками',
-            'speedrun': 'Спидран',
-            'flashcards': 'Флеш-карты',
-            'study': 'Сюжеты',
-            'detective': 'Секретный архив',
-            'redpencil': 'Красный карандаш'
+        window.handleTaskChange = function() { window.state.currentTask = document.getElementById('filter-task').value; document.getElementById('filter-rows').disabled = window.state.currentTask === 'task5'; if (window.state.currentMode === 'flashcards') window.nextFlashcard(); else generateTable(); };
+        
+        window.handleModeChange = function() { 
+            const mode = document.getElementById('filter-mode').value; 
+            toggleMode(mode); 
         };
-
-        window.openSetup = function(defaultTask, mode) {
-            haptic('light');
-            document.getElementById('setup-task-input').value = defaultTask;
-            document.getElementById('setup-mode-input').value = mode;
-            setSetupTask(defaultTask);
-
-            const isFlashcards = mode === 'flashcards' || mode === 'mistakes' || mode === 'study';
-            const isSpeedrun = mode === 'speedrun';
+        
+        window.handleSettingsChange = function() { 
+            const mode = window.state.currentMode;
             const isDetective = mode === 'detective';
+            const isSpeedrun = mode === 'speedrun';
             const isRedPencil = mode === 'redpencil';
-
-            document.getElementById('setup-title').innerText = "Настройка: " + modeTitles[mode];
-
-            document.getElementById('setup-task-container').classList.toggle('hidden', !(isFlashcards || mode === 'normal'));
-            document.getElementById('setup-period-container').classList.toggle('hidden', isDetective || isSpeedrun);
-            document.getElementById('setup-rows-container').classList.toggle('hidden', isDetective || isFlashcards || isSpeedrun || isRedPencil);
-            document.getElementById('setup-case-container').classList.toggle('hidden', !isDetective);
-            document.getElementById('setup-hide-learned-container').classList.toggle('hidden', mode === 'mistakes' || isDetective || isRedPencil);
-
-            handleSetupSettingsChange();
-
-            const modal = document.getElementById('setup-modal');
-            const content = document.getElementById('setup-modal-content');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('translate-y-full');
-            }, 10);
-        };
-
-        window.setSetupTask = function(task) {
-            document.getElementById('setup-task-input').value = task;
-            const btn4 = document.getElementById('btn-setup-task4');
-            const btn5 = document.getElementById('btn-setup-task5');
-            
-            if (task === 'task4') {
-                btn4.className = "flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-white dark:bg-[#2a2e30] text-blue-600 transition-colors";
-                btn5.className = "flex-1 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-700 transition-colors";
-                document.getElementById('setup-rows-container').classList.remove('opacity-50', 'pointer-events-none');
-            } else {
-                btn5.className = "flex-1 py-2 text-sm font-bold rounded-lg shadow-sm bg-white dark:bg-[#2a2e30] text-purple-600 transition-colors";
-                btn4.className = "flex-1 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-700 transition-colors";
-                document.getElementById('setup-rows-container').classList.add('opacity-50', 'pointer-events-none');
-            }
-        };
-
-        window.setSetupRows = function(rows) {
-            document.getElementById('filter-rows').value = rows;
-            [4,6,10].forEach(r => {
-                const btn = document.getElementById(`btn-row-${r}`);
-                if (r === rows) {
-                    btn.className = "flex-1 py-2 text-sm font-bold rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 transition-colors";
-                } else {
-                    btn.className = "flex-1 py-2 text-sm font-bold rounded-lg border-2 border-gray-200 bg-white text-gray-600 dark:border-[#2a2e30] dark:bg-[#1a1c1d] dark:text-gray-400 transition-colors";
-                }
-            });
-        };
-
-        window.handleSetupSettingsChange = function() {
             const periodVal = document.getElementById('filter-period').value;
-            const isDetective = document.getElementById('setup-mode-input').value === 'detective';
-            const isSpeedrun = document.getElementById('setup-mode-input').value === 'speedrun';
+            
             const customContainer = document.getElementById('custom-period-container');
             if (customContainer) customContainer.classList.toggle('hidden', isDetective || isSpeedrun || periodVal !== 'custom');
-        };
 
-        window.closeSetup = function() {
-            const modal = document.getElementById('setup-modal');
-            const content = document.getElementById('setup-modal-content');
-            content.classList.add('translate-y-full');
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        };
-
-        window.startGameFromSetup = function() {
-            haptic('medium');
-            closeSetup();
-            
-            window.state.currentTask = document.getElementById('setup-task-input').value;
-            const mode = document.getElementById('setup-mode-input').value;
-            
-            let title = modeTitles[mode];
-            if(mode === 'normal' || mode === 'speedrun' || mode === 'flashcards' || mode === 'mistakes') {
-                title += window.state.currentTask === 'task4' ? ' (География)' : ' (Личности)';
-            }
-            document.getElementById('active-game-title').innerText = title;
-
-            document.getElementById('lobby-area').classList.add('hidden');
-            document.getElementById('game-container').classList.remove('hidden');
-            document.getElementById('game-container').classList.add('flex');
-            window.state.currentScreen = 'game';
-
-            toggleMode(mode);
-        };
-
-        window.backToLobby = function() {
-            haptic('light');
-            clearInterval(window.state.timerInterval);
-            const timerContainer = document.getElementById('timer-container');
-            if(timerContainer) timerContainer.classList.add('hidden'); 
-            
-            document.getElementById('game-container').classList.add('hidden');
-            document.getElementById('game-container').classList.remove('flex');
-            document.getElementById('lobby-area').classList.remove('hidden');
-            window.state.currentScreen = 'lobby';
-            document.body.classList.remove('mode-detective');
-        };
-
-        window.backToLobbyFromGameEnd = function() {
-            const modal = document.getElementById('game-over-modal');
-            modal.classList.add('hidden');
-            document.getElementById('board-overlay').classList.add('hidden');
-            backToLobby();
-        }
-
-        window.openSetupModalFromGame = function() {
-            openSetup(window.state.currentTask, window.state.currentMode);
+            if (mode === 'flashcards' && window.nextFlashcard) window.nextFlashcard(); 
+            else if (mode === 'study') { window.state.studyIndex = 0; if (window.renderStudyCard) renderStudyCard(); }
+            else if (mode === 'redpencil') { if (window.startRedPencilMode) startRedPencilMode(); }
+            else if (window.generateTable) generateTable(); 
         };
 
         function getBasePool(period) {
@@ -1279,9 +1116,8 @@
                 pool = uniquePool;
                 
                 if (pool.length === 0) {
-                    showToast('🎉', 'Ошибок и забытых фактов нет! Возврат в меню.', 'bg-emerald-500', 'border-emerald-700');
-                    setTimeout(() => backToLobby(), 1500);
-                    return null;
+                    showToast('🎉', 'Ошибок и забытых фактов нет! Возврат в Обучение.', 'bg-emerald-500', 'border-emerald-700');
+                    document.getElementById('filter-mode').value = 'normal'; toggleMode('normal'); return null;
                 }
             } else if (window.state.hideLearned) {
                 pool = pool.filter(f => {
@@ -1299,7 +1135,7 @@
         }
 
         function toggleMode(mode) {
-            if (window.state.currentMode === mode && window.state.currentScreen === 'game' && DOM.tbody && DOM.tbody.innerHTML !== '') return; 
+            if (window.state.currentMode === mode) return; 
             window.state.currentMode = mode; window.state.stats.streak = 0; updateGlobalUI();
             
             const timerContainer = document.getElementById('timer-container');
@@ -1312,7 +1148,21 @@
             const isDetective = mode === 'detective';
             const isRedPencil = mode === 'redpencil';
             
+            document.getElementById('filter-task-container').classList.toggle('hidden', isDetective || isRedPencil);
+            document.getElementById('filter-period-container').classList.toggle('hidden', isDetective || isSpeedrun);
+            document.getElementById('filter-rows-container').classList.toggle('hidden', isDetective || isFlashcards || isSpeedrun || isStudy || isRedPencil);
+            document.getElementById('filter-case-container').classList.toggle('hidden', !isDetective);
+            
+            const periodVal = document.getElementById('filter-period').value;
+            const customContainer = document.getElementById('custom-period-container');
+            if (customContainer) customContainer.classList.toggle('hidden', isDetective || isSpeedrun || periodVal !== 'custom');
+            
             document.body.classList.toggle('mode-detective', isDetective);
+
+            if (isSpeedrun) { 
+                document.getElementById('filter-rows').value = "4"; 
+                document.getElementById('filter-period').value = "all"; 
+            }
 
             ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => {
                 const el = document.getElementById(id);
@@ -1352,11 +1202,12 @@
             }
         }
 
+        // --- ВОССТАНОВЛЕННЫЕ ФУНКЦИИ ФЛЕШ-КАРТОЧЕК ---
         window.nextFlashcard = function() {
             const period = document.getElementById('filter-period').value;
             let allowed = getFilteredPool(period);
             if (!allowed || allowed.length === 0) {
-                document.getElementById('flashcard-area').innerHTML = '<div class="text-center p-10 w-full"><h2 class="text-xl font-bold text-rose-500 bg-white dark:bg-[#242729] rounded-xl p-5 shadow">⚠️ Нет подходящих событий!</h2></div>';
+                document.getElementById('flashcard-area').innerHTML = '<div class="text-center p-10 w-full"><h2 class="text-xl font-bold text-rose-500 bg-white dark:bg-[#242729] rounded-xl p-5 shadow">⚠️ В этом периоде нет событий!</h2></div>';
                 return;
             }
             
@@ -1385,7 +1236,7 @@
             const fact = window.state.currentFlashcardFact; 
             const isTask5 = window.state.currentTask === 'task5';
             
-            card.className = "w-full max-w-md mx-auto bg-blue-50 dark:bg-[#242729] rounded-3xl shadow-xl p-6 min-h-[350px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-[#2a2e30] transition-all duration-300 relative flipped"; 
+            card.className = "w-full max-w-md bg-blue-50 dark:bg-[#242729] rounded-3xl shadow-xl p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-[#2a2e30] transition-all duration-300 relative flipped"; 
             card.onclick = null; 
             
             let mapLink = '';
@@ -1426,12 +1277,13 @@
             saveProgress(); updateGlobalUI(); checkAchievements(); window.nextFlashcard();
         };
 
+        // --- ГЕНЕРАЦИЯ СЕКРЕТНОГО АРХИВА (СЛЕДОВАТЕЛЬ) ---
         function generateDetectiveTable() {
             window.state.tableHasMistake = false;
             window.state.answersRevealed = false;
             
             document.getElementById('pool-title').innerHTML = `<span>🔎</span> УЛИКИ`;
-            document.getElementById('pool-panel').className = "w-full lg:w-1/3 flex flex-col sticky bottom-[85px] lg:bottom-4 z-40 p-4 rounded-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400 detective-pool-panel";
+            document.getElementById('pool-panel').className = "w-full lg:w-1/3 flex flex-col sticky bottom-0 z-40 p-4 rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400 detective-pool-panel";
 
             document.getElementById('check-buttons').classList.remove('hidden'); document.getElementById('check-buttons').classList.add('flex');
             
@@ -1462,9 +1314,11 @@
                 return;
             }
 
+            // Выбираем случайное дело из категории
             const caseData = cases[Math.floor(Math.random() * cases.length)];
             window.state.currentTargetData = caseData.items; 
             
+            // Заголовок таблицы - это название дела
             document.getElementById('table-head').innerHTML = `
                 <tr>
                     <th class="p-4 sm:p-6 text-left relative bg-[#f3efe6] dark:bg-[#dcd6c7] rounded-t-lg">
@@ -1489,6 +1343,7 @@
                 
                 missing.push(item.answer); 
 
+                // Заменяем маркер ### на слот, встроенный в текст
                 const textHtml = item.text.replace('###', `<div class="dnd-slot detective-slot" data-expected="${item.answer}" data-letter=""></div>`);
                 td.innerHTML = `<span class="font-bold mr-2 text-gray-500">${idx + 1}.</span> ${textHtml}`;
                 
@@ -1497,6 +1352,7 @@
             });
             DOM.tbody.appendChild(trFragment);
 
+            // Пул: правильные + фейковые из файла data.js
             let poolItems = [...missing, ...(caseData.fakes || [])]; 
 
             const poolFragment = document.createDocumentFragment();
@@ -1514,7 +1370,7 @@
             window.state.answersRevealed = false;
             
             document.getElementById('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`;
-            document.getElementById('pool-panel').className = "w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-[85px] lg:bottom-4 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-2xl lg:rounded-xl shadow-[0_-4px_15px_rgba(0,0,0,0.08)] lg:shadow-md transition-colors duration-400";
+            document.getElementById('pool-panel').className = "w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400";
             
             const stamp = document.getElementById('detective-stamp');
             if (stamp) stamp.classList.add('hidden');
@@ -1594,15 +1450,11 @@
             window.state.tableHasMistake = false;
             window.state.answersRevealed = false;
             
-            let period = document.getElementById('filter-period').value;
-            let rowsCount = parseInt(document.getElementById('filter-rows').value) || 4;
+            const period = document.getElementById('filter-period').value;
+            const rowsCount = parseInt(document.getElementById('filter-rows').value) || 4;
             
-            if(window.state.currentMode === 'speedrun') {
-                period = 'all'; rowsCount = 4;
-            }
-
             document.getElementById('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`;
-            document.getElementById('pool-panel').className = "w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-[85px] lg:bottom-4 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-2xl lg:rounded-xl shadow-[0_-4px_15px_rgba(0,0,0,0.08)] lg:shadow-md transition-colors duration-400";
+            document.getElementById('pool-panel').className = "w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col sticky bottom-0 z-40 p-4 border border-gray-300 dark:border-[#2a2e30] rounded-t-2xl lg:rounded-xl shadow-2xl lg:shadow-md transition-colors duration-400";
             
             const stamp = document.getElementById('detective-stamp');
             if (stamp) stamp.classList.add('hidden');
@@ -1777,7 +1629,7 @@
 
             if (window.state.currentTask === 'task5' || window.state.currentMode === 'detective') {
                 if (allCorrect && filled === total && !window.state.tableHasMistake && newlyCorrectRowsCount > 0) {
-                    linesToReward = window.state.currentMode === 'detective' ? 2 : 2;
+                    linesToReward = 2;
                 }
             } else {
                 linesToReward = newlyCorrectRowsCount;
@@ -1898,6 +1750,7 @@
         function updateGlobalUI() {
             updateText(DOM.streak, window.state.stats.streak);
             updateText(DOM.solved, window.state.stats.totalSolvedEver);
+            updateText(DOM.zenSolved, window.state.stats.totalSolvedEver);
             updateText(DOM.points, window.state.stats.points);
             updateText(DOM.modalSolved, window.state.stats.totalSolvedEver);
             updateText(DOM.modalMistakes, window.state.mistakesPool.length);
@@ -1939,6 +1792,114 @@
 
         function closeModal() { if (window.state.isHomeworkMode) window.location.href = window.location.pathname; else location.reload(); }
         function shareTelegram() { const text = `🔥 Мой стрик в тренажере ЕГЭ по истории — ${window.state.stats.streak}! Попробуй побить: `; window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`); }
+
+        // ВОССТАНОВЛЕННЫЕ ФУНКЦИИ МОДАЛЬНЫХ ОКОН
+        window.openStatsModal = function() {
+            updateGlobalUI();
+            const eraContainer = document.getElementById('stats-era-container');
+            if (eraContainer) {
+                const eraNames = {'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'};
+                let eraHtml = '';
+                for (let key in eraNames) {
+                    const st = window.state.stats.eraStats[key] || { correct: 0, total: 0 };
+                    const percent = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
+                    eraHtml += `
+                        <div class="flex justify-between items-center bg-gray-50 dark:bg-[#2a2e30]/50 p-2 rounded-lg border border-gray-100 dark:border-[#2a2e30]">
+                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">${eraNames[key]}</span>
+                            <span class="text-xs font-black ${percent > 80 ? 'text-emerald-500' : (percent > 50 ? 'text-yellow-500' : 'text-rose-500')}">${percent}% <span class="text-gray-400 font-normal">(${st.correct}/${st.total})</span></span>
+                        </div>`;
+                }
+                eraContainer.innerHTML = eraHtml;
+            }
+
+            const dailyContainer = document.getElementById('stats-daily-container');
+            if (dailyContainer) {
+                const daily = window.state.stats.dailyStats || {};
+                const dates = Object.keys(daily).sort((a,b) => new Date(b) - new Date(a)).slice(0, 5);
+                if (dates.length > 0) {
+                    let dailyHtml = '';
+                    dates.forEach(d => {
+                        const dStr = new Date(d).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'});
+                        const mins = Math.floor((daily[d].timeSpent || 0) / 60);
+                        dailyHtml += `
+                            <div class="flex justify-between items-center bg-gray-50 dark:bg-[#2a2e30]/50 p-2 rounded-lg border border-gray-100 dark:border-[#2a2e30]">
+                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300">${dStr}</span>
+                                <div class="text-xs text-right">
+                                    <span class="font-black text-examBlue dark:text-blue-400">${daily[d].solved || 0} решено</span>
+                                    <span class="text-gray-400 mx-1">|</span>
+                                    <span class="font-bold text-yellow-600 dark:text-yellow-500">${mins} мин</span>
+                                </div>
+                            </div>`;
+                    });
+                    dailyContainer.innerHTML = dailyHtml;
+                } else {
+                    dailyContainer.innerHTML = '<p class="text-xs text-gray-500 text-center py-2">Пока нет данных.</p>';
+                }
+            }
+
+            const m = document.getElementById('stats-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.closeStatsModal = function() {
+            const m = document.getElementById('stats-modal');
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        };
+
+        window.openProfileModal = function() {
+            document.getElementById('profile-name-input').value = localStorage.getItem('student_manual_name') || '';
+            document.getElementById('profile-class-code').value = localStorage.getItem('student_class_code') || '';
+            const m = document.getElementById('profile-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.closeProfileModal = function() {
+            const m = document.getElementById('profile-modal');
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        };
+        
+        window.saveProfileName = function() {
+            const name = document.getElementById('profile-name-input').value.trim();
+            const code = document.getElementById('profile-class-code').value.trim();
+            if (name) localStorage.setItem('student_manual_name', name);
+            if (code !== undefined) localStorage.setItem('student_class_code', code);
+            showToast('✅', 'Профиль сохранен!', 'bg-emerald-500', 'border-emerald-700');
+            window.closeProfileModal();
+            if (window.syncProgressToCloud) window.syncProgressToCloud();
+        };
+
+        window.openAchievementsModal = function() {
+            const grid = document.getElementById('achievements-grid');
+            if (grid && typeof achievementsList !== 'undefined') {
+                let html = '';
+                achievementsList.forEach(a => {
+                    const isUnlocked = window.state.stats.achievements.includes(a.id);
+                    html += `
+                    <div class="achievement-card bg-white dark:bg-[#242729] border ${isUnlocked ? 'border-yellow-400 shadow-yellow-200/50' : 'border-gray-200 dark:border-[#2a2e30]'} rounded-xl p-3 flex flex-col items-center text-center relative ${isUnlocked ? '' : 'achievement-locked'}">
+                        <div class="text-3xl mb-2">${a.icon}</div>
+                        <h4 class="font-black text-[10px] sm:text-xs text-gray-800 dark:text-slate-200 mb-1 leading-tight">${a.name}</h4>
+                        <p class="text-[9px] text-gray-500 dark:text-gray-400 leading-tight">${a.desc}</p>
+                    </div>`;
+                });
+                grid.innerHTML = html;
+            }
+            const m = document.getElementById('achievements-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.closeAchievementsModal = function() {
+            const m = document.getElementById('achievements-modal');
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        };
 
         function openShopModal() {
             document.getElementById('shop-points-display').innerText = window.state.stats.points; let html = '';
@@ -2067,10 +2028,18 @@
             window.renderStudyCard();
         };
 
+        // --- ЛОГИКА РЕЖИМА "КРАСНЫЙ КАРАНДАШ" ---
         let currentRPCaseIndex = 0;
         let rpFakesTotal = 0;
         let rpFakesFound = 0;
         let rpCasesShuffled = [];
+
+        window.updateRPCounter = function() {
+            const counterEl = document.getElementById('rp-counter');
+            if (counterEl) {
+                counterEl.innerText = `${rpFakesFound} / ${rpFakesTotal}`;
+            }
+        };
 
         window.startRedPencilMode = function() {
             if (typeof redPencilCases === 'undefined') {
@@ -2115,6 +2084,7 @@
         };
 
         window.loadRPCase = function(index) {
+            // Сбрасываем флаг ошибок при загрузке нового документа
             if(window.state) window.state.rpHasMistake = false; 
             
             if (index >= rpCasesShuffled.length) {
@@ -2128,12 +2098,13 @@
             const caseData = rpCasesShuffled[index];
             document.getElementById('rp-title').innerText = caseData.title + ' • ' + caseData.year + ' г.';
             
+            // НОВАЯ ЛОГИКА СЛУЧАЙНЫХ ОШИБОК
             let potentialFakes = caseData.slots.filter(s => s.current !== s.correct);
             let fixedTruths = caseData.slots.filter(s => s.current === s.correct);
             
-            let targetFakesCount = Math.floor(Math.random() * 5) + 2; 
+            let targetFakesCount = Math.floor(Math.random() * 5) + 2; // от 2 до 6
             targetFakesCount = Math.min(targetFakesCount, potentialFakes.length);
-            targetFakesCount = Math.max(1, targetFakesCount); 
+            targetFakesCount = Math.max(1, targetFakesCount); // на случай если в базе меньше 2 ошибок
             
             let shuffledFakes = shuffleArray([...potentialFakes]);
             let activeFakes = shuffledFakes.slice(0, targetFakesCount);
@@ -2155,6 +2126,7 @@
                 htmlContent = htmlContent.replace(`{${finalSlot.id}}`, nodeStr);
             });
 
+            // "Минное поле": оборачиваем все остальные обычные слова в кликабельные элементы
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             
@@ -2201,10 +2173,6 @@
             });
         };
 
-        window.updateRPCounter = function() {
-            document.getElementById('rp-counter').innerText = `Осталось фальшивок: ${rpFakesTotal - rpFakesFound}`;
-        };
-
         window.handleRPWordClick = function(e) {
             const node = e.currentTarget;
             if (!node || node.classList.contains('crossed')) return;
@@ -2219,7 +2187,7 @@
                 
                 rpFakesFound++;
                 window.updateRPCounter();
-
+                
                 if (window.tgApp?.HapticFeedback) {
                     window.tgApp.HapticFeedback.notificationOccurred('success');
                 }
@@ -2228,6 +2196,7 @@
                     window.winRPCase();
                 }
             } else {
+                // Если тыкнул на слот-обманку (слово из слота, но правильное)
                 window.handleRPPlainClick({ currentTarget: node });
             }
         };
@@ -2241,7 +2210,7 @@
             
             if(window.state) {
                 window.state.stats.streak = 0; 
-                window.state.rpHasMistake = true; 
+                window.state.rpHasMistake = true; // Фиксируем ошибку, чтобы в конце не дать балл
                 if (window.updateGlobalUI) window.updateGlobalUI();
                 if (window.saveProgress) window.saveProgress();
             }
@@ -2264,7 +2233,8 @@
             
             document.getElementById('rp-next-btn').classList.remove('hidden');
             document.getElementById('rp-giveup-btn').classList.add('hidden');
-            
+
+            // Начисляем 1 балл (строку) только если не было совершено ошибок
             if(window.state && !window.state.rpHasMistake) {
                 if (typeof updateScoreAndStats === 'function') {
                     updateScoreAndStats(1, true);
@@ -2275,7 +2245,7 @@
                 if (window.saveProgress) window.saveProgress();
                 if (window.checkAchievements) window.checkAchievements();
             }
-
+            
             if (window.tgApp?.HapticFeedback) {
                 window.tgApp.HapticFeedback.notificationOccurred('success');
             }
@@ -2310,11 +2280,6 @@
             document.getElementById('rp-giveup-btn').classList.add('hidden');
         };
 
-        window.nextRedPencilCase = function() {
-            currentRPCaseIndex++;
-            window.loadRPCase(currentRPCaseIndex);
-        };
-
         window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud = async function() {}; window.stopClassProgressSync = function() {};
         window.loadClassProgress = function() { document.getElementById('teacher-class-stats').innerHTML = '<p class="text-sm text-gray-500 text-center mt-5">Синхронизация с облаком... Подождите пару секунд.</p>'; };
         
@@ -2325,7 +2290,6 @@
         document.addEventListener('DOMContentLoaded', initStorage);
     </script>
 
-    <!-- Firebase модуль -->
     <script type="module">
         (async function() {
             try {
@@ -2361,7 +2325,9 @@
                         return tgId;
                     }
                     
-                    if (currentSavedId) return currentSavedId;
+                    if (currentSavedId) {
+                        return currentSavedId;
+                    }
                     
                     let newId = fbUser ? fbUser.uid : 'anon_' + Date.now();
                     localStorage.setItem('stable_student_id', newId);
@@ -2461,6 +2427,7 @@
 
                     unsubscribeTeacher = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snapshot) => {
                         let rawStudents = [];
+                        
                         snapshot.forEach(docSnap => {
                             let data = docSnap.data();
                             data._docId = docSnap.id; 
@@ -2468,6 +2435,7 @@
                         });
 
                         let studentsObjList = [];
+                        
                         rawStudents.forEach(st => {
                             let nameKey = (st.name && st.name !== 'Ученик (Без имени)') ? st.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
                             let tgKey = isRealTgId(st.tgId) ? String(st.tgId) : null;
@@ -2475,6 +2443,7 @@
                             let foundIdx = studentsObjList.findIndex(existing => {
                                 let existingNameKey = (existing.name && existing.name !== 'Ученик (Без имени)') ? existing.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
                                 let existingTgKey = isRealTgId(existing.tgId) ? String(existing.tgId) : null;
+
                                 if (tgKey && existingTgKey && tgKey === existingTgKey) return true;
                                 if (nameKey && existingNameKey && nameKey === existingNameKey) return true;
                                 return false;
@@ -2482,8 +2451,10 @@
 
                             if (foundIdx !== -1) {
                                 let existing = studentsObjList[foundIdx];
+                                
                                 let stScore = st.totalSolved || 0;
                                 let exScore = existing.totalSolved || 0;
+
                                 if (stScore > exScore || (stScore === exScore && (st.timeSpent || 0) > (existing.timeSpent || 0))) {
                                     studentsObjList[foundIdx] = st;
                                 }
@@ -2506,6 +2477,7 @@
 
                         filtered.forEach((st, idx) => {
                             const timeMin = Math.floor((st.timeSpent || 0) / 60);
+                            
                             let lastActiveStr = 'Нет данных';
                             if (st.lastActive) {
                                 const d = new Date(st.lastActive);
@@ -2540,6 +2512,7 @@
                             }
 
                             let tgTag = st.username ? `<span class="text-[10px] text-gray-400 dark:text-gray-500 font-normal ml-1">(${st.username})</span>` : '';
+
                             let assignHwBtn = `<button onclick="window.assignHomeworkToStudent('${st.tgId}', '${st.name.replace(/'/g, "\\'")}')" class="text-[10px] bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-200 py-1.5 rounded shadow-sm dark:bg-orange-900/40 dark:text-orange-200 dark:border-orange-700 font-bold uppercase w-full">Задать ДЗ</button>`;
 
                             html += `
