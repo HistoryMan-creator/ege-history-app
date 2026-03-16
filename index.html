@@ -21,25 +21,11 @@
             height: calc(70px + env(safe-area-inset-bottom, 0px)); 
             padding-bottom: env(safe-area-inset-bottom, 0px); 
         }
-        @media (max-width: 1023px) {
-            #pool-panel { 
-                position: fixed !important;
-                left: 0 !important;
-                width: 100% !important;
-                bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; 
-                z-index: 40 !important;
-            }
-            /* Динамический отступ, чтобы можно было прокрутить таблицу над пулом */
-            #classic-task-area { padding-bottom: 75vh !important; } 
-        }
-        body.zen-mode-active #pool-panel {
-            bottom: 0 !important;
-            padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)) !important;
-        }
+        
         @media (min-width: 1024px) {
             #pool-panel {
                 position: sticky !important;
-                top: 6rem !important;
+                top: 4rem !important;
                 height: fit-content !important;
                 align-self: flex-start !important;
             }
@@ -330,69 +316,46 @@
 </head>
 <body class="bg-gray-50 dark:bg-[#181a1b] text-slate-800 dark:text-slate-200 font-sans antialiased min-h-screen flex flex-col relative">
 
-    <!-- ГЛОБАЛЬНАЯ ШАПКА -->
+    <!-- УЗКАЯ МИНИМАЛИСТИЧНАЯ ГЛОБАЛЬНАЯ ШАПКА -->
     <header id="main-header" class="bg-examBlue dark:bg-[#121415] text-white shadow-md sticky top-0 z-50 no-print transition-colors duration-400">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="text-2xl sm:text-3xl cursor-pointer select-none transition-transform active:scale-90" onclick="handleSecretTeacherClick()">🏛️</span>
-                    <div class="text-left">
-                        <h1 class="text-lg sm:text-xl font-bold tracking-tight leading-tight">Тренажер ЕГЭ</h1>
-                        <p class="text-blue-200 dark:text-slate-400 text-[10px] sm:text-[11px]">PRO | История</p>
-                    </div>
+        <div class="max-w-7xl mx-auto px-3 py-1.5 flex justify-between items-center h-10 sm:h-12">
+            <!-- Только иконка, без текста -->
+            <div class="flex items-center gap-2 cursor-pointer active:scale-90 transition-transform" onclick="handleSecretTeacherClick()">
+                <span class="text-xl sm:text-2xl drop-shadow-md">🏛️</span>
+            </div>
+            
+            <!-- Компактная статистика в линию -->
+            <div class="flex items-center justify-center gap-3 sm:gap-6 flex-1 px-2">
+                <div class="flex items-center gap-1" title="Стрик">
+                    <span class="text-xs sm:text-sm">🔥</span>
+                    <span class="text-xs sm:text-sm font-black text-yellow-400" id="stat-streak">0</span>
                 </div>
-                <div class="flex sm:hidden items-center gap-2">
-                    <button onclick="toggleTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Сменить тему">🌙</button>
+                <div class="flex items-center gap-1" title="Решено">
+                    <span class="text-xs sm:text-sm">✅</span>
+                    <span class="text-xs sm:text-sm font-black text-emerald-400" id="stat-solved">0</span>
+                </div>
+                <div class="flex items-center gap-1 hidden sm:flex" title="Выучено">
+                    <span class="text-xs sm:text-sm">🎓</span>
+                    <span class="text-xs sm:text-sm font-black text-purple-400" id="stat-learned">0</span>
+                </div>
+                <div class="flex items-center gap-1" title="Память">
+                    <span class="text-xs sm:text-sm">🧠</span>
+                    <span class="text-xs sm:text-sm font-black text-emerald-400" id="stat-memory">100%</span>
+                </div>
+                <div class="flex items-center gap-1 cursor-pointer active:scale-95 transition-transform" onclick="openGlobalTopModal()" title="Глобальный Топ">
+                    <span class="text-xs sm:text-sm">🏆</span>
+                    <span class="text-xs sm:text-sm font-black text-blue-300">Топ</span>
                 </div>
             </div>
             
-            <!-- Геймификация -->
-            <div class="flex flex-wrap sm:flex-nowrap items-center justify-center w-full sm:w-auto gap-1.5 sm:gap-4 mt-3 sm:mt-0">
-                <div class="flex flex-col items-center justify-center bg-white/10 dark:bg-white/5 rounded-xl px-2 sm:px-4 py-1.5 flex-1 sm:flex-none shadow-sm border border-white/10 whitespace-nowrap">
-                    <span class="text-[9px] sm:text-[10px] text-yellow-200 uppercase font-black tracking-widest text-center">Стрик</span>
-                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                        <span class="text-xs sm:text-sm leading-none">🔥</span>
-                        <span class="text-sm sm:text-lg font-black text-yellow-400 leading-none" id="stat-streak">0</span>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center justify-center bg-white/10 dark:bg-white/5 rounded-xl px-2 sm:px-4 py-1.5 flex-1 sm:flex-none shadow-sm border border-white/10 whitespace-nowrap">
-                    <span class="text-[9px] sm:text-[10px] text-emerald-200 uppercase font-black tracking-widest text-center">Решено</span>
-                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                        <span class="text-xs sm:text-sm leading-none">✅</span>
-                        <span class="text-sm sm:text-lg font-black text-emerald-400 leading-none" id="stat-solved">0</span>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center justify-center bg-white/10 dark:bg-white/5 rounded-xl px-2 sm:px-4 py-1.5 flex-1 sm:flex-none shadow-sm border border-white/10 whitespace-nowrap">
-                    <span class="text-[9px] sm:text-[10px] text-purple-200 uppercase font-black tracking-widest text-center">Выучено</span>
-                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                        <span class="text-xs sm:text-sm leading-none">🎓</span>
-                        <span class="text-sm sm:text-lg font-black text-purple-400 leading-none" id="stat-learned">0</span>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center justify-center bg-white/10 dark:bg-white/5 rounded-xl px-2 sm:px-4 py-1.5 flex-1 sm:flex-none shadow-sm border border-white/10 whitespace-nowrap">
-                    <span class="text-[9px] sm:text-[10px] text-pink-200 uppercase font-black tracking-widest text-center">Память</span>
-                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                        <span class="text-xs sm:text-sm leading-none">🧠</span>
-                        <span class="text-sm sm:text-lg font-black text-emerald-400 leading-none" id="stat-memory">100%</span>
-                    </div>
-                </div>
-                <!-- НОВАЯ КНОПКА ГЛОБАЛЬНОГО ТОПА -->
-                <div onclick="openGlobalTopModal()" class="flex flex-col items-center justify-center bg-blue-500/20 hover:bg-blue-500/40 cursor-pointer transition-colors rounded-xl px-2 sm:px-4 py-1.5 flex-1 sm:flex-none shadow-sm border border-blue-400/30 whitespace-nowrap active:scale-95">
-                    <span class="text-[9px] sm:text-[10px] text-blue-200 uppercase font-black tracking-widest text-center">Рейтинг</span>
-                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                        <span class="text-xs sm:text-sm leading-none">🏆</span>
-                        <span class="text-sm sm:text-lg font-black text-blue-400 leading-none">Топ</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="hidden sm:flex items-center gap-2 ml-4 shrink-0">
-                <button onclick="toggleTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm" title="Сменить тему">🌙</button>
+            <!-- Кнопка ночного режима -->
+            <div class="flex items-center shrink-0">
+                <button onclick="toggleTheme()" class="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-xs sm:text-sm" title="Сменить тему">🌙</button>
             </div>
         </div>
     </header>
 
-    <div id="joke-toast" class="no-print fixed top-20 right-0 transform translate-x-full transition-transform duration-300 z-[9999]">
+    <div id="joke-toast" class="no-print fixed top-16 right-0 transform translate-x-full transition-transform duration-300 z-[9999]">
         <div id="toast-content" class="text-slate-50 font-bold text-xs sm:text-sm px-4 py-2 rounded-l-lg shadow-lg flex items-center gap-2 border-y-2 border-l-2"></div>
     </div>
 
@@ -405,7 +368,7 @@
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
-    <main class="no-print flex-grow max-w-5xl mx-auto w-full flex flex-col relative px-4 pt-6 pb-4">
+    <main class="no-print flex-grow max-w-5xl mx-auto w-full flex flex-col relative px-4 pt-4 pb-4">
         
         <!-- === ЛОББИ === -->
         <div id="lobby-area" class="w-full flex flex-col gap-6 pb-10">
@@ -501,24 +464,25 @@
         <!-- === ИГРОВОЙ ЭКРАН (Скрыт по умолчанию) === -->
         <div id="game-container" class="hidden flex-col w-full flex-grow relative">
             
-            <!-- Игровая Шапка -->
-            <div id="game-header" class="flex justify-between items-center mb-4 sm:mb-6 bg-white dark:bg-[#242729] p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-[#2a2e30]">
-                <button onclick="backToLobby()" class="flex items-center gap-2 text-gray-500 hover:text-examBlue dark:hover:text-blue-400 font-bold transition-colors text-sm sm:text-base px-2 py-1 rounded-xl hover:bg-gray-50 dark:hover:bg-[#181a1b]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    <span class="hidden sm:inline">В меню</span>
+            <!-- УЗКАЯ Игровая Шапка с шестеренкой -->
+            <div id="game-header" class="flex justify-between items-center mb-2 sm:mb-3 bg-white/60 dark:bg-[#242729]/60 backdrop-blur-md p-1.5 sm:p-2 rounded-xl shadow-sm border border-gray-100 dark:border-[#2a2e30]">
+                <button onclick="backToLobby()" class="flex items-center gap-1.5 text-gray-500 hover:text-examBlue dark:hover:text-blue-400 font-bold transition-colors text-xs sm:text-sm px-2 py-1 rounded-lg hover:bg-white dark:hover:bg-[#181a1b]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span class="hidden sm:inline">Назад</span>
                 </button>
                 <div class="flex flex-col items-center">
-                    <h2 id="game-title-display" class="font-black text-gray-800 dark:text-slate-200 uppercase tracking-widest text-sm sm:text-lg">Режим</h2>
-                    <div id="game-timer-display" class="hidden text-rose-500 font-black text-sm animate-pulse">03:00</div>
+                    <h2 id="game-title-display" class="font-black text-gray-800 dark:text-slate-200 uppercase tracking-widest text-xs sm:text-sm">Режим</h2>
+                    <div id="game-timer-display" class="hidden text-rose-500 font-black text-xs animate-pulse">03:00</div>
                 </div>
-                <button onclick="openPreGameModal(window.state.currentTask, window.state.currentMode)" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl p-2 bg-gray-50 dark:bg-[#181a1b] rounded-xl transition-colors">⚙️</button>
+                <button onclick="openPreGameModal(window.state.currentTask, window.state.currentMode)" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-base p-1.5 bg-white dark:bg-[#181a1b] rounded-lg transition-colors shadow-sm">⚙️</button>
             </div>
 
-            <!-- Игровые зоны -->
-            <div id="classic-task-area" class="hidden flex-col lg:flex-row relative gap-4 items-start w-full pb-[180px] sm:pb-0">
+            <!-- Игровые зоны: теперь связаны без разрыва по вертикали на смартфонах -->
+            <div id="classic-task-area" class="hidden flex-col lg:flex-row relative gap-0 lg:gap-4 items-start w-full">
                 <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-[#181a1b]/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
 
-                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#242729] rounded-2xl shadow-sm border border-gray-200 dark:border-[#2a2e30] overflow-hidden transition-colors relative z-10">
+                <!-- Таблица: скругления только сверху (для смартфонов) -->
+                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#242729] rounded-t-2xl lg:rounded-2xl shadow-sm border border-gray-200 dark:border-[#2a2e30] border-b-0 lg:border-b overflow-hidden transition-colors relative z-10">
                     <div id="detective-stamp" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 sm:border-8 border-red-600 text-red-600 font-black text-4xl sm:text-6xl uppercase tracking-widest px-4 py-2 transform -rotate-12 opacity-[0.07] dark:opacity-10 pointer-events-none z-0 font-mono text-center whitespace-nowrap" style="border-radius: 8px;">СОВЕРШЕННО<br>СЕКРЕТНО</div>
                     <div class="overflow-x-auto p-1 relative z-10">
                         <table class="w-full text-left border-collapse table-fixed">
@@ -528,18 +492,17 @@
                     </div>
                 </div>
 
-                <!-- Панель пула: теперь "прилипает" (sticky) к нижней части экрана без перекрытия контента -->
-                <div id="pool-panel" class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col fixed sm:sticky bottom-[70px] sm:bottom-0 left-0 sm:left-auto z-40 p-3 sm:p-4 border-t sm:border border-gray-200 dark:border-[#2a2e30] rounded-t-2xl sm:rounded-2xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] sm:shadow-sm transition-all duration-400">
-                    <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
+                <!-- Панель пула: привязана вплотную к низу таблицы (для смартфонов) -->
+                <div id="pool-panel" class="w-full lg:w-1/3 bg-gray-50/80 dark:bg-[#1a1c1d]/80 lg:bg-white lg:dark:bg-[#242729] flex flex-col z-40 p-3 sm:p-4 border-x border-b lg:border border-gray-200 dark:border-[#2a2e30] rounded-b-2xl lg:rounded-2xl shadow-sm transition-all duration-400 relative">
+                    <div class="flex justify-between items-center mb-2 lg:mb-4">
                         <h3 id="pool-title" class="font-black text-gray-800 dark:text-slate-200 flex items-center gap-2 text-sm sm:text-base uppercase tracking-widest">
                             <span>🧩</span> Варианты
                         </h3>
-                        <button id="pool-toggle-btn" class="lg:hidden text-gray-500 bg-gray-100 dark:bg-[#2a2e30] px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">Свернуть</button>
                     </div>
                     
                     <div id="pool-content-wrapper">
-                        <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 sm:gap-2 max-h-[28vh] sm:max-h-[50vh] lg:max-h-none overflow-y-auto custom-scroll pb-1"></div>
-                        <div class="mt-2 pt-2 sm:mt-4 sm:pt-4 border-t border-gray-100 dark:border-[#2a2e30] flex flex-col gap-2 sm:gap-3">
+                        <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 sm:gap-2 lg:max-h-none overflow-y-auto custom-scroll pb-1"></div>
+                        <div class="mt-2 pt-2 sm:mt-4 sm:pt-4 border-t border-gray-200 lg:border-gray-100 dark:border-[#2a2e30] flex flex-col gap-2 sm:gap-3">
                             <div id="check-buttons" class="flex gap-2 w-full">
                                 <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 sm:py-4 px-2 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 text-[11px] sm:text-sm w-full uppercase tracking-widest transition-transform flex justify-center items-center gap-1">
                                     ✅ Уверен
@@ -562,7 +525,6 @@
             <div id="flashcard-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative pb-10"></div>
             <div id="study-area" class="hidden flex-col flex-grow items-center justify-center w-full gap-4 relative pb-10"></div>
             <div id="redpencil-area" class="hidden flex-col flex-grow items-center w-full gap-4 relative pb-10">
-                <!-- ВОССТАНОВЛЕННЫЕ ЭЛЕМЕНТЫ: ЗАГОЛОВОК И СЧЕТЧИК -->
                 <div class="flex items-center justify-between w-full max-w-4xl mb-2">
                     <h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-slate-200 truncate pr-4 uppercase tracking-widest" id="rp-title">Документ</h2>
                     <div class="text-xs sm:text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-900/30 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-rose-200 dark:border-rose-800/50 shadow-sm whitespace-nowrap" id="rp-counter">0 / 0</div>
@@ -687,7 +649,7 @@
         </div>
     </div>
 
-    <!-- СКРЫТЫЕ СИСТЕМНЫЕ СЕЛЕКТЫ (Нужны для работы старой логики JS) -->
+    <!-- СКРЫТЫЕ СИСТЕМНЫЕ СЕЛЕКТЫ -->
     <div id="hidden-controls" style="display: none;">
         <select id="filter-task"><option value="task4"></option><option value="task5"></option></select>
         <select id="filter-mode"><option value="normal"></option><option value="mistakes"></option><option value="speedrun"></option><option value="flashcards"></option><option value="study"></option><option value="detective"></option><option value="redpencil"></option></select>
@@ -918,7 +880,6 @@
                     <div id="stats-era-container" class="space-y-3"></div>
                 </div>
                 
-                <!-- ПЕРЕНЕСЕННЫЙ БЛОК ТОПА ЗА 7 ДНЕЙ -->
                 <div class="mb-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-[#1a2320] dark:to-[#181a1b] p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm relative overflow-hidden hidden" id="student-leaderboard-container">
                     <div class="absolute -right-4 -top-4 text-6xl opacity-10 pointer-events-none">🔥</div>
                     <h3 class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-3 relative z-10 flex items-center gap-1" id="student-leaderboard-title"><span>🔥</span> Топ за неделю</h3>
@@ -1104,12 +1065,10 @@
             data.lastUpdated = now; window.state.stats.factStreaks[fKey] = data; return data;
         }
 
-        // --- НОВАЯ ЛОГИКА UI: БЫСТРЫЙ СТАРТ И МОДАЛКА ---
         window.quickStartGame = function(task, mode) {
             haptic('medium');
             window.state.currentTask = task;
             
-            // Синхронизируем базовые селекты
             document.getElementById('filter-task').value = task;
             document.getElementById('filter-mode').value = mode;
             
@@ -1126,7 +1085,6 @@
             document.getElementById('pre-game-title').innerText = titles[mode];
             document.getElementById('game-title-display').innerText = titles[mode];
 
-            // Прячем лобби, показываем игру
             document.getElementById('lobby-area').classList.add('hidden');
             document.getElementById('game-container').classList.remove('hidden');
             document.getElementById('game-container').classList.add('flex');
@@ -1160,7 +1118,6 @@
             document.getElementById('pg-case-container').classList.toggle('hidden', !isDetective);
             document.getElementById('pg-hide-learned-container').classList.toggle('hidden', isDetective || isSpeedrun || isRedPencil);
             
-            // Синхронизация текущих значений со скрытыми селектами, чтобы модалка отражала текущие настройки
             if (document.getElementById('filter-period')) document.getElementById('pg-filter-period').value = document.getElementById('filter-period').value || 'all';
             if (document.getElementById('filter-case')) document.getElementById('pg-filter-case').value = document.getElementById('filter-case').value || 'rtw';
             if (document.getElementById('filter-rows')) window.setPgRows(document.getElementById('filter-rows').value || '4');
@@ -1172,7 +1129,6 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            // Animation
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 sheet.classList.remove('translate-y-full');
@@ -1201,13 +1157,12 @@
             });
             const activeBtn = document.getElementById(`btn-row-${rows}`);
             activeBtn.className = "pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors";
-            document.getElementById('filter-rows').value = rows; // Sync hidden
+            document.getElementById('filter-rows').value = rows; 
         };
 
         window.startGameFromModal = function() {
             haptic('medium');
             
-            // Синхронизация со скрытыми элементами для старой логики
             window.state.currentTask = window.state.pendingTask;
             document.getElementById('filter-task').value = window.state.pendingTask;
             document.getElementById('filter-mode').value = window.state.pendingMode;
@@ -1244,7 +1199,6 @@
             clearInterval(window.state.timerInterval);
             document.getElementById('game-timer-display').classList.add('hidden');
 
-            // Очистка столов
             DOM.tbody.innerHTML = '';
             DOM.pool.innerHTML = '';
             
@@ -2068,8 +2022,6 @@
             }
         }
 
-        function toggleMobilePool() { const wrapper = document.getElementById('pool-content-wrapper'); const btn = document.getElementById('pool-toggle-btn'); const isHidden = wrapper.classList.toggle('hidden'); btn.innerText = isHidden ? 'Развернуть' : 'Свернуть'; }
-
         function updateGlobalUI() {
             let totalLearned = 0; let freshLearned = 0; const now = Date.now();
             Object.values(window.state.stats.factStreaks || {}).forEach(d => {
@@ -2082,7 +2034,7 @@
             updateText(DOM.streak, window.state.stats.streak);
             updateText(DOM.solved, window.state.stats.totalSolvedEver);
             updateText(DOM.zenSolved, window.state.stats.totalSolvedEver);
-            updateText(DOM.learned, totalLearned); // Updated facts learned instead of points in header
+            updateText(DOM.learned, totalLearned);
             updateText(DOM.modalSolved, window.state.stats.totalSolvedEver);
             updateText(DOM.modalMistakes, window.state.mistakesPool.length);
             
@@ -2135,7 +2087,6 @@
 
         function shareTelegram() { const text = `🔥 Мой стрик в тренажере ЕГЭ по истории — ${window.state.stats.streak}! Попробуй побить: `; window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`); }
 
-        // ВОССТАНОВЛЕННЫЕ ФУНКЦИИ МОДАЛЬНЫХ ОКОН
         window.openStatsModal = function() {
             updateGlobalUI();
             
@@ -2776,379 +2727,137 @@
                             bestSpeedrun: s.bestSpeedrunScore || 0, 
                             timeSpent: s.totalTimeSpent || 0, 
                             mistakesCount: window.state.mistakesPool ? window.state.mistakesPool.length : 0,
-                            lastActive: new Date().toISOString(),
-                            fullStateJson: JSON.stringify({ stats: s, mistakesPool: window.state.mistakesPool, hideLearned: window.state.hideLearned })
+                            fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}',
+                            lastActive: Date.now()
                         }, { merge: true });
                     } catch(e) { console.error("Sync error:", e); }
                 };
 
-                window.assignHomeworkToStudent = async function(studentId, studentName) {
-                    const count = parseInt(prompt(`Укажите количество ЛИНИЙ, которые должен решить ученик ${studentName}:`, "20"));
-                    if (isNaN(count) || count <= 0) return;
+                window.loadClassProgress = async function() {
+                    if (!db) return;
+                    const tc = document.getElementById('teacher-class-code-input').value.trim();
+                    const filterMyClass = document.getElementById('teacher-filter-class').checked;
+                    const container = document.getElementById('teacher-class-stats');
+                    const weeklyContainer = document.getElementById('weekly-class-stats');
+                    
+                    container.innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">⏳ Загрузка...</p>';
+                    weeklyContainer.innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">⏳ Загрузка...</p>';
                     
                     try {
-                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId), {
-                            hwFlashcardsToSolve: count
-                        }, { merge: true });
-                        showToast('✅', `Долг в ${count} линий назначен!`, 'bg-emerald-500', 'border-emerald-700');
-                    } catch(e) {
-                        console.error(e);
-                        showToast('❌', 'Ошибка назначения долга', 'bg-rose-500', 'border-rose-700');
-                    }
-                };
-
-                window.copyStudentReport = function(tgId) {
-                    const student = window.loadedStudentsData.find(s => s.tgId === tgId);
-                    if (!student) return showToast('❌', 'Ученик не найден', 'bg-rose-500', 'border-rose-700');
-                    
-                    let stats, mistakesPool;
-                    if (student.fullStateJson) {
-                        try {
-                            const parsed = JSON.parse(student.fullStateJson);
-                            stats = parsed.stats;
-                            mistakesPool = parsed.mistakesPool || [];
-                        } catch(e) {
-                            return showToast('❌', 'Ошибка данных', 'bg-rose-500', 'border-rose-700');
-                        }
-                    } else {
-                        return showToast('❌', 'Нет подробных данных', 'bg-rose-500', 'border-rose-700');
-                    }
-
-                    const timeMinutes = Math.floor((stats.totalTimeSpent || 0) / 60); 
-                    const learnedCount = Object.values(stats.factStreaks || {}).filter(window.isFactLearned).length;
-                    
-                    let text = `🎓 Отчет ученика: ${student.name}\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n⏱ Время в тренажере: ${timeMinutes} мин\n✅ Решено заданий: ${stats.totalSolvedEver || 0}\n🃏 Решено карточек: ${stats.flashcardsSolved || 0}\n🔥 Лучший стрик: ${stats.streak || 0}\n🧠 Выучено на 100%: ${learnedCount} фактов\n\n📊 Успеваемость по эпохам:\n`;
-                    
-                    Object.entries({'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'}).forEach(([key, eraName]) => { 
-                        const data = (stats.eraStats && stats.eraStats[key]) ? stats.eraStats[key] : { correct: 0, total: 0 }; 
-                        text += `- ${eraName}: ${data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0}% (${data.correct} из ${data.total})\n`; 
-                    });
-                    
-                    if (mistakesPool.length > 0) { 
-                        text += `\n⚠️ Ошибки для проработки:\n`; 
-                        mistakesPool.forEach((m, idx) => { 
-                            text += `${idx + 1}. ${m.fact.person ? `${m.fact.event} ➡️ ${m.fact.person}` : `${m.fact.geo} | ${m.fact.event} | ${m.fact.year}`}\n`; 
-                        }); 
-                    } else {
-                        text += `\n🎉 Ошибок нет! Идеальная работа!\n`;
-                    }
-
-                    const fallbackCopy = (txt) => {
-                        const ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('📋', 'Отчет скопирован!', 'bg-emerald-500', 'border-emerald-700');
-                    };
-
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(text).then(() => showToast('📋', 'Отчет скопирован!', 'bg-emerald-500', 'border-emerald-700')).catch(() => fallbackCopy(text)); 
-                    } else { 
-                        fallbackCopy(text); 
-                    }
-                };
-
-                window.loadClassProgress = function() {
-                    if (!fbUser || !db) {
-                        document.getElementById('teacher-class-stats').innerHTML = '<p class="text-[11px] font-bold uppercase tracking-widest text-gray-500 text-center mt-5">Нет сети.</p>';
-                        return;
-                    }
-                    
-                    const filterClass = document.getElementById('teacher-filter-class').checked;
-                    const currentCode = document.getElementById('teacher-class-code-input').value.trim();
-
-                    // Если галочка стоит, но код не введен, просим ввести код и не грузим всю базу
-                    if (filterClass && !currentCode) {
-                        document.getElementById('teacher-class-stats').innerHTML = '<div class="text-center py-6 px-4 bg-gray-50 dark:bg-[#1a1c1d] rounded-2xl border border-gray-200 dark:border-[#2a2e30]"><span class="text-3xl block mb-2">🎓</span><p class="text-sm font-bold text-gray-600 dark:text-gray-400">Введите ваш код класса в поле выше, чтобы отфильтровать своих учеников. Чтобы увидеть весь список, снимите галочку "Только мой класс".</p></div>';
-                        if (unsubscribeTeacher) { unsubscribeTeacher(); unsubscribeTeacher = null; }
-                        return;
-                    }
-
-                    document.getElementById('teacher-class-stats').innerHTML = '<p class="text-[11px] font-bold uppercase tracking-widest text-gray-500 text-center mt-5">⏳ Загрузка учеников...</p>';
-                    if (unsubscribeTeacher) unsubscribeTeacher();
-
-                    unsubscribeTeacher = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snapshot) => {
-                        let rawStudents = [];
+                        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
+                        let students = [];
+                        querySnapshot.forEach(doc => {
+                            const d = doc.data();
+                            if (!filterMyClass || d.classCode === tc) students.push(d);
+                        });
                         
-                        snapshot.forEach(docSnap => {
-                            let data = docSnap.data();
-                            data._docId = docSnap.id; 
-                            rawStudents.push(data);
-                        });
-
-                        let studentsObjList = [];
+                        window.loadedStudentsData = students;
                         
-                        rawStudents.forEach(st => {
-                            let nameKey = (st.name && st.name !== 'Ученик (Без имени)') ? st.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                            let tgKey = isRealTgId(st.tgId) ? String(st.tgId) : null;
-
-                            let foundIdx = studentsObjList.findIndex(existing => {
-                                let existingNameKey = (existing.name && existing.name !== 'Ученик (Без имени)') ? existing.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                                let existingTgKey = isRealTgId(existing.tgId) ? String(existing.tgId) : null;
-
-                                if (tgKey && existingTgKey && tgKey === existingTgKey) return true;
-                                if (nameKey && existingNameKey && nameKey === existingNameKey) return true;
-                                return false;
-                            });
-
-                            if (foundIdx !== -1) {
-                                let existing = studentsObjList[foundIdx];
-                                let stScore = st.totalSolved || 0;
-                                let exScore = existing.totalSolved || 0;
-
-                                if (stScore > exScore || (stScore === exScore && (st.timeSpent || 0) > (existing.timeSpent || 0))) {
-                                    studentsObjList[foundIdx] = st;
-                                }
-                            } else {
-                                studentsObjList.push(st);
-                            }
-                        });
-
-                        // Фильтрация
-                        if (filterClass && currentCode) {
-                            studentsObjList = studentsObjList.filter(s => s.classCode === currentCode);
-                        }
-
-                        // Подготовка расширенной статистики
-                        let todayStr = new Date().toISOString().split('T')[0];
-                        let yDate = new Date();
-                        yDate.setDate(yDate.getDate() - 1);
-                        let yesterdayStr = yDate.toISOString().split('T')[0];
-
-                        studentsObjList.forEach(st => {
-                            st.solvedToday = 0;
-                            st.solvedYesterday = 0;
-                            st.timeSpentToday = 0;
-                            st.lastActiveStr = 'Неизвестно';
-                            
-                            if (st.lastActive) {
-                                const d = new Date(st.lastActive);
-                                if (!isNaN(d.getTime())) {
-                                    st.lastActiveStr = d.toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'}) + ' ' + d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
-                                }
-                            }
-
-                            if (st.mistakesCount === undefined) st.mistakesCount = 0;
-                            if (st.learnedCount === undefined) st.learnedCount = 0;
-                            if (st.health === undefined) st.health = 100;
-
-                            if (st.fullStateJson) {
-                                try {
-                                    let parsed = JSON.parse(st.fullStateJson);
-                                    let daily = parsed.stats?.dailyStats || {};
-                                    st.solvedToday = daily[todayStr]?.solved || 0;
-                                    st.timeSpentToday = daily[todayStr]?.timeSpent || 0;
-                                    st.solvedYesterday = daily[yesterdayStr]?.solved || 0;
-                                    
-                                    if (st.mistakesCount === 0 && parsed.mistakesPool) {
-                                        st.mistakesCount = parsed.mistakesPool.length;
-                                    }
-                                } catch(e) {}
-                            }
-                        });
-
-                        studentsObjList.sort((a, b) => {
-                            if ((b.totalSolved || 0) !== (a.totalSolved || 0)) return (b.totalSolved || 0) - (a.totalSolved || 0);
-                            return (a.timeSpent || 0) - (b.timeSpent || 0);
-                        });
-
-                        window.loadedStudentsData = studentsObjList;
-
+                        // CLASS STATS
+                        students.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
                         let html = '';
-                        studentsObjList.forEach((st, idx) => {
-                            let icon = idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '👤'));
-                            let rowClass = idx === 0 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-white dark:bg-[#242729] border-gray-100 dark:border-[#2a2e30]';
-                            let nameColor = idx === 0 ? 'text-yellow-700 dark:text-yellow-500' : 'text-gray-800 dark:text-slate-200';
-                            
-                            let hpColor = 'text-emerald-500';
-                            if (st.health < 50) hpColor = 'text-rose-500';
-                            else if (st.health < 80) hpColor = 'text-yellow-500';
-                            
-                            let safeName = (st.name || 'Без имени').replace(/'/g, "\\'");
-
-                            html += `
-                            <div class="flex flex-col p-3 rounded-2xl border ${rowClass} shadow-sm gap-2 min-w-0">
-                                <div class="flex justify-between items-start gap-3 w-full min-w-0">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <div class="text-2xl drop-shadow-sm shrink-0">${icon}</div>
-                                        <div class="flex flex-col min-w-0">
-                                            <span class="font-black text-sm sm:text-base ${nameColor} truncate">${safeName} ${st.username ? `<span class="text-[10px] text-blue-500 font-bold ml-1">${st.username}</span>` : ''}</span>
-                                            <span class="text-[10px] font-bold text-gray-400 mt-0.5 uppercase tracking-wide truncate">Код: ${st.classCode || '—'} | Заходил: ${st.lastActiveStr}</span>
+                        if (students.length === 0) {
+                            html = '<p class="text-[10px] font-bold text-gray-500 text-center uppercase py-5">Ученики не найдены</p>';
+                        } else {
+                            students.forEach((st, idx) => {
+                                let badge = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🎓'));
+                                let healthStr = st.health >= 80 ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : (st.health >= 50 ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 'bg-rose-100 text-rose-700 border-rose-300');
+                                
+                                html += `
+                                <div class="bg-white dark:bg-[#242729] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2a2e30] flex flex-col gap-3 relative overflow-hidden transition-all hover:shadow-md">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xl drop-shadow-sm">${badge}</span>
+                                            <div>
+                                                <h4 class="font-black text-sm text-gray-800 dark:text-gray-200 leading-tight">${st.name || 'Без имени'}</h4>
+                                                ${st.username ? `<span class="text-[10px] font-bold text-blue-500 block">${st.username}</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xs font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg border border-blue-100 dark:border-blue-800 inline-block mb-1">Решено: ${st.totalSolved || 0}</div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 shrink-0">
-                                        <button onclick="window.assignHomeworkToStudent('${st.tgId}', '${safeName}')" class="text-xl hover:scale-110 transition-transform cursor-pointer" title="Назначить ДЗ">📝</button>
-                                        <button onclick="window.copyStudentReport('${st.tgId}')" class="text-xl hover:scale-110 transition-transform cursor-pointer" title="Скопировать отчет">📋</button>
+                                    <div class="flex gap-2 w-full mt-1">
+                                        <div class="flex-1 text-center bg-gray-50 dark:bg-[#1a1c1d] rounded-xl p-2 border border-gray-100 dark:border-[#2a2e30]">
+                                            <span class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Память</span>
+                                            <span class="text-xs font-black inline-block px-1.5 py-0.5 rounded-md border ${healthStr}">${st.health || 0}%</span>
+                                        </div>
+                                        <div class="flex-1 text-center bg-gray-50 dark:bg-[#1a1c1d] rounded-xl p-2 border border-gray-100 dark:border-[#2a2e30]">
+                                            <span class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Ошибок</span>
+                                            <span class="text-xs font-black text-rose-500">${st.mistakesCount || 0}</span>
+                                        </div>
+                                        <div class="flex-1 text-center bg-gray-50 dark:bg-[#1a1c1d] rounded-xl p-2 border border-gray-100 dark:border-[#2a2e30]">
+                                            <span class="block text-[9px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Стрик</span>
+                                            <span class="text-xs font-black text-yellow-500">🔥 ${st.bestStreak || 0}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full mt-1">
-                                    <div class="bg-gray-100 dark:bg-[#1a1c1d] rounded-lg p-2 flex flex-col items-center justify-center border border-gray-200 dark:border-[#2a2e30]">
-                                        <span class="text-[9px] text-gray-500 uppercase font-black tracking-widest text-center">Выучено</span>
-                                        <span class="text-sm font-black text-purple-500 flex items-center justify-center flex-wrap whitespace-nowrap gap-1">
-                                            ${st.learnedCount || 0} <span class="text-[10px] ${hpColor} font-bold bg-white dark:bg-black/30 px-1 rounded">${st.health || 100}%</span>
-                                        </span>
-                                    </div>
-                                    <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2 flex flex-col items-center justify-center border border-yellow-200 dark:border-yellow-800/50">
-                                        <span class="text-[9px] text-yellow-600 dark:text-yellow-500 uppercase font-black tracking-widest text-center">Долг ДЗ</span>
-                                        <span class="text-sm font-black text-yellow-600 dark:text-yellow-500">${st.hwFlashcardsToSolve || 0}</span>
-                                    </div>
-                                    <div class="bg-gray-100 dark:bg-[#1a1c1d] rounded-lg p-2 flex flex-col items-center justify-center border border-gray-200 dark:border-[#2a2e30]">
-                                        <span class="text-[9px] text-gray-500 uppercase font-black tracking-widest text-center">Всего</span>
-                                        <span class="text-sm font-black text-examBlue dark:text-blue-400">${st.totalSolved || 0} <span class="text-[10px] text-gray-400 font-bold ml-1">${Math.floor((st.timeSpent || 0)/60)}м</span></span>
-                                    </div>
-                                    <div class="bg-rose-50 dark:bg-rose-900/20 rounded-lg p-2 flex flex-col items-center justify-center border border-rose-100 dark:border-rose-800/50">
-                                        <span class="text-[9px] text-rose-400 uppercase font-black tracking-widest text-center">Ошибки</span>
-                                        <span class="text-sm font-black text-rose-500">${st.mistakesCount || 0}</span>
-                                    </div>
-                                </div>
-                            </div>`;
-                        });
-                        if (studentsObjList.length === 0) html = '<p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest text-center py-4">Учеников не найдено.</p>';
-                        document.getElementById('teacher-class-stats').innerHTML = html;
-
-                        // Построение Weekly топа
-                        renderWeeklyTop(window.loadedStudentsData, filterClass, currentCode);
-
-                    }, (error) => {
-                        console.error("Snapshot error:", error);
-                        document.getElementById('teacher-class-stats').innerHTML = '<p class="text-[11px] font-bold text-rose-500 uppercase tracking-widest text-center py-4">Ошибка сети</p>';
-                    });
-                };
-
-                function renderWeeklyTop(allStudents, filterClass, currentCode) {
-                    let list = [...allStudents];
-                    if (filterClass && currentCode) list = list.filter(s => s.classCode === currentCode);
-                    
-                    list.forEach(st => {
-                        st.weeklySolved = 0;
-                        if (st.fullStateJson) {
-                            try {
-                                let parsed = JSON.parse(st.fullStateJson);
-                                let daily = parsed.stats?.dailyStats || {};
-                                let now = Date.now();
-                                Object.keys(daily).forEach(d => {
-                                    if (now - new Date(d).getTime() <= 7 * 24 * 3600 * 1000) {
-                                        st.weeklySolved += daily[d].solved || 0;
-                                    }
-                                });
-                            } catch(e) {}
+                                </div>`;
+                            });
                         }
-                    });
+                        container.innerHTML = html;
 
-                    list.sort((a,b) => b.weeklySolved - a.weeklySolved);
-                    list = list.slice(0, 7).filter(s => s.weeklySolved > 0);
+                        // WEEKLY STATS 
+                        let weeklyHtml = '';
+                        students.sort((a,b) => (b.timeSpent || 0) - (a.timeSpent || 0));
+                        students.slice(0, 7).forEach((st, idx) => {
+                            let wBadge = idx === 0 ? '👑' : '🔥';
+                            weeklyHtml += `
+                                <div class="bg-white dark:bg-[#242729] rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-[#2a2e30] flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg w-6 text-center">${wBadge}</span>
+                                        <span class="font-bold text-sm text-gray-800 dark:text-gray-200 truncate max-w-[120px] sm:max-w-xs">${st.name || 'Без имени'}</span>
+                                    </div>
+                                    <div class="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg border border-emerald-100 dark:border-emerald-800">
+                                        ${Math.floor((st.timeSpent||0)/60)} мин
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        if(weeklyHtml === '') weeklyHtml = '<p class="text-[10px] font-bold text-gray-500 text-center uppercase py-5">Нет данных за неделю</p>';
+                        weeklyContainer.innerHTML = weeklyHtml;
 
-                    let html = '';
-                    list.forEach((st, idx) => {
-                        let icon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🏅'));
-                        let nameColor = idx === 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-800 dark:text-slate-200';
-                        html += `
-                        <div class="flex justify-between items-center p-3 rounded-xl bg-white dark:bg-[#242729] border border-gray-100 dark:border-[#2a2e30] shadow-sm min-w-0 gap-2">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="text-2xl shrink-0">${icon}</div>
-                                <span class="text-sm font-black ${nameColor} truncate">${(st.name || 'Без имени').replace(/'/g, "\\'")}</span>
-                            </div>
-                            <div class="bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 rounded-xl text-emerald-700 dark:text-emerald-400 text-sm font-black border border-emerald-200 dark:border-emerald-800/50 shadow-inner shrink-0">
-                                +${st.weeklySolved}
-                            </div>
-                        </div>`;
-                    });
-
-                    if (list.length === 0) html = '<p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest text-center py-4">За неделю никто ничего не решил :(</p>';
-                    document.getElementById('weekly-class-stats').innerHTML = html;
-                }
+                    } catch(e) { console.error(e); container.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Ошибка загрузки</p>'; }
+                };
 
                 window.loadStudentLeaderboard = async function() {
-                    let tc = localStorage.getItem('student_class_code');
-                    const container = document.getElementById('student-leaderboard-container');
-                    const listEl = document.getElementById('student-leaderboard-list');
-                    const titleEl = document.getElementById('student-leaderboard-title');
-                    
-                    if (!container) return;
-                    
-                    container.classList.remove('hidden');
-                    if (titleEl) {
-                        titleEl.innerHTML = tc ? '<span>🔥</span> Топ класса за неделю' : '<span>🔥</span> Глобальный топ (7 дней)';
-                    }
-                    
-                    listEl.innerHTML = '<p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center py-2">Загрузка топа...</p>';
+                    const lc = document.getElementById('student-leaderboard-container');
+                    const ll = document.getElementById('student-leaderboard-list');
+                    if (!db || !lc || !ll) return;
                     
                     try {
-                        const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
-                        let students = [];
-                        snap.forEach(d => {
-                            let data = d.data();
-                            if (!tc || data.classCode === tc) {
-                                let weeklySolved = 0;
-                                if (data.fullStateJson) {
-                                    try {
-                                        let parsed = JSON.parse(data.fullStateJson);
-                                        let daily = parsed.stats?.dailyStats || {};
-                                        let now = Date.now();
-                                        Object.keys(daily).forEach(dKey => {
-                                            if (now - new Date(dKey).getTime() <= 7 * 24 * 3600 * 1000) {
-                                                weeklySolved += daily[dKey].solved || 0;
-                                            }
-                                        });
-                                    } catch(e) {}
-                                }
-                                data.weeklySolved = weeklySolved;
-                                students.push(data);
-                            }
+                        const classCode = localStorage.getItem('student_class_code');
+                        if (!classCode) return; 
+                        
+                        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
+                        let classMates = [];
+                        querySnapshot.forEach(doc => {
+                            const d = doc.data();
+                            if (d.classCode === classCode) classMates.push(d);
                         });
                         
-                        // Merge duplicates based on ID or Name
-                        let merged = [];
-                        students.forEach(st => {
-                            let nameKey = (st.name && st.name !== 'Ученик (Без имени)') ? st.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                            let tgKey = isRealTgId(st.tgId) ? String(st.tgId) : null;
-                            
-                            let foundIdx = merged.findIndex(existing => {
-                                let exNameKey = (existing.name && existing.name !== 'Ученик (Без имени)') ? existing.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                                let exTgKey = isRealTgId(existing.tgId) ? String(existing.tgId) : null;
-                                if (tgKey && exTgKey && tgKey === exTgKey) return true;
-                                if (nameKey && exNameKey && nameKey === exNameKey) return true;
-                                return false;
-                            });
-                            
-                            if (foundIdx !== -1) {
-                                if (st.weeklySolved > merged[foundIdx].weeklySolved) {
-                                    merged[foundIdx] = st;
-                                }
-                            } else {
-                                merged.push(st);
-                            }
-                        });
-
-                        let weekly = merged.sort((a,b) => b.weeklySolved - a.weeklySolved).slice(0, 5).filter(s => s.weeklySolved > 0);
+                        if (classMates.length < 2) return; 
+                        
+                        classMates.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
+                        lc.classList.remove('hidden');
+                        
                         let html = '';
-                        
-                        weekly.forEach((st, idx) => {
-                            let isMe = st.tgId === resolveUserId(fbUser);
-                            let icon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '🏅'));
-                            let nameColor = isMe ? 'text-emerald-700 dark:text-emerald-400 font-black' : 'text-gray-700 dark:text-gray-300';
-                            let bgClass = isMe ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/50' : 'bg-white/50 dark:bg-black/20 border-white/50 dark:border-white/5';
-                            
+                        classMates.slice(0, 3).forEach((st, idx) => {
+                            let badge = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
                             html += `
-                            <div class="flex justify-between items-center p-2 rounded-xl border ${bgClass} shadow-sm min-w-0 gap-2">
-                                <div class="flex items-center gap-2 overflow-hidden min-w-0">
-                                    <div class="w-6 text-center text-lg shrink-0">${icon}</div>
-                                    <span class="text-xs font-black ${nameColor} truncate">${(st.name || 'Без имени').replace(/'/g, "\\'")}</span>
+                                <div class="flex justify-between items-center bg-white/50 dark:bg-black/20 p-2 rounded-lg backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-800/50">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm">${badge}</span>
+                                        <span class="font-bold text-[11px] text-gray-800 dark:text-gray-200">${st.name || 'Без имени'}</span>
+                                    </div>
+                                    <span class="font-black text-[11px] text-emerald-600 dark:text-emerald-400">${st.totalSolved || 0}</span>
                                 </div>
-                                <div class="bg-emerald-100 dark:bg-emerald-900/50 px-2 py-1 rounded-lg text-emerald-700 dark:text-emerald-400 text-[11px] font-black shrink-0 border border-emerald-200 dark:border-emerald-800/50 shadow-inner">
-                                    ${st.weeklySolved} л.
-                                </div>
-                            </div>`;
+                            `;
                         });
+                        ll.innerHTML = html;
                         
-                        if (weekly.length === 0) {
-                            html = '<p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center py-4">Рейтинг пуст. Стань первым!</p>';
-                        }
-                        listEl.innerHTML = html;
-                        
-                    } catch(e) {
-                        listEl.innerHTML = '<p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest text-center py-4">Ошибка загрузки сети</p>';
-                        console.error(e);
-                    }
+                    } catch (e) { console.error("Leaderboard load failed", e); }
                 };
-                
-                // Функция загрузки глобального топа
+
                 window.openGlobalTopModal = async function() {
                     const m = document.getElementById('global-top-modal');
                     m.classList.remove('hidden');
@@ -3156,63 +2865,39 @@
                     setTimeout(() => m.classList.remove('opacity-0'), 10);
                     
                     const container = document.getElementById('global-top-container');
-                    container.innerHTML = '<p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center py-8">⏳ Загрузка базы данных Главного Управления...</p>';
+                    container.innerHTML = '<p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center py-8">⏳ Синхронизация с сервером...</p>';
                     
-                    if (!fbUser || !db) {
-                        container.innerHTML = '<p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest text-center py-8">Нет подключения к сети</p>';
+                    if (!db) {
+                        container.innerHTML = '<p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest text-center py-8">Ошибка: БД недоступна</p>';
                         return;
                     }
                     
                     try {
-                        const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
-                        let students = [];
-                        snap.forEach(d => {
-                            let data = d.data();
-                            students.push(data);
-                        });
+                        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
+                        let topList = [];
+                        querySnapshot.forEach(doc => topList.push(doc.data()));
                         
-                        let merged = [];
-                        students.forEach(st => {
-                            let nameKey = (st.name && st.name !== 'Ученик (Без имени)') ? st.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                            let tgKey = isRealTgId(st.tgId) ? String(st.tgId) : null;
-                            
-                            let foundIdx = merged.findIndex(existing => {
-                                let exNameKey = (existing.name && existing.name !== 'Ученик (Без имени)') ? existing.name.trim().toLowerCase().replace(/[^a-zа-яё0-9]/gi, '') : null;
-                                let exTgKey = isRealTgId(existing.tgId) ? String(existing.tgId) : null;
-                                if (tgKey && exTgKey && tgKey === exTgKey) return true;
-                                if (nameKey && exNameKey && nameKey === exNameKey) return true;
-                                return false;
-                            });
-                            
-                            if (foundIdx !== -1) {
-                                if ((st.totalSolved || 0) > (merged[foundIdx].totalSolved || 0)) {
-                                    merged[foundIdx] = st;
-                                }
-                            } else {
-                                merged.push(st);
-                            }
-                        });
-
-                        let topList = merged.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0)).slice(0, 50).filter(s => (s.totalSolved || 0) > 0);
+                        topList.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
+                        topList = topList.slice(0, 50); 
                         
                         let html = '<div class="flex flex-col gap-2">';
                         topList.forEach((st, idx) => {
-                            let isMe = st.tgId === resolveUserId(fbUser);
-                            let icon = idx === 0 ? '👑' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `<span class="text-sm font-black text-gray-400 w-6 text-center inline-block">${idx+1}</span>`));
-                            let nameColor = isMe ? 'text-blue-600 dark:text-blue-400 font-black' : 'text-gray-800 dark:text-slate-200 font-bold';
-                            let bgClass = isMe ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50' : 'bg-white dark:bg-[#242729] border-gray-100 dark:border-[#2a2e30]';
+                            let badge = (idx === 0) ? '👑' : ((idx === 1) ? '🥈' : ((idx === 2) ? '🥉' : `${idx+1}`));
+                            let badgeStyle = (idx < 3) ? 'text-xl drop-shadow-md w-8 text-center' : 'text-xs font-black text-blue-300 w-8 text-center';
                             
                             html += `
-                            <div class="flex justify-between items-center p-3 rounded-xl border ${bgClass} shadow-sm min-w-0 gap-3">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="text-xl sm:text-2xl shrink-0 flex items-center justify-center">${icon}</div>
-                                    <div class="flex flex-col min-w-0">
-                                        <span class="text-sm ${nameColor} truncate">${(st.name || 'Без имени').replace(/'/g, "\\'")} ${st.username ? `<span class="text-[10px] text-blue-400 ml-1">${st.username}</span>` : ''}</span>
-                                        ${isMe ? '<span class="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-0.5">Это вы</span>' : ''}
+                            <div class="bg-white dark:bg-[#242729] rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-[#2a2e30] flex justify-between items-center transition-transform hover:-translate-y-0.5">
+                                <div class="flex items-center gap-2 overflow-hidden">
+                                    <span class="${badgeStyle} shrink-0">${badge}</span>
+                                    <div class="truncate">
+                                        <h4 class="font-black text-[12px] sm:text-sm text-gray-800 dark:text-gray-200 truncate">${st.name || 'Аноним'}</h4>
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">${st.username || 'Тайный агент'}</span>
                                     </div>
                                 </div>
-                                <div class="bg-gray-100 dark:bg-[#1a1c1d] px-3 py-1.5 rounded-xl text-examBlue dark:text-blue-400 text-sm font-black border border-gray-200 dark:border-[#2a2e30] shrink-0 text-right">
-                                    ${st.totalSolved || 0}
+                                <div class="text-right shrink-0 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                                    <span class="font-black text-examBlue dark:text-blue-400 text-sm sm:text-base leading-none block">
+                                        ${st.totalSolved || 0}
+                                    </span>
                                     <span class="text-[9px] font-bold text-gray-400 block leading-none">строк</span>
                                 </div>
                             </div>`;
