@@ -30,7 +30,11 @@
                 z-index: 40 !important;
             }
             /* Динамический отступ, чтобы можно было прокрутить таблицу над пулом */
-            #classic-task-area { padding-bottom: max(400px, 50vh) !important; } 
+            #classic-task-area { padding-bottom: 75vh !important; } 
+        }
+        body.zen-mode-active #pool-panel {
+            bottom: 0 !important;
+            padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)) !important;
         }
         @media (min-width: 1024px) {
             #pool-panel {
@@ -525,7 +529,7 @@
                 </div>
 
                 <!-- Панель пула: теперь "прилипает" (sticky) к нижней части экрана без перекрытия контента -->
-                <div id="pool-panel" class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col fixed sm:sticky bottom-[70px] sm:bottom-0 left-0 sm:left-auto z-40 p-4 border-t sm:border border-gray-200 dark:border-[#2a2e30] rounded-t-3xl sm:rounded-2xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] sm:shadow-sm transition-colors duration-400">
+                <div id="pool-panel" class="w-full lg:w-1/3 bg-white dark:bg-[#242729] flex flex-col fixed sm:sticky bottom-[70px] sm:bottom-0 left-0 sm:left-auto z-40 p-3 sm:p-4 border-t sm:border border-gray-200 dark:border-[#2a2e30] rounded-t-2xl sm:rounded-2xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)] sm:shadow-sm transition-all duration-400">
                     <div class="flex justify-between items-center mb-2 lg:mb-4 cursor-pointer lg:cursor-auto" onclick="toggleMobilePool()">
                         <h3 id="pool-title" class="font-black text-gray-800 dark:text-slate-200 flex items-center gap-2 text-sm sm:text-base uppercase tracking-widest">
                             <span>🧩</span> Варианты
@@ -534,20 +538,20 @@
                     </div>
                     
                     <div id="pool-content-wrapper">
-                        <div id="pool-container" class="flex flex-wrap justify-center gap-2 sm:gap-2 max-h-[35vh] sm:max-h-[50vh] lg:max-h-none overflow-y-auto custom-scroll pb-2"></div>
-                        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2e30] flex flex-col gap-3">
+                        <div id="pool-container" class="flex flex-wrap justify-center gap-1.5 sm:gap-2 max-h-[28vh] sm:max-h-[50vh] lg:max-h-none overflow-y-auto custom-scroll pb-1"></div>
+                        <div class="mt-2 pt-2 sm:mt-4 sm:pt-4 border-t border-gray-100 dark:border-[#2a2e30] flex flex-col gap-2 sm:gap-3">
                             <div id="check-buttons" class="flex gap-2 w-full">
-                                <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-2 rounded-2xl shadow-lg active:scale-95 text-xs sm:text-sm w-full uppercase tracking-widest transition-transform flex justify-center items-center gap-1">
+                                <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 sm:py-4 px-2 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 text-[11px] sm:text-sm w-full uppercase tracking-widest transition-transform flex justify-center items-center gap-1">
                                     ✅ Уверен
                                 </button>
-                                <button id="check-btn-doubt" onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-white font-black py-4 px-2 rounded-2xl shadow-lg active:scale-95 text-[10px] sm:text-xs w-full uppercase tracking-widest transition-transform flex justify-center items-center gap-1 leading-tight">
+                                <button id="check-btn-doubt" onclick="checkAnswers(false)" class="bg-indigo-500 hover:bg-indigo-600 text-white font-black py-2.5 sm:py-4 px-2 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 text-[9px] sm:text-xs w-full uppercase tracking-widest transition-transform flex justify-center items-center gap-1 leading-tight">
                                     🤔 Сомневаюсь
                                 </button>
                             </div>
-                            <button id="reveal-btn" onclick="toggleAnswers()" class="hidden text-gray-500 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 font-bold py-2 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline uppercase tracking-wider">
+                            <button id="reveal-btn" onclick="toggleAnswers()" class="hidden text-gray-500 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 font-bold py-1.5 sm:py-2 active:scale-95 text-[10px] sm:text-xs w-full transition-colors underline uppercase tracking-wider">
                                 👀 Сдаюсь, покажи ответы
                             </button>
-                            <button id="next-btn" onclick="generateTable()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-6 rounded-2xl shadow-lg active:scale-95 text-sm sm:text-base w-full uppercase tracking-widest transition-transform">
+                            <button id="next-btn" onclick="generateTable()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-black py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 text-[11px] sm:text-base w-full uppercase tracking-widest transition-transform">
                                 ➡️ Дальше
                             </button>
                         </div>
@@ -1361,6 +1365,7 @@
             const body = document.body;
 
             if (window.state.focusMode) {
+                body.classList.add('zen-mode-active');
                 header.classList.add('hidden');
                 bottomNav.classList.add('hidden');
                 body.style.paddingBottom = '0px';
@@ -1368,6 +1373,7 @@
                 zenExitBtn.classList.add('flex');
                 showToast('🧘', 'Режим Дзен активирован', 'bg-teal-500', 'border-teal-700');
             } else {
+                body.classList.remove('zen-mode-active');
                 header.classList.remove('hidden');
                 bottomNav.classList.remove('hidden');
                 body.style.paddingBottom = '';
