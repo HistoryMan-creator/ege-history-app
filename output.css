@@ -1176,6 +1176,10 @@ video {
   gap: 0.25rem;
 }
 
+.gap-1\.5 {
+  gap: 0.375rem;
+}
+
 .gap-2 {
   gap: 0.5rem;
 }
@@ -3457,6 +3461,10 @@ video {
     gap: 0.5rem;
   }
 
+  .sm\:gap-3 {
+    gap: 0.75rem;
+  }
+
   .sm\:gap-4 {
     gap: 1rem;
   }
@@ -3530,6 +3538,10 @@ video {
 
   .sm\:text-\[10px\] {
     font-size: 10px;
+  }
+
+  .sm\:text-\[11px\] {
+    font-size: 11px;
   }
 
   .sm\:text-\[14px\] {

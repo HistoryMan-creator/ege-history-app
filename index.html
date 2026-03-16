@@ -29,7 +29,8 @@
                 bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; 
                 z-index: 40 !important;
             }
-            #classic-task-area { padding-bottom: 250px; } /* Запас пространства, чтобы панель пула не перекрывала таблицу */
+            /* Динамический отступ, чтобы можно было прокрутить таблицу над пулом */
+            #classic-task-area { padding-bottom: max(400px, 50vh) !important; } 
         }
         @media (min-width: 1024px) {
             #pool-panel {
@@ -329,11 +330,11 @@
     <header id="main-header" class="bg-examBlue dark:bg-[#121415] text-white shadow-md sticky top-0 z-50 no-print transition-colors duration-400">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
             <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3">
                     <span class="text-2xl sm:text-3xl cursor-pointer select-none transition-transform active:scale-90" onclick="handleSecretTeacherClick()">🏛️</span>
-                    <div class="text-left hidden sm:block">
-                        <h1 class="text-xl font-bold tracking-tight leading-tight">Тренажер ЕГЭ</h1>
-                        <p class="text-blue-200 dark:text-slate-400 text-[11px]">PRO | История</p>
+                    <div class="text-left">
+                        <h1 class="text-lg sm:text-xl font-bold tracking-tight leading-tight">Тренажер ЕГЭ</h1>
+                        <p class="text-blue-200 dark:text-slate-400 text-[10px] sm:text-[11px]">PRO | История</p>
                     </div>
                 </div>
                 <div class="flex sm:hidden items-center gap-2">
@@ -342,7 +343,7 @@
             </div>
             
             <!-- Геймификация -->
-            <div class="flex flex-wrap sm:flex-nowrap items-center justify-center w-full sm:w-auto gap-2 sm:gap-4 mt-3 sm:mt-0">
+            <div class="flex flex-wrap sm:flex-nowrap items-center justify-center w-full sm:w-auto gap-1.5 sm:gap-4 mt-3 sm:mt-0">
                 <div class="flex flex-col items-center justify-center bg-white/10 dark:bg-white/5 rounded-xl px-2 sm:px-4 py-1.5 flex-1 sm:flex-none shadow-sm border border-white/10 whitespace-nowrap">
                     <span class="text-[9px] sm:text-[10px] text-yellow-200 uppercase font-black tracking-widest text-center">Стрик</span>
                     <div class="flex items-center justify-center gap-1 mt-0.5">
