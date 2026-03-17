@@ -153,6 +153,9 @@
         .achievement-card { transition: transform 0.2s, box-shadow 0.2s; }
         .achievement-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
+
+        /* Стиль для Дзен-режима */
+        body.zen-mode-active main { padding-bottom: 80px !important; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-[#121212] text-slate-800 dark:text-gray-300 font-sans antialiased min-h-screen flex flex-col relative">
@@ -255,7 +258,7 @@
             <div id="game-header" class="flex justify-between items-center mb-2 sm:mb-3 bg-white/60 dark:bg-[#1e1e1e]/80 backdrop-blur-md p-1.5 sm:p-2 rounded-xl shadow-sm border border-gray-100 dark:border-[#2c2c2c] shrink-0">
                 <button onclick="backToLobby()" class="flex items-center gap-1.5 text-gray-500 hover:text-examBlue dark:text-gray-400 dark:hover:text-blue-400 font-bold transition-colors text-xs sm:text-sm px-2 py-1 rounded-lg hover:bg-white dark:hover:bg-[#2c2c2c]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg><span class="hidden sm:inline">Назад</span></button>
                 <div class="flex flex-col items-center"><h2 id="game-title-display" class="font-black text-gray-800 dark:text-gray-300 uppercase tracking-widest text-xs sm:text-sm">Режим</h2><div id="game-timer-display" class="hidden text-rose-500 font-black text-xs animate-pulse">03:00</div></div>
-                <button onclick="openPreGameModal(window.state.currentTask, window.state.currentMode)" class="text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 text-base p-1.5 bg-white dark:bg-[#2c2c2c] rounded-lg transition-colors shadow-sm">⚙️</button>
+                <button onclick="openGlobalSettings()" class="text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 text-base p-1.5 bg-white dark:bg-[#2c2c2c] rounded-lg transition-colors shadow-sm">⚙️</button>
             </div>
 
             <!-- Классическая таблица -->
@@ -305,19 +308,22 @@
         </div>
     </main>
 
-    <!-- Кнопка выхода из Дзена -->
-    <div id="zen-exit-btn" onclick="toggleFocusMode()" class="hidden fixed bottom-0 left-1/2 transform -translate-x-1/2 z-[10000] w-32 h-5 sm:h-6 bg-teal-600/40 backdrop-blur-md hover:bg-teal-500 hover:h-12 hover:w-48 transition-all duration-300 rounded-t-2xl cursor-pointer items-center justify-center group shadow-[0_0_15px_rgba(20,184,166,0.4)] no-print overflow-hidden border-t border-x border-teal-400/30"><span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/50 group-hover:hidden transition-opacity">Дзен</span><span class="text-xs sm:text-sm font-black uppercase tracking-widest text-white hidden group-hover:block">Выйти</span></div>
+    <!-- Кнопка Дзен (Плавающая круглая иконка) -->
+    <div id="zen-exit-btn" onclick="toggleFocusMode()" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[10000] w-14 h-14 bg-gradient-to-tr from-teal-500 to-emerald-400 backdrop-blur-md hover:scale-110 active:scale-90 transition-all duration-300 rounded-full cursor-pointer items-center justify-center shadow-[0_0_20px_rgba(20,184,166,0.6)] hover:shadow-[0_0_30px_rgba(20,184,166,0.9)] no-print border border-white/30 dark:border-white/10">
+        <span class="text-2xl drop-shadow-md relative">🧘</span>
+    </div>
 
-    <!-- Нижнее меню (Только 3 кнопки) -->
+    <!-- Нижнее меню (Только 4 кнопки) -->
     <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-[#2c2c2c] flex justify-around items-center z-[9999] shadow-[0_-5px_15px_rgba(0,0,0,0.08)] dark:shadow-[0_-5px_15px_rgba(0,0,0,0.5)] !opacity-100 transition-transform">
         <button onclick="window.location.href='https://historyman-creator.github.io/tsar-tinder/'" class="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-red-500 active:text-red-500 transition-colors group"><span class="text-2xl mb-1 group-active:scale-110 transition-transform">🩸</span><span class="text-[10px] font-black uppercase tracking-widest">Тиндер</span></button>
         <button onclick="toggleFocusMode()" class="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-teal-500 active:text-teal-500 transition-colors group"><span class="text-2xl mb-1 group-active:-translate-y-1 transition-transform">🧘</span><span class="text-[10px] font-black uppercase tracking-widest">Дзен</span></button>
+        <button onclick="openGlobalSettings()" class="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-blue-500 active:text-blue-500 transition-colors group"><span class="text-2xl mb-1 group-active:-translate-y-1 transition-transform">⚙️</span><span class="text-[10px] font-black uppercase tracking-widest">Настройки</span></button>
         <button onclick="openStatsModal()" class="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-purple-500 active:text-purple-500 transition-colors group"><span class="text-2xl mb-1 group-active:-translate-y-1 transition-transform">📊</span><span class="text-[10px] font-black uppercase tracking-widest">Профиль</span></button>
     </nav>
 
     <!-- === МОДАЛКИ === -->
     
-    <!-- Модалка перед игрой (Настройки) -->
+    <!-- Модалка перед игрой (Глобальные настройки) -->
     <div id="pre-game-modal" class="fixed inset-0 bg-black/60 z-[10000] hidden flex-col justify-end backdrop-blur-sm transition-opacity opacity-0 no-print" onclick="if(event.target === this) closePreGameModal()">
         <div class="bg-gray-50 dark:bg-[#1e1e1e] rounded-t-3xl p-6 pb-10 w-full max-w-lg mx-auto flex flex-col gap-5 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto custom-scroll overscroll-contain" id="pg-sheet" onclick="event.stopPropagation()">
             <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-2 opacity-50 shrink-0"></div><h2 id="pre-game-title" class="text-xl font-black text-gray-800 dark:text-gray-300 text-center uppercase tracking-widest mb-2 shrink-0">Настройки</h2>
@@ -325,9 +331,9 @@
             <div id="pg-period-container" class="flex flex-col gap-2 shrink-0"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Историческая эпоха</label><div class="relative"><select id="pg-filter-period" onchange="checkCustomPeriod()" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] text-gray-800 dark:text-gray-300 rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none cursor-pointer"><option value="all">🌍 Вся история</option><option value="custom">⚙️ Свой период</option><option value="early">⚔️ Древность и Смута</option><option value="18th">👑 XVIII век</option><option value="19th">🚂 XIX век</option><option value="20th">🚀 XX век</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div></div></div>
             <div id="pg-custom-period-container" class="hidden grid grid-cols-2 gap-4"><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">От года</label><input type="number" id="pg-custom-year-start" value="862" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">До года</label><input type="number" id="pg-custom-year-end" value="2022" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div></div>
             <div id="pg-rows-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Сложность</label><div class="grid grid-cols-3 gap-2"><button onclick="setPgRows(4)" id="btn-row-4" class="pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors">4 строки</button><button onclick="setPgRows(6)" id="btn-row-6" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">6 строк</button><button onclick="setPgRows(10)" id="btn-row-10" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">10 строк</button></div></div>
-            <div id="pg-case-container" class="hidden flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Материалы дела</label><div class="relative"><select id="pg-filter-case" class="w-full bg-stone-100 dark:bg-[#2a2722] border-2 border-stone-300 dark:border-[#4a4235] text-stone-900 dark:text-[#dcd6c7] rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none font-mono"><option value="rtw">⚔️ Русско-турецкие войны</option><option value="sweden">🌊 Борьба за Балтику</option><option value="smuta">👑 Смутное время</option><option value="mongols">🐎 Ордынское иго</option><option value="napoleon">🔥 Отечественная 1812 г.</option><option value="palace">📜 Дворцовые перевороты</option><option value="revolts">🔥 Бунташный век</option><option value="decembrists">❄️ Декабристы</option><option value="ww1">💥 Первая мировая война</option><option value="revolutions">🚩 Революции 1917 года</option><option value="ww2">🎖️ ВОВ</option><option value="coldwar">🌐 Холодная война</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">▼</div></div></div>
+            <div id="pg-case-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Материалы дела <span class="text-rose-400 font-bold lowercase tracking-normal text-[9px]">(только для режима детектив)</span></label><div class="relative"><select id="pg-filter-case" class="w-full bg-stone-100 dark:bg-[#2a2722] border-2 border-stone-300 dark:border-[#4a4235] text-stone-900 dark:text-[#dcd6c7] rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none font-mono"><option value="rtw">⚔️ Русско-турецкие войны</option><option value="sweden">🌊 Борьба за Балтику</option><option value="smuta">👑 Смутное время</option><option value="mongols">🐎 Ордынское иго</option><option value="napoleon">🔥 Отечественная 1812 г.</option><option value="palace">📜 Дворцовые перевороты</option><option value="revolts">🔥 Бунташный век</option><option value="decembrists">❄️ Декабристы</option><option value="ww1">💥 Первая мировая война</option><option value="revolutions">🚩 Революции 1917 года</option><option value="ww2">🎖️ ВОВ</option><option value="coldwar">🌐 Холодная война</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">▼</div></div></div>
             <label id="pg-hide-learned-container" class="flex items-center gap-4 bg-white dark:bg-[#2c2c2c] p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-[#3f3f46] cursor-pointer mt-2 group active:scale-95 transition-transform shrink-0"><div class="relative flex items-center justify-center"><input type="checkbox" id="pg-hide-learned" class="peer appearance-none w-6 h-6 border-2 border-gray-300 dark:border-gray-600 rounded-lg checked:bg-blue-500 checked:border-blue-500 transition-colors"><svg class="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><div><span class="block text-sm font-black text-gray-800 dark:text-gray-300 uppercase tracking-wide">Скрывать выученное</span><span class="block text-[10px] text-gray-400 font-bold mt-0.5">Убирает свежие факты из пула</span></div></label>
-            <button onclick="startGameFromModal()" class="w-full bg-blue-600 text-white font-black text-lg py-5 rounded-2xl mt-2 shadow-[0_8px_20px_rgba(37,99,235,0.3)] active:scale-95 transition-transform uppercase tracking-widest flex items-center justify-center gap-2 shrink-0">ПРИМЕНИТЬ 🚀</button>
+            <button onclick="applyGlobalSettings()" class="w-full bg-blue-600 text-white font-black text-lg py-5 rounded-2xl mt-2 shadow-[0_8px_20px_rgba(37,99,235,0.3)] active:scale-95 transition-transform uppercase tracking-widest flex items-center justify-center gap-2 shrink-0">СОХРАНИТЬ 💾</button>
         </div>
     </div>
 
@@ -445,6 +451,10 @@
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="text-center bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Всего решено</p><p class="text-3xl font-black text-examBlue dark:text-blue-400 mt-1" id="modal-stat-solved">0</p></div>
                     <div class="text-center bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm relative overflow-hidden cursor-pointer hover:border-rose-400 transition-colors active:scale-95 group" onclick="openMistakesListModal()"><div class="absolute inset-0 bg-rose-50 dark:bg-rose-900/10 opacity-50 pointer-events-none transition-opacity group-hover:opacity-100"></div><p class="text-[10px] text-rose-400 uppercase font-black tracking-widest relative z-10">Ошибок в пуле</p><p class="text-3xl font-black text-rose-500 relative z-10 mt-1" id="modal-stat-mistakes">0</p><div class="absolute bottom-1 left-0 w-full text-center text-[8px] text-rose-400/70 font-bold uppercase">Смотреть</div></div>
+                </div>
+                <div id="student-leaderboard-container" class="hidden mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
+                    <h3 class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-1"><span>🌍</span> Общий топ (неделя)</h3>
+                    <div id="student-leaderboard-list" class="flex flex-col gap-2"></div>
                 </div>
                 <div class="mb-6 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Прогресс по эпохам</h3><div id="stats-era-container" class="space-y-3"></div></div>
                 <div class="mb-2 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Активность по дням</h3><div id="stats-daily-container" class="space-y-2"></div></div>
@@ -564,41 +574,61 @@
             $('pre-game-title').innerText = titles[mode]; $('game-title-display').innerText = titles[mode];
             $('lobby-area').classList.add('hidden'); $('game-container').classList.remove('hidden'); $('game-container').classList.add('flex');
             document.body.classList.add('in-game'); $('bottom-nav').classList.add('hide-nav');
+            
+            // Включаем кнопку Дзен внутри игры
+            const zenBtn = $('zen-exit-btn'); if (zenBtn) { zenBtn.classList.remove('hidden'); zenBtn.classList.add('flex'); }
+
             toggleMode(mode);
         };
 
-        window.openPreGameModal = function(task, mode) {
-            window.state.pendingTask = task; window.state.pendingMode = mode;
-            const titles = { 'normal': task === 'task4' ? '📍 Задание №4' : '👤 Задание №5', 'speedrun': '⚡ Спидран', 'flashcards': '🃏 Флеш-карточки', 'mistakes': '🔥 Ошибки', 'study': '📖 Сюжеты', 'detective': '🕵️ Секретный архив', 'redpencil': '🖍️ Красный карандаш' };
-            $('pre-game-title').innerText = titles[mode];
-            const isDet = mode === 'detective', isSpd = mode === 'speedrun', isRP = mode === 'redpencil', isFc = mode === 'flashcards', isSt = mode === 'study';
-            $('pg-period-container').classList.toggle('hidden', isDet || isSpd);
-            $('pg-rows-container').classList.toggle('hidden', isDet || isFc || isSpd || isSt || isRP || task === 'task5');
-            $('pg-case-container').classList.toggle('hidden', !isDet);
-            $('pg-hide-learned-container').classList.toggle('hidden', isDet || isSpd || isRP);
+        window.openGlobalSettings = function() {
+            $('pre-game-title').innerText = 'Глобальные настройки';
+            
+            $('pg-period-container').classList.remove('hidden');
+            $('pg-rows-container').classList.remove('hidden');
+            $('pg-case-container').classList.remove('hidden'); 
+            $('pg-hide-learned-container').classList.remove('hidden');
             
             if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'all';
             if ($('filter-case')) $('pg-filter-case').value = $('filter-case').value || 'rtw';
             if ($('filter-rows')) window.setPgRows($('filter-rows').value || '4');
-            checkCustomPeriod(); showModal('pre-game-modal'); setTimeout(() => $('pg-sheet').classList.remove('translate-y-full'), 10);
+            checkCustomPeriod(); 
+            showModal('pre-game-modal'); 
+            setTimeout(() => $('pg-sheet').classList.remove('translate-y-full'), 10);
         };
 
         window.closePreGameModal = function() { hideModal('pre-game-modal'); $('pg-sheet').classList.add('translate-y-full'); };
         window.checkCustomPeriod = function() { $('pg-custom-period-container').classList.toggle('hidden', $('pg-filter-period').value !== 'custom'); };
         window.setPgRows = function(rows) { $$('.pg-row-btn').forEach(btn => btn.className = "pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors"); $(`btn-row-${rows}`).className = "pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors"; $('filter-rows').value = rows; };
 
-        window.startGameFromModal = function() {
-            haptic('medium'); window.state.currentTask = window.state.pendingTask;
-            $('filter-task').value = window.state.pendingTask; $('filter-mode').value = window.state.pendingMode; $('filter-period').value = $('pg-filter-period').value; $('custom-year-start').value = $('pg-custom-year-start').value; $('custom-year-end').value = $('pg-custom-year-end').value;
-            if(window.state.pendingMode === 'detective') $('filter-case').value = $('pg-filter-case').value;
-            const hideLearned = $('pg-hide-learned').checked; $('toggle-hide-learned').checked = hideLearned; window.state.hideLearned = hideLearned; saveProgress();
-            closePreGameModal(); $('lobby-area').classList.add('hidden'); $('game-container').classList.remove('hidden'); $('game-container').classList.add('flex'); document.body.classList.add('in-game'); $('bottom-nav').classList.add('hide-nav'); $('game-title-display').innerText = $('pre-game-title').innerText;
-            toggleMode(window.state.pendingMode);
+        window.applyGlobalSettings = function() {
+            haptic('medium'); 
+            $('filter-period').value = $('pg-filter-period').value; 
+            $('custom-year-start').value = $('pg-custom-year-start').value; 
+            $('custom-year-end').value = $('pg-custom-year-end').value;
+            $('filter-case').value = $('pg-filter-case').value;
+            const hideLearned = $('pg-hide-learned').checked; 
+            $('toggle-hide-learned').checked = hideLearned; 
+            window.state.hideLearned = hideLearned; 
+            
+            saveProgress();
+            closePreGameModal();
+            
+            if (document.body.classList.contains('in-game')) {
+                window.handleSettingsChange();
+            } else {
+                showToast('⚙️', 'Настройки сохранены', 'bg-blue-500', 'border-blue-700');
+            }
         };
 
         window.backToLobby = function() {
             haptic('light'); $('game-container').classList.add('hidden'); $('game-container').classList.remove('flex'); $('lobby-area').classList.remove('hidden');
-            if (!window.state.focusMode) { document.body.classList.remove('in-game'); $('bottom-nav').classList.remove('hide-nav'); }
+            if (!window.state.focusMode) { 
+                document.body.classList.remove('in-game'); 
+                $('bottom-nav').classList.remove('hide-nav'); 
+                // Скрываем Дзен кнопку только если не активирован режим
+                const zenBtn = $('zen-exit-btn'); if (zenBtn) { zenBtn.classList.add('hidden'); zenBtn.classList.remove('flex'); }
+            }
             clearInterval(window.state.timerInterval); $('game-timer-display').classList.add('hidden');
             $('task-table-body').innerHTML = ''; $('pool-container').innerHTML = '';
             ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => { const el = $(id); if (el) { el.classList.add('hidden'); el.classList.remove('flex', 'lg:flex-row'); } });
@@ -659,22 +689,41 @@
                 $('filter-task').value = tsk; window.state.currentTask = tsk;
                 $('lobby-area').classList.add('hidden'); $('hw-alert').classList.remove('hidden'); updateText($('hw-remaining'), window.state.hwCurrentPool.length);
                 $('game-container').classList.remove('hidden'); $('game-container').classList.add('flex'); $('game-title-display').innerText = "📚 ДОМАШНЕЕ ЗАДАНИЕ";
-                document.body.classList.add('in-game'); $('bottom-nav').classList.add('hide-nav'); toggleMode('normal');
+                document.body.classList.add('in-game'); $('bottom-nav').classList.add('hide-nav'); 
+                const zenBtn = $('zen-exit-btn'); if (zenBtn) { zenBtn.classList.remove('hidden'); zenBtn.classList.add('flex'); }
+                toggleMode('normal');
             } else if (hwCount) {
                 window.state.stats.hwFlashcardsToSolve = parseInt(hwCount);
                 if (p.get('hw_task')) { $('filter-task').value = p.get('hw_task'); window.state.currentTask = p.get('hw_task'); }
                 if (p.get('hw_period')) { $('filter-period').value = p.get('hw_period'); if (p.get('hw_period') === 'custom') { $('custom-year-start').value = p.get('hw_sy') || '862'; $('custom-year-end').value = p.get('hw_ey') || '2022'; } }
                 saveProgress(); window.history.replaceState({}, document.title, window.location.pathname); showToast('📝', 'Вам назначено ДЗ!', 'bg-blue-500', 'border-blue-700'); updateGlobalUI();
-                setTimeout(() => { $('lobby-area').classList.add('hidden'); $('game-container').classList.remove('hidden'); $('game-container').classList.add('flex'); document.body.classList.add('in-game'); $('bottom-nav').classList.add('hide-nav'); $('game-title-display').innerText = "📚 ДОМАШНЕЕ ЗАДАНИЕ"; toggleMode('normal'); }, 500);
+                setTimeout(() => { $('lobby-area').classList.add('hidden'); $('game-container').classList.remove('hidden'); $('game-container').classList.add('flex'); document.body.classList.add('in-game'); $('bottom-nav').classList.add('hide-nav'); const zenBtn = $('zen-exit-btn'); if (zenBtn) { zenBtn.classList.remove('hidden'); zenBtn.classList.add('flex'); } $('game-title-display').innerText = "📚 ДОМАШНЕЕ ЗАДАНИЕ"; toggleMode('normal'); }, 500);
             }
         }
 
         function toggleTheme() { localStorage.setItem('ege_theme', document.documentElement.classList.toggle('dark') ? 'dark' : 'light'); }
         
         window.toggleFocusMode = function() {
-            window.state.focusMode = !window.state.focusMode; const header = $('main-header'), bottomNav = $('bottom-nav'), zenExitBtn = $('zen-exit-btn'), body = document.body;
-            if (window.state.focusMode) { body.classList.add('zen-mode-active'); header.classList.add('hidden'); bottomNav.classList.add('hide-nav'); body.classList.add('in-game'); zenExitBtn.classList.remove('hidden'); zenExitBtn.classList.add('flex'); showToast('🧘', 'Режим Дзен активирован', 'bg-teal-500', 'border-teal-700'); } 
-            else { body.classList.remove('zen-mode-active'); header.classList.remove('hidden'); if (!$('lobby-area').classList.contains('hidden')) { bottomNav.classList.remove('hide-nav'); body.classList.remove('in-game'); } zenExitBtn.classList.add('hidden'); zenExitBtn.classList.remove('flex'); showToast('🧘', 'Дзен отключен', 'bg-gray-500', 'border-gray-700'); }
+            window.state.focusMode = !window.state.focusMode; 
+            const header = $('main-header'), bottomNav = $('bottom-nav'), zenExitBtn = $('zen-exit-btn'), body = document.body;
+            
+            if (window.state.focusMode) { 
+                body.classList.add('zen-mode-active'); 
+                header.classList.add('hidden'); 
+                bottomNav.classList.add('hide-nav'); 
+                if (!body.classList.contains('in-game')) body.classList.add('in-game'); 
+                zenExitBtn.classList.remove('hidden'); zenExitBtn.classList.add('flex'); 
+                showToast('🧘', 'Режим Дзен активирован', 'bg-teal-500', 'border-teal-700'); 
+            } else { 
+                body.classList.remove('zen-mode-active'); 
+                header.classList.remove('hidden'); 
+                if (!$('lobby-area').classList.contains('hidden')) { 
+                    bottomNav.classList.remove('hide-nav'); 
+                    body.classList.remove('in-game'); 
+                    zenExitBtn.classList.add('hidden'); zenExitBtn.classList.remove('flex'); 
+                }
+                showToast('🧘', 'Дзен отключен', 'bg-gray-500', 'border-gray-700'); 
+            }
         };
 
         function toggleHideLearned() { window.state.hideLearned = $('toggle-hide-learned').checked; saveProgress(); handleSettingsChange(); }
@@ -1260,10 +1309,9 @@
             const ll = document.getElementById('student-leaderboard-list');
             if (!db || !lc || !ll) return;
             try {
-                const cC = localStorage.getItem('student_class_code'); if (!cC) return; 
                 const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students')); let cM = [];
-                qS.forEach(doc => { const d = doc.data(); if (d.classCode === cC) cM.push(d); });
-                cM = mergeDuplicateStudents(cM); if (cM.length < 2) return; 
+                qS.forEach(doc => { cM.push(doc.data()); });
+                cM = mergeDuplicateStudents(cM); if (cM.length < 1) return; 
                 
                 let today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
                 let lastMon = new Date(today); let day = lastMon.getDay(); let diff = lastMon.getDate() - day + (day === 0 ? -6 : 1);
@@ -1276,29 +1324,24 @@
 
                 cM.sort((a,b) => (b.weeklySolved || 0) - (a.weeklySolved || 0)); lc.classList.remove('hidden');
                 
-                let ht = ''; cM.slice(0, 3).forEach((st, idx) => { if(st.weeklySolved > 0) ht += `<div class="flex justify-between items-center bg-white/50 dark:bg-black/20 p-2 rounded-lg backdrop-blur-sm border border-emerald-200/50"><div class="flex items-center gap-2"><span class="text-sm">${idx===0?'🥇':(idx===1?'🥈':'🥉')}</span><span class="font-bold text-[11px] text-gray-800 dark:text-gray-200">${st.name || 'Без имени'}</span></div><span class="font-black text-[11px] text-emerald-600">${st.weeklySolved} строк</span></div>`; }); ll.innerHTML = ht || '<p class="text-[9px] text-gray-500">Пока никто ничего не решил</p>';
+                let ht = ''; cM.slice(0, 5).forEach((st, idx) => { if(st.weeklySolved > 0) ht += `<div class="flex justify-between items-center bg-white/50 dark:bg-[#1e1e1e]/50 p-2.5 rounded-xl backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-800/50 shadow-sm"><div class="flex items-center gap-3"><span class="text-lg">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':'👤'))}</span><span class="font-bold text-[12px] text-gray-800 dark:text-gray-200">${st.name || 'Без имени'}</span></div><span class="font-black text-[12px] text-emerald-600 dark:text-emerald-400 bg-white dark:bg-[#121212] px-2 py-1 rounded-lg border border-emerald-100 dark:border-emerald-900">${st.weeklySolved} стр.</span></div>`; }); ll.innerHTML = ht || '<p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest text-center py-2">Решённых заданий пока нет</p>';
             } catch (e) {}
         };
 
         window.openGlobalTopModal = async function() {
             const cont = document.getElementById('global-top-container'); window.showModal('global-top-modal');
-            if (!db) { cont.innerHTML = '<p class="text-[10px] font-bold text-rose-500 text-center py-8">БД недоступна</p>'; return; }
-            cont.innerHTML = '<p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center py-8">⏳ Загрузка топ-50...</p>';
+            if (!db) { cont.innerHTML = '<p class="text-[10px] font-bold text-rose-500 text-center py-4">База данных недоступна</p>'; return; }
+            cont.innerHTML = '<p class="text-[10px] font-bold text-gray-500 text-center py-4">⏳ Загрузка...</p>';
             try {
-                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students')); let st = [];
-                qS.forEach(doc => st.push(doc.data()));
-                st = mergeDuplicateStudents(st); st.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0)); const tL = st.slice(0, 50);
-                let ht = '<div class="flex flex-col gap-2">';
-                tL.forEach((s, idx) => { ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border ${idx<3?'border-yellow-200 dark:border-yellow-900/50':'border-gray-100 dark:border-[#2c2c2c]'} flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800 mb-0.5">${s.totalSolved || 0}</span><span class="text-[9px] font-bold text-gray-400 block leading-none">строк</span></div></div>`; }); ht += '</div>';
+                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students')); let cM = [];
+                qS.forEach(doc => { const d = doc.data(); cM.push(d); });
+                cM = mergeDuplicateStudents(cM);
+                cM.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
+                let tL = cM.slice(0, 50); let ht = '<div class="flex flex-col gap-2">';
+                tL.forEach((s, idx) => { ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800 mb-0.5">${s.totalSolved || 0}</span><span class="text-[9px] font-bold text-gray-400 block leading-none">строк</span></div></div>`; }); ht += '</div>';
                 cont.innerHTML = tL.length === 0 ? '<p class="text-[10px] font-bold text-gray-500 text-center py-8">Пусто</p>' : ht;
-            } catch(e) { cont.innerHTML = '<p class="text-[10px] font-bold text-rose-500 text-center py-8">Ошибка загрузки</p>'; }
+            } catch(e) { cont.innerHTML = '<p class="text-[10px] font-bold text-rose-500 text-center py-4">Ошибка загрузки</p>'; }
         };
-
-        const tModal = document.getElementById('teacher-modal');
-        const tTabStats = document.getElementById('teacher-tab-stats');
-        if (tModal && tTabStats && !tModal.classList.contains('hidden') && tTabStats.classList.contains('flex')) {
-            window.loadClassProgress();
-        }
     </script>
 </body>
 </html>
