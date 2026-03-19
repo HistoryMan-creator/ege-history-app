@@ -17,7 +17,7 @@
         body.in-game { padding-bottom: env(safe-area-inset-bottom, 0px); }
         #bottom-nav { height: calc(70px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); }
         #bottom-nav.hide-nav { display: none !important; }
-        @media (min-width: 1024px) { #pool-panel { position: sticky !important; top: 4rem !important; height: fit-content !important; align-self: flex-start !important; } }
+        @media (min-width: 1024px) { #pool-panel { position: sticky !important; top: 4rem !important; height: fit-content !important; align-self: flex-start !important; bottom: auto !important; } }
         
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -56,8 +56,6 @@
 
         .revealed-chip { background-color: #fff7ed !important; border-color: #fdba74 !important; color: #c2410c !important; }
         .dark .revealed-chip { background-color: rgba(194, 65, 12, 0.2) !important; border-color: #ea580c !important; color: #fdba74 !important; }
-        .revealed-detective-chip { background-color: #fef2f2 !important; border-color: #f87171 !important; color: #b91c1c !important; }
-        .dark .revealed-detective-chip { background-color: rgba(185, 28, 28, 0.2) !important; border-color: #ef4444 !important; color: #fca5a5 !important; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
@@ -66,30 +64,28 @@
         body.mode-detective #table-container, .dark body.mode-detective #table-container { color: #2c241b !important; }
         body.mode-detective #classic-task-area tr { border-color: transparent !important; }
         body.mode-detective #classic-task-area td { border: none !important; border-bottom: 1px dashed #d1c1a5 !important; }
+        
         body.mode-detective .detective-slot { background-color: rgba(239, 68, 68, 0.08) !important; border: 2px dashed #ef4444 !important; color: transparent !important; position: relative; overflow: hidden; border-radius: 4px !important; box-shadow: none !important; display: inline-flex !important; min-width: 180px; height: 28px; vertical-align: middle; margin: 0 6px; }
         body.mode-detective .detective-slot::after { content: 'ДАННЫЕ ЗАСЕКРЕЧЕНЫ'; position: absolute; color: #ef4444; font-family: 'Arial', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 0.5px; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; }
-        body.mode-detective .detective-slot.has-item { background-color: transparent !important; min-width: auto; border: none !important; border-bottom: 2px solid #1d4ed8 !important; border-radius: 0 !important; height: auto; }
+        
+        body.mode-detective .detective-slot.has-item { background-color: transparent !important; min-width: auto; border: none !important; border-bottom: 2px dashed #1d4ed8 !important; border-radius: 0 !important; height: auto; display: inline-flex !important; padding: 0 !important; box-shadow: none !important; }
+        .dark body.mode-detective .detective-slot.has-item { background-color: transparent !important; border-bottom-color: #60a5fa !important; }
         body.mode-detective .detective-slot.has-item::after { display: none; }
-        body.mode-detective .detective-chip { background: #facc15 !important; border: 2px solid #ca8a04 !important; font-family: 'Arial', sans-serif !important; box-shadow: 2px 4px 0 rgba(202, 138, 4, 0.4) !important; border-radius: 4px !important; transform: rotate(-1deg); color: #1c1917 !important; font-weight: 900 !important; text-transform: uppercase; font-size: 0.75rem !important; padding: 0.4rem 0.8rem !important; transition: all 0.15s ease; }
-        body.mode-detective .detective-chip:hover { transform: translateY(-2px) rotate(0deg); box-shadow: 2px 6px 0 rgba(202, 138, 4, 0.4) !important; }
-        body.mode-detective .detective-chip.selected { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5) !important; transform: translateY(-2px) rotate(1deg); }
-        body.mode-detective .detective-chip.in-slot { transform: none !important; box-shadow: none !important; border: none !important; background: transparent !important; color: #1d4ed8 !important; font-family: 'Courier New', Courier, monospace !important; font-size: 15px !important; font-weight: 900 !important; padding: 0 0.2rem !important; text-transform: none; }
-        .detective-pool-panel { background-color: #292524 !important; border-color: #1c1917 !important; color: #f5f5f4 !important; }
-        .detective-pool-panel h3 { color: #facc15 !important; }
-        .detective-pool-panel .text-gray-500 { color: #a8a29e !important; }
-        .detective-pool-panel .bg-gray-100 { background-color: #44403c !important; color: #f5f5f4 !important;}
-        body.mode-detective .correct-slot { border-bottom-color: #10b981 !important; }
-        body.mode-detective .correct-slot .detective-chip.in-slot { color: #047857 !important; }
-        body.mode-detective .incorrect-slot { border-bottom-color: #ef4444 !important; }
-        body.mode-detective .incorrect-slot .detective-chip.in-slot { color: #b91c1c !important; }
+        
+        body.mode-detective .detective-slot.correct-slot { border-bottom-color: #10b981 !important; background-color: transparent !important; }
+        .dark body.mode-detective .detective-slot.correct-slot { background-color: transparent !important; }
+        body.mode-detective .detective-slot.correct-slot .detective-chip.in-slot { color: #10b981 !important; }
+        
+        body.mode-detective .detective-slot.incorrect-slot { border-bottom-color: #ef4444 !important; background-color: transparent !important; }
+        .dark body.mode-detective .detective-slot.incorrect-slot { background-color: transparent !important; }
+        body.mode-detective .detective-slot.incorrect-slot .detective-chip.in-slot { color: #ef4444 !important; }
+        
+        body.mode-detective .detective-slot.revealed-slot { border-bottom-color: #f59e0b !important; background-color: transparent !important; }
+        .dark body.mode-detective .detective-slot.revealed-slot { border-bottom-color: #ea580c !important; background-color: transparent !important; }
+        body.mode-detective .detective-slot.revealed-slot .detective-chip.in-slot { background: transparent !important; border: none !important; color: #f59e0b !important; }
+        .dark body.mode-detective .detective-slot.revealed-slot .detective-chip.in-slot { color: #ea580c !important; }
 
-        .paper-bg { background-color: #f4ecd8; color: #2c241b; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15); background-image: radial-gradient(#d1c1a5 1px, transparent 1px); background-size: 20px 20px; background-position: 0 0; font-family: 'Georgia', serif; }
-        .dark .paper-bg { background-color: #2a2621; color: #e5e0d8; background-image: radial-gradient(#3d362d 1px, transparent 1px); }
-        .paper-edges { position: absolute; inset: 0; box-shadow: inset 0 0 60px rgba(100, 70, 40, 0.15); pointer-events: none; }
-        .dark .paper-edges { box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5); }
-        #rp-content { user-select: none; }
-        .word-node, .plain-word { display: inline-block; position: relative; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; }
-        .word-node.crossed { text-decoration: line-through; text-decoration-color: #dc2626; text-decoration-thickness: 3px; color: #ef4444 !important; cursor: default; }
+        body.mode-detective .detective-chip { background: #facc15 !important; border: 2px solid #ca8a04 !important; font-family: 'Arial', sans-serif !important; box-shadow: 2px 4px 0 rgba(202, 138, 4, 0.4) !important; border-radius: 4px !important; transform: rotate(-1deg); color: #1c1917 !important; font-weight: 900 !important; text-transform: uppercase; font-size: 0.75rem !important; padding: 0.4rem 0.8rem !important; transition: all 0.15s ease; }
         .correction-badge { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(5px); font-size: 0.75rem; background-color: #10b981; color: white; padding: 2px 8px; border-radius: 4px; white-space: nowrap; font-family: 'Arial', sans-serif; font-weight: 900; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5); z-index: 10; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); letter-spacing: 1px; }
         .word-node.show-correction .correction-badge { opacity: 1; transform: translateX(-50%) translateY(-2px); }
         .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
@@ -155,7 +151,7 @@
         .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
 
         /* Стиль для Дзен-режима */
-        body.zen-mode-active main { padding-bottom: 80px !important; }
+        body.zen-mode-active main { padding-bottom: 20px !important; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-[#121212] text-slate-800 dark:text-gray-300 font-sans antialiased min-h-screen flex flex-col relative">
@@ -265,7 +261,7 @@
             <div id="classic-task-area" class="hidden flex-col lg:flex-row relative gap-4 items-stretch w-full h-full flex-1">
                 <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-[#121212]/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
 
-                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#1e1e1e] rounded-t-2xl lg:rounded-2xl shadow-md lg:shadow-sm border border-gray-200 dark:border-[#2c2c2c] border-b-0 lg:border-b transition-colors relative z-10 shrink-0 h-fit max-h-[55vh] lg:max-h-none overflow-y-auto custom-scroll">
+                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-md lg:shadow-sm border border-gray-200 dark:border-[#2c2c2c] transition-colors relative z-10 shrink-0 mb-4 lg:mb-0">
                     <div id="detective-stamp" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 sm:border-8 border-red-600 text-red-600 font-black text-4xl sm:text-6xl uppercase tracking-widest px-4 py-2 transform -rotate-12 opacity-[0.07] dark:opacity-10 pointer-events-none z-0 font-mono text-center whitespace-nowrap" style="border-radius: 8px;">СОВЕРШЕННО<br>СЕКРЕТНО</div>
                     <div class="overflow-x-auto p-1 relative z-10 w-full">
                         <table class="w-full text-left border-collapse table-fixed">
@@ -275,10 +271,10 @@
                     </div>
                 </div>
 
-                <div id="pool-panel" class="w-full lg:w-1/3 bg-gray-50/95 dark:bg-[#181818]/95 lg:bg-white lg:dark:bg-[#1e1e1e] flex flex-col z-20 p-2 sm:p-4 border-x border-b lg:border border-gray-200 dark:border-[#2c2c2c] rounded-b-2xl lg:rounded-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] lg:shadow-sm transition-all duration-400 relative flex-1 lg:flex-none">
+                <div id="pool-panel" class="w-full lg:w-1/3 bg-gray-50/95 dark:bg-[#181818]/95 lg:bg-white lg:dark:bg-[#1e1e1e] flex flex-col z-[45] p-3 sm:p-4 border-x border-t border-gray-200 dark:border-[#2c2c2c] lg:border rounded-t-2xl lg:rounded-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.1)] lg:shadow-sm transition-all duration-400 sticky bottom-0 lg:bottom-auto mt-2 lg:mt-0">
                     <div class="flex justify-between items-center mb-2 lg:mb-4 px-2 shrink-0"><h3 id="pool-title" class="font-black text-gray-800 dark:text-gray-300 flex items-center gap-2 text-[11px] sm:text-base uppercase tracking-widest"><span>🧩</span> Варианты</h3></div>
                     <div id="pool-content-wrapper" class="flex flex-col flex-1 overflow-hidden">
-                        <div id="pool-container" class="flex flex-wrap justify-center content-start gap-1.5 sm:gap-2 flex-1 overflow-y-auto custom-scroll pb-1 px-1"></div>
+                        <div id="pool-container" class="flex flex-wrap justify-center content-start gap-1.5 sm:gap-2 flex-1 overflow-y-auto custom-scroll pb-1 px-1 max-h-[28vh] lg:max-h-none"></div>
                         <div class="mt-2 pt-2 sm:mt-4 sm:pt-4 border-t border-gray-200 lg:border-gray-100 dark:border-[#2c2c2c] flex flex-col gap-1.5 sm:gap-3 px-1 shrink-0">
                             <div id="action-wrapper" class="relative w-full flex flex-col gap-2">
                                 <div id="check-buttons" class="flex gap-2 w-full">
@@ -573,28 +569,20 @@
             
             if (window.state.focusMode) {
                 // Превращаем в мини-кнопку Дзен
-                zenBtn.className = "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-tr from-teal-500 to-emerald-400 backdrop-blur-md hover:scale-125 active:scale-90 transition-all duration-300 rounded-full cursor-pointer flex items-center justify-center shadow-[0_0_15px_rgba(20,184,166,0.8)] no-print border border-white/30 dark:border-white/10";
-                zenBtn.innerHTML = '<span class="text-[12px] sm:text-[14px] drop-shadow-md relative">🧘</span>';
+                const smallClass = "w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-tr from-teal-500 to-emerald-400 backdrop-blur-md hover:scale-110 active:scale-90 transition-all duration-300 rounded-full cursor-pointer flex items-center justify-center shadow-[0_0_10px_rgba(20,184,166,0.8)] no-print border-2 border-white dark:border-[#1e1e1e] z-[100]";
                 
-                // Встраиваем в активную зону кнопок
                 if (!$('classic-task-area').classList.contains('hidden')) {
+                    // Task 4/5: Ровно по центру между кнопками "Уверен" и "Сомневаюсь"
+                    zenBtn.className = "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 " + smallClass;
+                    zenBtn.innerHTML = '<span class="text-[12px] sm:text-[14px] drop-shadow-md relative">🧘</span>';
                     const wrap = $('action-wrapper');
-                    if (wrap) wrap.appendChild(zenBtn);
-                } else if (!$('flashcard-area').classList.contains('hidden')) {
-                    const fcActions = $('flashcard-area').querySelector('.flex.gap-2.w-full.mt-auto');
-                    if(fcActions) { fcActions.classList.add('relative'); fcActions.appendChild(zenBtn); }
-                } else if (!$('study-area').classList.contains('hidden')) {
-                    const stActions = $('study-area').querySelector('.p-4');
-                    if(stActions) { stActions.classList.add('relative'); stActions.appendChild(zenBtn); }
-                } else if (!$('redpencil-area').classList.contains('hidden')) {
-                    const rpActions = $('redpencil-area').querySelector('.w-full.max-w-4xl.flex.gap-3');
-                    if(rpActions) { rpActions.classList.add('relative'); rpActions.appendChild(zenBtn); }
+                    if (wrap) { wrap.classList.add('relative'); wrap.appendChild(zenBtn); }
                 } else {
+                    // Остальные режимы: В самый низ экрана вплотную к кнопкам ответов
                     document.body.appendChild(zenBtn);
-                    zenBtn.classList.replace('absolute', 'fixed');
-                    zenBtn.classList.add('bottom-4');
+                    zenBtn.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 " + smallClass;
+                    zenBtn.innerHTML = '<span class="text-[12px] sm:text-[14px] drop-shadow-md relative">🧘</span>';
                 }
-                
                 zenBtn.classList.remove('hidden');
                 zenBtn.classList.add('flex');
             } else {
@@ -853,7 +841,7 @@
 
         function generateDetectiveTable() {
             window.state.tableHasMistake = false; window.state.answersRevealed = false;
-            $('pool-title').innerHTML = `<span>🔎</span> УЛИКИ`; $('pool-panel').classList.add('detective-pool-panel');
+            $('pool-title').innerHTML = `<span>🔎</span> УЛИКИ`; 
             $('check-buttons').classList.remove('hidden'); $('check-buttons').classList.add('flex'); $('check-btn-sure').innerHTML = '✅ Вынести вердикт'; $('check-btn-doubt').innerHTML = '🤔 Нужна экспертиза';
             $('reveal-btn').className = "hidden text-orange-500 font-bold py-2 px-6 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline uppercase tracking-wider mt-2"; $('reveal-btn').innerHTML = '👀 Запросить подсказку штаба'; $('next-btn').classList.add('hidden');
             if ($('detective-stamp')) $('detective-stamp').classList.remove('hidden');
@@ -864,11 +852,11 @@
             $('table-head').innerHTML = `<tr><th class="p-2 sm:p-4 text-left relative bg-[#f3efe6] dark:bg-[#c7c1b3] rounded-t-lg"><div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1">Архив Главного Управления</div><div class="text-2xl sm:text-3xl font-serif font-black text-[#3e352d] uppercase border-b-2 border-[#d1c1a5] pb-2">ДОСЬЕ №${Math.floor(Math.random()*900 + 100)}-${['К','А','М','С','Ж'][Math.floor(Math.random()*5)]}</div><div class="text-sm font-bold text-[#3e352d] mt-3 flex items-center gap-2"><span class="text-xl">📁</span> ${caseData.title}</div></th></tr>`;
             let missing = []; const trFrag = document.createDocumentFragment();
             caseData.items.forEach((item, idx) => { const tr = document.createElement('tr'); tr.dataset.index = idx; const td = document.createElement('td'); td.className = "p-2 sm:p-4 align-middle text-left leading-relaxed text-[13px] sm:text-base"; missing.push(item.answer); td.innerHTML = `<span class="font-bold mr-2 text-gray-500">${idx + 1}.</span> ${item.text.replace('###', `<div class="dnd-slot detective-slot" data-expected="${item.answer}" data-letter=""></div>`)}`; tr.appendChild(td); trFrag.appendChild(tr); }); $('task-table-body').appendChild(trFrag);
-            let poolItems = [...missing, ...(caseData.fakes || [])]; const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const chip = document.createElement('div'); chip.className = "dnd-chip detective-chip"; chip.innerText = txt; poolFrag.appendChild(chip); }); $('pool-container').appendChild(poolFrag);
+            let poolItems = [...missing, ...(caseData.fakes || [])]; const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const chip = document.createElement('div'); chip.className = "dnd-chip"; chip.innerText = txt; poolFrag.appendChild(chip); }); $('pool-container').appendChild(poolFrag);
         }
 
         function generateTask5Table() {
-            window.state.tableHasMistake = false; window.state.answersRevealed = false; $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; $('pool-panel').classList.remove('detective-pool-panel'); if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
+            window.state.tableHasMistake = false; window.state.answersRevealed = false; $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
             $('check-buttons').classList.remove('hidden'); $('check-buttons').classList.add('flex'); $('check-btn-sure').innerHTML = '✅ Уверен'; $('check-btn-doubt').innerHTML = '🤔 Сомневаюсь'; $('reveal-btn').className = "hidden text-gray-500 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 font-bold py-2 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline uppercase tracking-wider mt-2"; $('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы'; $('next-btn').classList.add('hidden'); $('task-table-body').innerHTML = ''; $('pool-container').innerHTML = '';
             $('table-head').innerHTML = `<tr><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[60%] text-left pl-2 sm:pl-4">📜 Процесс (явление)</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[40%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">👤 Участник</th></tr>`;
             
@@ -894,7 +882,7 @@
             if (window.state.currentMode === 'detective') return generateDetectiveTable();
             if (window.state.currentTask === 'task5') return generateTask5Table();
             window.state.tableHasMistake = false; window.state.answersRevealed = false; const rowsCount = parseInt($('filter-rows').value) || 4;
-            $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; $('pool-panel').classList.remove('detective-pool-panel'); if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
+            $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
             $('check-buttons').classList.remove('hidden'); $('check-buttons').classList.add('flex'); $('check-btn-sure').innerHTML = '✅ Уверен'; $('check-btn-doubt').innerHTML = '🤔 Сомневаюсь'; $('reveal-btn').className = "hidden text-gray-500 hover:text-orange-500 dark:text-gray-400 font-bold py-2 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline uppercase tracking-wider mt-2"; $('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы'; $('next-btn').classList.add('hidden'); $('task-table-body').innerHTML = ''; $('pool-container').innerHTML = '';
             $('table-head').innerHTML = `<tr><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] text-center">🗺️ Объект</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[45%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">📜 Событие</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">⏳ Дата</th></tr>`;
             
@@ -989,7 +977,7 @@
                 rows.forEach((tr, idx) => {
                     const fact = window.state.currentTargetData[idx]; 
                     if (!window.state.isHomeworkMode && !tr.dataset.scored) { tr.dataset.scored = "incorrect"; if (!isDet) { updateFactSRS(factKey(fact), false, false); if (!window.state.mistakesPool.some(m => m.fact.event === fact.event && m.task === window.state.currentTask)) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); } }
-                    tr.querySelectorAll('.dnd-slot').forEach(slot => { if (!slot.classList.contains('correct-slot')) { slot._userChildren = Array.from(slot.childNodes); slot.innerHTML = `<div class="dnd-chip in-slot ${isDet ? 'detective-chip revealed-detective-chip' : 'revealed-chip'}">${slot.dataset.expected}</div>`; slot.classList.remove('incorrect-slot'); slot.classList.add('revealed-slot', 'has-item'); if(isDet) slot.classList.add('incorrect-slot'); } });
+                    tr.querySelectorAll('.dnd-slot').forEach(slot => { if (!slot.classList.contains('correct-slot')) { slot._userChildren = Array.from(slot.childNodes); slot.innerHTML = `<div class="dnd-chip in-slot revealed-chip">${slot.dataset.expected}</div>`; slot.classList.remove('incorrect-slot'); slot.classList.add('revealed-slot', 'has-item'); } });
                 });
                 window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
                 $('check-buttons').classList.add('hidden'); $('check-buttons').classList.remove('flex'); $('next-btn').classList.remove('hidden'); $('next-btn').innerHTML = isDet ? '📂 Следующее дело' : '➡️ Дальше'; updateGlobalUI(); saveProgress();
