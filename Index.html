@@ -72,18 +72,21 @@
         .dark body.mode-detective .detective-slot.has-item { background-color: transparent !important; border-bottom-color: #60a5fa !important; }
         body.mode-detective .detective-slot.has-item::after { display: none; }
         
+        /* Настройки текста внутри слота детектива (всегда черный и жирный, так как бумага светлая в обоих режимах) */
+        body.mode-detective .detective-slot.has-item .dnd-chip.in-slot { background: transparent !important; border: none !important; box-shadow: none !important; transform: none !important; color: #000 !important; font-weight: 900 !important; padding: 0 !important; }
+        
         body.mode-detective .detective-slot.correct-slot { border-bottom-color: #10b981 !important; background-color: transparent !important; }
         .dark body.mode-detective .detective-slot.correct-slot { background-color: transparent !important; }
-        body.mode-detective .detective-slot.correct-slot .detective-chip.in-slot { color: #10b981 !important; }
+        body.mode-detective .detective-slot.correct-slot .dnd-chip.in-slot { color: #10b981 !important; }
         
         body.mode-detective .detective-slot.incorrect-slot { border-bottom-color: #ef4444 !important; background-color: transparent !important; }
         .dark body.mode-detective .detective-slot.incorrect-slot { background-color: transparent !important; }
-        body.mode-detective .detective-slot.incorrect-slot .detective-chip.in-slot { color: #ef4444 !important; }
+        body.mode-detective .detective-slot.incorrect-slot .dnd-chip.in-slot { color: #ef4444 !important; }
         
         body.mode-detective .detective-slot.revealed-slot { border-bottom-color: #f59e0b !important; background-color: transparent !important; }
         .dark body.mode-detective .detective-slot.revealed-slot { border-bottom-color: #ea580c !important; background-color: transparent !important; }
-        body.mode-detective .detective-slot.revealed-slot .detective-chip.in-slot { background: transparent !important; border: none !important; color: #f59e0b !important; }
-        .dark body.mode-detective .detective-slot.revealed-slot .detective-chip.in-slot { color: #ea580c !important; }
+        body.mode-detective .detective-slot.revealed-slot .dnd-chip.in-slot { background: transparent !important; border: none !important; color: #f59e0b !important; }
+        .dark body.mode-detective .detective-slot.revealed-slot .dnd-chip.in-slot { color: #ea580c !important; }
 
         body.mode-detective .detective-chip { background: #facc15 !important; border: 2px solid #ca8a04 !important; font-family: 'Arial', sans-serif !important; box-shadow: 2px 4px 0 rgba(202, 138, 4, 0.4) !important; border-radius: 4px !important; transform: rotate(-1deg); color: #1c1917 !important; font-weight: 900 !important; text-transform: uppercase; font-size: 0.75rem !important; padding: 0.4rem 0.8rem !important; transition: all 0.15s ease; }
         
@@ -245,7 +248,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div onclick="quickStartGame('task4', 'speedrun')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-2xl mb-3 group-hover:rotate-12 transition-transform">⚡</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Спидран</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Гонка на время</p></div>
                     <div onclick="quickStartGame('task4', 'flashcards')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-2xl mb-3 group-hover:-rotate-12 transition-transform">🃏</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Карточки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Интервальное повторение</p></div>
-                    <div onclick="quickStartGame('task4', 'mistakes')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">🔥</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Ошибки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Слабые места</p></div>
+                    <div onclick="startMistakesMode()" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">🔥</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Ошибки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Слабые места</p></div>
                     <div onclick="quickStartGame('task4', 'study')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">📖</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Сюжеты</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">База знаний</p></div>
                 </div>
             </div>
@@ -444,6 +447,13 @@
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Имя и Фамилия</label><input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-4 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold shadow-inner"></div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Код класса (от учителя)</label><input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-4 font-mono border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none text-center font-black text-lg text-blue-600 dark:text-blue-400 shadow-inner"></div>
             <div class="flex gap-3 mt-2"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
+            
+            <div class="mt-2 pt-4 border-t border-gray-200 dark:border-[#2c2c2c] w-full">
+                <button onclick="signInWithGoogle()" class="w-full bg-white dark:bg-[#121212] border border-gray-300 dark:border-[#3f3f46] hover:bg-gray-50 dark:hover:bg-[#181818] text-gray-700 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-sm flex items-center justify-center gap-3 active:scale-95">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Войти через Google
+                </button>
+            </div>
         </div>
     </div>
 
@@ -522,7 +532,7 @@
             selectedChip: null, currentTask: 'task4', pendingTask: 'task4', pendingMode: 'normal',
             stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, points: 0, unlockedSkins: ['classic'], currentSkin: 'classic', dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
             mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
-            isTeacherAdmin: false, focusMode: false, studyIndex: 0
+            isTeacherAdmin: false, focusMode: false, studyIndex: 0, lastMistakeTask: 'task5'
         };
 
         const tg = window.Telegram ? window.Telegram.WebApp : null; window.tgApp = tg; 
@@ -611,9 +621,30 @@
             }
         };
 
+        window.startMistakesMode = function() {
+            haptic('light');
+            const pool = window.state.mistakesPool || [];
+            const hasT4 = pool.some(m => m.task === 'task4');
+            const hasT5 = pool.some(m => m.task === 'task5');
+            
+            let taskToStart = 'task4';
+            if (hasT4 && hasT5) {
+                taskToStart = window.state.lastMistakeTask === 'task4' ? 'task5' : 'task4';
+            } else if (hasT5) {
+                taskToStart = 'task5';
+            }
+            
+            window.state.lastMistakeTask = taskToStart;
+            quickStartGame(taskToStart, 'mistakes');
+        };
+
         window.quickStartGame = function(task, mode) {
             haptic('medium'); window.state.currentTask = task;
             $('filter-task').value = task; $('filter-mode').value = mode;
+            
+            // Восстанавливаем настройки из памяти, чтобы сбросить временные изменения (например, от Спидрана)
+            try { const savedSettings = localStorage.getItem('ege_settings'); if (savedSettings) { const parsed = JSON.parse(savedSettings); if (parsed.period) $('filter-period').value = parsed.period; if (parsed.sy) $('custom-year-start').value = parsed.sy; if (parsed.ey) $('custom-year-end').value = parsed.ey; if (parsed.case) $('filter-case').value = parsed.case; if (parsed.rows) $('filter-rows').value = parsed.rows; } } catch(e) {}
+            
             if (!$('filter-period').value) $('filter-period').value = 'all';
             
             const titles = { 'normal': task === 'task4' ? '📍 Задание №4' : '👤 Задание №5', 'speedrun': '⚡ Спидран', 'flashcards': '🃏 Флеш-карточки', 'mistakes': '🔥 Ошибки', 'study': '📖 Сюжеты', 'detective': '🕵️ Секретный архив', 'redpencil': '🖍️ Красный карандаш' };
@@ -635,6 +666,9 @@
             if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'all';
             if ($('filter-case')) $('pg-filter-case').value = $('filter-case').value || 'rtw';
             if ($('filter-rows')) window.setPgRows($('filter-rows').value || '4');
+            if ($('custom-year-start')) $('pg-custom-year-start').value = $('custom-year-start').value || '862';
+            if ($('custom-year-end')) $('pg-custom-year-end').value = $('custom-year-end').value || '2022';
+            
             checkCustomPeriod(); 
             showModal('pre-game-modal'); 
             setTimeout(() => $('pg-sheet').classList.remove('translate-y-full'), 10);
@@ -653,6 +687,8 @@
             const hideLearned = $('pg-hide-learned').checked; 
             $('toggle-hide-learned').checked = hideLearned; 
             window.state.hideLearned = hideLearned; 
+            
+            localStorage.setItem('ege_settings', JSON.stringify({ period: $('pg-filter-period').value, sy: $('pg-custom-year-start').value, ey: $('pg-custom-year-end').value, case: $('pg-filter-case').value, rows: $('filter-rows').value }));
             
             saveProgress();
             closePreGameModal();
@@ -680,6 +716,8 @@
         function initStorage() {
             if (tg && tg.initDataUnsafe) { tg.expand(); tg.ready(); if (tg.colorScheme === 'dark') { document.documentElement.classList.add('dark'); localStorage.setItem('ege_theme', 'dark'); } }
             initPrecomputed();
+            
+            try { const savedSettings = localStorage.getItem('ege_settings'); if (savedSettings) { const parsed = JSON.parse(savedSettings); if (parsed.period) $('filter-period').value = parsed.period; if (parsed.sy) $('custom-year-start').value = parsed.sy; if (parsed.ey) $('custom-year-end').value = parsed.ey; if (parsed.case) $('filter-case').value = parsed.case; if (parsed.rows) $('filter-rows').value = parsed.rows; } } catch(e) {}
             
             // FORCE DEFAULTS
             if (!$('filter-period').value) $('filter-period').value = 'all';
@@ -862,7 +900,7 @@
             $('table-head').innerHTML = `<tr><th class="p-2 sm:p-4 text-left relative bg-[#f3efe6] dark:bg-[#c7c1b3] rounded-t-lg"><div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1">Архив Главного Управления</div><div class="text-2xl sm:text-3xl font-serif font-black text-[#3e352d] uppercase border-b-2 border-[#d1c1a5] pb-2">ДОСЬЕ №${Math.floor(Math.random()*900 + 100)}-${['К','А','М','С','Ж'][Math.floor(Math.random()*5)]}</div><div class="text-sm font-bold text-[#3e352d] mt-3 flex items-center gap-2"><span class="text-xl">📁</span> ${caseData.title}</div></th></tr>`;
             let missing = []; const trFrag = document.createDocumentFragment();
             caseData.items.forEach((item, idx) => { const tr = document.createElement('tr'); tr.dataset.index = idx; const td = document.createElement('td'); td.className = "p-2 sm:p-4 align-middle text-left leading-relaxed text-[13px] sm:text-base"; missing.push(item.answer); td.innerHTML = `<span class="font-bold mr-2 text-gray-500">${idx + 1}.</span> ${item.text.replace('###', `<div class="dnd-slot detective-slot" data-expected="${item.answer}" data-letter=""></div>`)}`; tr.appendChild(td); trFrag.appendChild(tr); }); $('task-table-body').appendChild(trFrag);
-            let poolItems = [...missing, ...(caseData.fakes || [])]; const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const chip = document.createElement('div'); chip.className = "dnd-chip"; chip.innerText = txt; poolFrag.appendChild(chip); }); $('pool-container').appendChild(poolFrag);
+            let poolItems = [...missing, ...(caseData.fakes || [])]; const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const chip = document.createElement('div'); chip.className = "dnd-chip detective-chip"; chip.innerText = txt; poolFrag.appendChild(chip); }); $('pool-container').appendChild(poolFrag);
         }
 
         function generateTask5Table() {
@@ -1166,7 +1204,7 @@
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = "ege-history-bot";
@@ -1175,15 +1213,48 @@
         const app = initializeApp(firebaseConfig); 
         const auth = getAuth(app); 
         const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
         let fbUser = null; 
 
         function resolveUserId(userObj) {
+            // Если пользователь авторизован через Google, используем его Google UID как основной
+            if (userObj && !userObj.isAnonymous) {
+                localStorage.setItem('stable_student_id', userObj.uid);
+                return userObj.uid;
+            }
             let tgU = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe ? window.Telegram.WebApp.initDataUnsafe.user : null;
             let sId = localStorage.getItem('stable_student_id');
             if (tgU && tgU.id) { localStorage.setItem('stable_student_id', String(tgU.id)); return String(tgU.id); }
             if (sId) return sId;
             let nId = userObj ? userObj.uid : 'anon_' + Date.now(); localStorage.setItem('stable_student_id', nId); return nId;
         }
+
+        window.signInWithGoogle = async function() {
+            try {
+                showToast('⏳', 'Открываем авторизацию Google...', 'bg-blue-500', 'border-blue-700');
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                
+                // Автоматически подставляем имя из Google, если ученик не вводил свое
+                if (!localStorage.getItem('student_manual_name') && user.displayName) {
+                    document.getElementById('profile-name-input').value = user.displayName;
+                    localStorage.setItem('student_manual_name', user.displayName);
+                }
+                
+                showToast('✅', 'Успешный вход!', 'bg-emerald-500', 'border-emerald-700');
+                hideModal('profile-modal');
+                
+                // Принудительно отправляем накопленный локальный кэш на новый аккаунт 
+                // и подтягиваем базу из Google (если он играл с компьютера)
+                await window.syncProgressToCloud();
+                await window.loadProgressFromCloud();
+                updateGlobalUI();
+                
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                showToast('❌', 'Ошибка авторизации Google', 'bg-rose-500', 'border-rose-700');
+            }
+        };
 
         function mergeDuplicateStudents(students) {
             const m = {}, r = [];
@@ -1194,7 +1265,42 @@
                 else {
                     const k = nm + '|' + (st.username || '').trim().toLowerCase();
                     if (!m[k]) { m[k] = { ...st }; r.push(m[k]); } 
-                    else { m[k].totalSolved = Math.max(m[k].totalSolved || 0, st.totalSolved || 0); m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); m[k].bestStreak = Math.max(m[k].bestStreak || 0, st.bestStreak || 0); m[k].health = Math.max(m[k].health || 0, st.health || 0); m[k].mistakesCount = Math.max(m[k].mistakesCount || 0, st.mistakesCount || 0); m[k].fullStateJson = st.fullStateJson || m[k].fullStateJson; m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0); }
+                    else { 
+                        m[k].totalSolved = Math.max(m[k].totalSolved || 0, st.totalSolved || 0); 
+                        m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); 
+                        m[k].bestStreak = Math.max(m[k].bestStreak || 0, st.bestStreak || 0); 
+                        m[k].health = Math.max(m[k].health || 0, st.health || 0); 
+                        m[k].mistakesCount = Math.max(m[k].mistakesCount || 0, st.mistakesCount || 0); 
+                        m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0);
+                        
+                        // Глубокое слияние fullStateJson для сохранения dailyStats с разных устройств
+                        if (st.fullStateJson) {
+                            if (!m[k].fullStateJson) {
+                                m[k].fullStateJson = st.fullStateJson;
+                            } else {
+                                try {
+                                    let j1 = JSON.parse(m[k].fullStateJson);
+                                    let j2 = JSON.parse(st.fullStateJson);
+                                    let ds1 = j1.dailyStats || {};
+                                    let ds2 = j2.dailyStats || {};
+                                    let mDs = { ...ds1 };
+                                    for (let day in ds2) {
+                                        if (mDs[day]) {
+                                            mDs[day].solved = Math.max(mDs[day].solved || 0, ds2[day].solved || 0);
+                                            mDs[day].timeSpent = Math.max(mDs[day].timeSpent || 0, ds2[day].timeSpent || 0);
+                                        } else {
+                                            mDs[day] = ds2[day];
+                                        }
+                                    }
+                                    j1.dailyStats = mDs;
+                                    j1.totalSolvedEver = Math.max(j1.totalSolvedEver || 0, j2.totalSolvedEver || 0);
+                                    m[k].fullStateJson = JSON.stringify(j1);
+                                } catch(e) {
+                                    m[k].fullStateJson = st.fullStateJson || m[k].fullStateJson;
+                                }
+                            }
+                        }
+                    }
                 }
             }); 
             return r;

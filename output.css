@@ -3332,6 +3332,11 @@ video {
   border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
 }
 
+.dark\:hover\:bg-\[\#181818\]:hover:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(24 24 24 / var(--tw-bg-opacity, 1));
+}
+
 .dark\:hover\:bg-\[\#25282a\]:hover:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(37 40 42 / var(--tw-bg-opacity, 1));
