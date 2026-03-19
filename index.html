@@ -68,82 +68,27 @@
         body.mode-detective .detective-slot { background-color: rgba(239, 68, 68, 0.08) !important; border: 2px dashed #ef4444 !important; color: transparent !important; position: relative; overflow: hidden; border-radius: 4px !important; box-shadow: none !important; display: inline-flex !important; min-width: 180px; height: 28px; vertical-align: middle; margin: 0 6px; }
         body.mode-detective .detective-slot::after { content: 'ДАННЫЕ ЗАСЕКРЕЧЕНЫ'; position: absolute; color: #ef4444; font-family: 'Arial', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 0.5px; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; }
         
-        body.mode-detective .detective-slot.has-item { background-color: transparent !important; min-width: auto; border: none !important; border-bottom: 2px dashed #1d4ed8 !important; border-radius: 0 !important; height: auto; display: inline-flex !important; padding: 0 !important; box-shadow: none !important; }
-        .dark body.mode-detective .detective-slot.has-item { background-color: transparent !important; border-bottom-color: #60a5fa !important; }
+        body.mode-detective .detective-slot.has-item { background-color: white !important; min-width: auto; border: 2px solid #3b82f6 !important; border-radius: 0.75rem !important; height: auto; display: inline-flex !important; padding: 0 !important; box-shadow: none !important; }
+        .dark body.mode-detective .detective-slot.has-item { background-color: #18181b !important; border-color: #3b82f6 !important; }
         body.mode-detective .detective-slot.has-item::after { display: none; }
         
-        body.mode-detective .detective-slot.correct-slot { border-bottom-color: #10b981 !important; background-color: transparent !important; }
-        .dark body.mode-detective .detective-slot.correct-slot { background-color: transparent !important; }
-        body.mode-detective .detective-slot.correct-slot .detective-chip.in-slot { color: #10b981 !important; }
-        
-        body.mode-detective .detective-slot.incorrect-slot { border-bottom-color: #ef4444 !important; background-color: transparent !important; }
-        .dark body.mode-detective .detective-slot.incorrect-slot { background-color: transparent !important; }
-        body.mode-detective .detective-slot.incorrect-slot .detective-chip.in-slot { color: #ef4444 !important; }
-        
-        body.mode-detective .detective-slot.revealed-slot { border-bottom-color: #f59e0b !important; background-color: transparent !important; }
-        .dark body.mode-detective .detective-slot.revealed-slot { border-bottom-color: #ea580c !important; background-color: transparent !important; }
-        body.mode-detective .detective-slot.revealed-slot .detective-chip.in-slot { background: transparent !important; border: none !important; color: #f59e0b !important; }
-        .dark body.mode-detective .detective-slot.revealed-slot .detective-chip.in-slot { color: #ea580c !important; }
+        body.mode-detective .detective-slot.correct-slot { border-color: #10b981 !important; background-color: #ecfdf5 !important; }
+        .dark body.mode-detective .detective-slot.correct-slot { background-color: rgba(16, 185, 129, 0.1) !important; }
+        body.mode-detective .detective-slot.incorrect-slot { border-color: #f43f5e !important; background-color: #fff1f2 !important; }
+        .dark body.mode-detective .detective-slot.incorrect-slot { background-color: rgba(244, 63, 94, 0.1) !important; }
+        body.mode-detective .detective-slot.revealed-slot { border-color: #f59e0b !important; background-color: #fffbeb !important; }
+        .dark body.mode-detective .detective-slot.revealed-slot { border-color: #ea580c !important; background-color: rgba(234, 88, 12, 0.05) !important; }
 
-        body.mode-detective .detective-chip { background: #facc15 !important; border: 2px solid #ca8a04 !important; font-family: 'Arial', sans-serif !important; box-shadow: 2px 4px 0 rgba(202, 138, 4, 0.4) !important; border-radius: 4px !important; transform: rotate(-1deg); color: #1c1917 !important; font-weight: 900 !important; text-transform: uppercase; font-size: 0.75rem !important; padding: 0.4rem 0.8rem !important; transition: all 0.15s ease; }
+        .paper-bg { background-color: #f4ecd8; color: #2c241b; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15); background-image: radial-gradient(#d1c1a5 1px, transparent 1px); background-size: 20px 20px; background-position: 0 0; font-family: 'Georgia', serif; }
+        .dark .paper-bg { background-color: #2a2621; color: #e5e0d8; background-image: radial-gradient(#3d362d 1px, transparent 1px); }
+        .paper-edges { position: absolute; inset: 0; box-shadow: inset 0 0 60px rgba(100, 70, 40, 0.15); pointer-events: none; }
+        .dark .paper-edges { box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5); }
+        #rp-content { user-select: none; }
+        .word-node, .plain-word { display: inline-block; position: relative; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; }
+        .word-node.crossed { text-decoration: line-through; text-decoration-color: #dc2626; text-decoration-thickness: 3px; color: #ef4444 !important; cursor: default; }
         .correction-badge { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(5px); font-size: 0.75rem; background-color: #10b981; color: white; padding: 2px 8px; border-radius: 4px; white-space: nowrap; font-family: 'Arial', sans-serif; font-weight: 900; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5); z-index: 10; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); letter-spacing: 1px; }
         .word-node.show-correction .correction-badge { opacity: 1; transform: translateX(-50%) translateY(-2px); }
         .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-
-        body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
-        body.skin-beresta header, body.skin-beresta nav { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; border-top-color: #5c4033 !important;}
-        body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-[#1e1e1e], body.skin-beresta .dark\:bg-[#121212], body.skin-beresta .dark\:bg-[#2c2c2c], body.skin-beresta .bg-gray-50 { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
-        body.skin-beresta .text-gray-800, body.skin-beresta .dark\:text-gray-300, body.skin-beresta .text-gray-900, body.skin-beresta .text-gray-700, body.skin-beresta .text-gray-600 { color: #4a3525 !important; }
-        body.skin-beresta header .text-white { color: #fffaf0 !important; }
-        body.skin-beresta .dnd-slot { background-color: #faebd7 !important; border-color: #cdaa7d !important; }
-        body.skin-beresta .dnd-chip { background-color: #ffdead !important; border-color: #deb887 !important; color: #5c4033 !important; }
-
-        body.skin-empire { background-color: #fcfbf8 !important; }
-        body.skin-empire header, body.skin-empire nav { background-color: #6b151e !important; border-bottom-color: #d4af37 !important; border-top-color: #d4af37 !important;}
-        body.skin-empire header .text-white { color: #fdf5e6 !important; }
-        body.skin-empire .bg-white, body.skin-empire .dark\:bg-[#1e1e1e], body.skin-empire .dark\:bg-[#121212], body.skin-empire .dark\:bg-[#2c2c2c], body.skin-empire .bg-gray-50 { background-color: #ffffff !important; border-color: #d4af37 !important; box-shadow: 0 4px 15px rgba(107,21,30,0.1) !important; }
-        body.skin-empire .text-gray-800, body.skin-empire .dark\:text-gray-300, body.skin-empire .text-gray-900, body.skin-empire .text-gray-700, body.skin-empire .text-gray-600 { color: #2b1b17 !important; }
-        body.skin-empire .dnd-chip { background-color: #fdfbf7 !important; border-color: #d4af37 !important; color: #6b151e !important; }
-
-        body.skin-ussr { background-color: #f4f4f4 !important; }
-        body.skin-ussr header, body.skin-ussr nav { background-color: #cc0000 !important; border-bottom-color: #ffcc00 !important; border-top-color: #ffcc00 !important;}
-        body.skin-ussr header .text-white { color: #ffcc00 !important; }
-        body.skin-ussr .text-gray-800, body.skin-ussr .dark\:text-gray-300, body.skin-ussr .text-gray-900, body.skin-ussr .text-gray-700, body.skin-ussr .text-gray-600 { color: #111111 !important; }
-        body.skin-ussr .dnd-chip { background-color: #ffe6e6 !important; border-color: #cc0000 !important; color: #cc0000 !important; font-family: monospace; font-weight: 900; text-transform: uppercase; border-radius: 0 !important; }
-        body.skin-ussr .dnd-slot { border-radius: 0 !important; border-width: 3px !important; }
-        body.skin-ussr .bg-white, body.skin-ussr .dark\:bg-[#1e1e1e], body.skin-ussr .dark\:bg-[#121212], body.skin-ussr .dark\:bg-[#2c2c2c], body.skin-ussr .bg-gray-50 { background-color: #ffffff !important; border-radius: 0 !important; border-color: #cc0000 !important; }
-
-        body.skin-cyberpunk { background-color: #0d0221 !important; color: #00f0ff !important; }
-        body.skin-cyberpunk header, body.skin-cyberpunk nav { background-color: #240046 !important; border-bottom-color: #ff003c !important; border-top-color: #ff003c !important;}
-        body.skin-cyberpunk .bg-white, body.skin-cyberpunk .dark\:bg-[#1e1e1e], body.skin-cyberpunk .dark\:bg-[#121212], body.skin-cyberpunk .dark\:bg-[#2c2c2c], body.skin-cyberpunk .bg-gray-50 { background-color: #1a0b2e !important; border-color: #00f0ff !important; color: #ffffff !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15) !important; }
-        body.skin-cyberpunk .text-gray-800, body.skin-cyberpunk .dark\:text-gray-300, body.skin-cyberpunk .text-gray-900, body.skin-cyberpunk .text-gray-700, body.skin-cyberpunk .text-gray-600 { color: #00f0ff !important; text-shadow: 0 0 3px rgba(0,240,255,0.5); }
-        body.skin-cyberpunk .dnd-chip { background-color: #240046 !important; border-color: #ff003c !important; color: #ff003c !important; text-transform: uppercase; font-family: monospace; }
-        body.skin-cyberpunk .dnd-slot { background-color: rgba(36,0,70,0.5) !important; border-color: #00f0ff !important; }
-        body.skin-cyberpunk header .text-white { color: #00f0ff !important; text-shadow: 0 0 8px #00f0ff; }
-
-        body.skin-matrix { background-color: #000000 !important; font-family: monospace !important; color: #00ff41 !important; }
-        body.skin-matrix header, body.skin-matrix nav { background-color: #001100 !important; border-bottom-color: #00ff41 !important; border-top-color: #00ff41 !important;}
-        body.skin-matrix .bg-white, body.skin-matrix .dark\:bg-[#1e1e1e], body.skin-matrix .dark\:bg-[#121212], body.skin-matrix .dark\:bg-[#2c2c2c], body.skin-matrix .bg-gray-50 { background-color: #001100 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
-        body.skin-matrix .text-gray-800, body.skin-matrix .dark\:text-gray-300, body.skin-matrix .text-gray-900, body.skin-matrix .text-gray-700, body.skin-matrix .text-gray-600 { color: #00ff41 !important; }
-        body.skin-matrix .dnd-chip { background-color: #000000 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
-        body.skin-matrix .dnd-slot { background-color: #001100 !important; border-color: #008f11 !important; border-radius: 0 !important; }
-        body.skin-matrix header .text-white { color: #00ff41 !important; }
-
-        body.skin-space { background: #0b0c10 !important; color: #c5c6c7 !important; }
-        body.skin-space header, body.skin-space nav { background-color: #0b0c10 !important; border-bottom-color: #45a29e !important; border-top-color: #45a29e !important;}
-        body.skin-space .bg-white, body.skin-space .dark\:bg-[#1e1e1e], body.skin-space .dark\:bg-[#121212], body.skin-space .dark\:bg-[#2c2c2c], body.skin-space .bg-gray-50 { background-color: rgba(31,40,51,0.95) !important; border-color: #45a29e !important; border-radius: 1rem !important; }
-        body.skin-space .text-gray-800, body.skin-space .dark\:text-gray-300, body.skin-space .text-gray-900, body.skin-space .text-gray-700, body.skin-space .text-gray-600 { color: #66fcf1 !important; }
-        body.skin-space .dnd-chip { background-color: #1f2833 !important; border-color: #45a29e !important; color: #66fcf1 !important; border-radius: 20px !important; }
-        body.skin-space .dnd-slot { background-color: rgba(11,12,16,0.6) !important; border-color: #66fcf1 !important; border-radius: 20px !important; }
-        body.skin-space header .text-white { color: #66fcf1 !important; }
-
-        body.skin-golden { background: #fff9e6 !important; }
-        body.skin-golden header, body.skin-golden nav { background: #b8860b !important; border-bottom-color: #ffffff !important; border-top-color: #ffffff !important;}
-        body.skin-golden header .text-white { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        body.skin-golden .bg-white, body.skin-golden .dark\:bg-[#1e1e1e], body.skin-golden .dark\:bg-[#121212], body.skin-golden .dark\:bg-[#2c2c2c], body.skin-golden .bg-gray-50 { background-color: #ffffff !important; border-color: #daa520 !important; box-shadow: 0 10px 30px rgba(218,165,32,0.2) !important; border-radius: 1rem !important; }
-        body.skin-golden .dnd-chip { background: #fff9e6 !important; border-color: #daa520 !important; color: #b8860b !important; box-shadow: 0 2px 5px rgba(218,165,32,0.2) !important; }
-        body.skin-golden .text-gray-800, body.skin-golden .dark\:text-gray-300, body.skin-golden .text-gray-900, body.skin-golden .text-gray-700, body.skin-golden .text-gray-600 { color: #b8860b !important; }
-        body.skin-golden .dnd-slot { background-color: #fffaeb !important; border-color: #ffd700 !important; }
 
         .modal-content-hidden { content-visibility: hidden; }
         .achievement-card { transition: transform 0.2s, box-shadow 0.2s; }
@@ -215,6 +160,19 @@
         
         <!-- ЛОББИ -->
         <div id="lobby-area" class="w-full flex flex-col gap-6 pb-10">
+            
+            <div onclick="startDuelSearch()" class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 shadow-[0_8px_30px_rgba(99,102,241,0.4)] border border-indigo-400 cursor-pointer transition-all active:scale-95 hover:-translate-y-1 flex items-center justify-between group overflow-hidden relative mb-2 text-white">
+                <div class="absolute -right-4 -bottom-4 text-7xl opacity-20 group-hover:scale-110 transition-transform pointer-events-none">⚔️</div>
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="text-4xl drop-shadow-sm">⚔️</div>
+                    <div>
+                        <h4 class="font-black text-lg sm:text-xl uppercase tracking-wide">PvP Дуэль</h4>
+                        <p class="text-xs font-bold text-indigo-100 mt-0.5">Сразись с другими (1 минута)</p>
+                    </div>
+                </div>
+                <div class="bg-rose-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded-md shadow-sm relative z-10">Online</div>
+            </div>
+
             <div id="lobby-hw-banner" class="hidden bg-gradient-to-r from-rose-500 to-red-600 rounded-2xl p-5 shadow-[0_8px_30px_rgba(225,29,72,0.3)] mb-2 text-white cursor-pointer transform transition-transform active:scale-95 border border-rose-400" onclick="quickStartGame('task4', 'normal')">
                 <div class="flex items-center justify-between">
                     <div><h3 class="font-black uppercase tracking-widest text-sm sm:text-base flex items-center gap-2 mb-1">🔥 Долг Учителю</h3><p class="text-xs sm:text-sm font-bold opacity-90">Осталось решить: <span id="lobby-hw-remaining" class="text-xl sm:text-2xl font-black bg-white/20 px-2 py-0.5 rounded-lg ml-1">0</span> строк</p></div>
@@ -257,11 +215,29 @@
                 <button onclick="openGlobalSettings()" class="text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 text-base p-1.5 bg-white dark:bg-[#2c2c2c] rounded-lg transition-colors shadow-sm">⚙️</button>
             </div>
 
+            <!-- PvP ДУЭЛЬ ХЕДЕР -->
+            <div id="duel-header" class="hidden justify-between items-center mb-2 sm:mb-3 bg-gradient-to-r from-indigo-900 via-purple-800 to-rose-900 text-white p-2 sm:p-3 rounded-xl shadow-[0_4px_15px_rgba(139,92,246,0.3)] border border-purple-500/30 shrink-0">
+                <div class="flex flex-col items-start w-[30%]">
+                    <span class="text-[10px] sm:text-xs font-black uppercase opacity-80 truncate w-full text-blue-200">Я</span>
+                    <span class="text-xl sm:text-2xl font-black drop-shadow-md text-white" id="duel-my-score">0</span>
+                    <span class="text-[9px] sm:text-[10px] text-yellow-400 font-bold bg-yellow-400/20 px-1.5 rounded" id="duel-my-combo">🔥 0</span>
+                </div>
+                <div class="flex flex-col items-center w-[40%]">
+                    <span class="text-[10px] uppercase font-black opacity-80 tracking-widest text-purple-200">Таймер</span>
+                    <span class="text-3xl sm:text-4xl font-black drop-shadow-lg text-white" id="duel-timer">60</span>
+                </div>
+                <div class="flex flex-col items-end w-[30%]">
+                    <span class="text-[10px] sm:text-xs font-black uppercase opacity-80 truncate w-full text-right text-rose-200" id="duel-opp-name">Соперник</span>
+                    <span class="text-xl sm:text-2xl font-black drop-shadow-md text-white" id="duel-opp-score">0</span>
+                    <span class="text-[9px] sm:text-[10px] text-yellow-400 font-bold bg-yellow-400/20 px-1.5 rounded" id="duel-opp-combo">🔥 0</span>
+                </div>
+            </div>
+
             <!-- Классическая таблица -->
-            <div id="classic-task-area" class="hidden flex-col lg:flex-row relative gap-4 items-stretch w-full h-full flex-1">
+            <div id="classic-task-area" class="hidden flex-col lg:flex-row relative lg:gap-4 items-stretch w-full h-full flex-1">
                 <div id="board-overlay" class="absolute inset-0 bg-white/50 dark:bg-[#121212]/50 backdrop-blur-[1px] z-[35] hidden rounded-2xl transition-colors"></div>
 
-                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-md lg:shadow-sm border border-gray-200 dark:border-[#2c2c2c] transition-colors relative z-10 shrink-0 mb-4 lg:mb-0">
+                <div id="table-container" class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-[#1e1e1e] rounded-t-2xl lg:rounded-2xl shadow-sm border border-gray-200 dark:border-[#2c2c2c] border-b-0 lg:border-b transition-colors relative z-10 shrink-0">
                     <div id="detective-stamp" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 sm:border-8 border-red-600 text-red-600 font-black text-4xl sm:text-6xl uppercase tracking-widest px-4 py-2 transform -rotate-12 opacity-[0.07] dark:opacity-10 pointer-events-none z-0 font-mono text-center whitespace-nowrap" style="border-radius: 8px;">СОВЕРШЕННО<br>СЕКРЕТНО</div>
                     <div class="overflow-x-auto p-1 relative z-10 w-full">
                         <table class="w-full text-left border-collapse table-fixed">
@@ -271,11 +247,11 @@
                     </div>
                 </div>
 
-                <div id="pool-panel" class="w-full lg:w-1/3 bg-gray-50/95 dark:bg-[#181818]/95 lg:bg-white lg:dark:bg-[#1e1e1e] flex flex-col z-[45] p-3 sm:p-4 border-x border-t border-gray-200 dark:border-[#2c2c2c] lg:border rounded-t-2xl lg:rounded-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.1)] lg:shadow-sm transition-all duration-400 sticky bottom-0 lg:bottom-auto mt-2 lg:mt-0">
+                <div id="pool-panel" class="w-full lg:w-1/3 bg-gray-50 dark:bg-[#181818] lg:bg-white lg:dark:bg-[#1e1e1e] flex flex-col z-[45] p-3 sm:p-4 border border-gray-200 dark:border-[#2c2c2c] rounded-b-2xl lg:rounded-2xl shadow-sm transition-all duration-400">
                     <div class="flex justify-between items-center mb-2 lg:mb-4 px-2 shrink-0"><h3 id="pool-title" class="font-black text-gray-800 dark:text-gray-300 flex items-center gap-2 text-[11px] sm:text-base uppercase tracking-widest"><span>🧩</span> Варианты</h3></div>
-                    <div id="pool-content-wrapper" class="flex flex-col flex-1 overflow-hidden">
-                        <div id="pool-container" class="flex flex-wrap justify-center content-start gap-1.5 sm:gap-2 flex-1 overflow-y-auto custom-scroll pb-1 px-1 max-h-[28vh] lg:max-h-none"></div>
-                        <div class="mt-2 pt-2 sm:mt-4 sm:pt-4 border-t border-gray-200 lg:border-gray-100 dark:border-[#2c2c2c] flex flex-col gap-1.5 sm:gap-3 px-1 shrink-0">
+                    <div id="pool-content-wrapper" class="flex flex-col flex-1">
+                        <div id="pool-container" class="flex flex-wrap justify-center content-start gap-1.5 sm:gap-2 flex-1 pb-2 px-1"></div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-[#2c2c2c] flex flex-col gap-1.5 sm:gap-3 px-1 shrink-0">
                             <div id="action-wrapper" class="relative w-full flex flex-col gap-2">
                                 <div id="check-buttons" class="flex gap-2 w-full">
                                     <button id="check-btn-sure" onclick="checkAnswers(true)" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2.5 sm:py-4 px-2 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 text-[11px] sm:text-sm w-full uppercase tracking-widest transition-transform flex justify-center items-center gap-1">✅ Уверен</button>
@@ -311,7 +287,7 @@
         <span class="text-2xl drop-shadow-md relative">🧘</span>
     </div>
 
-    <!-- Нижнее меню (Только 4 кнопки) -->
+    <!-- Нижнее меню -->
     <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-[#2c2c2c] flex justify-around items-center z-[9999] shadow-[0_-5px_15px_rgba(0,0,0,0.08)] dark:shadow-[0_-5px_15px_rgba(0,0,0,0.5)] !opacity-100 transition-transform">
         <button onclick="window.location.href='https://historyman-creator.github.io/tsar-tinder/'" class="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-red-500 active:text-red-500 transition-colors group"><span class="text-2xl mb-1 group-active:scale-110 transition-transform">🩸</span><span class="text-[10px] font-black uppercase tracking-widest">Тиндер</span></button>
         <button onclick="toggleFocusMode()" class="flex flex-col items-center justify-center w-full h-full text-gray-500 dark:text-gray-400 hover:text-teal-500 active:text-teal-500 transition-colors group"><span class="text-2xl mb-1 group-active:-translate-y-1 transition-transform">🧘</span><span class="text-[10px] font-black uppercase tracking-widest">Дзен</span></button>
@@ -321,6 +297,16 @@
 
     <!-- === МОДАЛКИ === -->
     
+    <!-- Модалка поиска дуэли -->
+    <div id="duel-search-modal" class="fixed inset-0 bg-black/80 z-[10006] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-8 w-[90%] max-w-sm text-center shadow-[0_10px_50px_rgba(139,92,246,0.3)] border border-purple-200 dark:border-purple-900/50">
+            <div class="text-6xl mb-4 animate-bounce drop-shadow-lg">⚔️</div>
+            <h2 class="text-lg font-black mb-2 text-gray-800 dark:text-gray-200 uppercase tracking-widest" id="duel-search-status">Поиск соперника...</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 font-bold mb-6" id="duel-search-timer">Ожидание: 0с</p>
+            <button onclick="cancelDuelSearch()" id="cancel-duel-btn" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors active:scale-95 shadow-sm">Отмена</button>
+        </div>
+    </div>
+
     <!-- Модалка перед игрой (Глобальные настройки) -->
     <div id="pre-game-modal" class="fixed inset-0 bg-black/60 z-[10000] hidden flex-col justify-end backdrop-blur-sm transition-opacity opacity-0 no-print" onclick="if(event.target === this) closePreGameModal()">
         <div class="bg-gray-50 dark:bg-[#1e1e1e] rounded-t-3xl p-6 pb-10 w-full max-w-lg mx-auto flex flex-col gap-5 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto custom-scroll overscroll-contain" id="pg-sheet" onclick="event.stopPropagation()">
@@ -328,7 +314,7 @@
             
             <div id="pg-period-container" class="flex flex-col gap-2 shrink-0"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Историческая эпоха</label><div class="relative"><select id="pg-filter-period" onchange="checkCustomPeriod()" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] text-gray-800 dark:text-gray-300 rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none cursor-pointer"><option value="all">🌍 Вся история</option><option value="custom">⚙️ Свой период</option><option value="early">⚔️ Древность и Смута</option><option value="18th">👑 XVIII век</option><option value="19th">🚂 XIX век</option><option value="20th">🚀 XX век</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div></div></div>
             <div id="pg-custom-period-container" class="hidden grid grid-cols-2 gap-4"><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">От года</label><input type="number" id="pg-custom-year-start" value="862" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">До года</label><input type="number" id="pg-custom-year-end" value="2022" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div></div>
-            <div id="pg-rows-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Сложность</label><div class="grid grid-cols-3 gap-2"><button onclick="setPgRows(4)" id="btn-row-4" class="pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors">4 строки</button><button onclick="setPgRows(6)" id="btn-row-6" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">6 строк</button><button onclick="setPgRows(10)" id="btn-row-10" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">10 строк</button></div></div>
+            <div id="pg-rows-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Сложность (Количество строк)</label><div class="grid grid-cols-3 gap-2"><button onclick="setPgRows(4)" id="btn-row-4" class="pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors">4 строки</button><button onclick="setPgRows(6)" id="btn-row-6" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">6 строк</button><button onclick="setPgRows(10)" id="btn-row-10" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">10 строк</button></div></div>
             <div id="pg-case-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Материалы дела <span class="text-rose-400 font-bold lowercase tracking-normal text-[9px]">(только для режима детектив)</span></label><div class="relative"><select id="pg-filter-case" class="w-full bg-stone-100 dark:bg-[#2a2722] border-2 border-stone-300 dark:border-[#4a4235] text-stone-900 dark:text-[#dcd6c7] rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none font-mono"><option value="rtw">⚔️ Русско-турецкие войны</option><option value="sweden">🌊 Борьба за Балтику</option><option value="smuta">👑 Смутное время</option><option value="mongols">🐎 Ордынское иго</option><option value="napoleon">🔥 Отечественная 1812 г.</option><option value="palace">📜 Дворцовые перевороты</option><option value="revolts">🔥 Бунташный век</option><option value="decembrists">❄️ Декабристы</option><option value="ww1">💥 Первая мировая война</option><option value="revolutions">🚩 Революции 1917 года</option><option value="ww2">🎖️ ВОВ</option><option value="coldwar">🌐 Холодная война</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">▼</div></div></div>
             <label id="pg-hide-learned-container" class="flex items-center gap-4 bg-white dark:bg-[#2c2c2c] p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-[#3f3f46] cursor-pointer mt-2 group active:scale-95 transition-transform shrink-0"><div class="relative flex items-center justify-center"><input type="checkbox" id="pg-hide-learned" class="peer appearance-none w-6 h-6 border-2 border-gray-300 dark:border-gray-600 rounded-lg checked:bg-blue-500 checked:border-blue-500 transition-colors"><svg class="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><div><span class="block text-sm font-black text-gray-800 dark:text-gray-300 uppercase tracking-wide">Скрывать выученное</span><span class="block text-[10px] text-gray-400 font-bold mt-0.5">Убирает свежие факты из пула</span></div></label>
             <button onclick="applyGlobalSettings()" class="w-full bg-blue-600 text-white font-black text-lg py-5 rounded-2xl mt-2 shadow-[0_8px_20px_rgba(37,99,235,0.3)] active:scale-95 transition-transform uppercase tracking-widest flex items-center justify-center gap-2 shrink-0">СОХРАНИТЬ 💾</button>
@@ -338,7 +324,7 @@
     <!-- СКРЫТЫЕ СИСТЕМНЫЕ СЕЛЕКТЫ (ОБЯЗАТЕЛЬНО С ЗНАЧЕНИЯМИ ПО УМОЛЧАНИЮ) -->
     <div id="hidden-controls" style="display: none;">
         <select id="filter-task"><option value="task4" selected>task4</option><option value="task5">task5</option></select>
-        <select id="filter-mode"><option value="normal" selected>normal</option><option value="mistakes">mistakes</option><option value="speedrun">speedrun</option><option value="flashcards">flashcards</option><option value="study">study</option><option value="detective">detective</option><option value="redpencil">redpencil</option></select>
+        <select id="filter-mode"><option value="normal" selected>normal</option><option value="mistakes">mistakes</option><option value="speedrun">speedrun</option><option value="flashcards">flashcards</option><option value="study">study</option><option value="detective">detective</option><option value="redpencil">redpencil</option><option value="duel">duel</option></select>
         <select id="filter-period"><option value="all" selected>all</option><option value="custom">custom</option><option value="early">early</option><option value="18th">18th</option><option value="19th">19th</option><option value="20th">20th</option></select>
         <select id="filter-rows"><option value="4" selected>4</option><option value="6">6</option><option value="10">10</option></select>
         <select id="filter-case"><option value="rtw" selected>rtw</option><option value="sweden">sweden</option><option value="smuta">smuta</option><option value="mongols">mongols</option><option value="napoleon">napoleon</option><option value="palace">palace</option><option value="revolts">revolts</option><option value="decembrists">decembrists</option><option value="ww1">ww1</option><option value="revolutions">revolutions</option><option value="ww2">ww2</option><option value="coldwar">coldwar</option></select>
@@ -349,16 +335,6 @@
     <template id="flashcard-template-front"><div class="w-full max-w-md bg-white dark:bg-[#1e1e1e] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-8 min-h-[300px] flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed border-gray-300 dark:border-[#2c2c2c] hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 relative group" onclick="window.flipFlashcard(this)"><div class="absolute top-4 left-4 bg-gray-100 dark:bg-[#2c2c2c] px-2 py-1 rounded text-[12px] font-bold text-gray-500 shadow-sm border border-gray-200 dark:border-[#3f3f46] fc-level-badge"></div><div class="absolute top-4 right-4 text-gray-300 dark:text-gray-600 group-hover:text-blue-400 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div><span class="fc-label text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4"></span><h2 class="fc-title text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-300 leading-relaxed"></h2><p class="text-[12px] font-bold text-blue-500 mt-8 opacity-70 animate-pulse uppercase tracking-wider">Коснись, чтобы перевернуть</p></div></template>
     <template id="flashcard-template-back"><span class="text-[12px] font-black text-blue-400 dark:text-blue-500 uppercase tracking-[0.2em] absolute top-4">Ответ</span><div class="fc-content flex flex-col w-full mt-6 mb-4 items-center justify-center flex-grow"></div><div class="flex gap-2 w-full mt-auto shrink-0"><button onclick="window.answerFlashcard(false, false, event)" class="flex-1 bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 py-4 rounded-2xl font-black text-xs sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-widest border border-rose-200 dark:border-rose-800">❌ Забыл</button><button onclick="window.answerFlashcard(true, false, event)" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 py-4 rounded-2xl font-black text-xs sm:text-sm transition-transform active:scale-95 shadow-sm uppercase tracking-widest border border-indigo-200 dark:border-indigo-800">🤔 Сомневаюсь</button><button onclick="window.answerFlashcard(true, true, event)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black text-xs sm:text-sm transition-transform active:scale-95 shadow-md uppercase tracking-widest">✅ Помню</button></div></template>
     <template id="study-card-template"><div class="w-full max-w-lg bg-white dark:bg-[#1e1e1e] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] overflow-hidden border border-gray-200 dark:border-[#2c2c2c] flex flex-col transition-all duration-300 min-h-[400px]"><div class="h-32 sm:h-40 flex items-center justify-center text-7xl shadow-inner st-bg transition-colors"><span class="drop-shadow-lg st-emoji hover:scale-110 transition-transform cursor-default">👑</span></div><div class="p-6 sm:p-8 flex flex-col flex-grow text-center items-center justify-center"><span class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 st-label"></span><h2 class="text-xl sm:text-3xl font-black text-gray-800 dark:text-gray-300 mb-4 st-title"></h2><div class="w-12 h-1 bg-blue-500 rounded-full mb-4"></div><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed st-desc font-medium"></p></div><div class="p-4 bg-gray-50 dark:bg-[#181818] border-t border-gray-200 dark:border-[#2c2c2c] mt-auto shrink-0"><button onclick="window.nextStudyCard()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 sm:py-5 rounded-2xl shadow-md transition-transform active:scale-95 uppercase tracking-widest text-sm flex items-center justify-center gap-2">Понятно, дальше <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></button></div></div><div class="mt-4 text-xs font-bold text-gray-400 bg-white/50 dark:bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm st-progress shadow-sm"></div></template>
-
-    <div id="shop-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="p-4 border-b border-gray-200 dark:border-[#2c2c2c] flex justify-between items-center bg-gray-50 dark:bg-[#181818] shrink-0">
-                <div><h2 class="text-lg sm:text-xl font-black text-gray-800 dark:text-gray-300 flex items-center gap-2">🎨 Скины</h2><p class="text-[11px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Трать заработанные баллы!</p></div>
-                <div class="flex items-center gap-4"><div class="bg-pink-100 dark:bg-pink-900/30 border border-pink-300 dark:border-pink-800 text-pink-800 dark:text-pink-300 px-3 py-1.5 rounded-xl text-sm font-black shadow-sm">🪙 <span id="shop-points-display">0</span></div><button onclick="hideModal('shop-modal')" class="text-3xl text-gray-400 hover:text-rose-500 transition-colors leading-none">&times;</button></div>
-            </div>
-            <div class="flex-grow p-4 overflow-y-auto custom-scroll bg-gray-100 dark:bg-[#121212]"><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="shop-grid"></div></div>
-        </div>
-    </div>
 
     <div id="achievements-modal" class="fixed inset-0 bg-black/80 z-[10006] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#1e1e1e] rounded-2xl w-[95%] max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -444,7 +420,6 @@
                 <div class="flex gap-2 mb-6">
                     <button onclick="openProfileModal()" class="flex-1 bg-white hover:bg-blue-50 text-blue-700 dark:bg-[#1e1e1e] dark:text-blue-400 py-3 rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-transform active:scale-95 flex flex-col items-center justify-center gap-1 border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><span class="text-lg sm:text-xl">👤</span> Профиль</button>
                     <button onclick="openAchievementsModal()" class="flex-1 bg-white hover:bg-yellow-50 text-yellow-700 dark:bg-[#1e1e1e] dark:text-yellow-400 py-3 rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-transform active:scale-95 flex flex-col items-center justify-center gap-1 border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><span class="text-lg sm:text-xl">🏆</span> Ачивки</button>
-                    <button onclick="openShopModal()" class="flex-1 bg-white hover:bg-pink-50 text-pink-700 dark:bg-[#1e1e1e] dark:text-pink-400 py-3 rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-transform active:scale-95 flex flex-col items-center justify-center gap-1 border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><span class="text-lg sm:text-xl">🎨</span> Скины</button>
                 </div>
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="text-center bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Всего решено</p><p class="text-3xl font-black text-examBlue dark:text-blue-400 mt-1" id="modal-stat-solved">0</p></div>
@@ -457,7 +432,7 @@
                 <div class="mb-6 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Прогресс по эпохам</h3><div id="stats-era-container" class="space-y-3"></div></div>
                 <div class="mb-2 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Активность по дням</h3><div id="stats-daily-container" class="space-y-2"></div></div>
             </div>
-            <div class="shrink-0 pt-4 border-t border-gray-200 dark:border-[#2c2c2c] mt-2"><button onclick="copyTextReport()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 shadow-[0_4px_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2">📋 Скопировать отчет</button><button onclick="resetAllProgress()" class="w-full mt-3 text-[10px] text-gray-400 hover:text-rose-500 uppercase font-bold text-center transition-colors">Очистить весь прогресс</button></div>
+            <div class="shrink-0 pt-4 border-t border-gray-200 dark:border-[#2c2c2c] mt-2"><button onclick="copyTextReport()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 shadow-[0_4px_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2">📋 Скопировать отчет</button></div>
         </div>
     </div>
 
@@ -470,7 +445,7 @@
 
     <div id="game-over-modal" class="fixed inset-0 bg-black/90 z-[10000] hidden flex-col items-center justify-center backdrop-blur-md opacity-0 transition-opacity no-print">
         <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-8 w-[85%] max-w-xs text-center shadow-[0_10px_50px_rgba(0,0,0,0.5)]">
-            <div class="text-6xl mb-4 drop-shadow-lg" id="modal-emoji">🏆</div><h2 class="text-sm font-black mb-1 text-gray-400 uppercase tracking-widest" id="modal-main-title">Результат</h2><p class="text-5xl font-black text-blue-600 dark:text-blue-400 mb-6 drop-shadow-sm" id="modal-score">0</p>
+            <div class="text-6xl mb-4 drop-shadow-lg" id="modal-emoji">🏆</div><h2 class="text-sm font-black mb-1 text-gray-400 uppercase tracking-widest" id="modal-main-title">Результат</h2><p class="text-5xl font-black text-blue-600 dark:text-blue-400 mb-6 drop-shadow-sm flex items-center justify-center gap-3" id="modal-score">0</p>
             <button onclick="shareTelegram()" class="w-full bg-[#0088cc] hover:bg-[#0077b3] text-white py-4 rounded-2xl font-black uppercase tracking-wider mb-3 flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-md"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.94z"/></svg>Поделиться</button>
             <button onclick="closeGameOverModal()" class="w-full bg-gray-100 dark:bg-[#181818] hover:bg-gray-200 text-gray-600 dark:text-gray-400 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors active:scale-95">В меню</button>
         </div>
@@ -510,12 +485,151 @@
 
         window.state = {
             selectedChip: null, currentTask: 'task4', pendingTask: 'task4', pendingMode: 'normal',
-            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, points: 0, unlockedSkins: ['classic'], currentSkin: 'classic', dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
+            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
             mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
-            isTeacherAdmin: false, focusMode: false, studyIndex: 0
+            isTeacherAdmin: false, focusMode: false, studyIndex: 0, errorStreak: 0,
+            duel: { active: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, myCombo: 0, oppScore: 0, oppCombo: 0, searching: false }
+        };
+
+        // --- БАЗА ШУТОК ---
+        const jokePhrases = {
+            correct: [
+                "Не настолько ты и плох.", "Хорош!", "Идешь к успеху.", "Так держать!", "База!", 
+                "ТЫ почти как Трамп!", "Исторично!", "Мозг как у Ленина!", "Ключевский тобой гордится.", "100 баллов на горизонте!", 
+                "Бюджетное место уже твое!", "Гений исторической мысли!", "Артасов лично пожмет тебе руку!", "Ты вообще спишь или только историю учишь?", "Машина для уничтожения тестов!", 
+                "Ты случайно не реинкарнация Нестора Летописца?", "Да ты знаешь историю лучше тех, кто ее делал!", "Приемная комиссия МГУ уже плачет от счастья!", "Кажется, составители ЕГЭ будут списывать у тебя!", "Великий Магистр Времен и Народов!", 
+                "Твой мозг — это буквально Государственный Архив РФ!", "Давай честно, ты сам писал эти учебники по истории?", "Император Всероссийский и Повелитель ЕГЭ по истории!", "С таким мозгом можно предсказывать будущее, а не только знать прошлое!", "Ты преисполнился в познании настолько, что этот мир тебе абсолютно понятен!"
+            ],
+            error: [
+                "ты тупой?", "Мда...", "Артасов плачет от твоих ответов.", "Минус баллы.", "Соберись, тряпка!", 
+                "Завод уже ждет тебя!", "Армия близко, сынок.","Ты вообще открывал учебник?", "С такими знаниями только в ПТУ.", 
+                "Рюрик в гробу перевернулся.", "Это фиаско, братан.", "Твои шансы не стать бомжом тают на глазах.", "Ты не сдашь ЕГЭ, чел.", "Может, историю вообще не сдавать? Подумай.", 
+                "Даже кот ответил бы лучше.", "Скажи маме, чтобы родила кого получше.", "Ты бьешь все рекорды по тупости.", "Твоя безграмотность войдет в легенды!", "Поздравляю, ты изобрел альтернативную историю!", 
+                "Кто-то перепутал века, а кто-то — тысячелетия...", "Если бы за ошибки платили, ты бы уже купил МГУ!", "Я всего лишь код, но даже мне больно на это смотреть.", "Оставь надежду, всяк сюда входящий. ЕГЭ тебе не светит.", "Хватит тыкать наугад, иди читай теорию, гений!"
+            ]
+        };
+
+        window.getJokePhrase = function(isCorrect) {
+            if (isCorrect) {
+                window.state.errorStreak = 0;
+                let currentStreak = window.state.stats.streak || 0;
+                let idx = Math.min(Math.max(currentStreak - 1, 0), jokePhrases.correct.length - 1);
+                return jokePhrases.correct[idx];
+            } else {
+                window.state.errorStreak = (window.state.errorStreak || 0) + 1;
+                let idx = Math.min(window.state.errorStreak - 1, jokePhrases.error.length - 1);
+                return jokePhrases.error[idx];
+            }
         };
 
         const tg = window.Telegram ? window.Telegram.WebApp : null; window.tgApp = tg; 
+
+        // === СИСТЕМА ДУЭЛЕЙ PvP ===
+        let duelSearchTimer = null;
+        let duelSearchSeconds = 0;
+
+        window.startDuelSearch = function() {
+            haptic('medium');
+            showModal('duel-search-modal');
+            $('duel-search-status').innerText = "Поиск соперника...";
+            duelSearchSeconds = 0;
+            $('duel-search-timer').innerText = `Ожидание: ${duelSearchSeconds}с`;
+            duelSearchTimer = setInterval(() => {
+                duelSearchSeconds++;
+                $('duel-search-timer').innerText = `Ожидание: ${duelSearchSeconds}с`;
+                if (duelSearchSeconds > 30) {
+                    window.cancelDuelSearch('Никого нет в сети 😢');
+                }
+            }, 1000);
+            
+            if (window.startDuelSearchDb) window.startDuelSearchDb();
+        };
+
+        window.cancelDuelSearch = function(msg) {
+            haptic('light');
+            clearInterval(duelSearchTimer);
+            hideModal('duel-search-modal');
+            if (msg) showToast('ℹ️', msg, 'bg-blue-500', 'border-blue-700');
+            if (window.cancelDuelDb) window.cancelDuelDb();
+        };
+
+        window.initDuelStart = function(startTime) {
+            clearInterval(duelSearchTimer);
+            haptic('success');
+            $('duel-search-status').innerText = "СОПЕРНИК НАЙДЕН!";
+            $('cancel-duel-btn').classList.add('hidden');
+            $('duel-search-timer').innerText = (window.state.duel.oppName || 'Соперник') + " готовится...";
+            
+            const startWait = setInterval(() => {
+                const left = startTime - Date.now();
+                if (left <= 0) {
+                    clearInterval(startWait);
+                    hideModal('duel-search-modal');
+                    window.startDuelGame();
+                } else {
+                    $('duel-search-timer').innerText = `Начинаем через ${Math.ceil(left/1000)}...`;
+                }
+            }, 100);
+        };
+
+        window.startDuelGame = function() {
+            $('lobby-area').classList.add('hidden'); 
+            $('game-container').classList.remove('hidden'); 
+            $('game-container').classList.add('flex');
+            document.body.classList.add('in-game'); 
+            $('bottom-nav').classList.add('hide-nav');
+            
+            window.state.currentTask = 'task4';
+            $('filter-task').value = 'task4';
+            $('filter-rows').value = '4'; // Дуэль идет на 4 строках для скорости
+            $('filter-period').value = 'all';
+            window.state.currentMode = 'duel';
+            window.state.duel.active = true;
+            window.state.timeLeft = 60;
+            
+            $('game-header').classList.add('hidden');
+            $('duel-header').classList.remove('hidden');
+            $('duel-header').classList.add('flex');
+            
+            $('duel-opp-name').innerText = window.state.duel.oppName || "Соперник";
+            window.updateDuelUI();
+            window.generateTable();
+            
+            window.state.timerInterval = setInterval(() => { 
+                window.state.timeLeft--; 
+                $('duel-timer').innerText = window.state.timeLeft; 
+                if(window.state.timeLeft <= 0) window.endDuel(); 
+            }, 1000);
+        };
+
+        window.updateDuelUI = function() {
+            if (!window.state.duel || !window.state.duel.active) return;
+            $('duel-my-score').innerText = window.state.duel.myScore;
+            $('duel-opp-score').innerText = window.state.duel.oppScore;
+            $('duel-my-combo').innerText = `🔥 ${window.state.duel.myCombo}`;
+            $('duel-opp-combo').innerText = `🔥 ${window.state.duel.oppCombo}`;
+        };
+
+        window.endDuel = function() {
+            clearInterval(window.state.timerInterval);
+            window.state.duel.active = false;
+            if (window.cancelDuelDb) window.cancelDuelDb();
+            
+            const myS = window.state.duel.myScore;
+            const oppS = window.state.duel.oppScore;
+            
+            let emoji = '😐', title = 'НИЧЬЯ', text = 'Победила дружба', color = 'text-gray-500';
+            if (myS > oppS) { emoji = '🏆'; title = 'ПОБЕДА!'; text = 'Вы разгромили соперника!'; color = 'text-emerald-500'; haptic('success'); }
+            else if (myS < oppS) { emoji = '💔'; title = 'ПОРАЖЕНИЕ'; text = 'Соперник оказался быстрее...'; color = 'text-rose-500'; haptic('error'); }
+            
+            $('modal-emoji').innerText = emoji;
+            $('modal-main-title').innerText = title;
+            $('modal-score').innerHTML = `<span class="${color}">${myS}</span> <span class="text-gray-400 text-3xl mx-2">:</span> <span class="text-gray-500">${oppS}</span>`;
+            
+            showModal('game-over-modal'); 
+            $('board-overlay').classList.remove('hidden');
+        };
+        // ============================
 
         window.secretClicks = 0; window.secretTimer = null;
         window.handleLogoClick = function() {
@@ -536,7 +650,7 @@
         function getYearFromFact(d) { if (!d) return 0; if (d.year) { let m = String(d.year).match(/\d+/); return m ? parseInt(m[0]) : 0; } return 0; }
 
         function updateScoreAndStats(linesCount, isPerfectHw = false) {
-            window.state.stats.totalSolvedEver += linesCount; window.state.stats.points += linesCount; 
+            window.state.stats.totalSolvedEver += linesCount; 
             const today = getTodayString(); 
             if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 }; 
             window.state.stats.dailyStats[today].solved += linesCount;
@@ -568,17 +682,14 @@
             if (!zenBtn) return;
             
             if (window.state.focusMode) {
-                // Превращаем в мини-кнопку Дзен
                 const smallClass = "w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-tr from-teal-500 to-emerald-400 backdrop-blur-md hover:scale-110 active:scale-90 transition-all duration-300 rounded-full cursor-pointer flex items-center justify-center shadow-[0_0_10px_rgba(20,184,166,0.8)] no-print border-2 border-white dark:border-[#1e1e1e] z-[100]";
                 
                 if (!$('classic-task-area').classList.contains('hidden')) {
-                    // Task 4/5: Ровно по центру между кнопками "Уверен" и "Сомневаюсь"
                     zenBtn.className = "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 " + smallClass;
                     zenBtn.innerHTML = '<span class="text-[12px] sm:text-[14px] drop-shadow-md relative">🧘</span>';
                     const wrap = $('action-wrapper');
                     if (wrap) { wrap.classList.add('relative'); wrap.appendChild(zenBtn); }
                 } else {
-                    // Остальные режимы: В самый низ экрана вплотную к кнопкам ответов
                     document.body.appendChild(zenBtn);
                     zenBtn.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 " + smallClass;
                     zenBtn.innerHTML = '<span class="text-[12px] sm:text-[14px] drop-shadow-md relative">🧘</span>';
@@ -586,7 +697,6 @@
                 zenBtn.classList.remove('hidden');
                 zenBtn.classList.add('flex');
             } else {
-                // Возвращаем в вид большой плавающей кнопки
                 document.body.appendChild(zenBtn);
                 zenBtn.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[10000] w-14 h-14 bg-gradient-to-tr from-teal-500 to-emerald-400 backdrop-blur-md hover:scale-110 active:scale-90 transition-all duration-300 rounded-full cursor-pointer flex items-center justify-center shadow-[0_0_20px_rgba(20,184,166,0.6)] hover:shadow-[0_0_30px_rgba(20,184,166,0.9)] no-print border border-white/30 dark:border-white/10";
                 zenBtn.innerHTML = '<span class="text-2xl drop-shadow-md relative">🧘</span>';
@@ -655,11 +765,22 @@
         };
 
         window.backToLobby = function() {
-            haptic('light'); $('game-container').classList.add('hidden'); $('game-container').classList.remove('flex'); $('lobby-area').classList.remove('hidden');
+            haptic('light'); 
+            if (window.state.currentMode === 'duel') {
+                if (window.cancelDuelDb) window.cancelDuelDb();
+                window.state.duel.active = false;
+            }
+            
+            $('game-container').classList.add('hidden'); $('game-container').classList.remove('flex'); $('lobby-area').classList.remove('hidden');
             if (!window.state.focusMode) { 
                 document.body.classList.remove('in-game'); 
                 $('bottom-nav').classList.remove('hide-nav'); 
             }
+            
+            $('duel-header').classList.add('hidden');
+            $('duel-header').classList.remove('flex');
+            $('game-header').classList.remove('hidden');
+            
             clearInterval(window.state.timerInterval); $('game-timer-display').classList.add('hidden');
             $('task-table-body').innerHTML = ''; $('pool-container').innerHTML = '';
             ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => { const el = $(id); if (el) { el.classList.add('hidden'); el.classList.remove('flex', 'lg:flex-row'); } });
@@ -671,7 +792,6 @@
             if (tg && tg.initDataUnsafe) { tg.expand(); tg.ready(); if (tg.colorScheme === 'dark') { document.documentElement.classList.add('dark'); localStorage.setItem('ege_theme', 'dark'); } }
             initPrecomputed();
             
-            // FORCE DEFAULTS
             if (!$('filter-period').value) $('filter-period').value = 'all';
             if (!$('filter-task').value) $('filter-task').value = 'task4';
             if (!$('filter-mode').value) $('filter-mode').value = 'normal';
@@ -689,7 +809,7 @@
                 }
             } catch(e) {}
             if (localStorage.getItem('ege_theme') === 'dark') document.documentElement.classList.add('dark');
-            applySkin(); $('toggle-hide-learned').checked = window.state.hideLearned; $('pg-hide-learned').checked = window.state.hideLearned;
+            $('toggle-hide-learned').checked = window.state.hideLearned; $('pg-hide-learned').checked = window.state.hideLearned;
             setTimeout(() => $$('.modal-content-hidden').forEach(el => el.classList.remove('modal-content-hidden')), 500);
             updateGlobalUI(); checkURLForHomework();
             setInterval(() => {
@@ -698,14 +818,8 @@
             }, 1000);
         }
 
-        function applySkin() { 
-            document.body.className = document.body.className.replace(/skin-\w+/g, ''); const themeBtns = $$('button[title="Сменить тему"]');
-            if (window.state.stats.currentSkin !== 'classic') { document.body.classList.add('skin-' + window.state.stats.currentSkin); document.documentElement.classList.remove('dark'); themeBtns.forEach(b => b.style.display = 'none'); } 
-            else { if (localStorage.getItem('ege_theme') === 'dark') document.documentElement.classList.add('dark'); themeBtns.forEach(b => b.style.display = ''); }
-        }
-
         function saveProgress() {
-            localStorage.setItem('ege_final_storage_v4', JSON.stringify({ totalSolvedEver: window.state.stats.totalSolvedEver, flashcardsSolved: window.state.stats.flashcardsSolved, eraStats: window.state.stats.eraStats, factStreaks: window.state.stats.factStreaks, hwFlashcardsToSolve: window.state.stats.hwFlashcardsToSolve, mistakesPool: window.state.mistakesPool, hideLearned: window.state.hideLearned, totalTimeSpent: window.state.stats.totalTimeSpent, bestSpeedrunScore: window.state.stats.bestSpeedrunScore, points: window.state.stats.points, unlockedSkins: window.state.stats.unlockedSkins, currentSkin: window.state.stats.currentSkin, dailyStats: window.state.stats.dailyStats, achievements: window.state.stats.achievements, achievementsData: window.state.stats.achievementsData }));
+            localStorage.setItem('ege_final_storage_v4', JSON.stringify({ totalSolvedEver: window.state.stats.totalSolvedEver, flashcardsSolved: window.state.stats.flashcardsSolved, eraStats: window.state.stats.eraStats, factStreaks: window.state.stats.factStreaks, hwFlashcardsToSolve: window.state.stats.hwFlashcardsToSolve, mistakesPool: window.state.mistakesPool, hideLearned: window.state.hideLearned, totalTimeSpent: window.state.stats.totalTimeSpent, bestSpeedrunScore: window.state.stats.bestSpeedrunScore, dailyStats: window.state.stats.dailyStats, achievements: window.state.stats.achievements, achievementsData: window.state.stats.achievementsData }));
             if (window.syncProgressToCloud) window.syncProgressToCloud();
         }
 
@@ -715,7 +829,6 @@
             const hwIds = p.get('hw');
             
             if (hwIds) {
-                // Link mode (specific facts)
                 const tsk = p.get('task') || 'task4';
                 window.state.isHomeworkMode = true; window.state.hwTargetIndices = hwIds.split(',').map(Number); window.state.hwCurrentPool = [...window.state.hwTargetIndices];
                 $('filter-task').value = tsk; window.state.currentTask = tsk;
@@ -796,9 +909,9 @@
         function toggleMode(mode) {
             if (window.state.currentMode !== mode) { window.state.currentMode = mode; window.state.stats.streak = 0; updateGlobalUI(); }
             const timerContainer = $('game-timer-display'); timerContainer.classList.add('hidden'); clearInterval(window.state.timerInterval);
-            const isFc = mode === 'flashcards', isSpd = mode === 'speedrun', isSt = mode === 'study', isDet = mode === 'detective', isRP = mode === 'redpencil';
+            const isFc = mode === 'flashcards', isSpd = mode === 'speedrun', isSt = mode === 'study', isDet = mode === 'detective', isRP = mode === 'redpencil', isDuel = mode === 'duel';
             document.body.classList.toggle('mode-detective', isDet);
-            if (isSpd) { $('filter-rows').value = "4"; $('filter-period').value = "all"; }
+            if (isSpd || isDuel) { $('filter-rows').value = "4"; $('filter-period').value = "all"; }
             ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => { const el = $(id); if (el) { el.classList.add('hidden'); if (id === 'classic-task-area') el.classList.remove('flex', 'lg:flex-row'); if (id === 'flashcard-area' || id === 'study-area' || id === 'redpencil-area') el.classList.remove('flex'); } });
             if (isRP) { const rpa = $('redpencil-area'); if (rpa) { rpa.classList.remove('hidden'); rpa.classList.add('flex'); } if (window.startRedPencilMode) window.startRedPencilMode(); } 
             else if (isFc) { const fa = $('flashcard-area'); if (fa) { fa.classList.remove('hidden'); fa.classList.add('flex'); } if (window.nextFlashcard) window.nextFlashcard(); } 
@@ -806,7 +919,7 @@
             else {
                 const ca = $('classic-task-area'); if (ca) { ca.classList.remove('hidden'); ca.classList.add('flex', 'lg:flex-row'); }
                 if(isSpd) { window.state.timeLeft = 180; if(timerContainer) timerContainer.classList.remove('hidden'); window.state.timerInterval = setInterval(() => { window.state.timeLeft--; const min = Math.floor(window.state.timeLeft/60); const sec = window.state.timeLeft%60; updateText(timerContainer, `${min}:${sec < 10 ? '0' : ''}${sec}`); if(window.state.timeLeft <= 0) endGame(); }, 1000); }
-                if (window.generateTable) generateTable();
+                if (window.generateTable && !isDuel) generateTable();
             }
             setTimeout(() => window.updateZenButton(), 50);
         }
@@ -834,8 +947,20 @@
 
         window.answerFlashcard = function(isCorrect, isSure, e) {
             e.stopPropagation(); const fact = window.state.currentFlashcardFact; let fKey = factKey(fact); let mIdx = window.state.mistakesPool.findIndex(m => m.fact.event === fact.event && m.task === window.state.currentTask);
-            if (isCorrect) { haptic('success'); let d = updateFactSRS(fKey, true, isSure); if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); window.state.stats.streak++; if (d.level > 0) showToast('🧠', isSure ? 'Отлично! Уровень повышен' : 'Повторим завтра', 'bg-emerald-500', 'border-emerald-700'); else showToast(isSure ? '✅' : '🤔', isSure ? '+1.0 к прогрессу' : '+0.7 к прогрессу', isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700'); } 
-            else { haptic('error'); updateFactSRS(fKey, false, false); if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); window.state.stats.streak = 0; showToast('🔄', 'Прогресс сброшен. Повторим!', 'bg-rose-500', 'border-rose-700'); }
+            if (isCorrect) { 
+                haptic('success'); 
+                let d = updateFactSRS(fKey, true, isSure); 
+                if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); 
+                window.state.stats.streak++; 
+                if (d.level > 0) showToast('🧠', isSure ? 'Отлично! Уровень повышен' : 'Повторим завтра', 'bg-emerald-500', 'border-emerald-700'); 
+                else showToast(isSure ? '✅' : '🤔', getJokePhrase(true), isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700'); 
+            } else { 
+                haptic('error'); 
+                updateFactSRS(fKey, false, false); 
+                if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); 
+                window.state.stats.streak = 0; 
+                showToast('🔄', getJokePhrase(false), 'bg-rose-500', 'border-rose-700'); 
+            }
             window.state.stats.flashcardsSolved = (window.state.stats.flashcardsSolved || 0) + 1; saveProgress(); updateGlobalUI(); checkAchievements(); window.nextFlashcard();
         };
 
@@ -856,32 +981,43 @@
         }
 
         function generateTask5Table() {
-            window.state.tableHasMistake = false; window.state.answersRevealed = false; $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
+            window.state.tableHasMistake = false; window.state.answersRevealed = false; 
+            const rowsCount = parseInt($('filter-rows').value) || 4;
+            
+            $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
             $('check-buttons').classList.remove('hidden'); $('check-buttons').classList.add('flex'); $('check-btn-sure').innerHTML = '✅ Уверен'; $('check-btn-doubt').innerHTML = '🤔 Сомневаюсь'; $('reveal-btn').className = "hidden text-gray-500 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 font-bold py-2 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline uppercase tracking-wider mt-2"; $('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы'; $('next-btn').classList.add('hidden'); $('task-table-body').innerHTML = ''; $('pool-container').innerHTML = '';
             $('table-head').innerHTML = `<tr><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[60%] text-left pl-2 sm:pl-4">📜 Процесс (явление)</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[40%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">👤 Участник</th></tr>`;
             
-            let allowed = getFilteredPool($('filter-period').value || 'all', 4); if (!allowed || allowed.length === 0) { $('task-table-body').innerHTML = `<tr><td colspan="2" class="p-10 text-center font-bold text-rose-500 bg-white dark:bg-[#1e1e1e]">⚠️ Нет событий!</td></tr>`; return; }
+            let allowed = getFilteredPool($('filter-period').value || 'all', rowsCount); 
+            if (!allowed || allowed.length === 0) { $('task-table-body').innerHTML = `<tr><td colspan="2" class="p-10 text-center font-bold text-rose-500 bg-white dark:bg-[#1e1e1e]">⚠️ Нет событий!</td></tr>`; return; }
+            
             let target = []; 
             if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0) {
-                let count = Math.min(4, window.state.hwCurrentPool.length); 
+                let count = Math.min(rowsCount, window.state.hwCurrentPool.length); 
                 window.state.hwCurrentPool.slice(0, count).forEach(i => { let f = (typeof task5Data !== 'undefined' ? task5Data : [])[i]; if(f) target.push(f); });
             } else {
                 let uE = new Set(); let uP = new Set(); let svo = 0; let shuf = shuffleArray([...allowed]);
-                for (let f of shuf) { if (target.length >= 4) break; if (uE.has(f.event) || uP.has(f.person)) continue; let isSVO = f.year === "2022" || f.event.includes('СВО'); if (isSVO && svo >= 1) continue; target.push(f); uE.add(f.event); uP.add(f.person); if (isSVO) svo++; }
-                if (target.length < 4) for (let f of shuf) { if (target.length >= 4) break; if (!uE.has(f.event) && !uP.has(f.person)) { target.push(f); uE.add(f.event); uP.add(f.person); } }
+                for (let f of shuf) { if (target.length >= rowsCount) break; if (uE.has(f.event) || uP.has(f.person)) continue; let isSVO = f.year === "2022" || f.event.includes('СВО'); if (isSVO && svo >= 1) continue; target.push(f); uE.add(f.event); uP.add(f.person); if (isSVO) svo++; }
+                if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!uE.has(f.event) && !uP.has(f.person)) { target.push(f); uE.add(f.event); uP.add(f.person); } }
             }
 
-            window.state.currentTargetData = target; let missing = []; let uPoolP = new Set(); const letters = ['А', 'Б', 'В', 'Г']; const trFrag = document.createDocumentFragment();
-            target.forEach((row, idx) => { const tr = document.createElement('tr'); tr.className = "border-b border-gray-100 dark:border-[#2c2c2c] bg-white dark:bg-[#1e1e1e] transition-colors hover:bg-gray-50 dark:hover:bg-[#25282a]"; tr.dataset.index = idx; missing.push(row.person); uPoolP.add(row.person); tr.innerHTML = `<td class="p-1.5 sm:p-3 py-1.5 align-middle text-left border-r border-gray-100 dark:border-[#2c2c2c]"><span class="text-[11px] sm:text-[14px] font-bold text-gray-800 dark:text-gray-300 leading-relaxed block">${letters[idx]}) ${row.event}</span></td><td class="p-1 sm:p-3 py-1.5 align-middle text-center overflow-hidden"><div class="dnd-slot relative" data-expected="${row.person}" data-letter="?"></div></td>`; trFrag.appendChild(tr); }); $('task-table-body').appendChild(trFrag);
+            window.state.currentTargetData = target; let missing = []; let uPoolP = new Set(); const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М']; const trFrag = document.createDocumentFragment();
+            target.forEach((row, idx) => { const tr = document.createElement('tr'); tr.className = "border-b border-gray-100 dark:border-[#2c2c2c] bg-white dark:bg-[#1e1e1e] transition-colors hover:bg-gray-50 dark:hover:bg-[#25282a]"; tr.dataset.index = idx; missing.push(row.person); uPoolP.add(row.person); tr.innerHTML = `<td class="p-1.5 sm:p-3 py-1.5 align-middle text-left border-r border-gray-100 dark:border-[#2c2c2c]"><span class="text-[11px] sm:text-[14px] font-bold text-gray-800 dark:text-gray-300 leading-relaxed block">${letters[idx] || '?'}) ${row.event}</span></td><td class="p-1 sm:p-3 py-1.5 align-middle text-center overflow-hidden"><div class="dnd-slot relative" data-expected="${row.person}" data-letter="?"></div></td>`; trFrag.appendChild(tr); }); $('task-table-body').appendChild(trFrag);
+            
             if (typeof task5Data === 'undefined') return;
-            let poolItems = [...missing]; let att = 0; let allP = [...new Set(task5Data.map(d => d.person))]; while(poolItems.length < 6 && att < 100) { let randP = allP[Math.floor(Math.random() * allP.length)]; if (!uPoolP.has(randP)) { poolItems.push(randP); uPoolP.add(randP); } att++; }
+            let fakesCount = Math.ceil(target.length / 2); // 4 строки -> 2 фейка, 6 строк -> 3 фейка, 10 строк -> 5 фейков
+            let poolItems = [...missing]; let att = 0; let allP = [...new Set(task5Data.map(d => d.person))]; 
+            while(poolItems.length < target.length + fakesCount && att < 100) { let randP = allP[Math.floor(Math.random() * allP.length)]; if (!uPoolP.has(randP)) { poolItems.push(randP); uPoolP.add(randP); } att++; }
             const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const c = document.createElement('div'); c.className = "dnd-chip"; c.innerText = txt; poolFrag.appendChild(c); }); $('pool-container').appendChild(poolFrag);
         }
 
         function generateTable() {
             if (window.state.currentMode === 'detective') return generateDetectiveTable();
             if (window.state.currentTask === 'task5') return generateTask5Table();
-            window.state.tableHasMistake = false; window.state.answersRevealed = false; const rowsCount = parseInt($('filter-rows').value) || 4;
+            
+            window.state.tableHasMistake = false; window.state.answersRevealed = false; 
+            const rowsCount = parseInt($('filter-rows').value) || 4;
+            
             $('pool-title').innerHTML = `<span>🧩</span> ВАРИАНТЫ`; if ($('detective-stamp')) $('detective-stamp').classList.add('hidden');
             $('check-buttons').classList.remove('hidden'); $('check-buttons').classList.add('flex'); $('check-btn-sure').innerHTML = '✅ Уверен'; $('check-btn-doubt').innerHTML = '🤔 Сомневаюсь'; $('reveal-btn').className = "hidden text-gray-500 hover:text-orange-500 dark:text-gray-400 font-bold py-2 active:scale-95 text-[11px] sm:text-xs w-full transition-colors underline uppercase tracking-wider mt-2"; $('reveal-btn').innerHTML = '👀 Сдаюсь, покажи ответы'; $('next-btn').classList.add('hidden'); $('task-table-body').innerHTML = ''; $('pool-container').innerHTML = '';
             $('table-head').innerHTML = `<tr><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] text-center">🗺️ Объект</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[45%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">📜 Событие</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">⏳ Дата</th></tr>`;
@@ -894,9 +1030,24 @@
             }
             
             window.state.currentTargetData = target; let missing = [], hiddenRowsData = [], blanksPerRow = [], availableTypes = [], requiredFakes = { geo: 0, event: 0, year: 0 };
-            if (target.length === 4) { blanksPerRow = shuffleArray([2, 2, 1, 1]); availableTypes = ['geo', 'geo', 'event', 'event', 'year', 'year']; requiredFakes = { geo: 1, event: 1, year: 1 }; } 
-            else { blanksPerRow = Array(target.length).fill(1); let rem = Math.floor(target.length * 1.5) - target.length; while(rem > 0) { let r = Math.floor(Math.random() * target.length); if (blanksPerRow[r] < 2) { blanksPerRow[r]++; rem--; } } let t = blanksPerRow.reduce((a,b)=>a+b,0), types = ['geo', 'event', 'year']; for(let i=0; i<t; i++) availableTypes.push(types[i%3]); let c = { geo: availableTypes.filter(x=>x==='geo').length, event: availableTypes.filter(x=>x==='event').length, year: availableTypes.filter(x=>x==='year').length }; let mCount = Math.max(c.geo, c.event, c.year, 3); requiredFakes = { geo: mCount - c.geo, event: mCount - c.event, year: mCount - c.year }; }
-            let lIdx = 0; const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К']; function popType(av, excl) { let valIds = av.map((t, i) => excl.includes(t) ? -1 : i).filter(i => i !== -1); if (valIds.length === 0) return av.pop(); return av.splice(valIds[Math.floor(Math.random() * valIds.length)], 1)[0]; }
+            
+            const actualRows = target.length;
+            blanksPerRow = Array(actualRows).fill(1); 
+            let rem = Math.floor(actualRows * 1.5) - actualRows; 
+            while(rem > 0) { 
+                let r = Math.floor(Math.random() * actualRows); 
+                if (blanksPerRow[r] < 2) { blanksPerRow[r]++; rem--; } 
+            } 
+            
+            let totalBlanks = blanksPerRow.reduce((a,b)=>a+b,0), types = ['geo', 'event', 'year']; 
+            for(let i=0; i<totalBlanks; i++) availableTypes.push(types[i % 3]); 
+            
+            let fakesPerType = Math.ceil(actualRows / 4);
+            requiredFakes = { geo: fakesPerType, event: fakesPerType, year: fakesPerType };
+            
+            let lIdx = 0; const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М', 'Н', 'О', 'П']; 
+            function popType(av, excl) { let valIds = av.map((t, i) => excl.includes(t) ? -1 : i).filter(i => i !== -1); if (valIds.length === 0) { let fallb = Math.floor(Math.random() * av.length); return av.splice(fallb, 1)[0]; } return av.splice(valIds[Math.floor(Math.random() * valIds.length)], 1)[0]; }
+            
             const trFrag = document.createDocumentFragment();
             target.forEach((row, idx) => {
                 const tr = document.createElement('tr'); tr.className = "border-b border-gray-100 dark:border-[#2c2c2c] bg-white dark:bg-[#1e1e1e] transition-colors hover:bg-gray-50 dark:hover:bg-[#25282a]"; tr.dataset.index = idx;
@@ -908,10 +1059,21 @@
                     tr.appendChild(td);
                 }); trFrag.appendChild(tr);
             }); $('task-table-body').appendChild(trFrag);
+            
             if (typeof bigData === 'undefined') return;
             let poolItems = [...missing]; const pFacts = bigData.filter(d => [...new Set(target.map(t => t.c))].includes(d.c));
+            
             ['geo', 'event', 'year'].forEach(type => {
-                for(let i=0; i<requiredFakes[type]; i++) { let fnd = false, att = 0, relHid = hiddenRowsData.find(h => h.types.includes(type)), trap = null; if (typeof trapDict !== 'undefined' && relHid && Math.random() < 0.35) { let pT = trapDict[relHid.row[type]]; if (pT && pT.length > 0) trap = pT[Math.floor(Math.random() * pT.length)]; } if (trap && !poolItems.includes(trap)) { poolItems.push(trap); continue; } while(!fnd && att < 50) { let rF = pFacts[Math.floor(Math.random()*pFacts.length)], val = rF[type]; if (!poolItems.includes(val)) { poolItems.push(val); fnd = true; } att++; } }
+                for(let i=0; i<requiredFakes[type]; i++) { 
+                    let fnd = false, att = 0, relHid = hiddenRowsData.find(h => h.types.includes(type)), trap = null; 
+                    if (typeof trapDict !== 'undefined' && relHid && Math.random() < 0.35) { let pT = trapDict[relHid.row[type]]; if (pT && pT.length > 0) trap = pT[Math.floor(Math.random() * pT.length)]; } 
+                    if (trap && !poolItems.includes(trap)) { poolItems.push(trap); continue; } 
+                    while(!fnd && att < 50) { 
+                        let rF = pFacts[Math.floor(Math.random()*pFacts.length)], val = rF[type]; 
+                        if (!poolItems.includes(val)) { poolItems.push(val); fnd = true; } 
+                        att++; 
+                    } 
+                }
             });
             const pFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const c = document.createElement('div'); c.className = "dnd-chip"; c.innerText = txt; pFrag.appendChild(c); }); $('pool-container').appendChild(pFrag);
         }
@@ -952,21 +1114,74 @@
                 }
             });
 
+            // DUEL MODE INTERCEPT
+            if (window.state.currentMode === 'duel') {
+                if (!allCorrect || window.state.tableHasMistake) {
+                    window.state.duel.myCombo = 0;
+                    if (!allCorrect) {
+                         haptic('error'); window.state.tableHasMistake = true; showToast('❌', 'Ошибка! Комбо сброшено.', 'bg-rose-500', 'border-rose-700'); $('reveal-btn').classList.remove('hidden');
+                    } else {
+                         haptic('success');
+                         window.state.duel.myScore += newlyCorrect;
+                         $('check-buttons').classList.add('hidden'); setTimeout(() => window.generateTable(), 300);
+                    }
+                } else if (allCorrect && filled === total && !window.state.tableHasMistake) {
+                    haptic('success');
+                    let prevCombo = window.state.duel.myCombo || 0;
+                    let newCombo = prevCombo + newlyCorrect;
+                    let bonus = 0;
+                    
+                    for (let i = prevCombo + 1; i <= newCombo; i++) {
+                        if (i % 5 === 0) bonus += (i / 5);
+                    }
+                    
+                    window.state.duel.myCombo = newCombo;
+                    window.state.duel.myScore += newlyCorrect + bonus;
+                    if (bonus > 0) showToast('🔥', `КОМБО x${newCombo}! Бонус +${bonus}`, 'bg-purple-600', 'border-purple-800');
+                    else showToast('✅', `Отлично! +${newlyCorrect}`, 'bg-emerald-500', 'border-emerald-700');
+                    
+                    $('check-buttons').classList.add('hidden'); $('reveal-btn').classList.add('hidden');
+                    setTimeout(() => window.generateTable(), 300); 
+                }
+                window.updateDuelUI();
+                if (window.updateDuelScoreDb) window.updateDuelScoreDb(window.state.duel.myScore, window.state.duel.myCombo);
+                return; // Выходим из функции, стандартная логика не нужна
+            }
+
             let linesToRwd = (window.state.currentTask === 'task5' || window.state.currentMode === 'detective') ? (allCorrect && filled === total && !window.state.tableHasMistake && newlyCorrect > 0 ? 2 : 0) : newlyCorrect;
             if (linesToRwd > 0) updateScoreAndStats(linesToRwd, !window.state.tableHasMistake && allCorrect);
             window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
 
             if (allCorrect && filled === total) {
                 haptic('success'); 
-                if (!window.state.tableHasMistake) { window.state.stats.streak++; if (window.state.stats.streak % 5 === 0 && window.state.stats.streak > 0 && !window.state.isHomeworkMode) { window.state.stats.points += 10; setTimeout(() => showToast('🎁', '+10 бонусных баллов!', 'bg-purple-600', 'border-purple-800'), 2500); } }
-                if (window.state.currentMode === 'speedrun') { if (!window.state.tableHasMistake) { window.state.timeLeft += 25; showToast('⚡', '+25 секунд!', 'bg-purple-600', 'border-purple-800'); } else showToast('✅', 'Ошибки исправлены!', 'bg-blue-500', 'border-blue-700'); } 
-                else if (window.state.currentMode === 'detective') showToast('🕵️', 'Дело успешно закрыто!', 'bg-emerald-600', 'border-emerald-800'); 
-                else { if (!window.state.tableHasMistake) showToast(isSure ? '✅' : '🤔', isSure ? 'Уверенно! (+1.0)' : 'Засчитано! (+0.7)', isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700'); else showToast('✅', 'Ошибки исправлены!', 'bg-blue-500', 'border-blue-700'); }
+                if (!window.state.tableHasMistake) { 
+                    window.state.stats.streak++; 
+                    if (window.state.stats.streak % 5 === 0 && window.state.stats.streak > 0 && !window.state.isHomeworkMode) { 
+                        setTimeout(() => showToast('🔥', 'Отличный стрик!', 'bg-purple-600', 'border-purple-800'), 2500); 
+                    } 
+                }
+                if (window.state.currentMode === 'speedrun') { 
+                    if (!window.state.tableHasMistake) { window.state.timeLeft += 25; showToast('⚡', '+25 секунд!', 'bg-purple-600', 'border-purple-800'); } 
+                    else showToast('✅', 'Ошибки исправлены!', 'bg-blue-500', 'border-blue-700'); 
+                } 
+                else if (window.state.currentMode === 'detective') {
+                    showToast('🕵️', 'Дело успешно закрыто!', 'bg-emerald-600', 'border-emerald-800'); 
+                }
+                else { 
+                    if (!window.state.tableHasMistake) showToast(isSure ? '✅' : '🤔', window.getJokePhrase(true), isSure ? 'bg-emerald-500' : 'bg-indigo-500', isSure ? 'border-emerald-700' : 'border-indigo-700'); 
+                    else showToast('✅', 'Ошибки исправлены!', 'bg-blue-500', 'border-blue-700'); 
+                }
                 
                 $('check-buttons').classList.add('hidden'); $('check-buttons').classList.remove('flex'); $('reveal-btn').classList.add('hidden'); $('next-btn').classList.remove('hidden');
                 $('next-btn').innerHTML = window.state.currentMode === 'detective' ? '📂 Следующее дело' : '➡️ Дальше';
                 if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0) { window.state.hwCurrentPool.splice(0, rows.length); if (window.state.hwCurrentPool.length === 0) endGame(); } else saveProgress(); checkAchievements(); 
-            } else { haptic('error'); window.state.stats.streak = 0; window.state.tableHasMistake = true; showToast('❌', window.state.currentMode === 'detective' ? 'Улики не сходятся!' : 'Ошибка! Прогресс сброшен.', 'bg-rose-500', 'border-rose-700'); $('reveal-btn').classList.remove('hidden'); }
+            } else { 
+                haptic('error'); 
+                window.state.stats.streak = 0; 
+                window.state.tableHasMistake = true; 
+                showToast('❌', window.state.currentMode === 'detective' ? 'Улики не сходятся!' : window.getJokePhrase(false), 'bg-rose-500', 'border-rose-700'); 
+                $('reveal-btn').classList.remove('hidden'); 
+            }
             updateGlobalUI(); window.updateZenButton();
         }
 
@@ -1038,15 +1253,6 @@
             showModal('achievements-modal');
         };
 
-        window.openShopModal = function() {
-            $('shop-points-display').innerText = window.state.stats.points; let ht = '';
-            if (typeof skinsList !== 'undefined') { skinsList.forEach(s => { const isU = window.state.stats.unlockedSkins.includes(s.id), isS = window.state.stats.currentSkin === s.id; let btnH = isS ? `<button disabled class="w-full bg-gray-100 dark:bg-[#181818] text-gray-400 font-black py-3 rounded-xl cursor-not-allowed text-[11px] sm:text-xs uppercase tracking-widest">Выбрано</button>` : (isU ? `<button onclick="selectSkin('${s.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-colors shadow-md active:scale-95 text-[11px] sm:text-xs uppercase tracking-widest">Выбрать</button>` : `<button onclick="buySkin('${s.id}', ${s.price})" class="w-full ${window.state.stats.points >= s.price ? 'bg-emerald-500 hover:bg-emerald-600 shadow-md active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed'} text-white font-black py-3 rounded-xl transition-colors text-[11px] sm:text-xs uppercase tracking-widest">Купить за ${s.price}</button>`); ht += `<div class="border-2 ${isS ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/10' : 'border-gray-100 dark:border-[#2c2c2c] bg-white dark:bg-[#1e1e1e]'} rounded-2xl p-5 flex flex-col items-center text-center shadow-sm relative transition-all hover:-translate-y-1"><div class="text-5xl mb-3 drop-shadow-md">${s.icon}</div><h4 class="font-black text-sm text-gray-800 dark:text-gray-300 mb-1 uppercase tracking-wide">${s.name}</h4><p class="text-[10px] font-bold text-gray-400 mb-5 leading-tight">${s.desc}</p><div class="mt-auto w-full">${btnH}</div></div>`; }); }
-            $('shop-grid').innerHTML = ht; showModal('shop-modal');
-        };
-
-        window.buySkin = function(id, p) { if (window.state.stats.points >= p) { window.state.stats.points -= p; window.state.stats.unlockedSkins.push(id); window.state.stats.currentSkin = id; saveProgress(); applySkin(); openShopModal(); updateGlobalUI(); showToast('🎉', 'Скин разблокирован!', 'bg-emerald-500', 'border-emerald-700'); } else showToast('⚠️', 'Не хватает баллов!', 'bg-rose-500', 'border-rose-700'); };
-        window.selectSkin = function(id) { window.state.stats.currentSkin = id; saveProgress(); applySkin(); openShopModal(); };
-
         window.renderTeacherFacts = function() {
             const task = $('teacher-hw-task-select').value;
             let ht = ''; const per = [{ id: 'early', name: 'Древность и Смута' }, { id: '18th', name: 'XVIII век' }, { id: '19th', name: 'XIX век' }, { id: '20th', name: 'XX век' }]; 
@@ -1091,7 +1297,6 @@
         window.copyHomeworkLink = function() { const inp = $('teacher-generated-url'); const copyFn = () => { inp.select(); document.execCommand('copy'); showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700'); }; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(inp.value).then(() => showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700')).catch(copyFn); } else copyFn(); };
 
         window.copyTextReport = function() { const tM = Math.floor((window.state.stats.totalTimeSpent || 0) / 60); const lC = Object.values(window.state.stats.factStreaks || {}).filter(window.isFactLearned).length; let t = `🎓 Отчет: Тренажер Задания 4 (ЕГЭ История)\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n⏱ Время: ${tM} мин\n✅ Решено: ${window.state.stats.totalSolvedEver}\n🃏 Карточек: ${window.state.stats.flashcardsSolved || 0}\n🔥 Стрик: ${window.state.stats.streak}\n🧠 Выучено: ${lC} фактов\n\n📊 По эпохам:\n`; Object.entries({'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'}).forEach(([k, n]) => { const d = window.state.stats.eraStats[k] || { correct: 0, total: 0 }; t += `- ${n}: ${d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0}% (${d.correct} из ${d.total})\n`; }); if (window.state.mistakesPool.length > 0) { t += `\n⚠️ Ошибки:\n`; window.state.mistakesPool.forEach((m, i) => { t += `${i + 1}. ${m.fact.person ? `${m.fact.event} ➡️ ${m.fact.person}` : `${m.fact.geo} | ${m.fact.event} | ${m.fact.year}`}\n`; }); } else t += `\n🎉 Ошибок нет!\n`; const copyFn = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700'); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700')).catch(copyFn); else copyFn(); };
-        window.resetAllProgress = function() { const ok = window.tgApp && window.tgApp.showConfirm ? window.tgApp.showConfirm("Очистить всю статистику?") : confirm("Очистить всю статистику?"); if(ok) { localStorage.removeItem('ege_final_storage_v4'); location.reload(); } };
 
         window.openMapModal = function(name) { const cd = typeof geoDict !== 'undefined' ? geoDict[name] : null; $('yandex-map-iframe').src = cd ? `https://yandex.ru/map-widget/v1/?ll=${cd[0]},${cd[1]}&z=6&pt=${cd[0]},${cd[1]},pm2rdm` : `https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(name + ' историческое место')}&z=6`; $('map-modal-title').innerText = name; showModal('map-modal'); };
 
@@ -1139,16 +1344,18 @@
         window.handleRPPlainClick = function(e) {
             const n = e.currentTarget; if (n.classList.contains('shaking') || n.classList.contains('crossed')) return; 
             n.classList.add('animate-shake', 'text-rose-600', 'shaking'); if(window.state) { window.state.stats.streak = 0; window.state.rpHasMistake = true; updateGlobalUI(); saveProgress(); }
-            setTimeout(() => n.classList.remove('animate-shake', 'text-rose-600', 'shaking'), 500); if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); showToast('❌', 'Это подлинный исторический факт!', 'bg-rose-500', 'border-rose-700');
+            setTimeout(() => n.classList.remove('animate-shake', 'text-rose-600', 'shaking'), 500); if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error'); 
+            showToast('❌', window.getJokePhrase(false), 'bg-rose-500', 'border-rose-700');
         };
         window.winRPCase = function() {
             $('rp-next-btn').classList.remove('hidden'); $('rp-giveup-btn').classList.add('hidden');
             if(window.state && !window.state.rpHasMistake) { updateScoreAndStats(1, true); window.state.stats.streak = (window.state.stats.streak || 0) + 1; updateGlobalUI(); saveProgress(); checkAchievements(); }
-            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); showToast('🎉', 'Все фальшивки найдены!', 'bg-emerald-500', 'border-emerald-700');
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success'); 
+            showToast('🎉', window.state.rpHasMistake ? 'Все фальшивки найдены!' : window.getJokePhrase(true), 'bg-emerald-500', 'border-emerald-700');
         };
         window.giveUpRedPencil = function() { $$('#rp-content .target-node[data-type="fake"]').forEach(n => { if (!n.classList.contains('crossed')) { n.classList.add('crossed', 'show-correction'); n.innerHTML += `<span class="correction-badge">${n.dataset.correct}</span>`; } }); rpFakesFound = rpFakesTotal; window.updateRPCounter(); if(window.state) { window.state.stats.streak = 0; updateGlobalUI(); saveProgress(); } $('rp-next-btn').classList.remove('hidden'); $('rp-giveup-btn').classList.add('hidden'); };
 
-        window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud = async function() {}; window.loadClassProgress = function() { $('teacher-class-stats').innerHTML = '<p class="text-[11px] font-bold uppercase tracking-widest text-gray-500 text-center mt-5">Синхронизация...</p>'; };
+        window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud = async function() {}; window.loadClassProgress = function() { $('teacher-class-stats').innerHTML = '<p class=\"text-[11px] font-bold uppercase tracking-widest text-gray-500 text-center mt-5\">Синхронизация...</p>'; };
 
         document.addEventListener('DOMContentLoaded', initStorage);
     </script>
@@ -1157,7 +1364,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = "ege-history-bot";
         const firebaseConfig = { apiKey: "AIzaSyDdxtpuznCSK5a6CvcJdbt9pzKMXbUVl08", authDomain: "ege-history-bot.firebaseapp.com", projectId: "ege-history-bot", storageBucket: "ege-history-bot.firebasestorage.app", messagingSenderId: "489223236202", appId: "1:489223236202:web:48110779742d40d748f813" };
@@ -1206,6 +1413,112 @@
             }
         });
 
+        // PvP FIREBASE DUEL LOGIC
+        let duelUnsubscribe = null;
+        window.startDuelSearchDb = async function() {
+            if (!fbUser || !db) return showToast('❌', 'Подключитесь к сети', 'bg-rose-500', 'border-rose-700');
+            window.state.duel = { active: false, searching: true, matchId: null, isPlayer1: false, oppName: '', myScore: 0, oppScore: 0, myCombo: 0, oppCombo: 0 };
+            
+            const myUid = resolveUserId(fbUser);
+            let myName = localStorage.getItem('student_manual_name') || 'Игрок';
+            if (myName.length > 12) myName = myName.substring(0, 10) + '..';
+
+            const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+            
+            try {
+                const snapshot = await getDocs(matchesRef);
+                let matchToJoin = null;
+                const now = Date.now();
+                snapshot.forEach(doc => {
+                    let data = doc.data();
+                    if (data.status === 'waiting' && data.player1 && data.player1.uid !== myUid && (now - data.createdAt < 30000)) {
+                        matchToJoin = { id: doc.id, ...data };
+                    }
+                });
+
+                if (matchToJoin) {
+                    // Join existing match
+                    window.state.duel.isPlayer1 = false;
+                    window.state.duel.matchId = matchToJoin.id;
+                    await updateDoc(doc(matchesRef, matchToJoin.id), {
+                        status: 'playing',
+                        player2: { uid: myUid, name: myName, score: 0, combo: 0 },
+                        startTime: Date.now() + 4000 // Start in 4 seconds
+                    });
+                    listenToDuel(matchToJoin.id, myUid);
+                } else {
+                    // Create new match
+                    window.state.duel.isPlayer1 = true;
+                    const newMatch = await addDoc(matchesRef, {
+                        status: 'waiting',
+                        createdAt: Date.now(),
+                        player1: { uid: myUid, name: myName, score: 0, combo: 0 },
+                        player2: null,
+                        startTime: 0
+                    });
+                    window.state.duel.matchId = newMatch.id;
+                    listenToDuel(newMatch.id, myUid);
+                }
+            } catch(e) {
+                console.error(e);
+                showToast('❌', 'Ошибка поиска', 'bg-rose-500', 'border-rose-700');
+                window.cancelDuelSearch();
+            }
+        };
+
+        function listenToDuel(matchId, myUid) {
+            const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+            duelUnsubscribe = onSnapshot(doc(matchesRef, matchId), (docSnap) => {
+                if (!docSnap.exists()) {
+                    window.cancelDuelSearch('Соперник вышел');
+                    return;
+                }
+                const data = docSnap.data();
+                
+                if (data.status === 'playing' && window.state.duel.searching) {
+                    window.state.duel.searching = false;
+                    const opp = window.state.duel.isPlayer1 ? data.player2 : data.player1;
+                    window.state.duel.oppName = opp ? opp.name : 'Соперник';
+                    window.initDuelStart(data.startTime);
+                }
+                
+                if (data.status === 'playing' && !window.state.duel.searching) {
+                    const opp = window.state.duel.isPlayer1 ? data.player2 : data.player1;
+                    if (opp) {
+                        window.state.duel.oppScore = opp.score || 0;
+                        window.state.duel.oppCombo = opp.combo || 0;
+                        window.updateDuelUI();
+                    }
+                }
+            }, (error) => {
+                console.error(error);
+                window.cancelDuelSearch('Ошибка связи');
+            });
+        }
+
+        window.updateDuelScoreDb = function(score, combo) {
+            if (!db || !window.state.duel.matchId) return;
+            const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+            const updateData = {};
+            if (window.state.duel.isPlayer1) {
+                updateData['player1.score'] = score;
+                updateData['player1.combo'] = combo;
+            } else {
+                updateData['player2.score'] = score;
+                updateData['player2.combo'] = combo;
+            }
+            updateDoc(doc(matchesRef, window.state.duel.matchId), updateData).catch(e=>{});
+        };
+
+        window.cancelDuelDb = function() {
+            if (duelUnsubscribe) { duelUnsubscribe(); duelUnsubscribe = null; }
+            if (window.state.duel && window.state.duel.matchId && window.state.duel.isPlayer1 && window.state.duel.searching) {
+                const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
+                deleteDoc(doc(matchesRef, window.state.duel.matchId)).catch(e=>{});
+            }
+        };
+        // =======================
+
         window.loadProgressFromCloud = async function() {
             if (!fbUser || !db) return;
             try {
@@ -1218,7 +1531,6 @@
                         localStorage.setItem('ege_final_storage_v4', d.fullStateJson); 
                         const tgHL = document.getElementById('toggle-hide-learned'); if(tgHL) tgHL.checked = window.state.hideLearned; 
                         const pgHL = document.getElementById('pg-hide-learned'); if(pgHL) pgHL.checked = window.state.hideLearned;
-                        if(window.applySkin) window.applySkin(); 
                     } 
                     
                     if (d.hwFlashcardsToSolve !== undefined) {
@@ -1371,9 +1683,9 @@
                 cM = mergeDuplicateStudents(cM);
                 cM.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
                 let tL = cM.slice(0, 50); let ht = '<div class="flex flex-col gap-2">';
-                tL.forEach((s, idx) => { ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800 mb-0.5">${s.totalSolved || 0}</span><span class="text-[9px] font-bold text-gray-400 block leading-none">строк</span></div></div>`; }); ht += '</div>';
-                cont.innerHTML = tL.length === 0 ? '<p class="text-[10px] font-bold text-gray-500 text-center py-8">Пусто</p>' : ht;
-            } catch(e) { cont.innerHTML = '<p class="text-[10px] font-bold text-rose-500 text-center py-4">Ошибка загрузки</p>'; }
+                tL.forEach((s, idx) => { ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800 mb-0.5">${s.totalSolved || 0}</span><span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">строк</span></div></div>`; });
+                ht += '</div>'; cont.innerHTML = ht;
+            } catch (e) { cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Ошибка загрузки</p>'; }
         };
     </script>
 </body>
