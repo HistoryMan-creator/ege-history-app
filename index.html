@@ -6,14 +6,10 @@
     <title>Тренажер ЕГЭ: История (ULTIMATE)</title>
     
     <link rel="preconnect" href="https://telegram.org">
-    <!-- Для работы standalone без tailwind-сборки добавим CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { examBlue: '#2563eb' } } }
-        }
-    </script>
+    
+    <!-- Подключаем скомпилированный CSS вместо CDN -->
+    <link rel="stylesheet" href="output.css">
+    
     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
     
     <!-- ПОДКЛЮЧЕНИЕ БАЗЫ ДАННЫХ -->
@@ -463,7 +459,7 @@
         </div>
     </div>
 
-    <!-- === ОСНОВНОЙ СКРИПТ (ЛОГИКА ИГРЫ) === -->
+    <!-- === ОСНОВНО СКРИПТ (ЛОГИКА ИГРЫ) === -->
     <script>
         // --- ПОДГОТОВКА БАЗ ИЗ data.js ---
         window.task7Data = typeof task7Data !== 'undefined' ? task7Data : [];
@@ -493,20 +489,12 @@
         const periodsList = ['all', 'early', '18th', '19th', '20th'];
         
         function initPrecomputed() {
-            window.bigData = typeof bigData !== 'undefined' ? bigData : (window.bigData || []);
-            window.task5Data = typeof task5Data !== 'undefined' ? task5Data : (window.task5Data || []);
-            window.task7Data = typeof task7Data !== 'undefined' ? task7Data : (window.task7Data || []);
-            window.task7Top100Data = typeof task7Top100Data !== 'undefined' ? task7Top100Data : (window.task7Top100Data || window.task7Data || []);
-
-            if (window.bigData.length === 0 && window.task5Data.length === 0 && window.task7Data.length === 0) {
-                console.warn("Внимание: База данных загружается или пуста!");
-            }
-
+            if (typeof bigData === 'undefined' || typeof task5Data === 'undefined') console.warn("Внимание: База данных загружается или пуста!");
             const filterData = (data, p) => p === 'all' ? [...data] : data.filter(d => d.c === p);
             periodsList.forEach(p => { 
-                precomputed.task4[p] = filterData(window.bigData, p); 
-                precomputed.task5[p] = filterData(window.task5Data, p); 
-                precomputed.task7[p] = filterData(window.task7Data, p); 
+                precomputed.task4[p] = filterData(typeof bigData !== 'undefined' ? bigData : [], p); 
+                precomputed.task5[p] = filterData(typeof task5Data !== 'undefined' ? task5Data : [], p); 
+                precomputed.task7[p] = filterData(window.task7Data || [], p); 
             });
         }
 
@@ -1261,7 +1249,8 @@
                     else if (!slot.classList.contains('revealed-slot')) { rowAllCor = false; if(chip) { slot.classList.add('incorrect-slot'); slot.classList.remove('correct-slot'); } }
                 });
                 if (!rowAllCor || rowFilled !== slots.length) allCorrect = false;
-                if (!window.state.isHomeworkMode && rowFilled > 0 && !window.state.answersRevealed) {
+                
+                if (rowFilled > 0 && !window.state.answersRevealed) {
                     if (window.state.currentMode !== 'detective') {
                         let fKey = factKey(fact); let mIdx = window.state.mistakesPool.findIndex(m => m.task === window.state.currentTask && (
                             (window.state.currentTask === 'task5' && m.fact.event === fact.event) || 
@@ -1313,7 +1302,7 @@
                 return; // Выходим из функции, стандартная логика не нужна
             }
 
-            let linesToRwd = (window.state.currentTask === 'task5' || window.state.currentTask === 'task7' || window.state.currentMode === 'detective') ? (allCorrect && filled === total && !window.state.tableHasMistake && newlyCorrect > 0 ? 2 : 0) : newlyCorrect;
+            let linesToRwd = newlyCorrect;
             if (linesToRwd > 0) updateScoreAndStats(linesToRwd, !window.state.tableHasMistake && allCorrect);
             window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
 
@@ -1356,7 +1345,7 @@
                 window.state.tableHasMistake = true; window.state.stats.streak = 0; btn.innerHTML = isDet ? '🙈 Скрыть улики' : '🙈 Скрыть ответы';
                 rows.forEach((tr, idx) => {
                     const fact = window.state.currentTargetData[idx]; 
-                    if (!window.state.isHomeworkMode && !tr.dataset.scored) { 
+                    if (!tr.dataset.scored) { 
                         tr.dataset.scored = "incorrect"; 
                         if (!isDet) { 
                             updateFactSRS(factKey(fact), false, false); 
@@ -1581,14 +1570,25 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = "ege-history-bot";
-        const firebaseConfig = { apiKey: "AIzaSyDdxtpuznCSK5a6CvcJdbt9pzKMXbUVl08", authDomain: "ege-history-bot.firebaseapp.com", projectId: "ege-history-bot", storageBucket: "ege-history-bot.firebasestorage.app", messagingSenderId: "489223236202", appId: "1:489223236202:web:48110779742d40d748f813" };
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            firebaseConfig = { apiKey: "AIzaSyDdxtpuznCSK5a6CvcJdbt9pzKMXbUVl08", authDomain: "ege-history-bot.firebaseapp.com", projectId: "ege-history-bot", storageBucket: "ege-history-bot.firebasestorage.app", messagingSenderId: "489223236202", appId: "1:489223236202:web:48110779742d40d748f813" };
+        }
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : "ege-history-bot";
         
         const app = initializeApp(firebaseConfig); 
         const auth = getAuth(app); 
-        const db = getFirestore(app);
+        
+        // Используем initializeFirestore с авто-определением Long Polling для обхода блокировок
+        const db = initializeFirestore(app, {
+            experimentalAutoDetectLongPolling: true
+        });
+        
         let fbUser = null; 
 
         function resolveUserId(userObj) {
@@ -1617,7 +1617,7 @@
                         }
                         m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); 
                         m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0); 
-                    }
+                    else { m[k].totalSolved = Math.max(m[k].totalSolved || 0, st.totalSolved || 0); m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); m[k].bestStreak = Math.max(m[k].bestStreak || 0, st.bestStreak || 0); m[k].health = Math.max(m[k].health || 0, st.health || 0); m[k].mistakesCount = Math.max(m[k].mistakesCount || 0, st.mistakesCount || 0); m[k].fullStateJson = st.fullStateJson || m[k].fullStateJson; m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0); }
                 }
             }); 
             return r;
@@ -1627,18 +1627,18 @@
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 try {
                     await signInWithCustomToken(auth, __initial_auth_token);
-                } catch (e) {
-                    console.warn("Ошибка токена (custom-token-mismatch), используем анонимный вход:", e);
+                } catch(e) {
+                    console.warn("Ошибка токена (custom-token-mismatch), используем анонимный вход:", e.message);
                     try {
                         await signInAnonymously(auth);
-                    } catch (err) {
+                    } catch(err) {
                         console.error("Auth init error:", err);
                     }
                 }
             } else {
                 try {
                     await signInAnonymously(auth);
-                } catch (e) {
+                } catch(e) {
                     console.error("Auth init error:", e);
                 }
             }
@@ -1715,8 +1715,8 @@
                     listenToDuel(newMatch.id, myUid);
                 }
             } catch(e) {
-                console.error(e);
-                showToast('❌', 'Ошибка поиска', 'bg-rose-500', 'border-rose-700');
+                console.error("Ошибка поиска дуэли:", e);
+                showToast('❌', 'Сервер недоступен (Офлайн)', 'bg-rose-500', 'border-rose-700');
                 window.cancelDuelSearch();
             }
         };
@@ -1805,7 +1805,7 @@
                 let ht = st.length === 0 ? '<p class="text-center py-4 text-xs font-bold text-gray-500">Ученики не найдены</p>' : '';
                 st.forEach((s, idx) => {
                     let state = {}; try { state = JSON.parse(s.fullStateJson || '{}'); } catch(e){}
-                    const stats = state.stats || state || {}; // Fallback if format is direct
+                    const stats = state.stats || state || {}; 
                     const streak = stats.streak || state.streak || 0; 
                     
                     const timeSpentMin = Math.floor((stats.totalTimeSpent || state.totalTimeSpent || 0) / 60);
@@ -1864,7 +1864,11 @@
                     });
                     wCont.innerHTML = wHt;
                 }
-            } catch(e) { cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Ошибка загрузки</p>'; }
+            } catch(e) { 
+                console.error(e);
+                cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Нет подключения к серверу (Офлайн)</p>'; 
+                if (wCont) wCont.innerHTML = '';
+            }
         };
 
         window.loadStudentLeaderboard = async function() {
@@ -1908,7 +1912,10 @@
                 }); 
                 if(ht === '') ht = '<div class="text-center text-xs text-gray-500 font-bold py-2">На этой неделе пока никто не решал. Будь первым!</div>';
                 ll.innerHTML = ht;
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+                if(ll) ll.innerHTML = '<div class="text-center text-xs text-rose-500 font-bold py-2">Режим офлайн</div>';
+            }
         };
 
         window.openGlobalTopModal = async function() {
@@ -1925,7 +1932,10 @@
                     ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center text-base">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">@${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800/50">${s.totalSolved || 0}</span></div></div>`; 
                 });
                 ht += '</div>'; cont.innerHTML = ht;
-            } catch (e) { cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Ошибка загрузки</p>'; }
+            } catch (e) { 
+                console.error(e);
+                cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Нет подключения к серверу (Офлайн)</p>'; 
+            }
         };
 
         window._assignHwDb = async function(studentId, num) {
@@ -1937,6 +1947,33 @@
                 console.error(e);
                 showToast('❌', 'Ошибка назначения ДЗ', 'bg-rose-500', 'border-rose-700');
             }
+        };
+        
+        window.loadProgressFromCloud = async function() {
+            if (!fbUser || !db) return;
+            try {
+                const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(fbUser)));
+                if (dS.exists()) {
+                    const d = dS.data();
+                    if (d.totalSolved > (window.state.stats.totalSolvedEver || 0) && d.fullStateJson) {
+                        const cS = JSON.parse(d.fullStateJson); 
+                        Object.assign(window.state.stats, cS.stats); 
+                        if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool; 
+                        if (cS.hideLearned !== undefined) window.state.hideLearned = cS.hideLearned;
+                        if (cS.customYearFrom !== undefined) window.state.yearFrom = cS.customYearFrom;
+                        if (cS.customYearTo !== undefined) window.state.yearTo = cS.customYearTo;
+                        if (cS.selectedPeriods) window.state.selectedPeriods = cS.selectedPeriods;
+                        localStorage.setItem('ege_final_storage_v4', d.fullStateJson); 
+                    } 
+                    if(window.updateGlobalUI) window.updateGlobalUI();
+                }
+            } catch(e) {}
+        };
+
+        window.syncProgressToCloud = async function() {
+            if (!fbUser || !db) return; const s = window.state.stats; if (!s) return;
+            let nw = Date.now();
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(fbUser)), { name: localStorage.getItem('student_manual_name') || 'Ученик', tgId: resolveUserId(fbUser), classCode: localStorage.getItem('student_class_code') || '', totalSolved: s.totalSolvedEver || 0, fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}', lastActive: nw }, { merge: true }); } catch(e) {}
         };
     </script>
 </body>
