@@ -459,7 +459,7 @@
         </div>
     </div>
 
-    <!-- === ОСНОВНО СКРИПТ (ЛОГИКА ИГРЫ) === -->
+    <!-- === ОСНОВНОЙ СКРИПТ (ЛОГИКА ИГРЫ) === -->
     <script>
         // --- ПОДГОТОВКА БАЗ ИЗ data.js ---
         window.task7Data = typeof task7Data !== 'undefined' ? task7Data : [];
@@ -489,12 +489,20 @@
         const periodsList = ['all', 'early', '18th', '19th', '20th'];
         
         function initPrecomputed() {
-            if (typeof bigData === 'undefined' || typeof task5Data === 'undefined') console.warn("Внимание: База данных загружается или пуста!");
+            window.bigData = typeof bigData !== 'undefined' ? bigData : (window.bigData || []);
+            window.task5Data = typeof task5Data !== 'undefined' ? task5Data : (window.task5Data || []);
+            window.task7Data = typeof task7Data !== 'undefined' ? task7Data : (window.task7Data || []);
+            window.task7Top100Data = typeof task7Top100Data !== 'undefined' ? task7Top100Data : (window.task7Top100Data || window.task7Data || []);
+
+            if (window.bigData.length === 0 && window.task5Data.length === 0 && window.task7Data.length === 0) {
+                console.warn("Внимание: База данных загружается или пуста!");
+            }
+
             const filterData = (data, p) => p === 'all' ? [...data] : data.filter(d => d.c === p);
             periodsList.forEach(p => { 
-                precomputed.task4[p] = filterData(typeof bigData !== 'undefined' ? bigData : [], p); 
-                precomputed.task5[p] = filterData(typeof task5Data !== 'undefined' ? task5Data : [], p); 
-                precomputed.task7[p] = filterData(window.task7Data || [], p); 
+                precomputed.task4[p] = filterData(window.bigData, p); 
+                precomputed.task5[p] = filterData(window.task5Data, p); 
+                precomputed.task7[p] = filterData(window.task7Data, p); 
             });
         }
 
@@ -1345,7 +1353,7 @@
                 window.state.tableHasMistake = true; window.state.stats.streak = 0; btn.innerHTML = isDet ? '🙈 Скрыть улики' : '🙈 Скрыть ответы';
                 rows.forEach((tr, idx) => {
                     const fact = window.state.currentTargetData[idx]; 
-                    if (!tr.dataset.scored) { 
+                    if (!window.state.isHomeworkMode && !tr.dataset.scored) { 
                         tr.dataset.scored = "incorrect"; 
                         if (!isDet) { 
                             updateFactSRS(factKey(fact), false, false); 
@@ -1617,7 +1625,7 @@
                         }
                         m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); 
                         m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0); 
-                    else { m[k].totalSolved = Math.max(m[k].totalSolved || 0, st.totalSolved || 0); m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); m[k].bestStreak = Math.max(m[k].bestStreak || 0, st.bestStreak || 0); m[k].health = Math.max(m[k].health || 0, st.health || 0); m[k].mistakesCount = Math.max(m[k].mistakesCount || 0, st.mistakesCount || 0); m[k].fullStateJson = st.fullStateJson || m[k].fullStateJson; m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0); }
+                    }
                 }
             }); 
             return r;
