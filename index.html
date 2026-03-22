@@ -413,11 +413,36 @@
     </div>
 
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-5 shadow-2xl">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
             <h3 class="font-black text-xl dark:text-gray-300 text-center uppercase tracking-widest">👤 Профиль</h3>
+
+            <!-- Google Auth Section -->
+            <div>
+                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Аккаунт Google</label>
+                <!-- Если уже вошли через Google -->
+                <div id="google-signed-in" class="hidden items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-3">
+                    <img id="google-avatar" src="" class="w-10 h-10 rounded-full border-2 border-emerald-300 shrink-0" alt="avatar">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-black text-sm text-gray-800 dark:text-gray-200 truncate" id="google-display-name-label"></p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate" id="google-email-label"></p>
+                    </div>
+                    <button onclick="window.signOutGoogle()" class="shrink-0 text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase transition-colors active:scale-95">Выйти</button>
+                </div>
+                <!-- Кнопка входа -->
+                <button id="google-sign-in-btn" onclick="window.signInWithGoogle()" class="w-full flex items-center justify-center gap-3 border-2 border-gray-200 dark:border-[#3f3f46] bg-white dark:bg-[#2c2c2c] hover:bg-gray-50 dark:hover:bg-[#3f3f46] text-gray-700 dark:text-gray-200 py-3 px-4 rounded-2xl font-black text-sm transition-all active:scale-95 shadow-sm">
+                    <svg class="w-5 h-5 shrink-0" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+                    Войти через Google
+                </button>
+            </div>
+
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Имя и Фамилия</label><input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-4 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold shadow-inner"></div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Код класса (от учителя)</label><input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-4 font-mono border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none text-center font-black text-lg text-blue-600 dark:text-blue-400 shadow-inner"></div>
-            <div class="flex gap-3 mt-2"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
+            <div class="flex gap-3 mt-1"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
         </div>
     </div>
 
@@ -1428,7 +1453,7 @@
             showModal('mistakes-list-modal');
         };
 
-        window.openProfileModal = function() { $('profile-name-input').value = localStorage.getItem('student_manual_name') || ''; $('profile-class-code').value = localStorage.getItem('student_class_code') || ''; showModal('profile-modal'); };
+        window.openProfileModal = function() { $('profile-name-input').value = localStorage.getItem('student_manual_name') || ''; $('profile-class-code').value = localStorage.getItem('student_class_code') || ''; if (window._googleAuthUser !== undefined) { /* updated via onAuthStateChanged */ } showModal('profile-modal'); };
         window.saveProfileName = function() { const nm = $('profile-name-input').value.trim(), cd = $('profile-class-code').value.trim(); if (nm) localStorage.setItem('student_manual_name', nm); if (cd !== undefined) localStorage.setItem('student_class_code', cd); showToast('✅', 'Профиль сохранен!', 'bg-emerald-500', 'border-emerald-700'); hideModal('profile-modal'); if (window.syncProgressToCloud) window.syncProgressToCloud(); };
 
         window.openAchievementsModal = function() {
@@ -1577,7 +1602,7 @@
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
@@ -1601,6 +1626,11 @@
 
         function resolveUserId(userObj) {
             let tgU = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe ? window.Telegram.WebApp.initDataUnsafe.user : null;
+            // Если пользователь авторизован через Google — используем его uid как стабильный ID
+            if (userObj && userObj.providerData && userObj.providerData.length > 0 && userObj.providerData[0].providerId === 'google.com') {
+                localStorage.setItem('stable_student_id', userObj.uid);
+                return userObj.uid;
+            }
             let sId = localStorage.getItem('stable_student_id');
             if (tgU && tgU.id) { localStorage.setItem('stable_student_id', String(tgU.id)); return String(tgU.id); }
             if (sId) return sId;
@@ -1677,6 +1707,67 @@
                 }, (error) => console.error("HW snapshot error:", error));
             }
         });
+
+        // === GOOGLE AUTH ===
+        const googleProvider = new GoogleAuthProvider();
+
+        function updateGoogleAuthUI(user) {
+            const signedInEl = document.getElementById('google-signed-in');
+            const signInBtn = document.getElementById('google-sign-in-btn');
+            if (!signedInEl || !signInBtn) return;
+            const isGoogle = user && user.providerData && user.providerData.some(p => p.providerId === 'google.com');
+            if (isGoogle) {
+                const gData = user.providerData.find(p => p.providerId === 'google.com');
+                document.getElementById('google-display-name-label').textContent = gData.displayName || user.displayName || '';
+                document.getElementById('google-email-label').textContent = gData.email || user.email || '';
+                const avatar = document.getElementById('google-avatar');
+                if (gData.photoURL) { avatar.src = gData.photoURL; avatar.classList.remove('hidden'); }
+                else avatar.classList.add('hidden');
+                signedInEl.classList.remove('hidden');
+                signedInEl.classList.add('flex');
+                signInBtn.classList.add('hidden');
+            } else {
+                signedInEl.classList.add('hidden');
+                signedInEl.classList.remove('flex');
+                signInBtn.classList.remove('hidden');
+            }
+        }
+
+        window.signInWithGoogle = async function() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                // Если у пользователя нет имени в localStorage — подставим из Google
+                if (!localStorage.getItem('student_manual_name') && user.displayName) {
+                    localStorage.setItem('student_manual_name', user.displayName);
+                    const inp = document.getElementById('profile-name-input');
+                    if (inp) inp.value = user.displayName;
+                }
+                localStorage.setItem('stable_student_id', user.uid);
+                updateGoogleAuthUI(user);
+                showToast('✅', `Вошли как ${user.displayName || user.email}`, 'bg-emerald-500', 'border-emerald-700');
+                if (window.syncProgressToCloud) window.syncProgressToCloud();
+            } catch(e) {
+                if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+                    console.error('Google sign-in error:', e);
+                    showToast('❌', 'Ошибка входа через Google', 'bg-rose-500', 'border-rose-700');
+                }
+            }
+        };
+
+        window.signOutGoogle = async function() {
+            try {
+                await signOut(auth);
+                await signInAnonymously(auth);
+                updateGoogleAuthUI(null);
+                showToast('ℹ️', 'Вышли из аккаунта Google', 'bg-gray-500', 'border-gray-700');
+            } catch(e) {
+                console.error('Sign-out error:', e);
+            }
+        };
+
+        // Обновляем UI Google при изменении состояния авторизации
+        onAuthStateChanged(auth, (u) => { updateGoogleAuthUI(u); });
 
         // PvP FIREBASE DUEL LOGIC
         let duelUnsubscribe = null;
