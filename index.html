@@ -2188,56 +2188,97 @@
                 }
             }
         };
-        initAuth();
-
-        // Handle Google redirect result (called once on page load after redirect)
-        getRedirectResult(auth).then(result => {
-            if (result && result.user) {
-                const user = result.user;
-                const gName = user.displayName || '';
-                const gEmail = user.email || '';
-                if (gName && !localStorage.getItem('student_manual_name')) {
-                    localStorage.setItem('student_manual_name', gName);
-                }
-                localStorage.setItem('stable_student_id', 'google_' + user.uid);
-                localStorage.setItem('google_uid', user.uid);
-                localStorage.setItem('google_email', gEmail);
-                if($('profile-google-status')) {
-                    $('profile-google-status').textContent = '✅ ' + (gEmail || gName);
-                    $('profile-google-status').className = 'text-[11px] font-bold text-emerald-600 mt-1';
-                }
-                if($('profile-name-input') && gName && !$('profile-name-input').value) {
-                    $('profile-name-input').value = gName;
-                }
-                showToast('✅', 'Вход через Google: ' + (gName || gEmail), 'bg-emerald-500', 'border-emerald-700');
-                if (window.syncProgressToCloud) window.syncProgressToCloud();
+        // ─── Google auth helper ──────────────────────────────────────────────────
+        function _applyGoogleUser(user) {
+            const gName  = user.displayName || '';
+            const gEmail = user.email       || '';
+            if (gName && !localStorage.getItem('student_manual_name'))
+                localStorage.setItem('student_manual_name', gName);
+            localStorage.setItem('stable_student_id', 'google_' + user.uid);
+            localStorage.setItem('google_uid',   user.uid);
+            localStorage.setItem('google_email', gEmail);
+            const statusEl = $('profile-google-status');
+            if (statusEl) {
+                statusEl.textContent  = '✅ ' + (gEmail || gName);
+                statusEl.className    = 'text-[11px] font-bold text-emerald-600 mt-1';
             }
-        }).catch(e => {
-            console.error('Google redirect result error:', e);
-            if (e && e.code !== 'auth/redirect-cancelled-by-user') {
-                showToast('❌', 'Ошибка входа через Google', 'bg-rose-500', 'border-rose-700');
-            }
-        });
+            const nameEl = $('profile-name-input');
+            if (nameEl && gName && !nameEl.value) nameEl.value = gName;
+        }
 
-        // Google Sign-In for profile (redirect flow — работает в любом браузере и WebView)
+        // ─── Main auth bootstrap ─────────────────────────────────────────────────
+        // ВАЖНО: getRedirectResult нужно вызывать ДО signInAnonymously,
+        // иначе анонимный вход перебивает сессию редиректа.
+        const _bootAuth = async () => {
+            let googleSignedIn = false;
+            try {
+                const result = await getRedirectResult(auth);
+                if (result && result.user) {
+                    googleSignedIn = true;
+                    _applyGoogleUser(result.user);
+                    setTimeout(() => {
+                        const em = result.user.email || result.user.displayName || '';
+                        showToast('✅', 'Вход через Google: ' + em, 'bg-emerald-500', 'border-emerald-700');
+                    }, 600);
+                    if (window.syncProgressToCloud) window.syncProgressToCloud();
+                }
+            } catch (e) {
+                console.error('getRedirectResult error:', e);
+                // Показываем ошибку пользователю (кроме случая «сам закрыл окно»)
+                if (e.code && e.code !== 'auth/redirect-cancelled-by-user'
+                           && e.code !== 'auth/user-cancelled') {
+                    setTimeout(() => showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700'), 600);
+                }
+            }
+
+            // Если Google-аккаунт не найден — запускаем стандартный анонимный вход
+            if (!googleSignedIn) {
+                await initAuth();
+            }
+        };
+        _bootAuth();
+
+        // ─── Google Sign-In (redirect) ───────────────────────────────────────────
         window.signInWithGoogle = async function() {
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
             try {
+                // linkWithRedirect — если текущий пользователь анонимный,
+                // сохраняем его данные и привязываем Google-аккаунт.
+                // signInWithRedirect — если уже есть не-анонимный аккаунт.
                 if (fbUser && fbUser.isAnonymous) {
                     await linkWithRedirect(fbUser, provider);
                 } else {
                     await signInWithRedirect(auth, provider);
                 }
-                // После redirect страница перезагружается; результат обрабатывается через getRedirectResult выше
-            } catch(e) {
-                console.error('Google sign-in error:', e);
-                showToast('❌', 'Ошибка входа через Google', 'bg-rose-500', 'border-rose-700');
+                // После этого вызова браузер уйдёт на страницу Google.
+                // Результат будет пойман в getRedirectResult при возврате.
+            } catch (e) {
+                console.error('signInWithGoogle error:', e);
+                showToast('❌', 'Не удалось начать вход: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700');
             }
         };
 
         onAuthStateChanged(auth, async (u) => { 
             fbUser = u; 
             if (u) {
+                // Если Firebase знает, что юзер вошёл через Google — восстанавливаем статус в UI
+                // (актуально при перезагрузке страницы, когда редиректа уже не было)
+                const googleProvider = (u.providerData || []).find(p => p.providerId === 'google.com');
+                if (googleProvider && !localStorage.getItem('google_email')) {
+                    const gEmail = googleProvider.email || u.email || '';
+                    const gName  = googleProvider.displayName || u.displayName || '';
+                    localStorage.setItem('google_email', gEmail);
+                    localStorage.setItem('google_uid',   u.uid);
+                    localStorage.setItem('stable_student_id', 'google_' + u.uid);
+                    if (gName && !localStorage.getItem('student_manual_name'))
+                        localStorage.setItem('student_manual_name', gName);
+                    const statusEl = $('profile-google-status');
+                    if (statusEl) {
+                        statusEl.textContent = '✅ ' + (gEmail || gName);
+                        statusEl.className   = 'text-[11px] font-bold text-emerald-600 mt-1';
+                    }
+                }
                 await window.loadProgressFromCloud(); 
                 window.syncProgressToCloud(); 
                 
