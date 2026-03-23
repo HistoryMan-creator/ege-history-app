@@ -121,12 +121,60 @@
             setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); 
         };
         
+        window._currentHwStudentId = null;
+        window._currentHwTask = 'task4';
+
         window.promptAssignHw = function(studentId, name) {
-            let num = prompt(`Назначить ДЗ для ${name}\nВведите количество строк для решения:`, "50");
-            if (num === null) return;
-            num = parseInt(num);
-            if (isNaN(num) || num < 0) return showToast('⚠️', 'Введите корректное число', 'bg-rose-500', 'border-rose-700');
-            if (window._assignHwDb) window._assignHwDb(studentId, num);
+            window._currentHwStudentId = studentId;
+            window._currentHwTask = 'task4';
+            document.getElementById('assign-hw-student-name').textContent = name || 'Ученик';
+            document.getElementById('assign-hw-rows').value = '';
+            document.getElementById('assign-hw-deadline').value = '';
+            // Сбросить кнопки
+            document.querySelectorAll('.hw-task-btn').forEach(b => b.className = b.className.replace(/bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900\/30 dark:text-blue-300/g, 'bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400'));
+            const def = document.getElementById('hw-task-btn-task4');
+            if (def) def.className = def.className.replace('bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400', 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300');
+            document.querySelectorAll('.hw-rows-btn').forEach(b => b.className = b.className.replace('border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', 'border-gray-200 bg-white text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400'));
+            document.querySelectorAll('.hw-deadline-btn').forEach(b => b.className = b.className.replace('border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300', 'border-gray-200 bg-white text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400'));
+            showModal('assign-hw-modal');
+        };
+
+        window.selectHwTask = function(task) {
+            window._currentHwTask = task;
+            ['task4','task5','task7'].forEach(t => {
+                const btn = document.getElementById('hw-task-btn-' + t);
+                if (!btn) return;
+                const active = t === task;
+                btn.style.cssText = active
+                    ? 'border-color:#3b82f6;background:#eff6ff;color:#1d4ed8'
+                    : '';
+            });
+        };
+
+        window.setHwRows = function(n) {
+            document.getElementById('assign-hw-rows').value = n;
+            document.querySelectorAll('.hw-rows-btn').forEach(b => {
+                const active = Number(b.dataset.rows) === n;
+                b.style.cssText = active ? 'border-color:#3b82f6;background:#eff6ff;color:#1d4ed8' : '';
+            });
+        };
+
+        window.setHwDeadline = function(days) {
+            const d = new Date(); d.setDate(d.getDate() + days);
+            document.getElementById('assign-hw-deadline').value = d.toISOString().split('T')[0];
+            document.querySelectorAll('.hw-deadline-btn').forEach(b => {
+                const active = Number(b.dataset.days) === days;
+                b.style.cssText = active ? 'border-color:#7c3aed;background:#f5f3ff;color:#6d28d9' : '';
+            });
+        };
+
+        window.submitAssignHw = function() {
+            const num = parseInt(document.getElementById('assign-hw-rows').value);
+            if (isNaN(num) || num <= 0) return showToast('⚠️', 'Введите количество строк', 'bg-rose-500', 'border-rose-700');
+            const task = window._currentHwTask || 'task4';
+            const deadline = document.getElementById('assign-hw-deadline').value || null;
+            hideModal('assign-hw-modal');
+            if (window._assignHwDb) window._assignHwDb(window._currentHwStudentId, num, task, deadline);
         };
     </script>
 
@@ -157,7 +205,6 @@
         <div id="toast-content" class="text-slate-50 font-bold text-xs sm:text-sm px-4 py-2 rounded-l-lg shadow-lg flex items-center gap-2 border-y-2 border-l-2"></div>
     </div>
     <div id="hw-alert" class="hidden no-print bg-yellow-100 border-b-2 border-yellow-500 text-yellow-900 p-2 text-center text-xs font-bold shadow-md">⚠️ РЕЖИМ ДЗ: осталось <span id="hw-remaining" class="text-rose-600">0</span></div>
-    <div id="personal-hw-alert" class="hidden no-print bg-rose-100 border-b-2 border-rose-500 text-rose-900 p-2 text-center text-xs font-bold shadow-sm transition-colors animate-pulse">🔥 ДОЛГ УЧИТЕЛЮ: решите <span id="personal-hw-remaining" class="text-rose-600 font-black text-sm">0</span> линий!</div>
 
     <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
     <main class="no-print flex-grow max-w-5xl mx-auto w-full flex flex-col relative px-4 pt-4 pb-4">
@@ -186,27 +233,27 @@
             <div>
                 <h3 class="text-xs font-black tracking-widest text-gray-400 dark:text-gray-500 mb-3 px-1 uppercase">Базовые задания</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div onclick="quickStartGame('task4', 'normal')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center text-center gap-3 group"><div class="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shrink-0">📍</div><div><h4 class="font-black text-gray-800 dark:text-gray-300 text-lg sm:text-xl uppercase tracking-wide">Задание №4</h4><p class="text-xs sm:text-sm font-bold text-gray-400 mt-1">География и события</p></div></div>
-                    <div onclick="quickStartGame('task5', 'normal')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center text-center gap-3 group"><div class="w-14 h-14 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shrink-0">👤</div><div><h4 class="font-black text-gray-800 dark:text-gray-300 text-lg sm:text-xl uppercase tracking-wide">Задание №5</h4><p class="text-xs sm:text-sm font-bold text-gray-400 mt-1">Исторические личности</p></div></div>
-                    <div onclick="quickStartGame('task7', 'normal')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center text-center gap-3 group"><div class="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shrink-0">🎨</div><div><h4 class="font-black text-gray-800 dark:text-gray-300 text-lg sm:text-xl uppercase tracking-wide">Задание №7</h4><p class="text-xs sm:text-sm font-bold text-gray-400 mt-1">Памятники культуры</p></div></div>
+                    <div onclick="quickStartGame('task4', 'normal')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center text-center gap-3 group"><div class="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shrink-0">📍</div><div><h4 class="font-black text-gray-800 dark:text-gray-300 text-lg sm:text-xl uppercase tracking-wide">Задание №4</h4><p class="text-xs sm:text-sm font-bold text-gray-400 mt-1">География и события</p></div><div class="w-full mt-2"><div class="w-full bg-gray-100 dark:bg-[#2c2c2c] rounded-full h-1.5"><div id="progress-bar-task4" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width:0%"></div></div><p class="text-[9px] font-bold text-gray-400 mt-1" id="progress-text-task4">0 выучено</p></div></div>
+                    <div onclick="quickStartGame('task5', 'normal')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center text-center gap-3 group"><div class="w-14 h-14 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shrink-0">👤</div><div><h4 class="font-black text-gray-800 dark:text-gray-300 text-lg sm:text-xl uppercase tracking-wide">Задание №5</h4><p class="text-xs sm:text-sm font-bold text-gray-400 mt-1">Исторические личности</p></div><div class="w-full mt-2"><div class="w-full bg-gray-100 dark:bg-[#2c2c2c] rounded-full h-1.5"><div id="progress-bar-task5" class="bg-purple-500 h-1.5 rounded-full transition-all duration-500" style="width:0%"></div></div><p class="text-[9px] font-bold text-gray-400 mt-1" id="progress-text-task5">0 выучено</p></div></div>
+                    <div onclick="quickStartGame('task7', 'normal')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center justify-center text-center gap-3 group"><div class="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shrink-0">🎨</div><div><h4 class="font-black text-gray-800 dark:text-gray-300 text-lg sm:text-xl uppercase tracking-wide">Задание №7</h4><p class="text-xs sm:text-sm font-bold text-gray-400 mt-1">Памятники культуры</p></div><div class="w-full mt-2"><div class="w-full bg-gray-100 dark:bg-[#2c2c2c] rounded-full h-1.5"><div id="progress-bar-task7" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width:0%"></div></div><p class="text-[9px] font-bold text-gray-400 mt-1" id="progress-text-task7">0 выучено</p></div></div>
                 </div>
             </div>
 
             <div>
                 <h3 class="text-xs font-black tracking-widest text-gray-400 dark:text-gray-500 mb-3 px-1 uppercase">Прокачка навыков</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div onclick="quickStartGame('task4', 'speedrun')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-2xl mb-3 group-hover:rotate-12 transition-transform">⚡</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Спидран</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Гонка на время</p></div>
-                    <div onclick="quickStartGame('task4', 'flashcards')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-2xl mb-3 group-hover:-rotate-12 transition-transform">🃏</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Карточки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Интервальное повторение</p></div>
-                    <div onclick="quickStartGame('task4', 'mistakes')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">🔥</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Ошибки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Слабые места</p></div>
-                    <div onclick="quickStartGame('task4', 'study')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">📖</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Сюжеты</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">База знаний</p></div>
+                    <div onclick="pickTaskForMode('speedrun')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-2xl mb-3 group-hover:rotate-12 transition-transform">⚡</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Спидран</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Гонка на время</p></div>
+                    <div onclick="pickTaskForMode('flashcards')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-2xl mb-3 group-hover:-rotate-12 transition-transform">🃏</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Карточки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Интервальное повторение</p></div>
+                    <div onclick="pickTaskForMode('mistakes')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">🔥</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Ошибки</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">Слабые места</p></div>
+                    <div onclick="pickTaskForMode('study')" class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex flex-col items-center text-center group"><div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">📖</div><h4 class="font-black text-gray-800 dark:text-gray-300 text-sm sm:text-base uppercase tracking-wide mb-1">Сюжеты</h4><p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-tight">База знаний</p></div>
                 </div>
             </div>
 
             <div>
                 <h3 class="text-xs font-black tracking-widest text-gray-400 dark:text-gray-500 mb-3 px-1 uppercase">Спецоперации</h3>
                 <div class="grid grid-cols-1 gap-4">
-                    <div onclick="quickStartGame('task4', 'detective')" class="bg-[#f3efe6] dark:bg-[#2a2722] rounded-2xl p-5 shadow-sm border-2 border-dashed border-[#d1c1a5] dark:border-[#4a4235] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex items-center justify-between group overflow-hidden relative"><div class="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform pointer-events-none">🕵️</div><div class="flex items-center gap-4 relative z-10"><div class="text-3xl drop-shadow-sm">🕵️</div><div><h4 class="font-black text-[#3e352d] dark:text-[#dcd6c7] text-lg uppercase tracking-wide">Секретный архив</h4><p class="text-xs font-bold text-[#8a7f72] dark:text-[#8a7f72] mt-0.5">Восстановите утерянные данные</p></div></div><div class="bg-red-600 text-white text-[9px] font-black uppercase px-2 py-1 rounded-md rotate-12 relative z-10 hidden sm:block">Секретно</div></div>
-                    <div onclick="quickStartGame('task4', 'redpencil')" class="bg-[#f4ecd8] dark:bg-[#302b24] rounded-2xl p-5 shadow-sm border border-amber-200 dark:border-[#4a4235] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex items-center gap-4 group overflow-hidden relative"><div class="absolute inset-0 bg-[radial-gradient(#d1c1a5_1px,transparent_1px)] dark:bg-[radial-gradient(#4a4235_1px,transparent_1px)] bg-[size:20px_20px] opacity-30 pointer-events-none"></div><div class="text-3xl drop-shadow-sm relative z-10 group-hover:rotate-12 transition-transform">🖍️</div><div class="relative z-10"><h4 class="font-black text-[#5c2b2b] dark:text-[#e5c0c0] text-lg uppercase tracking-wide">Красный карандаш</h4><p class="text-xs font-bold text-[#8a6a52] dark:text-[#8a6a52] mt-0.5">Найди исторические фейки</p></div></div>
+                    <div onclick="pickTaskForMode('detective')" class="bg-[#f3efe6] dark:bg-[#2a2722] rounded-2xl p-5 shadow-sm border-2 border-dashed border-[#d1c1a5] dark:border-[#4a4235] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex items-center justify-between group overflow-hidden relative"><div class="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform pointer-events-none">🕵️</div><div class="flex items-center gap-4 relative z-10"><div class="text-3xl drop-shadow-sm">🕵️</div><div><h4 class="font-black text-[#3e352d] dark:text-[#dcd6c7] text-lg uppercase tracking-wide">Секретный архив</h4><p class="text-xs font-bold text-[#8a7f72] dark:text-[#8a7f72] mt-0.5">Восстановите утерянные данные</p></div></div><div class="bg-red-600 text-white text-[9px] font-black uppercase px-2 py-1 rounded-md rotate-12 relative z-10 hidden sm:block">Секретно</div></div>
+                    <div onclick="pickTaskForMode('redpencil')" class="bg-[#f4ecd8] dark:bg-[#302b24] rounded-2xl p-5 shadow-sm border border-amber-200 dark:border-[#4a4235] cursor-pointer transition-all active:scale-95 hover:-translate-y-1 hover:shadow-md flex items-center gap-4 group overflow-hidden relative"><div class="absolute inset-0 bg-[radial-gradient(#d1c1a5_1px,transparent_1px)] dark:bg-[radial-gradient(#4a4235_1px,transparent_1px)] bg-[size:20px_20px] opacity-30 pointer-events-none"></div><div class="text-3xl drop-shadow-sm relative z-10 group-hover:rotate-12 transition-transform">🖍️</div><div class="relative z-10"><h4 class="font-black text-[#5c2b2b] dark:text-[#e5c0c0] text-lg uppercase tracking-wide">Красный карандаш</h4><p class="text-xs font-bold text-[#8a6a52] dark:text-[#8a6a52] mt-0.5">Найди исторические фейки</p></div></div>
                 </div>
             </div>
         </div>
@@ -327,6 +374,180 @@
         </div>
     </div>
 
+    <!-- Модалка выбора задания для режимов -->
+    <div id="task-picker-modal" class="fixed inset-0 bg-black/60 z-[10001] hidden flex-col justify-end backdrop-blur-sm transition-opacity opacity-0 no-print" onclick="if(event.target===this) closeTaskPicker()">
+        <div id="tp-sheet" class="bg-gray-50 dark:bg-[#1e1e1e] rounded-t-3xl p-6 pb-10 w-full max-w-lg mx-auto flex flex-col gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
+            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto opacity-50 shrink-0"></div>
+            <h2 id="tp-title" class="text-lg font-black text-gray-800 dark:text-gray-300 text-center uppercase tracking-widest">Выберите задание</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="confirmTaskPick('task4')" class="bg-white dark:bg-[#2c2c2c] border-2 border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all hover:border-blue-400 hover:shadow-md">
+                    <span class="text-3xl">📍</span>
+                    <span class="text-xs font-black text-gray-700 dark:text-gray-300 uppercase">№4</span>
+                    <span class="text-[9px] font-bold text-gray-400">География</span>
+                    <span class="text-[9px] font-bold text-blue-500 tp-progress" data-task="task4"></span>
+                </button>
+                <button onclick="confirmTaskPick('task5')" class="bg-white dark:bg-[#2c2c2c] border-2 border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all hover:border-purple-400 hover:shadow-md">
+                    <span class="text-3xl">👤</span>
+                    <span class="text-xs font-black text-gray-700 dark:text-gray-300 uppercase">№5</span>
+                    <span class="text-[9px] font-bold text-gray-400">Личности</span>
+                    <span class="text-[9px] font-bold text-purple-500 tp-progress" data-task="task5"></span>
+                </button>
+                <button onclick="confirmTaskPick('task7')" class="bg-white dark:bg-[#2c2c2c] border-2 border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all hover:border-amber-400 hover:shadow-md">
+                    <span class="text-3xl">🎨</span>
+                    <span class="text-xs font-black text-gray-700 dark:text-gray-300 uppercase">№7</span>
+                    <span class="text-[9px] font-bold text-gray-400">Культура</span>
+                    <span class="text-[9px] font-bold text-amber-500 tp-progress" data-task="task7"></span>
+                </button>
+            </div>
+            <button onclick="closeTaskPicker()" class="w-full bg-gray-100 dark:bg-[#2c2c2c] text-gray-500 dark:text-gray-400 py-3 rounded-2xl font-black text-sm uppercase tracking-wider active:scale-95 transition-transform mt-1">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Онбординг для новых пользователей (6 слайдов) -->
+    <div id="onboarding-overlay" class="fixed inset-0 bg-black/80 z-[10010] hidden flex items-center justify-center backdrop-blur-sm no-print">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 max-w-sm mx-4 text-center shadow-2xl w-[92%]">
+
+            <!-- Слайд 1: Добро пожаловать -->
+            <div id="onb-step-1">
+                <div class="text-6xl mb-3">🏛️</div>
+                <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Добро пожаловать!</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                    Тренажёр ЕГЭ по истории России.<br>
+                    Задания <b>№4</b> (география), <b>№5</b> (личности) и <b>№7</b> (культура) — всё в одном месте.
+                </p>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-3 mb-5 text-left">
+                    <div class="flex items-center gap-2 mb-1"><span class="text-lg">📍</span><span class="text-xs font-black text-gray-700 dark:text-gray-300">№4 — Карты и события</span></div>
+                    <div class="flex items-center gap-2 mb-1"><span class="text-lg">👤</span><span class="text-xs font-black text-gray-700 dark:text-gray-300">№5 — Исторические личности</span></div>
+                    <div class="flex items-center gap-2"><span class="text-lg">🎨</span><span class="text-xs font-black text-gray-700 dark:text-gray-300">№7 — Памятники культуры</span></div>
+                </div>
+                <button onclick="nextOnbStep(2)" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-wider active:scale-95 transition-transform text-sm">Далее →</button>
+            </div>
+
+            <!-- Слайд 2: Умное повторение (SRS) -->
+            <div id="onb-step-2" class="hidden">
+                <div class="text-6xl mb-3">🧠</div>
+                <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Умное повторение</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+                    Приложение использует алгоритм <b>SRS</b> (Spaced Repetition System) — научно доказанный метод запоминания.
+                </p>
+                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-3 mb-3 text-left space-y-2">
+                    <div class="flex items-start gap-2">
+                        <span class="text-base shrink-0">📈</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400"><b>Кривая Эббингауза:</b> без повторений человек забывает 70% за 24 часа. SRS повторяет нужные факты именно в момент, когда мозг их почти забыл.</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-base shrink-0">⏱️</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400"><b>Интервалы растут:</b> 1й раз → через 4ч → через 12ч → через 2 дня → через 7 дней. Каждое верное повторение удваивает интервал.</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-base shrink-0">🎯</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400"><b>Оценка уверенности:</b> отвечай «Помню» или «Сомневаюсь» — алгоритм подстраивает расписание под тебя.</p>
+                    </div>
+                </div>
+                <button onclick="nextOnbStep(3)" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-wider active:scale-95 transition-transform text-sm">Далее →</button>
+            </div>
+
+            <!-- Слайд 3: Система баллов -->
+            <div id="onb-step-3" class="hidden">
+                <div class="text-6xl mb-3">⭐</div>
+                <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Как работает прогресс?</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">Каждый факт имеет <b>уровень изученности</b> от 0 до 3+.</p>
+                <div class="grid grid-cols-2 gap-2 mb-4 text-left">
+                    <div class="bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <div class="text-xs font-black text-gray-700 dark:text-gray-300 mb-1">🆕 Новый факт</div>
+                        <div class="text-[10px] text-gray-500">Баллы: 0 | Уровень: 0<br>Повторяется при каждом сеансе</div>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-2.5">
+                        <div class="text-xs font-black text-blue-700 dark:text-blue-300 mb-1">📚 Изучается</div>
+                        <div class="text-[10px] text-gray-500">Баллы: 1–2 | Уровень: 0<br>Повтор через 4–12 часов</div>
+                    </div>
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-2.5">
+                        <div class="text-xs font-black text-emerald-700 dark:text-emerald-300 mb-1">✅ Выучено</div>
+                        <div class="text-[10px] text-gray-500">Баллы: 3 | Уровень: 1+<br>Повтор через 2–14 дней</div>
+                    </div>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-2.5">
+                        <div class="text-xs font-black text-purple-700 dark:text-purple-300 mb-1">🧠 В памяти</div>
+                        <div class="text-[10px] text-gray-500">Уровень 3+ | Показатель 🧠<br>Долгосрочная память</div>
+                    </div>
+                </div>
+                <button onclick="nextOnbStep(4)" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-wider active:scale-95 transition-transform text-sm">Далее →</button>
+            </div>
+
+            <!-- Слайд 4: Режимы -->
+            <div id="onb-step-4" class="hidden">
+                <div class="text-6xl mb-3">🎮</div>
+                <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Режимы обучения</h2>
+                <div class="space-y-2 mb-4 text-left">
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">📋</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Обычный</div><div class="text-[10px] text-gray-500">Таблица как на реальном ЕГЭ — drag&drop фактов</div></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">🃏</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Карточки (задание №7)</div><div class="text-[10px] text-gray-500">Флеш-карточки по культуре с алгоритмом SRS</div></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">⚡</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Спидран</div><div class="text-[10px] text-gray-500">3 минуты на максимум строк — тренирует скорость</div></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">🕵️</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Секретный архив + Красный карандаш</div><div class="text-[10px] text-gray-500">Работа с историческими документами и поиск ошибок</div></div>
+                    </div>
+                </div>
+                <button onclick="nextOnbStep(5)" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-wider active:scale-95 transition-transform text-sm">Далее →</button>
+            </div>
+
+            <!-- Слайд 5: Статистика и учитель -->
+            <div id="onb-step-5" class="hidden">
+                <div class="text-6xl mb-3">📊</div>
+                <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Статистика и прогресс</h2>
+                <div class="space-y-2 mb-4 text-left">
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">🔥</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Стрик</div><div class="text-[10px] text-gray-500">Серия верных ответов подряд — старайся не прерывать!</div></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">🧠</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Память %</div><div class="text-[10px] text-gray-500">Доля выученных фактов, которые ещё не «протухли» — держи выше 80%!</div></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">👨‍🏫</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">Кабинет учителя</div><div class="text-[10px] text-gray-500">Учитель видит твой прогресс, может назначать домашние задания</div></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-gray-50 dark:bg-[#2c2c2c] rounded-xl p-2.5">
+                        <span class="text-xl shrink-0">⚔️</span>
+                        <div><div class="text-xs font-black text-gray-800 dark:text-gray-200">PvP Дуэли</div><div class="text-[10px] text-gray-500">Соревнуйся с одноклассниками в режиме реального времени!</div></div>
+                    </div>
+                </div>
+                <button onclick="nextOnbStep(6)" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-wider active:scale-95 transition-transform text-sm">Далее →</button>
+            </div>
+
+            <!-- Слайд 6: Настройка профиля + старт -->
+            <div id="onb-step-6" class="hidden">
+                <div class="text-6xl mb-3">🚀</div>
+                <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 mb-2">Готово! Последний шаг</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">Укажи своё имя и код класса, чтобы учитель видел твой прогресс.</p>
+                <div class="flex flex-col gap-3 mb-5">
+                    <input type="text" id="onb-name-input" placeholder="Фамилия Имя, класс (11А)" class="w-full p-3 border border-gray-200 dark:border-[#3f3f46] rounded-xl dark:bg-[#181818] dark:text-gray-300 outline-none font-bold text-sm shadow-inner text-center">
+                    <input type="text" id="onb-class-input" placeholder="Код класса (от учителя)" class="w-full p-3 border border-gray-200 dark:border-[#3f3f46] rounded-xl dark:bg-[#181818] dark:text-gray-300 outline-none font-bold text-sm shadow-inner text-center font-mono">
+                </div>
+                <button onclick="finishOnboarding()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-black uppercase tracking-wider active:scale-95 transition-transform text-sm shadow-md">Начать тренировку! 🚀</button>
+                <button onclick="finishOnboarding()" class="w-full text-gray-400 dark:text-gray-600 py-2 text-xs font-bold mt-1">Пропустить →</button>
+            </div>
+
+            <!-- Dots -->
+            <div class="flex justify-center gap-1.5 mt-4">
+                <div id="onb-dot-1" class="w-2 h-2 rounded-full bg-blue-500"></div>
+                <div id="onb-dot-2" class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                <div id="onb-dot-3" class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                <div id="onb-dot-4" class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                <div id="onb-dot-5" class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                <div id="onb-dot-6" class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- СКРЫТЫЕ СИСТЕМНЫЕ СЕЛЕКТЫ -->
     <div id="hidden-controls" style="display: none;">
         <select id="filter-task"><option value="task4" selected>task4</option><option value="task5">task5</option><option value="task7">task7</option></select>
@@ -368,15 +589,57 @@
     <div id="teacher-modal" class="fixed inset-0 bg-black/80 z-[10001] hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#1e1e1e] rounded-2xl w-[95%] max-w-3xl h-[85vh] flex flex-col overflow-hidden text-gray-800 dark:text-gray-300 shadow-2xl border border-gray-200 dark:border-[#2c2c2c]">
              <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-[#2c2c2c] flex justify-between items-center bg-gray-50 dark:bg-[#181818] shrink-0 gap-2"><h2 class="font-black text-base sm:text-xl flex items-center gap-2 uppercase tracking-wide truncate">👨‍🏫 Кабинет учителя</h2><button onclick="hideModal('teacher-modal')" class="text-3xl shrink-0 text-gray-400 hover:text-rose-500 transition-colors leading-none">&times;</button></div>
-             <div class="grid grid-cols-3 border-b border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#1e1e1e] shrink-0 w-full text-center">
+             <div class="grid grid-cols-2 border-b border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#1e1e1e] shrink-0 w-full text-center">
                  <button id="tab-btn-stats" onclick="switchTeacherTab('stats')" class="py-3 text-[10px] sm:text-xs font-black border-b-2 border-examBlue text-examBlue dark:text-blue-400 dark:border-blue-400 transition-colors uppercase tracking-wide leading-none truncate">Ученики</button>
                  <button id="tab-btn-weekly" onclick="switchTeacherTab('weekly')" class="py-3 text-[10px] sm:text-xs font-black border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors uppercase tracking-wide leading-none truncate">Топ недели</button>
-                 <button id="tab-btn-hw" onclick="switchTeacherTab('hw')" class="py-3 text-[10px] sm:text-xs font-black border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors uppercase tracking-wide leading-none truncate">ДЗ (Ссылка)</button>
              </div>
              
              <!-- ВКЛАДКА: УЧЕНИКИ -->
              <div class="flex-grow p-3 sm:p-4 overflow-y-auto overflow-x-hidden custom-scroll flex flex-col bg-gray-50 dark:bg-[#121212] relative w-full" id="teacher-tab-stats">
-                <div class="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] rounded-2xl p-4 mb-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3 shrink-0"><div class="flex items-center gap-3 w-full sm:w-auto justify-between"><span class="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest shrink-0">Код класса:</span><input type="text" id="teacher-class-code-input" class="w-20 text-center font-mono font-black text-examBlue dark:text-blue-300 text-lg p-2 border border-gray-300 rounded-xl dark:bg-[#2c2c2c] dark:border-[#3f3f46] outline-none bg-blue-50 dark:bg-blue-900/20 shrink-0" onchange="saveTeacherClassCode()"></div><label class="flex items-center gap-3 cursor-pointer w-full sm:w-auto justify-center bg-gray-50 dark:bg-[#181818] px-4 py-2 rounded-xl border border-gray-200 dark:border-[#2c2c2c] shrink-0"><input type="checkbox" id="teacher-filter-class" onchange="window.loadClassProgress()" class="w-5 h-5 text-examBlue bg-white border-gray-300 rounded shrink-0"><span class="text-[11px] sm:text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wide">Только мой класс</span></label></div>
+                <!-- Код класса + фильтр -->
+                <div class="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] rounded-2xl p-3 mb-3 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-3 shrink-0">
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
+                        <span class="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest shrink-0">Код класса:</span>
+                        <input type="text" id="teacher-class-code-input" class="w-20 text-center font-mono font-black text-examBlue dark:text-blue-300 text-lg p-2 border border-gray-300 rounded-xl dark:bg-[#2c2c2c] dark:border-[#3f3f46] outline-none bg-blue-50 dark:bg-blue-900/20 shrink-0" onchange="saveTeacherClassCode()">
+                    </div>
+                    <label class="flex items-center gap-3 cursor-pointer w-full sm:w-auto justify-center bg-gray-50 dark:bg-[#181818] px-4 py-2 rounded-xl border border-gray-200 dark:border-[#2c2c2c] shrink-0">
+                        <input type="checkbox" id="teacher-filter-class" onchange="window.loadClassProgress()" class="w-5 h-5 text-examBlue bg-white border-gray-300 rounded shrink-0">
+                        <span class="text-[11px] sm:text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wide">Только мой класс</span>
+                    </label>
+                </div>
+                <!-- Сводка по классу -->
+                <div id="teacher-class-summary" class="hidden mb-3 shrink-0">
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] rounded-xl p-2 text-center shadow-sm">
+                            <div class="text-[9px] text-gray-400 uppercase font-black tracking-widest">Учеников</div>
+                            <div class="text-lg font-black text-blue-600 dark:text-blue-400" id="summary-count">0</div>
+                        </div>
+                        <div class="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] rounded-xl p-2 text-center shadow-sm">
+                            <div class="text-[9px] text-gray-400 uppercase font-black tracking-widest">Ср. решено</div>
+                            <div class="text-lg font-black text-emerald-600 dark:text-emerald-400" id="summary-avg">0</div>
+                        </div>
+                        <div class="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] rounded-xl p-2 text-center shadow-sm">
+                            <div class="text-[9px] text-gray-400 uppercase font-black tracking-widest">Активны сегодня</div>
+                            <div class="text-lg font-black text-purple-600 dark:text-purple-400" id="summary-active">0</div>
+                        </div>
+                        <div class="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] rounded-xl p-2 text-center shadow-sm">
+                            <div class="text-[9px] text-red-400 uppercase font-black tracking-widest">3д без входа</div>
+                            <div class="text-lg font-black text-red-500" id="summary-atrisk">0</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Сортировка -->
+                <div class="flex items-center gap-2 mb-3 shrink-0">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest shrink-0">Сортировка:</span>
+                    <select id="teacher-sort-select" onchange="window.sortAndRenderStudents()" class="flex-1 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2c] text-[11px] font-bold text-gray-700 dark:text-gray-300 rounded-xl px-3 py-2 outline-none">
+                        <option value="total">По решённым строкам</option>
+                        <option value="weekly">По активности за неделю</option>
+                        <option value="streak">По стрику</option>
+                        <option value="learned">По выученным фактам</option>
+                        <option value="accuracy">По точности</option>
+                        <option value="lastActive">По последнему входу</option>
+                    </select>
+                </div>
                 <div id="teacher-class-stats" class="flex flex-col gap-3 w-full"></div>
              </div>
              
@@ -386,63 +649,69 @@
                 <div id="weekly-class-stats" class="flex flex-col gap-3 w-full"></div>
              </div>
              
-             <!-- ВКЛАДКА: ДЗ ПО ССЫЛКЕ -->
-             <div class="flex-grow p-3 sm:p-4 overflow-y-auto overflow-x-hidden custom-scroll hidden flex-col bg-white dark:bg-[#1e1e1e] relative" id="teacher-tab-hw">
-                <div class="mb-4 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800 text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200">Выберите конкретные факты для генерации ссылки-задания.</div>
-                
-                <div class="flex flex-col gap-2 mb-3">
-                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Тип задания</label>
-                    <select id="teacher-hw-task-select" onchange="renderTeacherFacts()" class="w-full p-2 bg-gray-50 dark:bg-[#121212] rounded-xl border border-gray-200 dark:border-[#2c2c2c] text-sm font-bold text-gray-800 dark:text-gray-200 outline-none">
-                        <option value="task4">Задание №4 (География)</option>
-                        <option value="task5">Задание №5 (Личности)</option>
-                        <option value="task7">Задание №7 (Культура)</option>
-                    </select>
+        </div>
+    </div>
+
+    <!-- Модалка: Назначить ДЗ ученику -->
+    <div id="assign-hw-modal" class="fixed inset-0 bg-black/80 hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print" style="will-change:transform; z-index:99999;">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="font-black text-base dark:text-gray-300 uppercase tracking-widest">📝 Назначить ДЗ</h3>
+                <button onclick="hideModal('assign-hw-modal')" class="text-2xl text-gray-400 hover:text-rose-500 leading-none">&times;</button>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl px-4 py-3 border border-blue-100 dark:border-blue-800">
+                <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-0.5">Ученик</p>
+                <p class="font-black text-sm text-blue-700 dark:text-blue-300" id="assign-hw-student-name">—</p>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Тип задания</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectHwTask('task4')" id="hw-task-btn-task4" class="hw-task-btn bg-blue-50 border-2 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-xl py-3 font-black text-xs transition-colors leading-snug">📍 №4<br><span class="font-normal text-[10px]">География</span></button>
+                    <button onclick="selectHwTask('task5')" id="hw-task-btn-task5" class="hw-task-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-3 font-black text-xs transition-colors leading-snug">👤 №5<br><span class="font-normal text-[10px]">Личности</span></button>
+                    <button onclick="selectHwTask('task7')" id="hw-task-btn-task7" class="hw-task-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-3 font-black text-xs transition-colors leading-snug">🎨 №7<br><span class="font-normal text-[10px]">Культура</span></button>
                 </div>
-                
-                <div id="teacher-facts-list" class="flex-grow"></div>
-                
-                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-[#2c2c2c] flex flex-col gap-2 shrink-0 bg-white dark:bg-[#1e1e1e] sticky bottom-0 pb-2">
-                    <div id="teacher-link-container" class="hidden mb-2">
-                        <input type="text" id="teacher-generated-url" readonly class="w-full p-3 text-[11px] sm:text-xs font-mono border border-gray-300 rounded-xl dark:bg-[#121212] dark:border-[#2c2c2c] mb-2 outline-none bg-gray-50 dark:text-gray-400 text-gray-600">
-                        <button onclick="copyHomeworkLink()" class="w-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-300 hover:bg-blue-200 py-3 rounded-xl text-sm font-black transition-colors uppercase tracking-wide">📋 Копировать ссылку</button>
-                    </div>
-                    <button onclick="generateHomeworkLink()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm transition-transform active:scale-95 shadow-md uppercase tracking-widest">Создать ДЗ по ссылке</button>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Количество строк</label>
+                <div class="grid grid-cols-4 gap-2 mb-2">
+                    <button onclick="setHwRows(10)" data-rows="10" class="hw-rows-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-xs transition-colors">10</button>
+                    <button onclick="setHwRows(20)" data-rows="20" class="hw-rows-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-xs transition-colors">20</button>
+                    <button onclick="setHwRows(50)" data-rows="50" class="hw-rows-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-xs transition-colors">50</button>
+                    <button onclick="setHwRows(100)" data-rows="100" class="hw-rows-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-xs transition-colors">100</button>
                 </div>
-             </div>
+                <input type="number" id="assign-hw-rows" placeholder="Или введи вручную..." min="1" max="9999" class="w-full p-3 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold text-center text-lg text-examBlue dark:text-blue-400 shadow-inner">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Дедлайн (необязательно)</label>
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                    <button onclick="setHwDeadline(1)" data-days="1" class="hw-deadline-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-[11px] transition-colors">Завтра</button>
+                    <button onclick="setHwDeadline(3)" data-days="3" class="hw-deadline-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-[11px] transition-colors">3 дня</button>
+                    <button onclick="setHwDeadline(7)" data-days="7" class="hw-deadline-btn bg-white border-2 border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 rounded-xl py-2.5 font-black text-[11px] transition-colors">Неделя</button>
+                </div>
+                <input type="date" id="assign-hw-deadline" class="w-full p-3 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold text-center shadow-inner">
+            </div>
+            <div class="flex gap-3 mt-1">
+                <button onclick="hideModal('assign-hw-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors text-sm">Отмена</button>
+                <button onclick="submitAssignHw()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95 text-sm">Назначить 🔥</button>
+            </div>
         </div>
     </div>
 
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
-        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-4 shadow-2xl">
+        <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-5 shadow-2xl">
             <h3 class="font-black text-xl dark:text-gray-300 text-center uppercase tracking-widest">👤 Профиль</h3>
-
-            <!-- Google Auth Section -->
-            <div>
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Аккаунт Google</label>
-                <!-- Если уже вошли через Google -->
-                <div id="google-signed-in" class="hidden items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-3">
-                    <img id="google-avatar" src="" class="w-10 h-10 rounded-full border-2 border-emerald-300 shrink-0" alt="avatar">
-                    <div class="flex-1 min-w-0">
-                        <p class="font-black text-sm text-gray-800 dark:text-gray-200 truncate" id="google-display-name-label"></p>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate" id="google-email-label"></p>
-                    </div>
-                    <button onclick="window.signOutGoogle()" class="shrink-0 text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase transition-colors active:scale-95">Выйти</button>
-                </div>
-                <!-- Кнопка входа -->
-                <button id="google-sign-in-btn" onclick="window.signInWithGoogle()" class="w-full flex items-center justify-center gap-3 border-2 border-gray-200 dark:border-[#3f3f46] bg-white dark:bg-[#2c2c2c] hover:bg-gray-50 dark:hover:bg-[#3f3f46] text-gray-700 dark:text-gray-200 py-3 px-4 rounded-2xl font-black text-sm transition-all active:scale-95 shadow-sm">
-                    <svg class="w-5 h-5 shrink-0" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                    </svg>
+            <!-- Google Auth Block -->
+            <div class="bg-gray-50 dark:bg-[#181818] rounded-2xl p-4 border border-gray-200 dark:border-[#2c2c2c] flex flex-col gap-2">
+                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Аккаунт Google</label>
+                <div id="profile-google-status" class="text-[11px] font-bold text-gray-400">Не привязан</div>
+                <button onclick="signInWithGoogle()" class="flex items-center justify-center gap-2 w-full bg-white dark:bg-[#2c2c2c] border border-gray-300 dark:border-[#3f3f46] rounded-xl py-2.5 font-black text-xs text-gray-700 dark:text-gray-300 active:scale-95 transition-transform shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-700">
+                    <svg viewBox="0 0 24 24" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     Войти через Google
                 </button>
             </div>
-
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Имя и Фамилия</label><input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-4 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold shadow-inner"></div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Код класса (от учителя)</label><input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-4 font-mono border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none text-center font-black text-lg text-blue-600 dark:text-blue-400 shadow-inner"></div>
-            <div class="flex gap-3 mt-1"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
+            <div class="flex gap-3 mt-2"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
         </div>
     </div>
 
@@ -490,7 +759,7 @@
         window.task7Data = typeof task7Data !== 'undefined' ? task7Data : [];
         window.task7Top100Data = typeof task7Top100Data !== 'undefined' ? task7Top100Data : window.task7Data;
 
-        window.openGlobalTopModal = function() {}; 
+        window.openGlobalTopModal = function() { showToast('⏳', 'Подключение...', 'bg-blue-500', 'border-blue-700'); };
         window.nextRedPencilCase = function() { haptic('light'); currentRPCaseIndex++; window.loadRPCase(currentRPCaseIndex); };
         
         function checkAchievements() {
@@ -641,6 +910,10 @@
             $('filter-task').value = 'task4';
             window.state.currentMode = 'duel';
             window.state.duel.active = true;
+            window.state.duel.myScore = 0;
+            window.state.duel.myCombo = 0;
+            window.state.duel.oppScore = 0;
+            window.state.duel.oppCombo = 0;
             window.state.timeLeft = 60;
             
             $('game-header').classList.add('hidden');
@@ -668,11 +941,12 @@
 
         window.endDuel = function() {
             clearInterval(window.state.timerInterval);
-            window.state.duel.active = false;
-            if (window.cancelDuelDb) window.cancelDuelDb();
             
             const myS = window.state.duel.myScore;
             const oppS = window.state.duel.oppScore;
+            
+            window.state.duel.active = false;
+            if (window.cancelDuelDb) window.cancelDuelDb();
             
             let emoji = '😐', title = 'НИЧЬЯ', text = 'Победила дружба', color = 'text-gray-500';
             if (myS > oppS) { emoji = '🏆'; title = 'ПОБЕДА!'; text = 'Вы разгромили соперника!'; color = 'text-emerald-500'; haptic('success'); }
@@ -684,6 +958,7 @@
             
             showModal('game-over-modal'); 
             $('board-overlay').classList.remove('hidden');
+            saveProgress(); updateGlobalUI();
         };
 
         window.secretClicks = 0; window.secretTimer = null;
@@ -771,6 +1046,139 @@
             toggleMode(mode);
         };
 
+        // === TASK PICKER FOR MODES ===
+        window._pendingMode = null;
+        window.pickTaskForMode = function(mode) {
+            haptic('light');
+            // Detective and Red Pencil are standalone modes — no task selection needed
+            if (mode === 'detective' || mode === 'redpencil') {
+                quickStartGame(window.state.currentTask || 'task4', mode);
+                return;
+            }
+            // Flashcards always use task7 (Culture)
+            if (mode === 'flashcards') {
+                quickStartGame('task7', mode);
+                return;
+            }
+            window._pendingMode = mode;
+            const modeNames = { 'speedrun': '⚡ Спидран', 'mistakes': '🔥 Ошибки', 'study': '📖 Сюжеты' };
+            $('tp-title').innerText = modeNames[mode] || 'Выберите задание';
+            updateTaskPickerProgress();
+            $('task-picker-modal').classList.remove('hidden');
+            $('task-picker-modal').classList.add('flex');
+            setTimeout(() => { $('task-picker-modal').classList.remove('opacity-0'); $('tp-sheet').classList.remove('translate-y-full'); }, 10);
+        };
+        window.confirmTaskPick = function(task) {
+            closeTaskPicker();
+            if (window._pendingMode) quickStartGame(task, window._pendingMode);
+        };
+        window.closeTaskPicker = function() {
+            $('task-picker-modal').classList.add('opacity-0');
+            $('tp-sheet').classList.add('translate-y-full');
+            setTimeout(() => { $('task-picker-modal').classList.add('hidden'); $('task-picker-modal').classList.remove('flex'); }, 300);
+        };
+        function updateTaskPickerProgress() {
+            $$('.tp-progress').forEach(el => {
+                const task = el.dataset.task;
+                const info = getTaskProgress(task);
+                el.textContent = info.learned + '/' + info.total;
+            });
+        }
+
+        // === PROGRESS BARS ===
+        function getTaskProgress(task) {
+            const streaks = window.state.stats.factStreaks || {};
+            const prefixes = { task4: '', task5: 't5_', task7: 't7_' };
+            const prefix = prefixes[task] || '';
+            let learned = 0;
+            for (const [key, val] of Object.entries(streaks)) {
+                if (task === 'task4' && !key.startsWith('t5_') && !key.startsWith('t7_')) {
+                    if (window.isFactLearned && window.isFactLearned(val)) learned++;
+                } else if (task === 'task5' && key.startsWith('t5_')) {
+                    if (window.isFactLearned && window.isFactLearned(val)) learned++;
+                } else if (task === 'task7' && key.startsWith('t7_')) {
+                    if (window.isFactLearned && window.isFactLearned(val)) learned++;
+                }
+            }
+            let total = 0;
+            try {
+                if (task === 'task4') total = (typeof bigData !== 'undefined' ? bigData.length : 0);
+                else if (task === 'task5') total = (typeof task5Data !== 'undefined' ? task5Data.length : 0);
+                else if (task === 'task7') total = (window.task7Data ? window.task7Data.length : 0);
+            } catch(e) {}
+            return { learned, total: total || 1 };
+        }
+        function updateProgressBars() {
+            ['task4', 'task5', 'task7'].forEach(task => {
+                const info = getTaskProgress(task);
+                const pct = Math.min(100, Math.round((info.learned / info.total) * 100));
+                const bar = $('progress-bar-' + task);
+                const txt = $('progress-text-' + task);
+                if (bar) bar.style.width = pct + '%';
+                if (txt) txt.textContent = info.learned + ' / ' + info.total + ' выучено';
+            });
+        }
+
+        // === ONBOARDING ===
+        function checkOnboarding() {
+            if (!localStorage.getItem('ege_onboarding_done')) {
+                $('onboarding-overlay').classList.remove('hidden');
+                $('onboarding-overlay').classList.add('flex');
+            }
+        }
+        window.nextOnbStep = function(step) {
+            haptic('light');
+            for (let i = 1; i <= 6; i++) {
+                const s = $('onb-step-' + i); if (s) s.classList.toggle('hidden', i !== step);
+                const d = $('onb-dot-' + i); if (d) { 
+                    d.classList.toggle('bg-blue-500', i === step); 
+                    d.classList.toggle('bg-gray-300', i !== step && i > step); 
+                    d.classList.toggle('bg-blue-200', i < step);
+                    d.classList.toggle('dark:bg-gray-600', i !== step);
+                }
+            }
+        };
+        window.finishOnboarding = function() {
+            haptic('medium');
+            // Save name/class from onboarding slide 6 if provided
+            const onbName = $('onb-name-input') ? $('onb-name-input').value.trim() : '';
+            const onbClass = $('onb-class-input') ? $('onb-class-input').value.trim() : '';
+            if (onbName) localStorage.setItem('student_manual_name', onbName);
+            if (onbClass) localStorage.setItem('student_class_code', onbClass);
+            localStorage.setItem('ege_onboarding_done', '1');
+            $('onboarding-overlay').classList.add('hidden');
+            $('onboarding-overlay').classList.remove('flex');
+            if (onbName || onbClass) {
+                if (window.syncProgressToCloud) window.syncProgressToCloud();
+                showToast('✅', 'Профиль сохранён! Удачи на ЕГЭ!', 'bg-emerald-500', 'border-emerald-700');
+            }
+        };
+
+        // === PULL-TO-REFRESH ===
+        (function initPullToRefresh() {
+            let startY = 0, pulling = false;
+            const lobby = $('lobby-area');
+            if (!lobby) return;
+            lobby.addEventListener('touchstart', function(e) {
+                if (window.scrollY === 0 && !document.body.classList.contains('in-game')) {
+                    startY = e.touches[0].clientY;
+                    pulling = true;
+                }
+            }, { passive: true });
+            lobby.addEventListener('touchmove', function(e) {
+                if (!pulling) return;
+                const diff = e.touches[0].clientY - startY;
+                if (diff > 80) {
+                    pulling = false;
+                    haptic('medium');
+                    updateProgressBars();
+                    updateGlobalUI();
+                    showToast('🔄', 'Обновлено!', 'bg-blue-500', 'border-blue-700');
+                }
+            }, { passive: true });
+            lobby.addEventListener('touchend', function() { pulling = false; }, { passive: true });
+        })();
+
         window.openGlobalSettings = function() {
             $('pre-game-title').innerText = 'Глобальные настройки';
             
@@ -836,6 +1244,7 @@
             ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => { const el = $(id); if (el) { el.classList.add('hidden'); el.classList.remove('flex', 'lg:flex-row'); } });
             document.body.classList.remove('mode-detective');
             window.updateZenButton();
+            updateProgressBars();
         };
 
         function initStorage() {
@@ -857,12 +1266,34 @@
                     if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool; if (parsed.hideLearned !== undefined) window.state.hideLearned = parsed.hideLearned;
                     if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {}; if (window.state.stats.flashcardsSolved === undefined) window.state.stats.flashcardsSolved = 0; if (window.state.stats.hwFlashcardsToSolve === undefined) window.state.stats.hwFlashcardsToSolve = 0; if (!window.state.stats.achievements) window.state.stats.achievements = []; if (!window.state.stats.achievementsData) window.state.stats.achievementsData = { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 };
                     const now = Date.now(); for (let key in window.state.stats.factStreaks) { let data = window.state.stats.factStreaks[key]; if (typeof data === 'number') { window.state.stats.factStreaks[key] = { points: data >= 3 ? 3 : data, level: data >= 3 ? 1 : 0, nextReview: data >= 3 ? now + 12*3600000 : 0, lastUpdated: now }; } else if (data && data.streak !== undefined) { window.state.stats.factStreaks[key] = { points: data.streak >= 3 ? 3 : data.streak, level: data.streak >= 3 ? 1 : 0, nextReview: data.streak >= 3 ? now + 12*3600000 : 0, lastUpdated: data.lastUpdated || now }; } }
+                    // Миграция старого формата eraStats (flat) → новый (per-task)
+                    const eras = window.state.stats.eraStats || {};
+                    const oldFormat = ['early','18th','19th','20th'].some(k => eras[k] && typeof eras[k].correct === 'number');
+                    if (oldFormat) {
+                        const migrated = { task4: {}, task5: {}, task7: {} };
+                        for (const era of ['early','18th','19th','20th']) {
+                            if (eras[era]) {
+                                // Старые данные относим к task4 — самое частое задание
+                                migrated.task4[era] = { ...eras[era] };
+                                migrated.task5[era] = { correct: 0, total: 0 };
+                                migrated.task7[era] = { correct: 0, total: 0 };
+                            }
+                        }
+                        window.state.stats.eraStats = migrated;
+                    }
+                    // Гарантируем структуру для всех заданий
+                    for (const tk of ['task4','task5','task7']) {
+                        if (!window.state.stats.eraStats[tk]) window.state.stats.eraStats[tk] = {};
+                        for (const era of ['early','18th','19th','20th']) {
+                            if (!window.state.stats.eraStats[tk][era]) window.state.stats.eraStats[tk][era] = { correct: 0, total: 0 };
+                        }
+                    }
                 }
             } catch(e) {}
             if (localStorage.getItem('ege_theme') === 'dark') document.documentElement.classList.add('dark');
             $('toggle-hide-learned').checked = window.state.hideLearned; $('pg-hide-learned').checked = window.state.hideLearned;
             setTimeout(() => $$('.modal-content-hidden').forEach(el => el.classList.remove('modal-content-hidden')), 500);
-            updateGlobalUI(); checkURLForHomework();
+            updateGlobalUI(); updateProgressBars(); checkOnboarding(); checkURLForHomework();
             setInterval(() => {
                 window.state.stats.totalTimeSpent = (window.state.stats.totalTimeSpent || 0) + 1; const today = getTodayString(); if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 }; window.state.stats.dailyStats[today].timeSpent++;
                 if (window.state.stats.totalTimeSpent % 5 === 0 && !window.state.isHomeworkMode) saveProgress();
@@ -1291,8 +1722,11 @@
                             (window.state.currentTask === 'task4' && m.fact.event === fact.event)
                         ));
                         if (!tr.dataset.scored) {
-                            if(!window.state.stats.eraStats[fact.c]) window.state.stats.eraStats[fact.c] = { correct: 0, total: 0 }; window.state.stats.eraStats[fact.c].total++;
-                            if (rowAllCor && rowFilled === slots.length) { window.state.stats.eraStats[fact.c].correct++; updateFactSRS(fKey, true, isSure); if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); tr.dataset.scored = "correct"; newlyCorrect++; } 
+                            const tk = window.state.currentMode === 'duel' ? 'task4' : window.state.currentTask;
+                            if (!window.state.stats.eraStats[tk]) window.state.stats.eraStats[tk] = {};
+                            if (!window.state.stats.eraStats[tk][fact.c]) window.state.stats.eraStats[tk][fact.c] = { correct: 0, total: 0 };
+                            window.state.stats.eraStats[tk][fact.c].total++;
+                            if (rowAllCor && rowFilled === slots.length) { window.state.stats.eraStats[tk][fact.c].correct++; updateFactSRS(fKey, true, isSure); if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); tr.dataset.scored = "correct"; newlyCorrect++; } 
                             else { updateFactSRS(fKey, false, false); if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); tr.dataset.scored = "incorrect"; }
                         } else if (tr.dataset.scored === "incorrect" && rowAllCor && rowFilled === slots.length) { tr.dataset.scored = "fixed"; if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); }
                     } else {
@@ -1332,6 +1766,8 @@
                 }
                 window.updateDuelUI();
                 if (window.updateDuelScoreDb) window.updateDuelScoreDb(window.state.duel.myScore, window.state.duel.myCombo);
+                if (newlyCorrect > 0) { updateScoreAndStats(newlyCorrect); }
+                updateGlobalUI();
                 return; // Выходим из функции, стандартная логика не нужна
             }
 
@@ -1408,7 +1844,20 @@
             Object.values(window.state.stats.factStreaks || {}).forEach(d => { if (window.isFactLearned(d)) { totalL++; if (d.nextReview > now) freshL++; } });
             updateText($('stat-streak'), window.state.stats.streak); updateText($('stat-solved'), window.state.stats.totalSolvedEver); if($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver); updateText($('stat-learned'), totalL); updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver); updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
             if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0 && $('hw-remaining')) updateText($('hw-remaining'), window.state.hwCurrentPool.length);
-            if (window.state.stats.hwFlashcardsToSolve > 0) { if($('personal-hw-alert')) $('personal-hw-alert').classList.remove('hidden'); if($('personal-hw-remaining')) updateText($('personal-hw-remaining'), window.state.stats.hwFlashcardsToSolve); if($('lobby-hw-banner')) $('lobby-hw-banner').classList.remove('hidden'); if($('lobby-hw-remaining')) updateText($('lobby-hw-remaining'), window.state.stats.hwFlashcardsToSolve); } 
+            if (window.state.stats.hwFlashcardsToSolve > 0) { 
+                if($('personal-hw-alert')) $('personal-hw-alert').classList.remove('hidden'); 
+                if($('personal-hw-remaining')) updateText($('personal-hw-remaining'), window.state.stats.hwFlashcardsToSolve); 
+                // Per-task breakdown
+                if($('personal-hw-breakdown')) {
+                    const parts = [];
+                    if (window.state.stats.hwTask4 > 0) parts.push('📍№4:' + window.state.stats.hwTask4);
+                    if (window.state.stats.hwTask5 > 0) parts.push('👤№5:' + window.state.stats.hwTask5);
+                    if (window.state.stats.hwTask7 > 0) parts.push('🎨№7:' + window.state.stats.hwTask7);
+                    $('personal-hw-breakdown').textContent = parts.length > 1 ? '(' + parts.join(' ') + ')' : '';
+                }
+                if($('lobby-hw-banner')) $('lobby-hw-banner').classList.remove('hidden'); 
+                if($('lobby-hw-remaining')) updateText($('lobby-hw-remaining'), window.state.stats.hwFlashcardsToSolve); 
+            } 
             else { if($('personal-hw-alert')) $('personal-hw-alert').classList.add('hidden'); if($('lobby-hw-banner')) $('lobby-hw-banner').classList.add('hidden'); }
             let h = totalL === 0 ? 100 : Math.round((freshL / totalL) * 100); let hC = 'text-emerald-400'; if (h < 50) hC = 'text-rose-400'; else if (h < 80) hC = 'text-yellow-400';
             if ($('stat-memory')) { $('stat-memory').parentElement.classList.remove('text-emerald-400', 'text-rose-400', 'text-yellow-400'); $('stat-memory').parentElement.classList.add(hC); updateText($('stat-memory'), h + '%'); }
@@ -1432,7 +1881,37 @@
 
         window.openStatsModal = function() {
             updateGlobalUI(); if (window.loadStudentLeaderboard) window.loadStudentLeaderboard();
-            if ($('stats-era-container')) { const eNames = {'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'}; let eH = ''; for (let key in eNames) { const st = window.state.stats.eraStats[key] || { correct: 0, total: 0 }; const pc = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0; eH += `<div class="flex justify-between items-center bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-100 dark:border-[#2c2c2c]"><span class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">${eNames[key]}</span><span class="text-sm font-black ${pc > 80 ? 'text-emerald-500' : (pc > 50 ? 'text-yellow-500' : 'text-rose-500')}">${pc}% <span class="text-gray-400 font-normal ml-1">(${st.correct}/${st.total})</span></span></div>`; } $('stats-era-container').innerHTML = eH; }
+            if ($('stats-era-container')) {
+                const eNames = { early: 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век' };
+                const tasks = [
+                    { key: 'task4', label: '📍 Задание №4', color: 'text-blue-600 dark:text-blue-400' },
+                    { key: 'task5', label: '👤 Задание №5', color: 'text-purple-600 dark:text-purple-400' },
+                    { key: 'task7', label: '🎨 Задание №7', color: 'text-amber-600 dark:text-amber-400' },
+                ];
+                let eH = '';
+                tasks.forEach(({ key, label, color }) => {
+                    const taskEra = (window.state.stats.eraStats || {})[key] || {};
+                    const totalAttempts = Object.values(taskEra).reduce((s, e) => s + (e.total || 0), 0);
+                    if (!totalAttempts) return;
+                    eH += `<div class="mb-3"><div class="text-[10px] font-black ${color} uppercase tracking-widest mb-2 px-1">${label}</div>`;
+                    for (const [eKey, eName] of Object.entries(eNames)) {
+                        const e = taskEra[eKey] || { correct: 0, total: 0 };
+                        if (!e.total) continue;
+                        const pc = Math.round((e.correct / e.total) * 100);
+                        const pcColor = pc > 80 ? 'text-emerald-500' : pc > 50 ? 'text-yellow-500' : 'text-rose-500';
+                        const barColor = pc > 80 ? '#10b981' : pc > 50 ? '#f59e0b' : '#f43f5e';
+                        eH += `<div class="flex items-center gap-3 bg-gray-50 dark:bg-[#181818] p-2.5 rounded-xl border border-gray-100 dark:border-[#2c2c2c] mb-1.5">
+                            <span class="text-[10px] font-black text-gray-500 dark:text-gray-400 min-w-[90px]">${eName}</span>
+                            <div class="flex-1 h-1.5 bg-gray-200 dark:bg-[#2c2c2c] rounded-full overflow-hidden">
+                                <div style="width:${pc}%;background:${barColor}" class="h-full rounded-full"></div>
+                            </div>
+                            <span class="text-xs font-black ${pcColor} min-w-[42px] text-right">${pc}% <span class="text-gray-400 font-normal text-[10px]">(${e.correct}/${e.total})</span></span>
+                        </div>`;
+                    }
+                    eH += '</div>';
+                });
+                $('stats-era-container').innerHTML = eH || '<p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center py-4">Ещё нет данных</p>';
+            }
             if ($('stats-daily-container')) { const dStat = window.state.stats.dailyStats || {}; const dts = Object.keys(dStat).sort((a,b) => new Date(b) - new Date(a)).slice(0, 5); if (dts.length > 0) { let dH = ''; dts.forEach(d => { const mins = Math.floor((dStat[d].timeSpent || 0) / 60); dH += `<div class="flex justify-between items-center bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-100 dark:border-[#2c2c2c]"><span class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">${new Date(d).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'})}</span><div class="text-xs text-right"><span class="font-black text-examBlue dark:text-blue-400">${dStat[d].solved || 0} решено</span><span class="text-gray-300 dark:text-gray-600 mx-1">|</span><span class="font-bold text-yellow-600 dark:text-yellow-500">${mins} мин</span></div></div>`; }); $('stats-daily-container').innerHTML = dH; } else $('stats-daily-container').innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">Пока нет данных.</p>'; }
             showModal('stats-modal');
         };
@@ -1453,7 +1932,16 @@
             showModal('mistakes-list-modal');
         };
 
-        window.openProfileModal = function() { $('profile-name-input').value = localStorage.getItem('student_manual_name') || ''; $('profile-class-code').value = localStorage.getItem('student_class_code') || ''; if (window._googleAuthUser !== undefined) { /* updated via onAuthStateChanged */ } showModal('profile-modal'); };
+        window.openProfileModal = function() {
+            $('profile-name-input').value = localStorage.getItem('student_manual_name') || '';
+            $('profile-class-code').value = localStorage.getItem('student_class_code') || '';
+            const gEmail = localStorage.getItem('google_email');
+            if ($('profile-google-status')) {
+                $('profile-google-status').textContent = gEmail ? '✅ ' + gEmail : 'Не привязан';
+                $('profile-google-status').className = gEmail ? 'text-[11px] font-bold text-emerald-600 mt-1' : 'text-[11px] font-bold text-gray-400 mt-1';
+            }
+            showModal('profile-modal');
+        };
         window.saveProfileName = function() { const nm = $('profile-name-input').value.trim(), cd = $('profile-class-code').value.trim(); if (nm) localStorage.setItem('student_manual_name', nm); if (cd !== undefined) localStorage.setItem('student_class_code', cd); showToast('✅', 'Профиль сохранен!', 'bg-emerald-500', 'border-emerald-700'); hideModal('profile-modal'); if (window.syncProgressToCloud) window.syncProgressToCloud(); };
 
         window.openAchievementsModal = function() {
@@ -1461,50 +1949,14 @@
             showModal('achievements-modal');
         };
 
-        window.renderTeacherFacts = function() {
-            const task = $('teacher-hw-task-select').value;
-            let ht = ''; const per = [{ id: 'early', name: 'Древность и Смута' }, { id: '18th', name: 'XVIII век' }, { id: '19th', name: 'XIX век' }, { id: '20th', name: 'XX век' }]; 
-            const cDP = task === 'task7' ? (window.task7Data || []) : (task === 'task5' ? (typeof task5Data !== 'undefined' ? task5Data : []) : (typeof bigData !== 'undefined' ? bigData : []));
-            
-            if (!cDP || cDP.length === 0) {
-                $('teacher-facts-list').innerHTML = '<p class="text-center p-4 text-gray-500 text-xs font-bold uppercase tracking-widest">База данных не загружена</p>';
-                return;
-            }
-            per.forEach(p => { 
-                const fIP = cDP.map((f, i) => ({ f, i })).filter(it => it.f.c === p.id); 
-                if (fIP.length === 0) return; 
-                let gH = `<div class="mb-6"><div class="flex justify-between items-center bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-200 dark:border-[#2c2c2c] mb-3 cursor-pointer select-none shadow-sm" onclick="toggleEraCheckbox('${p.id}')"><h4 class="font-black text-examBlue dark:text-blue-400 text-xs uppercase tracking-widest">${p.name}</h4><span class="text-[10px] font-bold text-gray-400 uppercase">Выбрать всё</span></div><div class="space-y-1.5 pl-2 era-group-${p.id}">`; 
-                fIP.forEach(it => { 
-                    let sT = task === 'task7' ? it.f.trait : (task === 'task5' ? it.f.person : `${it.f.geo} | ${it.f.year}`); 
-                    let mTit = task === 'task7' ? it.f.culture : it.f.event;
-                    gH += `<label class="flex items-start gap-3 cursor-pointer bg-white dark:bg-[#1e1e1e] hover:bg-blue-50 dark:hover:bg-[#25282a] p-2.5 rounded-xl border border-gray-100 dark:border-[#2c2c2c] transition-colors shadow-sm"><input type="checkbox" value="${it.i}" class="hw-checkbox mt-0.5 w-5 h-5 text-examBlue bg-gray-50 border-gray-300 rounded"><div class="text-xs text-gray-800 dark:text-gray-300 leading-tight"><span class="font-black">${mTit}</span><br><span class="text-[10px] font-bold text-gray-400 mt-1 block">${sT}</span></div></label>`; 
-                }); 
-                ht += gH + `</div></div>`; 
-            });
-            $('teacher-facts-list').innerHTML = ht;
-        };
-
         window.openTeacherModal = function() {
             let tc = localStorage.getItem('teacher_class_code'); if(!tc) { tc = Math.floor(1000 + Math.random() * 9000).toString(); localStorage.setItem('teacher_class_code', tc); } $('teacher-class-code-input').value = tc;
-            if(window.renderTeacherFacts) window.renderTeacherFacts();
-            $('teacher-link-container').classList.add('hidden'); switchTeacherTab('stats'); showModal('teacher-modal');
+            switchTeacherTab('stats'); showModal('teacher-modal');
         };
 
         window.saveTeacherClassCode = function() { const cd = $('teacher-class-code-input').value.trim(); if(cd) localStorage.setItem('teacher_class_code', cd); if (window.loadClassProgress) window.loadClassProgress(); };
-        window.switchTeacherTab = function(tab) { ['hw', 'stats', 'weekly'].forEach(t => { $(`teacher-tab-${t}`).classList.add('hidden'); $(`teacher-tab-${t}`).classList.remove('flex'); $(`tab-btn-${t}`).className = "py-3 text-[9px] sm:text-xs font-black border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 transition-colors uppercase tracking-wide leading-none truncate"; }); $(`teacher-tab-${tab}`).classList.remove('hidden'); $(`teacher-tab-${tab}`).classList.add('flex'); $(`tab-btn-${tab}`).className = "py-3 text-[9px] sm:text-xs font-black border-b-2 border-examBlue text-examBlue dark:text-blue-400 transition-colors uppercase tracking-wide leading-none truncate"; if (tab !== 'hw' && window.loadClassProgress) window.loadClassProgress(); };
+        window.switchTeacherTab = function(tab) { ['stats', 'weekly'].forEach(t => { $(`teacher-tab-${t}`).classList.add('hidden'); $(`teacher-tab-${t}`).classList.remove('flex'); $(`tab-btn-${t}`).className = "py-3 text-[9px] sm:text-xs font-black border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 transition-colors uppercase tracking-wide leading-none truncate"; }); $(`teacher-tab-${tab}`).classList.remove('hidden'); $(`teacher-tab-${tab}`).classList.add('flex'); $(`tab-btn-${tab}`).className = "py-3 text-[9px] sm:text-xs font-black border-b-2 border-examBlue text-examBlue dark:text-blue-400 transition-colors uppercase tracking-wide leading-none truncate"; if (window.loadClassProgress) window.loadClassProgress(); };
         
-        window.toggleEraCheckbox = function(eId) { const cb = $$(`.era-group-${eId} .hw-checkbox`); const aC = Array.from(cb).every(c => c.checked); cb.forEach(c => c.checked = !aC); };
-        
-        window.generateHomeworkLink = function() { 
-            const ch = $$('.hw-checkbox:checked'); 
-            if (ch.length === 0) return showToast('⚠️', 'Выберите факты!', 'bg-rose-500', 'border-rose-700'); 
-            if (ch.length > 50) return showToast('⚠️', 'Слишком много фактов.', 'bg-rose-500', 'border-rose-700'); 
-            const task = $('teacher-hw-task-select').value;
-            $('teacher-generated-url').value = `${window.location.href.split('?')[0]}?hw=${Array.from(ch).map(c => c.value).join(',')}&task=${task}`; 
-            $('teacher-link-container').classList.remove('hidden'); 
-        };
-        window.copyHomeworkLink = function() { const inp = $('teacher-generated-url'); const copyFn = () => { inp.select(); document.execCommand('copy'); showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700'); }; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(inp.value).then(() => showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700')).catch(copyFn); } else copyFn(); };
-
         window.copyTextReport = function() { 
             const tM = Math.floor((window.state.stats.totalTimeSpent || 0) / 60); 
             const lC = Object.values(window.state.stats.factStreaks || {}).filter(window.isFactLearned).length; 
@@ -1599,10 +2051,13 @@
         document.addEventListener('DOMContentLoaded', initStorage);
     </script>
 
+    <!-- jsPDF для PDF-отчётов -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithRedirect, linkWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
@@ -1626,39 +2081,91 @@
 
         function resolveUserId(userObj) {
             let tgU = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe ? window.Telegram.WebApp.initDataUnsafe.user : null;
-            // Если пользователь авторизован через Google — используем его uid как стабильный ID
-            if (userObj && userObj.providerData && userObj.providerData.length > 0 && userObj.providerData[0].providerId === 'google.com') {
-                localStorage.setItem('stable_student_id', userObj.uid);
-                return userObj.uid;
-            }
             let sId = localStorage.getItem('stable_student_id');
             if (tgU && tgU.id) { localStorage.setItem('stable_student_id', String(tgU.id)); return String(tgU.id); }
             if (sId) return sId;
             let nId = userObj ? userObj.uid : 'anon_' + Date.now(); localStorage.setItem('stable_student_id', nId); return nId;
         }
 
+        // Normalize name for comparison: lowercase, collapse spaces, remove punctuation
+        function normalizeName(n) {
+            return (n || '').trim().toLowerCase().replace(/[^а-яёa-z0-9\s]/gi, '').replace(/\s+/g,' ');
+        }
+        // Compute similarity of two normalized names (Jaccard on trigrams)
+        function nameSimilarity(a, b) {
+            if (!a || !b) return 0;
+            if (a === b) return 1;
+            const trigrams = s => { const t = new Set(); for(let i=0;i<s.length-2;i++) t.add(s.slice(i,i+3)); return t; };
+            const ta = trigrams(a), tb = trigrams(b);
+            let inter = 0; ta.forEach(t => { if(tb.has(t)) inter++; });
+            return inter / (ta.size + tb.size - inter || 1);
+        }
+        function mergeTwo(base, extra) {
+            if ((extra.totalSolved || 0) > (base.totalSolved || 0)) {
+                base.totalSolved = extra.totalSolved;
+                if (extra.fullStateJson && extra.fullStateJson.length > 20) base.fullStateJson = extra.fullStateJson;
+            } else if (extra.fullStateJson && extra.fullStateJson.length > 20 && (!base.fullStateJson || base.fullStateJson.length <= 20)) {
+                base.fullStateJson = extra.fullStateJson;
+            }
+            base.timeSpent = Math.max(base.timeSpent || 0, extra.timeSpent || 0);
+            base.lastActive = Math.max(base.lastActive || 0, extra.lastActive || 0);
+            // Keep longer/more complete name
+            if ((extra.name || '').length > (base.name || '').length && !/(аноним|без имени)/i.test(extra.name)) {
+                base.name = extra.name;
+            }
+        }
         function mergeDuplicateStudents(students) {
-            const m = {}, r = [];
-            students.forEach(st => {
-                const nm = (st.name || '').trim().toLowerCase();
-                if ((st.totalSolved || 0) === 0) return;
-                if (!nm || nm === 'аноним' || nm.includes('без имени')) r.push(st);
-                else {
-                    const k = nm + '|' + (st.username || '').trim().toLowerCase();
-                    if (!m[k]) { m[k] = { ...st }; r.push(m[k]); } 
-                    else { 
-                        if ((st.totalSolved || 0) >= (m[k].totalSolved || 0)) {
-                            m[k].totalSolved = st.totalSolved;
-                            if (st.fullStateJson && st.fullStateJson.length > 20) m[k].fullStateJson = st.fullStateJson;
-                        } else if (st.fullStateJson && st.fullStateJson.length > 20 && (!m[k].fullStateJson || m[k].fullStateJson.length <= 20)) {
-                            m[k].fullStateJson = st.fullStateJson;
-                        }
-                        m[k].timeSpent = Math.max(m[k].timeSpent || 0, st.timeSpent || 0); 
-                        m[k].lastActive = Math.max(m[k].lastActive || 0, st.lastActive || 0); 
-                    }
+            // Step 1: filter zero-activity
+            let active = students.filter(s => (s.totalSolved || 0) > 0);
+            // Step 2: exact match by normalized name + username
+            const exactMap = {};
+            const result = [];
+            active.forEach(st => {
+                const nm = normalizeName(st.name);
+                const isAnon = !nm || nm === 'аноним' || nm.includes('без имени') || nm.includes('ученик');
+                if (isAnon) {
+                    // anonymous: try to keep as-is, will be fuzzy-merged below
+                    result.push({ ...st, _nm: nm, _anon: true });
+                    return;
                 }
-            }); 
-            return r;
+                const k = nm + '|' + (st.username || '').trim().toLowerCase();
+                if (!exactMap[k]) { exactMap[k] = { ...st, _nm: nm, _anon: false }; result.push(exactMap[k]); }
+                else { mergeTwo(exactMap[k], st); }
+            });
+            // Step 3: fuzzy-merge anonymous entries with existing named entries
+            const namedResult = result.filter(s => !s._anon);
+            const anonEntries = result.filter(s => s._anon);
+            anonEntries.forEach(anon => {
+                // Try to find a named entry whose tgId or uid partially matches
+                const anonUid = (anon.tgId || anon.uid || '').toString();
+                let matched = null;
+                // Match by tgId overlap (handles google_ vs numeric tgId)
+                if (anonUid) {
+                    matched = namedResult.find(n => {
+                        const nUid = (n.tgId || n.uid || '').toString();
+                        return nUid && (nUid === anonUid || nUid.includes(anonUid) || anonUid.includes(nUid));
+                    });
+                }
+                if (matched) { mergeTwo(matched, anon); }
+                else { namedResult.push(anon); } // keep as separate if no match
+            });
+            // Step 4: fuzzy-merge named entries with high similarity (>0.82)
+            const finalResult = [];
+            const used = new Set();
+            namedResult.forEach((st, i) => {
+                if (used.has(i)) return;
+                finalResult.push(st);
+                namedResult.forEach((other, j) => {
+                    if (j <= i || used.has(j)) return;
+                    if (nameSimilarity(st._nm, other._nm) > 0.82) {
+                        mergeTwo(st, other);
+                        used.add(j);
+                    }
+                });
+            });
+            // Clean up internal fields
+            finalResult.forEach(s => { delete s._nm; delete s._anon; });
+            return finalResult;
         }
         
         const initAuth = async () => {
@@ -1683,23 +2190,93 @@
         };
         initAuth();
 
+        // Handle Google redirect result (called once on page load after redirect)
+        getRedirectResult(auth).then(result => {
+            if (result && result.user) {
+                const user = result.user;
+                const gName = user.displayName || '';
+                const gEmail = user.email || '';
+                if (gName && !localStorage.getItem('student_manual_name')) {
+                    localStorage.setItem('student_manual_name', gName);
+                }
+                localStorage.setItem('stable_student_id', 'google_' + user.uid);
+                localStorage.setItem('google_uid', user.uid);
+                localStorage.setItem('google_email', gEmail);
+                if($('profile-google-status')) {
+                    $('profile-google-status').textContent = '✅ ' + (gEmail || gName);
+                    $('profile-google-status').className = 'text-[11px] font-bold text-emerald-600 mt-1';
+                }
+                if($('profile-name-input') && gName && !$('profile-name-input').value) {
+                    $('profile-name-input').value = gName;
+                }
+                showToast('✅', 'Вход через Google: ' + (gName || gEmail), 'bg-emerald-500', 'border-emerald-700');
+                if (window.syncProgressToCloud) window.syncProgressToCloud();
+            }
+        }).catch(e => {
+            console.error('Google redirect result error:', e);
+            if (e && e.code !== 'auth/redirect-cancelled-by-user') {
+                showToast('❌', 'Ошибка входа через Google', 'bg-rose-500', 'border-rose-700');
+            }
+        });
+
+        // Google Sign-In for profile (redirect flow — работает в любом браузере и WebView)
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                if (fbUser && fbUser.isAnonymous) {
+                    await linkWithRedirect(fbUser, provider);
+                } else {
+                    await signInWithRedirect(auth, provider);
+                }
+                // После redirect страница перезагружается; результат обрабатывается через getRedirectResult выше
+            } catch(e) {
+                console.error('Google sign-in error:', e);
+                showToast('❌', 'Ошибка входа через Google', 'bg-rose-500', 'border-rose-700');
+            }
+        };
+
         onAuthStateChanged(auth, async (u) => { 
             fbUser = u; 
             if (u) {
                 await window.loadProgressFromCloud(); 
                 window.syncProgressToCloud(); 
                 
-                // Receiver for Homework
+                // Receiver for Homework (per-task system)
                 onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(u)), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        if (data.assignedTeacherHw && data.assignedTeacherHw > 0) {
+                        const t4 = data.hwAssignTask4 || 0;
+                        const t5 = data.hwAssignTask5 || 0;
+                        const t7 = data.hwAssignTask7 || 0;
+                        const totalHw = t4 + t5 + t7;
+                        if (totalHw > 0) {
+                            // Store per-task breakdown
+                            window.state.stats.hwTask4 = t4;
+                            window.state.stats.hwTask5 = t5;
+                            window.state.stats.hwTask7 = t7;
+                            window.state.stats.hwFlashcardsToSolve = totalHw;
+                            window.state.isHomeworkMode = true;
+                            if (data.assignedTeacherHwDeadline) {
+                                localStorage.setItem('teacher_hw_deadline', data.assignedTeacherHwDeadline);
+                            }
+                            // Reset counters in DB
+                            setDoc(docSnap.ref, { hwAssignTask4: 0, hwAssignTask5: 0, hwAssignTask7: 0, assignedTeacherHw: 0 }, { merge: true }).catch(console.error);
+                            // Build readable message
+                            const parts = [];
+                            if (t4 > 0) parts.push(`📍№4: ${t4}`);
+                            if (t5 > 0) parts.push(`👤№5: ${t5}`);
+                            if (t7 > 0) parts.push(`🎨№7: ${t7}`);
+                            const dlStr = data.assignedTeacherHwDeadline ? ` · до ${new Date(data.assignedTeacherHwDeadline + 'T00:00:00').toLocaleDateString('ru-RU')}` : '';
+                            showToast('🔥', `ДЗ: ${parts.join(', ')}${dlStr}`, 'bg-rose-500', 'border-rose-700');
+                            saveProgress();
+                            if(window.updateGlobalUI) window.updateGlobalUI();
+                        } else if (data.assignedTeacherHw && data.assignedTeacherHw > 0) {
+                            // Legacy fallback
                             window.state.stats.hwFlashcardsToSolve = data.assignedTeacherHw;
                             window.state.isHomeworkMode = true;
-                            // Reset counter in DB
+                            if (data.assignedTeacherHwTask) localStorage.setItem('teacher_hw_task', data.assignedTeacherHwTask);
                             setDoc(docSnap.ref, { assignedTeacherHw: 0 }, { merge: true }).catch(console.error);
-                            
-                            showToast('🔥', `Учитель назначил ДЗ: ${data.assignedTeacherHw} строк`, 'bg-rose-500', 'border-rose-700');
+                            showToast('🔥', `ДЗ: ${data.assignedTeacherHw} строк`, 'bg-rose-500', 'border-rose-700');
                             saveProgress();
                             if(window.updateGlobalUI) window.updateGlobalUI();
                         }
@@ -1707,67 +2284,6 @@
                 }, (error) => console.error("HW snapshot error:", error));
             }
         });
-
-        // === GOOGLE AUTH ===
-        const googleProvider = new GoogleAuthProvider();
-
-        function updateGoogleAuthUI(user) {
-            const signedInEl = document.getElementById('google-signed-in');
-            const signInBtn = document.getElementById('google-sign-in-btn');
-            if (!signedInEl || !signInBtn) return;
-            const isGoogle = user && user.providerData && user.providerData.some(p => p.providerId === 'google.com');
-            if (isGoogle) {
-                const gData = user.providerData.find(p => p.providerId === 'google.com');
-                document.getElementById('google-display-name-label').textContent = gData.displayName || user.displayName || '';
-                document.getElementById('google-email-label').textContent = gData.email || user.email || '';
-                const avatar = document.getElementById('google-avatar');
-                if (gData.photoURL) { avatar.src = gData.photoURL; avatar.classList.remove('hidden'); }
-                else avatar.classList.add('hidden');
-                signedInEl.classList.remove('hidden');
-                signedInEl.classList.add('flex');
-                signInBtn.classList.add('hidden');
-            } else {
-                signedInEl.classList.add('hidden');
-                signedInEl.classList.remove('flex');
-                signInBtn.classList.remove('hidden');
-            }
-        }
-
-        window.signInWithGoogle = async function() {
-            try {
-                const result = await signInWithPopup(auth, googleProvider);
-                const user = result.user;
-                // Если у пользователя нет имени в localStorage — подставим из Google
-                if (!localStorage.getItem('student_manual_name') && user.displayName) {
-                    localStorage.setItem('student_manual_name', user.displayName);
-                    const inp = document.getElementById('profile-name-input');
-                    if (inp) inp.value = user.displayName;
-                }
-                localStorage.setItem('stable_student_id', user.uid);
-                updateGoogleAuthUI(user);
-                showToast('✅', `Вошли как ${user.displayName || user.email}`, 'bg-emerald-500', 'border-emerald-700');
-                if (window.syncProgressToCloud) window.syncProgressToCloud();
-            } catch(e) {
-                if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-                    console.error('Google sign-in error:', e);
-                    showToast('❌', 'Ошибка входа через Google', 'bg-rose-500', 'border-rose-700');
-                }
-            }
-        };
-
-        window.signOutGoogle = async function() {
-            try {
-                await signOut(auth);
-                await signInAnonymously(auth);
-                updateGoogleAuthUI(null);
-                showToast('ℹ️', 'Вышли из аккаунта Google', 'bg-gray-500', 'border-gray-700');
-            } catch(e) {
-                console.error('Sign-out error:', e);
-            }
-        };
-
-        // Обновляем UI Google при изменении состояния авторизации
-        onAuthStateChanged(auth, (u) => { updateGoogleAuthUI(u); });
 
         // PvP FIREBASE DUEL LOGIC
         let duelUnsubscribe = null;
@@ -1881,91 +2397,414 @@
             window.state.duel = { active: false, searching: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, oppScore: 0, myCombo: 0, oppCombo: 0 };
         };
         
-        window.loadClassProgress = async function() {
-            if (!db) return; 
-            const tc = document.getElementById('teacher-class-code-input').value.trim();
+        // ─── Вспомогательные функции кабинета учителя ───
+
+        function computeStudentData(s, monStr, monday) {
+            let state = {}; try { state = JSON.parse(s.fullStateJson || '{}'); } catch(e) {}
+            const stats = state.stats || state || {};
+            const streak = stats.streak || state.streak || 0;
+            const timeSpentMin = Math.floor((stats.totalTimeSpent || state.totalTimeSpent || 0) / 60);
+
+            let learnedCount = 0;
+            Object.values(stats.factStreaks || state.factStreaks || {}).forEach(v => {
+                if (v.level > 0 || v.streak >= 3) learnedCount++;
+            });
+
+            const eraNames = { early: 'Древность', '18th': 'XVIII в.', '19th': 'XIX в.', '20th': 'XX в.' };
+            const rawEra = stats.eraStats || {};
+
+            // Поддержка обоих форматов: старый flat и новый per-task
+            const isNewFormat = rawEra.task4 || rawEra.task5 || rawEra.task7;
+            const taskDefs = [
+                { key: 'task4', label: '📍 №4 География', color: '#3b82f6' },
+                { key: 'task5', label: '👤 №5 Личности',  color: '#8b5cf6' },
+                { key: 'task7', label: '🎨 №7 Культура',  color: '#f59e0b' },
+            ];
+
+            // Общая точность (по всем заданиям и эпохам) для карточки
+            let totalCorrect = 0, totalAttempts = 0;
+            // eraData — сводная по всем заданиям (для мини-графика эпох в карточке)
+            const eraData = {};
+            for (const eKey of Object.keys(eraNames)) {
+                let c = 0, tot = 0;
+                if (isNewFormat) {
+                    for (const tk of ['task4','task5','task7']) {
+                        const e = (rawEra[tk] || {})[eKey] || {};
+                        c   += e.correct || 0;
+                        tot += e.total   || 0;
+                    }
+                } else {
+                    const e = rawEra[eKey] || {};
+                    c   = e.correct || 0;
+                    tot = e.total   || 0;
+                }
+                totalCorrect  += c;
+                totalAttempts += tot;
+                eraData[eKey] = { name: eraNames[eKey], correct: c, total: tot, pct: tot > 0 ? Math.round((c/tot)*100) : null };
+            }
+            const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : null;
+
+            // Per-task breakdown для PDF (with learned counts)
+            const allFactStreaks = stats.factStreaks || state.factStreaks || {};
+            function countLearnedForTask(taskKey) {
+                let count = 0;
+                const prefix = taskKey === 'task5' ? 't5_' : taskKey === 'task7' ? 't7_' : null;
+                Object.entries(allFactStreaks).forEach(([k, v]) => {
+                    const match = prefix ? k.startsWith(prefix) : (!k.startsWith('t5_') && !k.startsWith('t7_'));
+                    if (match && v && (v.level > 0 || v.streak >= 3)) count++;
+                });
+                return count;
+            }
+            const taskStats = taskDefs.map(({ key, label, color }) => {
+                const taskEra = isNewFormat ? (rawEra[key] || {}) : (key === 'task4' ? rawEra : {});
+                let tc = 0, tt = 0;
+                const eras = [];
+                for (const [eKey, eName] of Object.entries(eraNames)) {
+                    const e = taskEra[eKey] || { correct: 0, total: 0 };
+                    tc += e.correct || 0;
+                    tt += e.total   || 0;
+                    if (e.total > 0) eras.push({ name: eName, correct: e.correct, total: e.total, pct: Math.round((e.correct/e.total)*100) });
+                }
+                const learned = countLearnedForTask(key);
+                return { key, label, color, correct: tc, total: tt, pct: tt > 0 ? Math.round((tc/tt)*100) : null, eras, learned };
+            }).filter(t => t.total > 0 || t.learned > 0);
+
+            const dStat = stats.dailyStats || state.dailyStats || {};
+            let wScore = 0;
+            const now = new Date();
+            const last7 = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now); d.setDate(d.getDate() - i);
+                const dStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                const val = (dStat[dStr] && dStat[dStr].solved) || 0;
+                if (dStr >= monStr) wScore += val;
+                last7.push({ date: dStr, val });
+            }
+            // No totalSolved fallback — must come from actual dailyStats
+
+            const daysSinceActive = s.lastActive ? Math.floor((Date.now() - s.lastActive) / 86400000) : 999;
+            const lastActiveDate = s.lastActive ? new Date(s.lastActive) : null;
+            const lastActiveStr = lastActiveDate
+                ? `${lastActiveDate.toLocaleDateString('ru-RU')} ${String(lastActiveDate.getHours()).padStart(2,'0')}:${String(lastActiveDate.getMinutes()).padStart(2,'0')}`
+                : 'Давно';
+
+            let weakEra = null, weakPct = 101;
+            for (const e of Object.values(eraData)) {
+                if (e.total >= 5 && e.pct !== null && e.pct < weakPct) { weakPct = e.pct; weakEra = e; }
+            }
+
+            return { ...s, streak, timeSpentMin, learnedCount, accuracy, eraData, taskStats, wScore, last7,
+                     daysSinceActive, isToday: daysSinceActive === 0, atRisk: daysSinceActive >= 3,
+                     lastActiveStr, weakEra, totalCorrect, totalAttempts };
+        }
+
+        function renderMiniBar(last7) {
+            const max = Math.max(...last7.map(d => d.val), 1);
+            const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+            return last7.map((d, i) => {
+                const h = Math.max(3, Math.round((d.val / max) * 28));
+                const color = d.val === 0 ? '#e5e7eb' : i === 6 ? '#3b82f6' : '#6ee7b7';
+                const dayIdx = (new Date(d.date).getDay() + 6) % 7;
+                return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">
+                    <div title="${d.date}: ${d.val} строк" style="width:100%;max-width:14px;height:${h}px;background:${color};border-radius:3px 3px 0 0"></div>
+                    <span style="font-size:8px;color:#9ca3af;font-weight:700">${days[dayIdx]}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderEraRows(eraData) {
+            return Object.values(eraData).map(e => {
+                if (!e.total) return '';
+                const c = e.pct >= 80 ? '#10b981' : e.pct >= 60 ? '#f59e0b' : '#f43f5e';
+                return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+                    <span style="font-size:9px;color:#6b7280;font-weight:700;min-width:68px">${e.name}</span>
+                    <div style="flex:1;height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden">
+                        <div style="height:100%;width:${e.pct}%;background:${c};border-radius:3px"></div>
+                    </div>
+                    <span style="font-size:9px;font-weight:700;color:${c};min-width:28px;text-align:right">${e.pct}%</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderStudentCard(s, idx) {
+            const safeUid  = (s.uid  || '').replace(/'/g, "\\'");
+            const safeName = (s.name || 'Без имени').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const medal    = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `<span style="color:#9ca3af;font-size:12px">#${idx+1}</span>`;
+            const timeStr  = s.timeSpentMin >= 60 ? `${Math.floor(s.timeSpentMin/60)}ч ${s.timeSpentMin%60}м` : `${s.timeSpentMin}м`;
+            const accStr   = s.accuracy !== null ? `${s.accuracy}%` : '—';
+            const accColor = s.accuracy === null ? '#9ca3af' : s.accuracy >= 80 ? '#10b981' : s.accuracy >= 60 ? '#f59e0b' : '#f43f5e';
+            const atRiskBadge = s.atRisk
+                ? `<span style="font-size:9px;font-weight:700;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;padding:2px 6px;border-radius:4px">⚠️ ${s.daysSinceActive}д без входа</span>` : '';
+            const todayBadge = s.isToday
+                ? `<span style="font-size:9px;font-weight:700;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;padding:2px 6px;border-radius:4px">🟢 онлайн сегодня</span>` : '';
+            const weakBlock = s.weakEra
+                ? `<div style="margin-top:6px;font-size:10px;color:#9ca3af;font-weight:700">📍 Слабая тема: <span style="color:#f43f5e">${s.weakEra.name} — ${s.weakEra.pct}%</span></div>` : '';
+
+            return `<div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex flex-col">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:10px;border-bottom:1px solid #f1f5f9;gap:8px">
+                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+                        <span style="font-size:18px;flex-shrink:0">${medal}</span>
+                        <div style="min-width:0">
+                            <div class="dark:text-gray-200" style="font-weight:900;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name || 'Без имени'}</div>
+                            <div style="font-size:9px;color:#94a3b8;margin-top:1px">${s.lastActiveStr}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0">${atRiskBadge}${todayBadge}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 0;border-bottom:1px solid #f1f5f9;text-align:center">
+                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Решено</div><div style="font-size:13px;font-weight:900;color:#3b82f6">${s.totalSolved||0}</div></div>
+                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Неделя</div><div style="font-size:13px;font-weight:900;color:#8b5cf6">${s.wScore}</div></div>
+                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Выучено</div><div style="font-size:13px;font-weight:900;color:#10b981">${s.learnedCount}</div></div>
+                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Стрик</div><div style="font-size:13px;font-weight:900;color:#f59e0b">${s.streak}🔥</div></div>
+                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Точность</div><div style="font-size:13px;font-weight:900;color:${accColor}">${accStr}</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9">
+                    <div>
+                        <div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:6px">Активность 7 дней</div>
+                        <div style="display:flex;align-items:flex-end;gap:2px;height:40px">${renderMiniBar(s.last7)}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:6px">Точность по эпохам</div>
+                        ${renderEraRows(s.eraData) || '<div style="font-size:9px;color:#94a3b8;padding-top:4px">Нет данных</div>'}
+                        ${weakBlock}
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0 4px;font-size:9px;color:#94a3b8;font-weight:700">
+                    <span>⏱ В игре: <b style="color:#a78bfa">${timeStr}</b></span>
+                    <span>📝 Попыток: <b style="color:#64748b">${s.totalAttempts||0}</b></span>
+                    <span>✅ Верных: <b style="color:#10b981">${s.totalCorrect||0}</b></span>
+                </div>
+                <div style="display:flex;gap:6px;padding-top:8px;border-top:1px solid #f1f5f9">
+                    <button onclick="window.promptAssignHw('${safeUid}','${safeName}')" class="flex-1 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📝 ДЗ</button>
+                    <button onclick="window.downloadStudentPDF('${safeUid}')" class="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📄 PDF</button>
+                </div>
+            </div>`;
+        }
+
+        window._cachedStudents = [];
+
+        window.sortAndRenderStudents = function() {
+            const st = window._cachedStudents;
+            if (!st || !st.length) return;
+            const sort = document.getElementById('teacher-sort-select')?.value || 'total';
+            const sorted = [...st].sort((a, b) => {
+                if (sort === 'weekly')    return (b.wScore||0)       - (a.wScore||0);
+                if (sort === 'streak')    return (b.streak||0)       - (a.streak||0);
+                if (sort === 'learned')   return (b.learnedCount||0) - (a.learnedCount||0);
+                if (sort === 'accuracy')  return (b.accuracy||0)     - (a.accuracy||0);
+                if (sort === 'lastActive') return (b.lastActive||0)  - (a.lastActive||0);
+                return (b.totalSolved||0) - (a.totalSolved||0);
+            });
             const cont = document.getElementById('teacher-class-stats');
+            if (cont) cont.innerHTML = sorted.map((s, i) => renderStudentCard(s, i)).join('');
+        };
+
+        window.downloadStudentPDF = function(uid) {
+            const s = window._cachedStudents.find(x => x.uid === uid);
+            if (!s) return;
+            const jsPDFLib = window.jspdf;
+            if (!jsPDFLib) {
+                showToast('⏳', 'Загрузка PDF-библиотеки...', 'bg-blue-500', 'border-blue-700');
+                setTimeout(() => window.downloadStudentPDF(uid), 1200);
+                return;
+            }
+            const { jsPDF } = jsPDFLib;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const W = 210, M = 18;
+            let y = M;
+
+            // Транслитерация для встроенного helvetica
+            const t = str => (str||'').replace(/[а-яА-ЯёЁ]/g, c => ({
+                'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'j','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':"'",'ы':'y','ь':"'",'э':'e','ю':'yu','я':'ya',
+                'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'Yo','Ж':'Zh','З':'Z','И':'I','Й':'J','К':'K','Л':'L','М':'M','Н':'N','О':'O','П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F','Х':'Kh','Ц':'Ts','Ч':'Ch','Ш':'Sh','Щ':'Shch','Ъ':"'",'Ы':'Y','Ь':"'",'Э':'E','Ю':'Yu','Я':'Ya'
+            }[c]||c));
+
+            // Шапка
+            doc.setFillColor(37,99,235); doc.rect(0,0,W,26,'F');
+            doc.setTextColor(255,255,255);
+            doc.setFontSize(15); doc.setFont('helvetica','bold');
+            doc.text(t('Otchet: EGE Trenazhyor Istoriya'), M, 11);
+            doc.setFontSize(9); doc.setFont('helvetica','normal');
+            doc.text(`${new Date().toLocaleDateString('ru-RU')}`, M, 19);
+            doc.setTextColor(40,40,40);
+            y = 34;
+
+            // Имя
+            doc.setFontSize(14); doc.setFont('helvetica','bold');
+            doc.text(t(s.name||'Bez imeni'), M, y); y += 7;
+            doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+            doc.text(t(`Posledniy vkhod: ${s.lastActiveStr}`), M, y); y += 9;
+
+            // Метрики-плитки
+            const metrics = [
+                { label:'Resheno',  val:s.totalSolved||0,  rgb:[59,130,246] },
+                { label:'Vyucheno', val:s.learnedCount||0, rgb:[16,185,129] },
+                { label:'Strik',    val:s.streak||0,       rgb:[245,158,11] },
+                { label:'Tochnost', val:s.accuracy!==null?`${s.accuracy}%`:'—', rgb:s.accuracy>=80?[16,185,129]:s.accuracy>=60?[245,158,11]:[244,63,94] },
+                { label:'Nedelya',  val:s.wScore||0,       rgb:[139,92,246] },
+                { label:'Vremya',   val:`${s.timeSpentMin}m`, rgb:[168,85,247] },
+            ];
+            const tW = (W - M*2 - 10)/3;
+            metrics.forEach((m,i) => {
+                const cx = M + (i%3)*(tW+5), cy = y + Math.floor(i/3)*18;
+                doc.setFillColor(...m.rgb.map(v => Math.round(v*0.12+230)));
+                doc.roundedRect(cx,cy,tW,14,2,2,'F');
+                doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+                doc.text(m.label.toUpperCase(), cx+3, cy+5);
+                doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(...m.rgb);
+                doc.text(String(m.val), cx+3, cy+12);
+            });
+            y += 40;
+
+            // Активность 7 дней
+            doc.setDrawColor(229,231,235); doc.setLineWidth(0.3);
+            doc.line(M,y,W-M,y); y += 6;
+            doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
+            doc.text(t('Aktivnost za 7 dney'), M, y); y += 6;
+            const bW = (W-M*2-12)/7, bMaxH = 18;
+            const maxVal = Math.max(...s.last7.map(d=>d.val),1);
+            const dNames = ['Pn','Vt','Sr','Cht','Pt','Sb','Vs'];
+            s.last7.forEach((d,i) => {
+                const bx = M + i*(bW+2), bh = Math.max(1,(d.val/maxVal)*bMaxH), by = y+bMaxH-bh;
+                doc.setFillColor(...(d.val===0?[229,231,235]:i===6?[59,130,246]:[110,231,183]));
+                doc.roundedRect(bx, d.val===0?y+bMaxH-2:by, bW, d.val===0?2:bh, 1,1,'F');
+                const dIdx = (new Date(d.date).getDay()+6)%7;
+                doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
+                doc.text(dNames[dIdx], bx+bW/2-2, y+bMaxH+4);
+                if (d.val>0) { doc.setTextColor(80,80,80); doc.text(String(d.val), bx+bW/2-2, by-1); }
+            });
+            y += bMaxH+10;
+
+            // Точность по эпохам
+            doc.line(M,y,W-M,y); y += 6;
+            doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
+            doc.text(t('Tochnost po epokham'), M, y); y += 6;
+            Object.values(s.eraData).forEach(e => {
+                if (!e.total) return;
+                const bc = e.pct>=80?[16,185,129]:e.pct>=60?[245,158,11]:[244,63,94];
+                doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+                doc.text(t(e.name), M, y+3);
+                const bx2 = M+35, bw2 = W-M*2-35-18;
+                doc.setFillColor(241,245,249); doc.roundedRect(bx2,y,bw2,5,1,1,'F');
+                doc.setFillColor(...bc); doc.roundedRect(bx2,y,bw2*e.pct/100,5,1,1,'F');
+                doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...bc);
+                doc.text(`${e.pct}%  (${e.correct}/${e.total})`, W-M-2, y+4, {align:'right'});
+                y += 8;
+            });
+
+            // Слабая тема
+            if (s.weakEra) {
+                y += 2;
+                doc.setFillColor(254,242,242); doc.roundedRect(M,y,W-M*2,11,2,2,'F');
+                doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(220,38,38);
+                doc.text(t(`Slab. tema: ${s.weakEra.name} — ${s.weakEra.pct}% (${s.weakEra.correct}/${s.weakEra.total})`), M+4, y+7);
+                y += 15;
+            }
+
+            // Разбивка по типам заданий
+            if (s.taskStats && s.taskStats.length > 0) {
+                doc.line(M,y,W-M,y); y += 6;
+                doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
+                doc.text(t('Razbirka po tipam zadaniy'), M, y); y += 7;
+                s.taskStats.forEach(tk => {
+                    const pctLabel = tk.pct !== null ? `${tk.pct}%` : '-';
+                    const bc = tk.pct !== null ? (tk.pct >= 80 ? [16,185,129] : tk.pct >= 60 ? [245,158,11] : [244,63,94]) : [148,163,184];
+                    // Строка задания
+                    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
+                    doc.text(t(tk.label.replace(/[^\x00-\x7F]/g, '')), M, y+4);
+                    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...bc);
+                    doc.text(`${pctLabel}  (${tk.correct}/${tk.total})`, W-M, y+4, { align: 'right' });
+                    // Общая полоса
+                    const bx3 = M+50, bw3 = W-M*2-50-22;
+                    doc.setFillColor(241,245,249); doc.roundedRect(bx3,y,bw3,5,1,1,'F');
+                    if (tk.pct !== null) { doc.setFillColor(...bc); doc.roundedRect(bx3,y,bw3*tk.pct/100,5,1,1,'F'); }
+                    y += 9;
+                    // Learned facts for this task
+                    if (tk.learned > 0) {
+                        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(16,185,129);
+                        doc.text(t(`  Vyucheno: ${tk.learned} faktov`), M+4, y+3);
+                        y += 6;
+                    }
+                    // Подэпохи
+                    tk.eras.forEach(era => {
+                        const ec = era.pct >= 80 ? [16,185,129] : era.pct >= 60 ? [245,158,11] : [244,63,94];
+                        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+                        doc.text(`  ${t(era.name)}`, M+4, y+3);
+                        const bx4 = M+38, bw4 = W-M*2-38-20;
+                        doc.setFillColor(241,245,249); doc.roundedRect(bx4,y-0.5,bw4,4,1,1,'F');
+                        doc.setFillColor(...ec); doc.roundedRect(bx4,y-0.5,bw4*era.pct/100,4,1,1,'F');
+                        doc.setTextColor(...ec); doc.text(`${era.pct}%`, W-M, y+3, { align: 'right' });
+                        y += 6;
+                    });
+                    y += 2;
+                });
+            }
+
+            // Подвал
+            doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(180,180,180);
+            doc.text(t(`EGE Trenazhyor | ${new Date().toLocaleDateString('ru-RU')} | uid: ${s.uid||''}`), M, 287);
+
+            doc.save(`Otchet_${t(s.name||'student').replace(/[^a-zA-Z0-9_]/g,'_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast('📄', 'PDF-отчёт скачан!', 'bg-blue-500', 'border-blue-700');
+        };
+
+        window.loadClassProgress = async function() {
+            if (!db) return;
+            const tc  = document.getElementById('teacher-class-code-input').value.trim();
+            const cont  = document.getElementById('teacher-class-stats');
             const wCont = document.getElementById('weekly-class-stats');
             cont.innerHTML = '<p class="text-center py-4 text-xs font-bold text-gray-500">Загрузка...</p>';
-            if(wCont) wCont.innerHTML = '<p class="text-center py-4 text-xs font-bold text-gray-500">Загрузка...</p>';
-            
+            if (wCont) wCont.innerHTML = '<p class="text-center py-4 text-xs font-bold text-gray-500">Загрузка...</p>';
+
             try {
-                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students')); let st = [];
-                
-                const now = new Date();
-                const day = now.getDay() || 7;
+                const now    = new Date();
+                const day    = now.getDay() || 7;
                 const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
                 const monStr = monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
 
-                qS.forEach(doc => { const d = doc.data(); d.uid = doc.id; if (d.classCode === tc) st.push(d); });
-                st = mergeDuplicateStudents(st); 
-                st.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
-                
-                let ht = st.length === 0 ? '<p class="text-center py-4 text-xs font-bold text-gray-500">Ученики не найдены</p>' : '';
-                st.forEach((s, idx) => {
-                    let state = {}; try { state = JSON.parse(s.fullStateJson || '{}'); } catch(e){}
-                    const stats = state.stats || state || {}; 
-                    const streak = stats.streak || state.streak || 0; 
-                    
-                    const timeSpentMin = Math.floor((stats.totalTimeSpent || state.totalTimeSpent || 0) / 60);
-                    const timeStr = timeSpentMin >= 60 ? `${Math.floor(timeSpentMin/60)} ч ${timeSpentMin%60} мин` : `${timeSpentMin} мин`;
-                    
-                    let learnedCount = 0;
-                    Object.values(stats.factStreaks || state.factStreaks || {}).forEach(v => {
-                        if (v.level > 0 || v.streak >= 3) learnedCount++;
-                    });
-                    
-                    let dStat = stats.dailyStats || state.dailyStats || {};
-                    let wScore = 0;
-                    for (let d in dStat) { if (d >= monStr) wScore += (dStat[d].solved || 0); }
-                    
-                    if (wScore === 0 && (s.lastActive || 0) >= monday.getTime() && (s.totalSolved || 0) > 0) {
-                        wScore = s.totalSolved;
-                    }
-                    
-                    s.weeklyScore = wScore;
-
-                    const lastActiveDate = s.lastActive ? new Date(s.lastActive) : null;
-                    const lastActiveStr = lastActiveDate ? `${lastActiveDate.toLocaleDateString()} ${lastActiveDate.getHours().toString().padStart(2,'0')}:${lastActiveDate.getMinutes().toString().padStart(2,'0')}` : 'Давно';
-                    
-                    const safeName = (s.name || 'Без имени').replace(/'/g, "\\'").replace(/"/g, "&quot;");
-
-                    ht += `
-                    <div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex flex-col gap-2 mb-3">
-                        <div class="flex justify-between items-center border-b border-gray-100 dark:border-[#2c2c2c] pb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">${idx===0?'🥇':(idx===1?'🥈':'🎓')}</span>
-                                <span class="font-black text-sm dark:text-gray-200">${s.name || 'Без имени'}</span>
-                            </div>
-                            <span class="text-[10px] text-gray-500 font-bold bg-gray-50 dark:bg-[#2c2c2c] px-2 py-1 rounded-md border border-gray-100 dark:border-[#3f3f46]">В сети: ${lastActiveStr}</span>
-                        </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center pt-1 pb-2">
-                            <div><span class="block text-[9px] text-gray-400 uppercase tracking-widest font-black">Решено</span><span class="block font-black text-blue-600 dark:text-blue-400">${s.totalSolved || 0} строк</span></div>
-                            <div><span class="block text-[9px] text-gray-400 uppercase tracking-widest font-black">Выучено</span><span class="block font-black text-emerald-500">${learnedCount} фактов</span></div>
-                            <div><span class="block text-[9px] text-gray-400 uppercase tracking-widest font-black">Стрик</span><span class="block font-black text-orange-500">${streak} 🔥</span></div>
-                            <div><span class="block text-[9px] text-gray-400 uppercase tracking-widest font-black">В игре</span><span class="block font-black text-purple-500">${timeStr} ⏳</span></div>
-                        </div>
-                        <div class="pt-2 border-t border-gray-100 dark:border-[#2c2c2c]">
-                            <button onclick="window.promptAssignHw('${s.uid}', '${safeName}')" class="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-400 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors active:scale-95">📝 Назначить ДЗ ученику</button>
-                        </div>
-                    </div>`;
+                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
+                let st = [];
+                const filterClass = document.getElementById('teacher-filter-class')?.checked;
+                qS.forEach(docSnap => {
+                    const d = docSnap.data(); d.uid = docSnap.id;
+                    if (!filterClass || d.classCode === tc) st.push(d);
                 });
-                cont.innerHTML = ht;
-                
+                st = mergeDuplicateStudents(st);
+
+                const enriched = st.map(s => computeStudentData(s, monStr, monday));
+                enriched.sort((a,b) => (b.totalSolved||0) - (a.totalSolved||0));
+                window._cachedStudents = enriched;
+
+                // Сводка
+                const summaryEl = document.getElementById('teacher-class-summary');
+                if (enriched.length && summaryEl) {
+                    summaryEl.classList.remove('hidden');
+                    document.getElementById('summary-count').textContent  = enriched.length;
+                    document.getElementById('summary-avg').textContent    = Math.round(enriched.reduce((s,x)=>s+(x.totalSolved||0),0)/enriched.length);
+                    document.getElementById('summary-active').textContent = enriched.filter(x=>x.isToday).length;
+                    document.getElementById('summary-atrisk').textContent = enriched.filter(x=>x.atRisk).length;
+                }
+
+                if (enriched.length === 0) {
+                    cont.innerHTML = '<p class="text-center py-4 text-xs font-bold text-gray-500">Ученики не найдены</p>';
+                } else {
+                    window.sortAndRenderStudents();
+                }
+
+                // Топ недели
                 if (wCont) {
-                    let weeklySt = [...st].sort((a,b) => (b.weeklyScore || 0) - (a.weeklyScore || 0)).filter(s => s.weeklyScore > 0);
-                    let wHt = weeklySt.length === 0 ? '<p class="text-center py-4 text-xs font-bold text-gray-500">На этой неделе пока нет активности</p>' : '';
-                    weeklySt.forEach((s, idx) => {
-                         wHt += `<div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center mb-2">
-                            <div class="flex items-center gap-3"><span class="text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-6 inline-block text-center text-lg">${idx+1}</span>`))}</span><span class="font-black text-sm dark:text-gray-200">${s.name || 'Без имени'}</span></div>
-                            <span class="text-base font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl">${s.weeklyScore} стр.</span>
-                         </div>`;
-                    });
+                    const weeklySt = [...enriched].sort((a,b)=>(b.wScore||0)-(a.wScore||0)).filter(s=>s.wScore>0);
+                    let wHt = weeklySt.length
+                        ? weeklySt.map((s,idx) => `<div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-3"><span class="text-2xl font-black">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':`<span class="text-gray-400 w-6 inline-block text-center text-lg">${idx+1}</span>`}</span><span class="font-black text-sm dark:text-gray-200">${s.name||'Без имени'}</span></div>
+                            <span class="text-base font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl">${s.wScore} стр.</span>
+                          </div>`).join('')
+                        : '<p class="text-center py-4 text-xs font-bold text-gray-500">На этой неделе пока нет активности</p>';
                     wCont.innerHTML = wHt;
                 }
-            } catch(e) { 
+            } catch(e) {
                 console.error(e);
-                cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Нет подключения к серверу (Офлайн)</p>'; 
+                cont.innerHTML = '<p class="text-rose-500 text-xs font-bold text-center py-4">Нет подключения к серверу (Офлайн)</p>';
                 if (wCont) wCont.innerHTML = '';
             }
         };
@@ -1995,9 +2834,8 @@
                     let wScore = 0;
                     for (let d in dStat) { if (d >= monStr) wScore += (dStat[d].solved || 0); }
                     
-                    if (wScore === 0 && (st.lastActive || 0) >= monday.getTime() && (st.totalSolved || 0) > 0) {
-                        wScore = st.totalSolved;
-                    }
+                    // Note: do NOT fall back to totalSolved — that inflates weekly score incorrectly
+                    // If no dailyStats entries this week, weekly score stays 0
                     
                     st.weeklyScore = wScore;
                 });
@@ -2037,11 +2875,26 @@
             }
         };
 
-        window._assignHwDb = async function(studentId, num) {
+        window._assignHwDb = async function(studentId, num, task, deadline) {
             if (!db) return;
+            const taskLabels = { task4: '№4 (География)', task5: '№5 (Личности)', task7: '№7 (Культура)' };
+            const deadlineStr = deadline ? ` до ${new Date(deadline + 'T00:00:00').toLocaleDateString('ru-RU')}` : '';
+            // Per-task fields so multiple assignments accumulate
+            const taskField = { task4: 'hwAssignTask4', task5: 'hwAssignTask5', task7: 'hwAssignTask7' };
+            const field = taskField[task] || 'hwAssignTask4';
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId), { assignedTeacherHw: num });
-                showToast('✅', `ДЗ (${num} строк) назначено!`, 'bg-emerald-500', 'border-emerald-700');
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+                const snap = await getDoc(ref);
+                const existing = snap.exists() ? (snap.data()[field] || 0) : 0;
+                const updates = {
+                    [field]: existing + num,
+                    assignedTeacherHwDeadline: deadline || null,
+                    // Legacy field kept for backward compat
+                    assignedTeacherHw: num,
+                    assignedTeacherHwTask: task || 'task4'
+                };
+                await updateDoc(ref, updates);
+                showToast('✅', `ДЗ: ${num} строк, задание ${taskLabels[task] || task}${deadlineStr}`, 'bg-emerald-500', 'border-emerald-700');
             } catch(e) {
                 console.error(e);
                 showToast('❌', 'Ошибка назначения ДЗ', 'bg-rose-500', 'border-rose-700');

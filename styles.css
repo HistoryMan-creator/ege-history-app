@@ -1,0 +1,393 @@
+/* --- ГЛОБАЛЬНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ --- */
+html, body { 
+    overscroll-behavior-y: none; 
+    transition: background-color 0.4s, color 0.4s; 
+}
+
+body:not(.in-game) { 
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); 
+}
+
+body.in-game { 
+    padding-bottom: env(safe-area-inset-bottom, 0px); 
+}
+
+#bottom-nav { 
+    height: calc(70px + env(safe-area-inset-bottom, 0px)); 
+    padding-bottom: env(safe-area-inset-bottom, 0px); 
+}
+
+#bottom-nav.hide-nav { 
+    display: none !important; 
+}
+
+@media (min-width: 1024px) { 
+    #pool-panel { 
+        position: sticky !important; 
+        top: 4rem !important; 
+        height: fit-content !important; 
+        align-self: flex-start !important; 
+        bottom: auto !important; 
+    } 
+}
+
+/* --- КАСТОМНЫЙ СКРОЛЛБАР --- */
+.custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
+
+.dark body { background-color: #121212; color: #d1d5db; }
+
+/* --- DRAG & DROP СЛОТЫ --- */
+.dnd-slot { 
+    min-height: 40px; 
+    border: 2px dashed #94a3b8; 
+    border-radius: 0.75rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    background-color: #f8fafc; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); 
+    padding: 0.15rem; 
+    touch-action: manipulation; 
+    font-size: 11px; 
+    line-height: 1.1; 
+    text-align: center; 
+    will-change: background-color, border-color; 
+}
+
+.dnd-slot:empty::before { 
+    content: attr(data-letter); 
+    color: #64748b; 
+    font-size: 1.5rem; 
+    font-weight: 900; 
+    opacity: 0.5; 
+}
+
+.dark .dnd-slot { border-color: #3f3f46; background-color: #18181b; }
+.dark .dnd-slot:empty::before { color: #71717a; opacity: 0.5; }
+
+@media (min-width: 768px) { 
+    .dnd-slot { min-height: 52px; font-size: 14px;} 
+}
+
+.dnd-slot:hover { border-color: #64748b; background-color: #f1f5f9; }
+.dark .dnd-slot:hover { border-color: #52525b; background-color: #27272a; }
+
+.dnd-slot.has-item { border: 2px solid #3b82f6; background-color: white; box-shadow: none; padding: 0; }
+.dark .dnd-slot.has-item { border-color: #3b82f6; background-color: #18181b; }
+
+.dnd-slot.correct-slot { border-color: #10b981; background-color: #ecfdf5; pointer-events: none; }
+.dark .dnd-slot.correct-slot { border-color: #10b981; background-color: rgba(16, 185, 129, 0.1); }
+
+.dnd-slot.incorrect-slot { border-color: #f43f5e; background-color: #fff1f2; animation: shake 0.4s ease-in-out; }
+.dark .dnd-slot.incorrect-slot { border-color: #f43f5e; background-color: rgba(244, 63, 94, 0.1); }
+
+.dnd-slot.revealed-slot { border-color: #f59e0b; background-color: #fffbeb; pointer-events: none; }
+.dark .dnd-slot.revealed-slot { border-color: #ea580c; background-color: rgba(234, 88, 12, 0.05); }
+
+.slot-ready { 
+    border-color: #3b82f6 !important; 
+    background-color: #eff6ff !important; 
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important; 
+    transform: scale(1.01); 
+}
+
+/* --- ФИШКИ (CHIPS) --- */
+.dnd-chip { 
+    padding: 0.35rem 0.5rem; 
+    background-color: white; 
+    border: 2px solid #cbd5e1; 
+    border-radius: 0.75rem; 
+    font-weight: 700; 
+    font-size: 0.75rem; 
+    cursor: pointer; 
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05); 
+    transition: transform 0.1s ease, background-color 0.1s, border-color 0.1s; 
+    user-select: none; 
+    color: #1e293b; 
+    text-align: center; 
+    touch-action: manipulation; 
+    will-change: transform, opacity; 
+}
+
+.dark .dnd-chip { background-color: #27272a; border-color: #3f3f46; color: #e4e4e7; }
+@media (min-width: 768px) { 
+    .dnd-chip { font-size: 0.9rem; padding: 0.4rem 0.6rem; } 
+}
+
+.dnd-chip.selected { 
+    border-color: #3b82f6; 
+    background-color: #eff6ff; 
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); 
+    transform: translateY(-2px); 
+}
+.dark .dnd-chip.selected { 
+    border-color: #3b82f6; 
+    background-color: rgba(59, 130, 246, 0.15); 
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); 
+}
+
+.dnd-chip.in-slot { 
+    border: none; 
+    box-shadow: none; 
+    background: transparent; 
+    padding: 0.15rem; 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 11px; 
+    transform: none; 
+    border-radius: 0; 
+    line-height: 1.1;
+}
+@media (min-width: 768px) { 
+    .dnd-chip.in-slot { font-size: 0.9rem; } 
+}
+
+.revealed-chip { 
+    background-color: #fff7ed !important; 
+    border-color: #fdba74 !important; 
+    color: #c2410c !important; 
+}
+.dark .revealed-chip { 
+    background-color: rgba(194, 65, 12, 0.2) !important; 
+    border-color: #ea580c !important; 
+    color: #fdba74 !important; 
+}
+
+@keyframes shake { 
+    0%, 100% { transform: translateX(0); } 
+    25% { transform: translateX(-4px); } 
+    75% { transform: translateX(4px); } 
+}
+
+/* --- РЕЖИМ ДЕТЕКТИВ --- */
+body.mode-detective #table-container { 
+    background-color: #f3efe6 !important; 
+    border: none !important; 
+    font-family: 'Georgia', serif !important; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important; 
+    border-radius: 8px !important; 
+}
+.dark body.mode-detective #table-container { 
+    background-color: #c7c1b3 !important; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; 
+}
+body.mode-detective #table-container, .dark body.mode-detective #table-container { 
+    color: #2c241b !important; 
+}
+body.mode-detective #classic-task-area tr { border-color: transparent !important; }
+body.mode-detective #classic-task-area td { 
+    border: none !important; 
+    border-bottom: 1px dashed #d1c1a5 !important; 
+}
+
+body.mode-detective .detective-slot { 
+    background-color: rgba(239, 68, 68, 0.08) !important; 
+    border: 2px dashed #ef4444 !important; 
+    color: transparent !important; 
+    position: relative; 
+    overflow: hidden; 
+    border-radius: 4px !important; 
+    box-shadow: none !important; 
+    display: inline-flex !important; 
+    min-width: 180px; 
+    height: 28px; 
+    vertical-align: middle; 
+    margin: 0 6px; 
+}
+
+body.mode-detective .detective-slot::after { 
+    content: 'ДАННЫЕ ЗАСЕКРЕЧЕНЫ'; 
+    position: absolute; 
+    color: #ef4444; 
+    font-family: 'Arial', sans-serif; 
+    font-size: 10px; 
+    font-weight: 900; 
+    letter-spacing: 0.5px; 
+    pointer-events: none; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    width: 100%; 
+    text-align: center; 
+}
+
+body.mode-detective .detective-slot.has-item { 
+    background-color: white !important; 
+    min-width: auto; 
+    border: 2px solid #3b82f6 !important; 
+    border-radius: 0.75rem !important; 
+    height: auto; 
+    display: inline-flex !important; 
+    padding: 0 !important; 
+    box-shadow: none !important; 
+}
+.dark body.mode-detective .detective-slot.has-item { 
+    background-color: #18181b !important; 
+    border-color: #3b82f6 !important; 
+}
+body.mode-detective .detective-slot.has-item::after { display: none; }
+
+body.mode-detective .detective-slot.correct-slot { 
+    border-color: #10b981 !important; 
+    background-color: #ecfdf5 !important; 
+}
+.dark body.mode-detective .detective-slot.correct-slot { 
+    background-color: rgba(16, 185, 129, 0.1) !important; 
+}
+body.mode-detective .detective-slot.incorrect-slot { 
+    border-color: #f43f5e !important; 
+    background-color: #fff1f2 !important; 
+}
+.dark body.mode-detective .detective-slot.incorrect-slot { 
+    background-color: rgba(244, 63, 94, 0.1) !important; 
+}
+body.mode-detective .detective-slot.revealed-slot { 
+    border-color: #f59e0b !important; 
+    background-color: #fffbeb !important; 
+}
+.dark body.mode-detective .detective-slot.revealed-slot { 
+    border-color: #ea580c !important; 
+    background-color: rgba(234, 88, 12, 0.05) !important; 
+}
+
+/* --- КРАСНЫЙ КАРАНДАШ (БУМАГА) --- */
+.paper-bg { 
+    background-color: #f4ecd8; 
+    color: #2c241b; 
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15); 
+    background-image: radial-gradient(#d1c1a5 1px, transparent 1px); 
+    background-size: 20px 20px; 
+    background-position: 0 0; 
+    font-family: 'Georgia', serif; 
+}
+.dark .paper-bg { 
+    background-color: #2a2621; 
+    color: #e5e0d8; 
+    background-image: radial-gradient(#3d362d 1px, transparent 1px); 
+}
+.paper-edges { 
+    position: absolute; 
+    inset: 0; 
+    box-shadow: inset 0 0 60px rgba(100, 70, 40, 0.15); 
+    pointer-events: none; 
+}
+.dark .paper-edges { box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5); }
+
+#rp-content { user-select: none; }
+.word-node, .plain-word { 
+    display: inline-block; 
+    position: relative; 
+    cursor: pointer; 
+    transition: color 0.2s ease, transform 0.2s ease; 
+}
+.word-node.crossed { 
+    text-decoration: line-through; 
+    text-decoration-color: #dc2626; 
+    text-decoration-thickness: 3px; 
+    color: #ef4444 !important; 
+    cursor: default; 
+}
+.correction-badge { 
+    position: absolute; 
+    bottom: 100%; 
+    left: 50%; 
+    transform: translateX(-50%) translateY(5px); 
+    font-size: 0.75rem; 
+    background-color: #10b981; 
+    color: white; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    white-space: nowrap; 
+    font-family: 'Arial', sans-serif; 
+    font-weight: 900; 
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5); 
+    z-index: 10; 
+    opacity: 0; 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    letter-spacing: 1px; 
+}
+.word-node.show-correction .correction-badge { 
+    opacity: 1; 
+    transform: translateX(-50%) translateY(-2px); 
+}
+.animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+
+/* --- ТЕМЫ (СКИНЫ) --- */
+
+/* Береста */
+body.skin-beresta { background-color: #f4e6ce !important; color: #4a3525 !important; }
+body.skin-beresta header, body.skin-beresta nav { background-color: #8b5a2b !important; border-bottom-color: #5c4033 !important; border-top-color: #5c4033 !important;}
+body.skin-beresta .bg-white, body.skin-beresta .dark\:bg-[#1e1e1e], body.skin-beresta .dark\:bg-[#121212], body.skin-beresta .dark\:bg-[#2c2c2c], body.skin-beresta .bg-gray-50 { background-color: #fffaf0 !important; border-color: #d2b48c !important; }
+body.skin-beresta .text-gray-800, body.skin-beresta .dark\:text-gray-300, body.skin-beresta .text-gray-900, body.skin-beresta .text-gray-700, body.skin-beresta .text-gray-600 { color: #4a3525 !important; }
+body.skin-beresta header .text-white { color: #fffaf0 !important; }
+body.skin-beresta .dnd-slot { background-color: #faebd7 !important; border-color: #cdaa7d !important; }
+body.skin-beresta .dnd-chip { background-color: #ffdead !important; border-color: #deb887 !important; color: #5c4033 !important; }
+
+/* Империя */
+body.skin-empire { background-color: #fcfbf8 !important; }
+body.skin-empire header, body.skin-empire nav { background-color: #6b151e !important; border-bottom-color: #d4af37 !important; border-top-color: #d4af37 !important;}
+body.skin-empire header .text-white { color: #fdf5e6 !important; }
+body.skin-empire .bg-white, body.skin-empire .dark\:bg-[#1e1e1e], body.skin-empire .dark\:bg-[#121212], body.skin-empire .dark\:bg-[#2c2c2c], body.skin-empire .bg-gray-50 { background-color: #ffffff !important; border-color: #d4af37 !important; box-shadow: 0 4px 15px rgba(107,21,30,0.1) !important; }
+body.skin-empire .text-gray-800, body.skin-empire .dark\:text-gray-300, body.skin-empire .text-gray-900, body.skin-empire .text-gray-700, body.skin-empire .text-gray-600 { color: #2b1b17 !important; }
+body.skin-empire .dnd-chip { background-color: #fdfbf7 !important; border-color: #d4af37 !important; color: #6b151e !important; }
+
+/* СССР */
+body.skin-ussr { background-color: #f4f4f4 !important; }
+body.skin-ussr header, body.skin-ussr nav { background-color: #cc0000 !important; border-bottom-color: #ffcc00 !important; border-top-color: #ffcc00 !important;}
+body.skin-ussr header .text-white { color: #ffcc00 !important; }
+body.skin-ussr .text-gray-800, body.skin-ussr .dark\:text-gray-300, body.skin-ussr .text-gray-900, body.skin-ussr .text-gray-700, body.skin-ussr .text-gray-600 { color: #111111 !important; }
+body.skin-ussr .dnd-chip { background-color: #ffe6e6 !important; border-color: #cc0000 !important; color: #cc0000 !important; font-family: monospace; font-weight: 900; text-transform: uppercase; border-radius: 0 !important; }
+body.skin-ussr .dnd-slot { border-radius: 0 !important; border-width: 3px !important; }
+body.skin-ussr .bg-white, body.skin-ussr .dark\:bg-[#1e1e1e], body.skin-ussr .dark\:bg-[#121212], body.skin-ussr .dark\:bg-[#2c2c2c], body.skin-ussr .bg-gray-50 { background-color: #ffffff !important; border-radius: 0 !important; border-color: #cc0000 !important; }
+
+/* Киберпанк */
+body.skin-cyberpunk { background-color: #0d0221 !important; color: #00f0ff !important; }
+body.skin-cyberpunk header, body.skin-cyberpunk nav { background-color: #240046 !important; border-bottom-color: #ff003c !important; border-top-color: #ff003c !important;}
+body.skin-cyberpunk .bg-white, body.skin-cyberpunk .dark\:bg-[#1e1e1e], body.skin-cyberpunk .dark\:bg-[#121212], body.skin-cyberpunk .dark\:bg-[#2c2c2c], body.skin-cyberpunk .bg-gray-50 { background-color: #1a0b2e !important; border-color: #00f0ff !important; color: #ffffff !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15) !important; }
+body.skin-cyberpunk .text-gray-800, body.skin-cyberpunk .dark\:text-gray-300, body.skin-cyberpunk .text-gray-900, body.skin-cyberpunk .text-gray-700, body.skin-cyberpunk .text-gray-600 { color: #00f0ff !important; text-shadow: 0 0 3px rgba(0,240,255,0.5); }
+body.skin-cyberpunk .dnd-chip { background-color: #240046 !important; border-color: #ff003c !important; color: #ff003c !important; text-transform: uppercase; font-family: monospace; }
+body.skin-cyberpunk .dnd-slot { background-color: rgba(36,0,70,0.5) !important; border-color: #00f0ff !important; }
+body.skin-cyberpunk header .text-white { color: #00f0ff !important; text-shadow: 0 0 8px #00f0ff; }
+
+/* Матрица */
+body.skin-matrix { background-color: #000000 !important; font-family: monospace !important; color: #00ff41 !important; }
+body.skin-matrix header, body.skin-matrix nav { background-color: #001100 !important; border-bottom-color: #00ff41 !important; border-top-color: #00ff41 !important;}
+body.skin-matrix .bg-white, body.skin-matrix .dark\:bg-[#1e1e1e], body.skin-matrix .dark\:bg-[#121212], body.skin-matrix .dark\:bg-[#2c2c2c], body.skin-matrix .bg-gray-50 { background-color: #001100 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
+body.skin-matrix .text-gray-800, body.skin-matrix .dark\:text-gray-300, body.skin-matrix .text-gray-900, body.skin-matrix .text-gray-700, body.skin-matrix .text-gray-600 { color: #00ff41 !important; }
+body.skin-matrix .dnd-chip { background-color: #000000 !important; border-color: #00ff41 !important; color: #00ff41 !important; border-radius: 0 !important; }
+body.skin-matrix .dnd-slot { background-color: #001100 !important; border-color: #008f11 !important; border-radius: 0 !important; }
+body.skin-matrix header .text-white { color: #00ff41 !important; }
+
+/* Космос */
+body.skin-space { background: #0b0c10 !important; color: #c5c6c7 !important; }
+body.skin-space header, body.skin-space nav { background-color: #0b0c10 !important; border-bottom-color: #45a29e !important; border-top-color: #45a29e !important;}
+body.skin-space .bg-white, body.skin-space .dark\:bg-[#1e1e1e], body.skin-space .dark\:bg-[#121212], body.skin-space .dark\:bg-[#2c2c2c], body.skin-space .bg-gray-50 { background-color: rgba(31,40,51,0.95) !important; border-color: #45a29e !important; border-radius: 1rem !important; }
+body.skin-space .text-gray-800, body.skin-space .dark\:text-gray-300, body.skin-space .text-gray-900, body.skin-space .text-gray-700, body.skin-space .text-gray-600 { color: #66fcf1 !important; }
+body.skin-space .dnd-chip { background-color: #1f2833 !important; border-color: #45a29e !important; color: #66fcf1 !important; border-radius: 20px !important; }
+body.skin-space .dnd-slot { background-color: rgba(11,12,16,0.6) !important; border-color: #66fcf1 !important; border-radius: 20px !important; }
+body.skin-space header .text-white { color: #66fcf1 !important; }
+
+/* Золото */
+body.skin-golden { background: #fff9e6 !important; }
+body.skin-golden header, body.skin-golden nav { background: #b8860b !important; border-bottom-color: #ffffff !important; border-top-color: #ffffff !important;}
+body.skin-golden header .text-white { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+body.skin-golden .bg-white, body.skin-golden .dark\:bg-[#1e1e1e], body.skin-golden .dark\:bg-[#121212], body.skin-golden .dark\:bg-[#2c2c2c], body.skin-golden .bg-gray-50 { background-color: #ffffff !important; border-color: #daa520 !important; box-shadow: 0 10px 30px rgba(218,165,32,0.2) !important; border-radius: 1rem !important; }
+body.skin-golden .dnd-chip { background: #fff9e6 !important; border-color: #daa520 !important; color: #b8860b !important; box-shadow: 0 2px 5px rgba(218,165,32,0.2) !important; }
+body.skin-golden .text-gray-800, body.skin-golden .dark\:text-gray-300, body.skin-golden .text-gray-900, body.skin-golden .text-gray-700, body.skin-golden .text-gray-600 { color: #b8860b !important; }
+body.skin-golden .dnd-slot { background-color: #fffaeb !important; border-color: #ffd700 !important; }
+
+/* --- МОДАЛЬНЫЕ ОКНА И ВСПОМОГАТЕЛЬНЫЕ --- */
+.modal-content-hidden { content-visibility: hidden; }
+.achievement-card { transition: transform 0.2s, box-shadow 0.2s; }
+.achievement-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.achievement-locked { filter: grayscale(100%); opacity: 0.5; }
+
+body.zen-mode-active main { padding-bottom: 20px !important; }
