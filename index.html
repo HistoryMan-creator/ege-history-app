@@ -645,7 +645,7 @@
              
              <!-- ВКЛАДКА: ТОП НЕДЕЛИ -->
              <div class="flex-grow p-3 sm:p-4 overflow-y-auto overflow-x-hidden custom-scroll hidden flex-col bg-gray-50 dark:bg-[#121212] relative w-full" id="teacher-tab-weekly">
-                <div class="text-center mb-6 shrink-0"><h3 class="font-black text-xl sm:text-2xl text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">🔥 Топ за неделю</h3><p class="text-[10px] text-gray-400 mt-1 uppercase">По количеству решенных строк (с понедельника)</p></div>
+                <div class="text-center mb-6 shrink-0"><h3 class="font-black text-xl sm:text-2xl text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">🔥 Топ за неделю</h3><p class="text-[10px] text-gray-400 mt-1 uppercase">По количеству решённых строк задания №4 (с понедельника)</p></div>
                 <div id="weekly-class-stats" class="flex flex-col gap-3 w-full"></div>
              </div>
              
@@ -727,12 +727,17 @@
                     <div class="text-center bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><p class="text-[10px] text-gray-400 uppercase font-black tracking-widest">Всего решено</p><p class="text-3xl font-black text-examBlue dark:text-blue-400 mt-1" id="modal-stat-solved">0</p></div>
                     <div class="text-center bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm relative overflow-hidden cursor-pointer hover:border-rose-400 transition-colors active:scale-95 group" onclick="openMistakesListModal()"><div class="absolute inset-0 bg-rose-50 dark:bg-rose-900/10 opacity-50 pointer-events-none transition-opacity group-hover:opacity-100"></div><p class="text-[10px] text-rose-400 uppercase font-black tracking-widest relative z-10">Ошибок в пуле</p><p class="text-3xl font-black text-rose-500 relative z-10 mt-1" id="modal-stat-mistakes">0</p><div class="absolute bottom-1 left-0 w-full text-center text-[8px] text-rose-400/70 font-bold uppercase">Смотреть</div></div>
                 </div>
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="text-center bg-white dark:bg-[#1e1e1e] p-3 rounded-2xl border border-blue-100 dark:border-blue-900/30 shadow-sm"><p class="text-[9px] text-blue-400 uppercase font-black tracking-widest">📍 Строки</p><p class="text-xl font-black text-blue-600 dark:text-blue-400 mt-1" id="modal-stat-task4">0</p></div>
+                    <div class="text-center bg-white dark:bg-[#1e1e1e] p-3 rounded-2xl border border-purple-100 dark:border-purple-900/30 shadow-sm"><p class="text-[9px] text-purple-400 uppercase font-black tracking-widest">👤 Личности</p><p class="text-xl font-black text-purple-600 dark:text-purple-400 mt-1" id="modal-stat-task5">0</p></div>
+                    <div class="text-center bg-white dark:bg-[#1e1e1e] p-3 rounded-2xl border border-amber-100 dark:border-amber-900/30 shadow-sm"><p class="text-[9px] text-amber-400 uppercase font-black tracking-widest">🎨 Культура</p><p class="text-xl font-black text-amber-600 dark:text-amber-400 mt-1" id="modal-stat-task7">0</p></div>
+                </div>
                 <div id="student-leaderboard-container" class="hidden mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
-                    <h3 class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-1"><span>🌍</span> Общий топ (неделя)</h3>
+                    <h3 class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-1"><span>🌍</span> Топ недели (строки №4)</h3>
                     <div id="student-leaderboard-list" class="flex flex-col gap-2"></div>
                 </div>
                 <div class="mb-6 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Прогресс по эпохам</h3><div id="stats-era-container" class="space-y-3"></div></div>
-                <div class="mb-2 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Активность по дням</h3><div id="stats-daily-container" class="space-y-2"></div></div>
+                <div class="mb-2 bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm"><h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Активность по дням (по заданиям)</h3><div id="stats-daily-container" class="space-y-2"></div></div>
             </div>
             <div class="shrink-0 pt-4 border-t border-gray-200 dark:border-[#2c2c2c] mt-2"><button onclick="copyTextReport()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-transform active:scale-95 shadow-[0_4px_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2">📋 Скопировать отчет</button></div>
         </div>
@@ -802,7 +807,7 @@
 
         window.state = {
             selectedChip: null, currentTask: 'task4', pendingTask: 'task4', pendingMode: 'normal',
-            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
+            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, solvedByTask: { task4: 0, task5: 0, task7: 0 }, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
             mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
             isTeacherAdmin: false, focusMode: false, studyIndex: 0, errorStreak: 0,
             duel: { active: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, myCombo: 0, oppScore: 0, oppCombo: 0, searching: false }
@@ -981,9 +986,16 @@
 
         function updateScoreAndStats(linesCount, isPerfectHw = false) {
             window.state.stats.totalSolvedEver += linesCount; 
+            // Per-task totals
+            const curTask = window.state.currentTask || 'task4';
+            if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task4: 0, task5: 0, task7: 0 };
+            window.state.stats.solvedByTask[curTask] = (window.state.stats.solvedByTask[curTask] || 0) + linesCount;
             const today = getTodayString(); 
-            if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 }; 
+            if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0, solvedTask4: 0, solvedTask5: 0, solvedTask7: 0 }; 
             window.state.stats.dailyStats[today].solved += linesCount;
+            // Per-task daily
+            const dtKey = 'solved' + curTask.charAt(0).toUpperCase() + curTask.slice(1);
+            window.state.stats.dailyStats[today][dtKey] = (window.state.stats.dailyStats[today][dtKey] || 0) + linesCount;
             const h = new Date().getHours();
             if (h >= 0 && h < 5) window.state.stats.achievementsData.nightOwls += linesCount;
             if (h >= 5 && h < 8) window.state.stats.achievementsData.earlyBirds += linesCount;
@@ -1288,6 +1300,8 @@
                             if (!window.state.stats.eraStats[tk][era]) window.state.stats.eraStats[tk][era] = { correct: 0, total: 0 };
                         }
                     }
+                    // Гарантируем solvedByTask
+                    if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task4: 0, task5: 0, task7: 0 };
                 }
             } catch(e) {}
             if (localStorage.getItem('ege_theme') === 'dark') document.documentElement.classList.add('dark');
@@ -1301,7 +1315,7 @@
         }
 
         function saveProgress() {
-            localStorage.setItem('ege_final_storage_v4', JSON.stringify({ streak: window.state.stats.streak, totalSolvedEver: window.state.stats.totalSolvedEver, flashcardsSolved: window.state.stats.flashcardsSolved, eraStats: window.state.stats.eraStats, factStreaks: window.state.stats.factStreaks, hwFlashcardsToSolve: window.state.stats.hwFlashcardsToSolve, mistakesPool: window.state.mistakesPool, hideLearned: window.state.hideLearned, totalTimeSpent: window.state.stats.totalTimeSpent, bestSpeedrunScore: window.state.stats.bestSpeedrunScore, dailyStats: window.state.stats.dailyStats, achievements: window.state.stats.achievements, achievementsData: window.state.stats.achievementsData }));
+            localStorage.setItem('ege_final_storage_v4', JSON.stringify({ streak: window.state.stats.streak, totalSolvedEver: window.state.stats.totalSolvedEver, solvedByTask: window.state.stats.solvedByTask, flashcardsSolved: window.state.stats.flashcardsSolved, eraStats: window.state.stats.eraStats, factStreaks: window.state.stats.factStreaks, hwFlashcardsToSolve: window.state.stats.hwFlashcardsToSolve, mistakesPool: window.state.mistakesPool, hideLearned: window.state.hideLearned, totalTimeSpent: window.state.stats.totalTimeSpent, bestSpeedrunScore: window.state.stats.bestSpeedrunScore, dailyStats: window.state.stats.dailyStats, achievements: window.state.stats.achievements, achievementsData: window.state.stats.achievementsData }));
             if (window.syncProgressToCloud) window.syncProgressToCloud();
         }
 
@@ -1843,6 +1857,11 @@
             let totalL = 0, freshL = 0, now = Date.now();
             Object.values(window.state.stats.factStreaks || {}).forEach(d => { if (window.isFactLearned(d)) { totalL++; if (d.nextReview > now) freshL++; } });
             updateText($('stat-streak'), window.state.stats.streak); updateText($('stat-solved'), window.state.stats.totalSolvedEver); if($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver); updateText($('stat-learned'), totalL); updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver); updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
+            // Per-task solved counters
+            const sbt = window.state.stats.solvedByTask || {};
+            if($('modal-stat-task4')) updateText($('modal-stat-task4'), sbt.task4 || 0);
+            if($('modal-stat-task5')) updateText($('modal-stat-task5'), sbt.task5 || 0);
+            if($('modal-stat-task7')) updateText($('modal-stat-task7'), sbt.task7 || 0);
             if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0 && $('hw-remaining')) updateText($('hw-remaining'), window.state.hwCurrentPool.length);
             if (window.state.stats.hwFlashcardsToSolve > 0) { 
                 if($('personal-hw-alert')) $('personal-hw-alert').classList.remove('hidden'); 
@@ -1912,7 +1931,7 @@
                 });
                 $('stats-era-container').innerHTML = eH || '<p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center py-4">Ещё нет данных</p>';
             }
-            if ($('stats-daily-container')) { const dStat = window.state.stats.dailyStats || {}; const dts = Object.keys(dStat).sort((a,b) => new Date(b) - new Date(a)).slice(0, 5); if (dts.length > 0) { let dH = ''; dts.forEach(d => { const mins = Math.floor((dStat[d].timeSpent || 0) / 60); dH += `<div class="flex justify-between items-center bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-100 dark:border-[#2c2c2c]"><span class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">${new Date(d).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'})}</span><div class="text-xs text-right"><span class="font-black text-examBlue dark:text-blue-400">${dStat[d].solved || 0} решено</span><span class="text-gray-300 dark:text-gray-600 mx-1">|</span><span class="font-bold text-yellow-600 dark:text-yellow-500">${mins} мин</span></div></div>`; }); $('stats-daily-container').innerHTML = dH; } else $('stats-daily-container').innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">Пока нет данных.</p>'; }
+            if ($('stats-daily-container')) { const dStat = window.state.stats.dailyStats || {}; const dts = Object.keys(dStat).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7); if (dts.length > 0) { let dH = ''; dts.forEach(d => { const day = dStat[d]; const mins = Math.floor((day.timeSpent || 0) / 60); const t4 = day.solvedTask4 || 0; const t5 = day.solvedTask5 || 0; const t7 = day.solvedTask7 || 0; const total = day.solved || 0; const taskParts = []; if (t4) taskParts.push(`<span class="text-blue-500">📍${t4}</span>`); if (t5) taskParts.push(`<span class="text-purple-500">👤${t5}</span>`); if (t7) taskParts.push(`<span class="text-amber-500">🎨${t7}</span>`); const taskStr = taskParts.length > 0 ? taskParts.join(' ') : `<span class="text-examBlue dark:text-blue-400">${total}</span>`; dH += `<div class="bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-100 dark:border-[#2c2c2c]"><div class="flex justify-between items-center"><span class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">${new Date(d).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'})}</span><span class="font-bold text-yellow-600 dark:text-yellow-500 text-[11px]">⏱ ${mins} мин</span></div><div class="flex gap-3 mt-1.5 text-[11px] font-black">${taskStr}<span class="text-gray-400 ml-auto">Всего: ${total}</span></div></div>`; }); $('stats-daily-container').innerHTML = dH; } else $('stats-daily-container').innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">Пока нет данных.</p>'; }
             showModal('stats-modal');
         };
 
@@ -2057,7 +2076,7 @@
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithRedirect, linkWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
@@ -2216,18 +2235,31 @@
                 if (result && result.user) {
                     googleSignedIn = true;
                     _applyGoogleUser(result.user);
-                    setTimeout(() => {
-                        const em = result.user.email || result.user.displayName || '';
-                        showToast('✅', 'Вход через Google: ' + em, 'bg-emerald-500', 'border-emerald-700');
-                    }, 600);
-                    if (window.syncProgressToCloud) window.syncProgressToCloud();
+                    // Тост и синхронизация — в onAuthStateChanged (когда fbUser уже установлен)
+                    window._pendingGoogleToast = result.user.email || result.user.displayName || '';
                 }
             } catch (e) {
                 console.error('getRedirectResult error:', e);
-                // Показываем ошибку пользователю (кроме случая «сам закрыл окно»)
-                if (e.code && e.code !== 'auth/redirect-cancelled-by-user'
-                           && e.code !== 'auth/user-cancelled') {
-                    setTimeout(() => showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700'), 600);
+
+                // ── Аккаунт Google уже привязан к другой анонимной сессии Firebase.
+                //    Решение — войти под этим аккаунтом напрямую через credential из ошибки.
+                if (e.code === 'auth/credential-already-in-use' ||
+                    e.code === 'auth/email-already-in-use') {
+                    try {
+                        const credential = GoogleAuthProvider.credentialFromError(e);
+                        if (credential) {
+                            const fallbackResult = await signInWithCredential(auth, credential);
+                            googleSignedIn = true;
+                            _applyGoogleUser(fallbackResult.user);
+                            window._pendingGoogleToast = fallbackResult.user.email || fallbackResult.user.displayName || '';
+                        }
+                    } catch (fallbackErr) {
+                        console.error('signInWithCredential fallback error:', fallbackErr);
+                        setTimeout(() => showToast('❌', 'Не удалось войти через Google. Попробуйте ещё раз.', 'bg-rose-500', 'border-rose-700'), 800);
+                    }
+                } else if (e.code && e.code !== 'auth/redirect-cancelled-by-user'
+                                   && e.code !== 'auth/user-cancelled') {
+                    setTimeout(() => showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700'), 800);
                 }
             }
 
@@ -2238,48 +2270,76 @@
         };
         _bootAuth();
 
-        // ─── Google Sign-In (redirect) ───────────────────────────────────────────
+        // ─── Google Sign-In (popup with redirect fallback) ─────────────────────
+        // signInWithPopup works in most environments including WebViews.
+        // If popup is blocked, falls back to signInWithRedirect.
         window.signInWithGoogle = async function() {
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
             try {
-                // linkWithRedirect — если текущий пользователь анонимный,
-                // сохраняем его данные и привязываем Google-аккаунт.
-                // signInWithRedirect — если уже есть не-анонимный аккаунт.
-                if (fbUser && fbUser.isAnonymous) {
-                    await linkWithRedirect(fbUser, provider);
-                } else {
-                    await signInWithRedirect(auth, provider);
+                // Try popup first — works in most browsers & WebViews
+                const result = await signInWithPopup(auth, provider);
+                if (result && result.user) {
+                    _applyGoogleUser(result.user);
+                    showToast('✅', 'Вход через Google: ' + (result.user.email || result.user.displayName || ''), 'bg-emerald-500', 'border-emerald-700');
                 }
-                // После этого вызова браузер уйдёт на страницу Google.
-                // Результат будет пойман в getRedirectResult при возврате.
             } catch (e) {
-                console.error('signInWithGoogle error:', e);
-                showToast('❌', 'Не удалось начать вход: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700');
+                // If popup blocked or failed, try redirect
+                if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+                    try {
+                        await signInWithRedirect(auth, provider);
+                    } catch (redirectErr) {
+                        console.error('signInWithRedirect fallback error:', redirectErr);
+                        showToast('❌', 'Не удалось войти: ' + (redirectErr.code || redirectErr.message), 'bg-rose-500', 'border-rose-700');
+                    }
+                } else if (e.code === 'auth/credential-already-in-use' || e.code === 'auth/email-already-in-use') {
+                    // Account already exists — sign in with credential directly
+                    try {
+                        const credential = GoogleAuthProvider.credentialFromError(e);
+                        if (credential) {
+                            const fallbackResult = await signInWithCredential(auth, credential);
+                            _applyGoogleUser(fallbackResult.user);
+                            showToast('✅', 'Вход через Google: ' + (fallbackResult.user.email || ''), 'bg-emerald-500', 'border-emerald-700');
+                        }
+                    } catch (credErr) {
+                        console.error('signInWithCredential error:', credErr);
+                        showToast('❌', 'Не удалось войти через Google', 'bg-rose-500', 'border-rose-700');
+                    }
+                } else {
+                    console.error('signInWithGoogle error:', e);
+                    showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700');
+                }
             }
         };
 
         onAuthStateChanged(auth, async (u) => { 
             fbUser = u; 
             if (u) {
-                // Если Firebase знает, что юзер вошёл через Google — восстанавливаем статус в UI
-                // (актуально при перезагрузке страницы, когда редиректа уже не было)
+                // ── Всегда синхронизируем stable_student_id с Google, если вход через Google.
+                //    Это работает и при первом входе, и при повторном открытии на том же/новом устройстве.
                 const googleProvider = (u.providerData || []).find(p => p.providerId === 'google.com');
-                if (googleProvider && !localStorage.getItem('google_email')) {
+                if (googleProvider) {
                     const gEmail = googleProvider.email || u.email || '';
                     const gName  = googleProvider.displayName || u.displayName || '';
+                    // Всегда обновляем — без проверки !localStorage, чтобы не было рассинхрона
                     localStorage.setItem('google_email', gEmail);
                     localStorage.setItem('google_uid',   u.uid);
                     localStorage.setItem('stable_student_id', 'google_' + u.uid);
                     if (gName && !localStorage.getItem('student_manual_name'))
                         localStorage.setItem('student_manual_name', gName);
-                    const statusEl = $('profile-google-status');
-                    if (statusEl) {
-                        statusEl.textContent = '✅ ' + (gEmail || gName);
-                        statusEl.className   = 'text-[11px] font-bold text-emerald-600 mt-1';
-                    }
+                    _applyGoogleUser(u); // обновляет UI профиля
                 }
-                await window.loadProgressFromCloud(); 
+
+                // Загружаем прогресс из облака (ПЕРЕД синхронизацией — иначе затрём облако нулями)
+                await window.loadProgressFromCloud();
+
+                // Тост о входе через Google (если был редирект)
+                if (window._pendingGoogleToast) {
+                    showToast('✅', 'Вход через Google: ' + window._pendingGoogleToast, 'bg-emerald-500', 'border-emerald-700');
+                    window._pendingGoogleToast = null;
+                }
+
+                // Теперь синхронизируем актуальный (возможно только что загруженный) прогресс в облако
                 window.syncProgressToCloud(); 
                 
                 // Receiver for Homework (per-task system)
@@ -2511,15 +2571,16 @@
             }).filter(t => t.total > 0 || t.learned > 0);
 
             const dStat = stats.dailyStats || state.dailyStats || {};
-            let wScore = 0;
+            let wScore = 0, wScoreTask4 = 0;
             const now = new Date();
             const last7 = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date(now); d.setDate(d.getDate() - i);
                 const dStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                 const val = (dStat[dStr] && dStat[dStr].solved) || 0;
-                if (dStr >= monStr) wScore += val;
-                last7.push({ date: dStr, val });
+                const valT4 = (dStat[dStr] && dStat[dStr].solvedTask4) || 0;
+                if (dStr >= monStr) { wScore += val; wScoreTask4 += valT4; }
+                last7.push({ date: dStr, val, t4: (dStat[dStr] && dStat[dStr].solvedTask4) || 0, t5: (dStat[dStr] && dStat[dStr].solvedTask5) || 0, t7: (dStat[dStr] && dStat[dStr].solvedTask7) || 0, mins: dStat[dStr] ? Math.floor((dStat[dStr].timeSpent || 0) / 60) : 0 });
             }
             // No totalSolved fallback — must come from actual dailyStats
 
@@ -2534,7 +2595,7 @@
                 if (e.total >= 5 && e.pct !== null && e.pct < weakPct) { weakPct = e.pct; weakEra = e; }
             }
 
-            return { ...s, streak, timeSpentMin, learnedCount, accuracy, eraData, taskStats, wScore, last7,
+            return { ...s, streak, timeSpentMin, learnedCount, accuracy, eraData, taskStats, wScore, wScoreTask4, last7, dStat,
                      daysSinceActive, isToday: daysSinceActive === 0, atRisk: daysSinceActive >= 3,
                      lastActiveStr, weakEra, totalCorrect, totalAttempts };
         }
@@ -2565,6 +2626,24 @@
                     <span style="font-size:9px;font-weight:700;color:${c};min-width:28px;text-align:right">${e.pct}%</span>
                 </div>`;
             }).join('');
+        }
+
+        function renderDailyDetail(last7) {
+            const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+            return last7.filter(d => d.val > 0).reverse().map(d => {
+                const dayIdx = (new Date(d.date).getDay() + 6) % 7;
+                const dateStr = new Date(d.date).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'});
+                const parts = [];
+                if (d.t4) parts.push(`<span style="color:#3b82f6">📍${d.t4}</span>`);
+                if (d.t5) parts.push(`<span style="color:#8b5cf6">👤${d.t5}</span>`);
+                if (d.t7) parts.push(`<span style="color:#f59e0b">🎨${d.t7}</span>`);
+                const taskStr = parts.length ? parts.join(' ') : `<span style="color:#3b82f6">${d.val}</span>`;
+                return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;padding:3px 0;border-bottom:1px solid #f8fafc">
+                    <span style="font-weight:700;color:#94a3b8;min-width:30px">${dateStr}</span>
+                    <span style="font-weight:700">${taskStr}</span>
+                    <span style="color:#94a3b8;font-weight:600">${d.mins}м</span>
+                </div>`;
+            }).join('') || '<div style="font-size:9px;color:#94a3b8;padding:4px 0">Нет данных</div>';
         }
 
         function renderStudentCard(s, idx) {
@@ -2609,6 +2688,10 @@
                         ${renderEraRows(s.eraData) || '<div style="font-size:9px;color:#94a3b8;padding-top:4px">Нет данных</div>'}
                         ${weakBlock}
                     </div>
+                </div>
+                <div style="padding:8px 0;border-bottom:1px solid #f1f5f9">
+                    <div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:4px">Подневная статистика</div>
+                    ${renderDailyDetail(s.last7)}
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0 4px;font-size:9px;color:#94a3b8;font-weight:700">
                     <span>⏱ В игре: <b style="color:#a78bfa">${timeStr}</b></span>
@@ -2834,11 +2917,11 @@
 
                 // Топ недели
                 if (wCont) {
-                    const weeklySt = [...enriched].sort((a,b)=>(b.wScore||0)-(a.wScore||0)).filter(s=>s.wScore>0);
+                    const weeklySt = [...enriched].sort((a,b)=>(b.wScoreTask4||0)-(a.wScoreTask4||0)).filter(s=>s.wScoreTask4>0);
                     let wHt = weeklySt.length
                         ? weeklySt.map((s,idx) => `<div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center mb-2">
                             <div class="flex items-center gap-3"><span class="text-2xl font-black">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':`<span class="text-gray-400 w-6 inline-block text-center text-lg">${idx+1}</span>`}</span><span class="font-black text-sm dark:text-gray-200">${s.name||'Без имени'}</span></div>
-                            <span class="text-base font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl">${s.wScore} стр.</span>
+                            <span class="text-base font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl">${s.wScoreTask4} стр.</span>
                           </div>`).join('')
                         : '<p class="text-center py-4 text-xs font-bold text-gray-500">На этой неделе пока нет активности</p>';
                     wCont.innerHTML = wHt;
@@ -2873,10 +2956,9 @@
                     let state = {}; try { state = JSON.parse(st.fullStateJson || '{}'); } catch(e){}
                     let dStat = state.dailyStats || state.stats?.dailyStats || {};
                     let wScore = 0;
-                    for (let d in dStat) { if (d >= monStr) wScore += (dStat[d].solved || 0); }
+                    for (let d in dStat) { if (d >= monStr) wScore += (dStat[d].solvedTask4 || 0); }
                     
-                    // Note: do NOT fall back to totalSolved — that inflates weekly score incorrectly
-                    // If no dailyStats entries this week, weekly score stays 0
+                    // Only task4 (строки) count for weekly leaderboard
                     
                     st.weeklyScore = wScore;
                 });
@@ -2948,19 +3030,30 @@
                 const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(fbUser)));
                 if (dS.exists()) {
                     const d = dS.data();
-                    if (d.totalSolved > (window.state.stats.totalSolvedEver || 0) && d.fullStateJson) {
-                        const cS = JSON.parse(d.fullStateJson); 
-                        Object.assign(window.state.stats, cS.stats); 
-                        if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool; 
-                        if (cS.hideLearned !== undefined) window.state.hideLearned = cS.hideLearned;
-                        if (cS.customYearFrom !== undefined) window.state.yearFrom = cS.customYearFrom;
-                        if (cS.customYearTo !== undefined) window.state.yearTo = cS.customYearTo;
-                        if (cS.selectedPeriods) window.state.selectedPeriods = cS.selectedPeriods;
-                        localStorage.setItem('ege_final_storage_v4', d.fullStateJson); 
-                    } 
-                    if(window.updateGlobalUI) window.updateGlobalUI();
+                    const cloudSolved  = d.totalSolved || 0;
+                    const localSolved  = window.state.stats.totalSolvedEver || 0;
+                    // Загружаем облако если:
+                    //   1. В облаке больше решённых задач (основной случай)
+                    //   2. Локальных данных нет вообще (новое устройство, localSolved == 0)
+                    const shouldLoad = d.fullStateJson && (cloudSolved > localSolved || localSolved === 0);
+                    if (shouldLoad) {
+                        try {
+                            const cS = JSON.parse(d.fullStateJson);
+                            Object.assign(window.state.stats, cS.stats);
+                            if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool;
+                            if (cS.hideLearned !== undefined) window.state.hideLearned = cS.hideLearned;
+                            if (cS.customYearFrom !== undefined) window.state.yearFrom = cS.customYearFrom;
+                            if (cS.customYearTo !== undefined) window.state.yearTo = cS.customYearTo;
+                            if (cS.selectedPeriods) window.state.selectedPeriods = cS.selectedPeriods;
+                            localStorage.setItem('ege_final_storage_v4', d.fullStateJson);
+                            console.log(`[Sync] Загружено из облака: ${cloudSolved} задач (локально было: ${localSolved})`);
+                        } catch(parseErr) {
+                            console.error('[Sync] Ошибка парсинга fullStateJson:', parseErr);
+                        }
+                    }
+                    if (window.updateGlobalUI) window.updateGlobalUI();
                 }
-            } catch(e) {}
+            } catch(e) { console.error('[Sync] loadProgressFromCloud error:', e); }
         };
 
         window.syncProgressToCloud = async function() {
