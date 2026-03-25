@@ -700,15 +700,6 @@
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-5 shadow-2xl">
             <h3 class="font-black text-xl dark:text-gray-300 text-center uppercase tracking-widest">👤 Профиль</h3>
-            <!-- Google Auth Block -->
-            <div class="bg-gray-50 dark:bg-[#181818] rounded-2xl p-4 border border-gray-200 dark:border-[#2c2c2c] flex flex-col gap-2">
-                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Аккаунт Google</label>
-                <div id="profile-google-status" class="text-[11px] font-bold text-gray-400">Не привязан</div>
-                <button onclick="signInWithGoogle()" class="flex items-center justify-center gap-2 w-full bg-white dark:bg-[#2c2c2c] border border-gray-300 dark:border-[#3f3f46] rounded-xl py-2.5 font-black text-xs text-gray-700 dark:text-gray-300 active:scale-95 transition-transform shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-700">
-                    <svg viewBox="0 0 24 24" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                    Войти через Google
-                </button>
-            </div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Имя и Фамилия</label><input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-4 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold shadow-inner"></div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Код класса (от учителя)</label><input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-4 font-mono border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none text-center font-black text-lg text-blue-600 dark:text-blue-400 shadow-inner"></div>
             <div class="flex gap-3 mt-2"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
@@ -808,7 +799,7 @@
         window.state = {
             selectedChip: null, currentTask: 'task4', pendingTask: 'task4', pendingMode: 'normal',
             stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, solvedByTask: { task4: 0, task5: 0, task7: 0 }, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
-            mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
+            mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: true, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
             isTeacherAdmin: false, focusMode: false, studyIndex: 0, errorStreak: 0,
             duel: { active: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, myCombo: 0, oppScore: 0, oppCombo: 0, searching: false }
         };
@@ -1196,8 +1187,8 @@
             
             $('pg-period-container').classList.remove('hidden');
             $('pg-rows-container').classList.remove('hidden');
-            $('pg-case-container').classList.remove('hidden'); 
-            $('pg-database-container').classList.remove('hidden'); 
+            $('pg-case-container').classList.toggle('hidden', window.state.currentMode !== 'detective'); 
+            $('pg-database-container').classList.toggle('hidden', window.state.currentTask !== 'task7'); 
             $('pg-hide-learned-container').classList.remove('hidden');
             
             if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'all';
@@ -1554,7 +1545,15 @@
             
             if (typeof task5Data === 'undefined') return;
             let fakesCount = Math.ceil(target.length / 2);
-            let poolItems = [...missing]; let att = 0; let allP = [...new Set(task5Data.map(d => d.person))]; 
+            let poolItems = [...missing]; let att = 0; 
+            // Smart distractors: prefer persons from the same eras as the target
+            let targetEras = [...new Set(target.map(t => t.c))];
+            let sameEraPeople = [...new Set(task5Data.filter(d => targetEras.includes(d.c)).map(d => d.person))];
+            let allP = [...new Set(task5Data.map(d => d.person))]; 
+            // First try same-era fakes
+            let shuffledSameEra = shuffleArray([...sameEraPeople]);
+            for (let p of shuffledSameEra) { if (poolItems.length >= target.length + fakesCount) break; if (!uPoolP.has(p)) { poolItems.push(p); uPoolP.add(p); } }
+            // Then fallback to any era
             while(poolItems.length < target.length + fakesCount && att < 100) { let randP = allP[Math.floor(Math.random() * allP.length)]; if (!uPoolP.has(randP)) { poolItems.push(randP); uPoolP.add(randP); } att++; }
             const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const c = document.createElement('div'); c.className = "dnd-chip"; c.innerText = txt; c.dataset.pureText = txt; poolFrag.appendChild(c); }); $('pool-container').appendChild(poolFrag);
         }
@@ -1593,7 +1592,15 @@
             $('task-table-body').appendChild(trFrag);
             
             let fakesCount = Math.ceil(target.length / 2);
-            let poolItems = [...missing]; let att = 0; let allT = [...new Set(window.task7Data.map(d => d.trait))]; 
+            let poolItems = [...missing]; let att = 0; 
+            // Smart distractors: prefer traits from the same eras as the target
+            let targetEras = [...new Set(target.map(t => t.c))];
+            let sameEraTraits = [...new Set(window.task7Data.filter(d => targetEras.includes(d.c)).map(d => d.trait))];
+            let allT = [...new Set(window.task7Data.map(d => d.trait))]; 
+            // First try same-era fakes
+            let shuffledSameEra = shuffleArray([...sameEraTraits]);
+            for (let t of shuffledSameEra) { if (poolItems.length >= target.length + fakesCount) break; if (!poolItems.includes(t)) poolItems.push(t); }
+            // Then fallback to any era
             while(poolItems.length < target.length + fakesCount && att < 100) { 
                 let randT = allT[Math.floor(Math.random() * allT.length)]; 
                 if (!poolItems.includes(randT)) poolItems.push(randT); 
@@ -1692,7 +1699,7 @@
             ['geo', 'event', 'year'].forEach(type => {
                 for(let i=0; i<requiredFakes[type]; i++) { 
                     let fnd = false, att = 0, relHid = hiddenRowsData.find(h => h.types.includes(type)), trap = null; 
-                    if (typeof trapDict !== 'undefined' && relHid && Math.random() < 0.35) { let pT = trapDict[relHid.row[type]]; if (pT && pT.length > 0) trap = pT[Math.floor(Math.random() * pT.length)]; } 
+                    if (typeof trapDict !== 'undefined' && relHid && Math.random() < 0.6) { let pT = trapDict[relHid.row[type]]; if (pT && pT.length > 0) trap = pT[Math.floor(Math.random() * pT.length)]; } 
                     if (trap && !poolItems.includes(trap)) { poolItems.push(trap); continue; } 
                     while(!fnd && att < 50) { 
                         let rF = pFacts[Math.floor(Math.random()*pFacts.length)], val = rF[type]; 
@@ -1954,11 +1961,6 @@
         window.openProfileModal = function() {
             $('profile-name-input').value = localStorage.getItem('student_manual_name') || '';
             $('profile-class-code').value = localStorage.getItem('student_class_code') || '';
-            const gEmail = localStorage.getItem('google_email');
-            if ($('profile-google-status')) {
-                $('profile-google-status').textContent = gEmail ? '✅ ' + gEmail : 'Не привязан';
-                $('profile-google-status').className = gEmail ? 'text-[11px] font-bold text-emerald-600 mt-1' : 'text-[11px] font-bold text-gray-400 mt-1';
-            }
             showModal('profile-modal');
         };
         window.saveProfileName = function() { const nm = $('profile-name-input').value.trim(), cd = $('profile-class-code').value.trim(); if (nm) localStorage.setItem('student_manual_name', nm); if (cd !== undefined) localStorage.setItem('student_class_code', cd); showToast('✅', 'Профиль сохранен!', 'bg-emerald-500', 'border-emerald-700'); hideModal('profile-modal'); if (window.syncProgressToCloud) window.syncProgressToCloud(); };
@@ -2076,7 +2078,7 @@
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
@@ -2207,140 +2209,17 @@
                 }
             }
         };
-        // ─── Google auth helper ──────────────────────────────────────────────────
-        function _applyGoogleUser(user) {
-            const gName  = user.displayName || '';
-            const gEmail = user.email       || '';
-            if (gName && !localStorage.getItem('student_manual_name'))
-                localStorage.setItem('student_manual_name', gName);
-            localStorage.setItem('stable_student_id', 'google_' + user.uid);
-            localStorage.setItem('google_uid',   user.uid);
-            localStorage.setItem('google_email', gEmail);
-            const statusEl = $('profile-google-status');
-            if (statusEl) {
-                statusEl.textContent  = '✅ ' + (gEmail || gName);
-                statusEl.className    = 'text-[11px] font-bold text-emerald-600 mt-1';
-            }
-            const nameEl = $('profile-name-input');
-            if (nameEl && gName && !nameEl.value) nameEl.value = gName;
-        }
-
         // ─── Main auth bootstrap ─────────────────────────────────────────────────
-        // ВАЖНО: getRedirectResult нужно вызывать ДО signInAnonymously,
-        // иначе анонимный вход перебивает сессию редиректа.
         const _bootAuth = async () => {
-            let googleSignedIn = false;
-            try {
-                const result = await getRedirectResult(auth);
-                if (result && result.user) {
-                    googleSignedIn = true;
-                    _applyGoogleUser(result.user);
-                    // Тост и синхронизация — в onAuthStateChanged (когда fbUser уже установлен)
-                    window._pendingGoogleToast = result.user.email || result.user.displayName || '';
-                }
-            } catch (e) {
-                console.error('getRedirectResult error:', e);
-
-                // ── Аккаунт Google уже привязан к другой анонимной сессии Firebase.
-                //    Решение — войти под этим аккаунтом напрямую через credential из ошибки.
-                if (e.code === 'auth/credential-already-in-use' ||
-                    e.code === 'auth/email-already-in-use') {
-                    try {
-                        const credential = GoogleAuthProvider.credentialFromError(e);
-                        if (credential) {
-                            const fallbackResult = await signInWithCredential(auth, credential);
-                            googleSignedIn = true;
-                            _applyGoogleUser(fallbackResult.user);
-                            window._pendingGoogleToast = fallbackResult.user.email || fallbackResult.user.displayName || '';
-                        }
-                    } catch (fallbackErr) {
-                        console.error('signInWithCredential fallback error:', fallbackErr);
-                        setTimeout(() => showToast('❌', 'Не удалось войти через Google. Попробуйте ещё раз.', 'bg-rose-500', 'border-rose-700'), 800);
-                    }
-                } else if (e.code && e.code !== 'auth/redirect-cancelled-by-user'
-                                   && e.code !== 'auth/user-cancelled') {
-                    setTimeout(() => showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700'), 800);
-                }
-            }
-
-            // Если Google-аккаунт не найден — запускаем стандартный анонимный вход
-            if (!googleSignedIn) {
-                await initAuth();
-            }
+            await initAuth();
         };
         _bootAuth();
-
-        // ─── Google Sign-In (popup with redirect fallback) ─────────────────────
-        // signInWithPopup works in most environments including WebViews.
-        // If popup is blocked, falls back to signInWithRedirect.
-        window.signInWithGoogle = async function() {
-            const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            try {
-                // Try popup first — works in most browsers & WebViews
-                const result = await signInWithPopup(auth, provider);
-                if (result && result.user) {
-                    _applyGoogleUser(result.user);
-                    showToast('✅', 'Вход через Google: ' + (result.user.email || result.user.displayName || ''), 'bg-emerald-500', 'border-emerald-700');
-                }
-            } catch (e) {
-                // If popup blocked or failed, try redirect
-                if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
-                    try {
-                        await signInWithRedirect(auth, provider);
-                    } catch (redirectErr) {
-                        console.error('signInWithRedirect fallback error:', redirectErr);
-                        showToast('❌', 'Не удалось войти: ' + (redirectErr.code || redirectErr.message), 'bg-rose-500', 'border-rose-700');
-                    }
-                } else if (e.code === 'auth/credential-already-in-use' || e.code === 'auth/email-already-in-use') {
-                    // Account already exists — sign in with credential directly
-                    try {
-                        const credential = GoogleAuthProvider.credentialFromError(e);
-                        if (credential) {
-                            const fallbackResult = await signInWithCredential(auth, credential);
-                            _applyGoogleUser(fallbackResult.user);
-                            showToast('✅', 'Вход через Google: ' + (fallbackResult.user.email || ''), 'bg-emerald-500', 'border-emerald-700');
-                        }
-                    } catch (credErr) {
-                        console.error('signInWithCredential error:', credErr);
-                        showToast('❌', 'Не удалось войти через Google', 'bg-rose-500', 'border-rose-700');
-                    }
-                } else {
-                    console.error('signInWithGoogle error:', e);
-                    showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700');
-                }
-            }
-        };
 
         onAuthStateChanged(auth, async (u) => { 
             fbUser = u; 
             if (u) {
-                // ── Всегда синхронизируем stable_student_id с Google, если вход через Google.
-                //    Это работает и при первом входе, и при повторном открытии на том же/новом устройстве.
-                const googleProvider = (u.providerData || []).find(p => p.providerId === 'google.com');
-                if (googleProvider) {
-                    const gEmail = googleProvider.email || u.email || '';
-                    const gName  = googleProvider.displayName || u.displayName || '';
-                    // Всегда обновляем — без проверки !localStorage, чтобы не было рассинхрона
-                    localStorage.setItem('google_email', gEmail);
-                    localStorage.setItem('google_uid',   u.uid);
-                    localStorage.setItem('stable_student_id', 'google_' + u.uid);
-                    if (gName && !localStorage.getItem('student_manual_name'))
-                        localStorage.setItem('student_manual_name', gName);
-                    _applyGoogleUser(u); // обновляет UI профиля
-                }
-
                 // Загружаем прогресс из облака (ПЕРЕД синхронизацией — иначе затрём облако нулями)
-                await window.loadProgressFromCloud();
-
-                // Тост о входе через Google (если был редирект)
-                if (window._pendingGoogleToast) {
-                    showToast('✅', 'Вход через Google: ' + window._pendingGoogleToast, 'bg-emerald-500', 'border-emerald-700');
-                    window._pendingGoogleToast = null;
-                }
-
-                // Теперь синхронизируем актуальный (возможно только что загруженный) прогресс в облако
-                window.syncProgressToCloud(); 
+                await window.loadProgressFromCloud(); 
                 
                 // Receiver for Homework (per-task system)
                 onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(u)), (docSnap) => {
