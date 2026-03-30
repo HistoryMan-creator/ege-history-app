@@ -362,8 +362,8 @@
         <div class="bg-gray-50 dark:bg-[#1e1e1e] rounded-t-3xl p-6 pb-10 w-full max-w-lg mx-auto flex flex-col gap-5 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto custom-scroll overscroll-contain" id="pg-sheet" onclick="event.stopPropagation()">
             <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-2 opacity-50 shrink-0"></div><h2 id="pre-game-title" class="text-xl font-black text-gray-800 dark:text-gray-300 text-center uppercase tracking-widest mb-2 shrink-0">Настройки</h2>
             
-            <div id="pg-period-container" class="flex flex-col gap-2 shrink-0"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Историческая эпоха</label><div class="relative"><select id="pg-filter-period" onchange="checkCustomPeriod()" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] text-gray-800 dark:text-gray-300 rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none cursor-pointer"><option value="all">🌍 Вся история</option><option value="custom">⚙️ Свой период</option><option value="early">⚔️ Древность и Смута</option><option value="18th">👑 XVIII век</option><option value="19th">🚂 XIX век</option><option value="20th">🚀 XX век</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div></div></div>
-            <div id="pg-custom-period-container" class="hidden grid grid-cols-2 gap-4"><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">От года</label><input type="number" id="pg-custom-year-start" value="862" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">До года</label><input type="number" id="pg-custom-year-end" value="2022" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div></div>
+            <div id="pg-period-container" class="flex flex-col gap-2 shrink-0"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Историческая эпоха</label><div class="relative"><select id="pg-filter-period" onchange="checkCustomPeriod()" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] text-gray-800 dark:text-gray-300 rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none cursor-pointer"><option value="all">🌍 Вся история</option><option value="custom" selected>⚙️ Свой период</option><option value="early">⚔️ Древность и Смута</option><option value="18th">👑 XVIII век</option><option value="19th">🚂 XIX век</option><option value="20th">🚀 XX век</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div></div></div>
+            <div id="pg-custom-period-container" class="hidden grid grid-cols-2 gap-4"><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">От года</label><input type="number" id="pg-custom-year-start" value="862" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div><div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">До года</label><input type="number" id="pg-custom-year-end" value="2026" class="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-2xl p-4 text-sm font-bold text-center outline-none shadow-sm dark:text-gray-300"></div></div>
             <div id="pg-rows-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Сложность (Количество строк)</label><div class="grid grid-cols-3 gap-2"><button onclick="setPgRows(4)" id="btn-row-4" class="pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors">4 строки</button><button onclick="setPgRows(6)" id="btn-row-6" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">6 строк</button><button onclick="setPgRows(10)" id="btn-row-10" class="pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors">10 строк</button></div></div>
             <div id="pg-case-container" class="flex flex-col gap-2"><label class="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">Материалы дела <span class="text-rose-400 font-bold lowercase tracking-normal text-[9px]">(только для режима детектив)</span></label><div class="relative"><select id="pg-filter-case" class="w-full bg-stone-100 dark:bg-[#2a2722] border-2 border-stone-300 dark:border-[#4a4235] text-stone-900 dark:text-[#dcd6c7] rounded-2xl p-4 text-sm font-bold outline-none shadow-sm appearance-none font-mono"><option value="rtw">⚔️ Русско-турецкие войны</option><option value="sweden">🌊 Борьба за Балтику</option><option value="smuta">👑 Смутное время</option><option value="mongols">🐎 Ордынское иго</option><option value="napoleon">🔥 Отечественная 1812 г.</option><option value="palace">📜 Дворцовые перевороты</option><option value="revolts">🔥 Бунташный век</option><option value="decembrists">❄️ Декабристы</option><option value="ww1">💥 Первая мировая война</option><option value="revolutions">🚩 Революции 1917 года</option><option value="ww2">🎖️ ВОВ</option><option value="coldwar">🌐 Холодная война</option></select><div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">▼</div></div></div>
             
@@ -552,11 +552,11 @@
     <div id="hidden-controls" style="display: none;">
         <select id="filter-task"><option value="task4" selected>task4</option><option value="task5">task5</option><option value="task7">task7</option></select>
         <select id="filter-mode"><option value="normal" selected>normal</option><option value="mistakes">mistakes</option><option value="speedrun">speedrun</option><option value="flashcards">flashcards</option><option value="study">study</option><option value="detective">detective</option><option value="redpencil">redpencil</option><option value="duel">duel</option></select>
-        <select id="filter-period"><option value="all" selected>all</option><option value="custom">custom</option><option value="early">early</option><option value="18th">18th</option><option value="19th">19th</option><option value="20th">20th</option></select>
+        <select id="filter-period"><option value="all">all</option><option value="custom" selected>custom</option><option value="early">early</option><option value="18th">18th</option><option value="19th">19th</option><option value="20th">20th</option></select>
         <select id="filter-rows"><option value="4" selected>4</option><option value="6">6</option><option value="10">10</option></select>
         <select id="filter-database"><option value="top100" selected>top100</option><option value="full">full</option></select>
         <select id="filter-case"><option value="rtw" selected>rtw</option><option value="sweden">sweden</option><option value="smuta">smuta</option><option value="mongols">mongols</option><option value="napoleon">napoleon</option><option value="palace">palace</option><option value="revolts">revolts</option><option value="decembrists">decembrists</option><option value="ww1">ww1</option><option value="revolutions">revolutions</option><option value="ww2">ww2</option><option value="coldwar">coldwar</option></select>
-        <input type="number" id="custom-year-start" value="862"><input type="number" id="custom-year-end" value="2022"><input type="checkbox" id="toggle-hide-learned">
+        <input type="number" id="custom-year-start" value="862"><input type="number" id="custom-year-end" value="2026"><input type="checkbox" id="toggle-hide-learned">
     </div>
 
     <!-- Шаблоны для карточек -->
@@ -700,6 +700,15 @@
     <div id="profile-modal" class="fixed inset-0 bg-black/80 z-[10005] hidden flex-col items-center justify-center backdrop-blur-sm opacity-0 transition-opacity no-print modal-content-hidden">
         <div class="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 w-[90%] max-w-sm flex flex-col gap-5 shadow-2xl">
             <h3 class="font-black text-xl dark:text-gray-300 text-center uppercase tracking-widest">👤 Профиль</h3>
+            <!-- Google Auth Block -->
+            <div class="bg-gray-50 dark:bg-[#181818] rounded-2xl p-4 border border-gray-200 dark:border-[#2c2c2c] flex flex-col gap-2">
+                <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Аккаунт Google</label>
+                <div id="profile-google-status" class="text-[11px] font-bold text-gray-400">Не привязан</div>
+                <button onclick="signInWithGoogle()" class="flex items-center justify-center gap-2 w-full bg-white dark:bg-[#2c2c2c] border border-gray-300 dark:border-[#3f3f46] rounded-xl py-2.5 font-black text-xs text-gray-700 dark:text-gray-300 active:scale-95 transition-transform shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-700">
+                    <svg viewBox="0 0 24 24" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Войти через Google
+                </button>
+            </div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Имя и Фамилия</label><input type="text" id="profile-name-input" placeholder="Иванов Иван, 11 'А'" class="w-full p-4 border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none font-bold shadow-inner"></div>
             <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">Код класса (от учителя)</label><input type="text" id="profile-class-code" placeholder="Например: 4921" class="w-full p-4 font-mono border border-gray-200 rounded-2xl dark:bg-[#181818] dark:border-[#2c2c2c] dark:text-gray-300 outline-none text-center font-black text-lg text-blue-600 dark:text-blue-400 shadow-inner"></div>
             <div class="flex gap-3 mt-2"><button onclick="hideModal('profile-modal')" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-[#2c2c2c] dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-300 py-4 rounded-2xl font-black uppercase tracking-wider transition-colors">Отмена</button><button onclick="saveProfileName()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-wider transition-colors shadow-md active:scale-95">Сохранить</button></div>
@@ -799,7 +808,7 @@
         window.state = {
             selectedChip: null, currentTask: 'task4', pendingTask: 'task4', pendingMode: 'normal',
             stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, solvedByTask: { task4: 0, task5: 0, task7: 0 }, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
-            mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: true, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
+            mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
             isTeacherAdmin: false, focusMode: false, studyIndex: 0, errorStreak: 0,
             duel: { active: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, myCombo: 0, oppScore: 0, oppCombo: 0, searching: false }
         };
@@ -1091,16 +1100,14 @@
         // === PROGRESS BARS ===
         function getTaskProgress(task) {
             const streaks = window.state.stats.factStreaks || {};
-            const prefixes = { task4: '', task5: 't5_', task7: 't7_' };
-            const prefix = prefixes[task] || '';
             let learned = 0;
             for (const [key, val] of Object.entries(streaks)) {
                 if (task === 'task4' && !key.startsWith('t5_') && !key.startsWith('t7_')) {
-                    if (window.isFactLearned && window.isFactLearned(val)) learned++;
+                    if (window.isFactLearned(val)) learned++;
                 } else if (task === 'task5' && key.startsWith('t5_')) {
-                    if (window.isFactLearned && window.isFactLearned(val)) learned++;
+                    if (window.isFactLearned(val)) learned++;
                 } else if (task === 'task7' && key.startsWith('t7_')) {
-                    if (window.isFactLearned && window.isFactLearned(val)) learned++;
+                    if (window.isFactLearned(val)) learned++;
                 }
             }
             let total = 0;
@@ -1187,14 +1194,35 @@
             
             $('pg-period-container').classList.remove('hidden');
             $('pg-rows-container').classList.remove('hidden');
-            $('pg-case-container').classList.toggle('hidden', window.state.currentMode !== 'detective'); 
-            $('pg-database-container').classList.toggle('hidden', window.state.currentTask !== 'task7'); 
+            $('pg-case-container').classList.add('hidden'); 
+            $('pg-database-container').classList.remove('hidden'); 
             $('pg-hide-learned-container').classList.remove('hidden');
             
-            if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'all';
+            // Hide period & rows for detective mode (Secret Archive uses its own case system)
+            if (window.state.currentMode === 'detective') {
+                $('pg-period-container').classList.add('hidden');
+                $('pg-rows-container').classList.add('hidden');
+                $('pg-database-container').classList.add('hidden');
+                $('pg-hide-learned-container').classList.add('hidden');
+                $('pg-case-container').classList.remove('hidden');
+            }
+            // Hide rows for red pencil mode
+            if (window.state.currentMode === 'redpencil') {
+                $('pg-rows-container').classList.add('hidden');
+                $('pg-database-container').classList.add('hidden');
+            }
+            
+            if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'custom';
             if ($('filter-case')) $('pg-filter-case').value = $('filter-case').value || 'rtw';
             if ($('filter-database')) $('pg-filter-database').value = $('filter-database').value || 'top100';
             if ($('filter-rows')) window.setPgRows($('filter-rows').value || '4');
+            // Always open custom period by default with 862-2026
+            if ($('pg-filter-period').value === 'custom' || $('pg-filter-period').value === 'all') {
+                $('pg-filter-period').value = 'custom';
+                $('filter-period').value = 'custom';
+                if (!$('pg-custom-year-start').value || $('pg-custom-year-start').value === '0') $('pg-custom-year-start').value = '862';
+                if (!$('pg-custom-year-end').value || $('pg-custom-year-end').value === '0') $('pg-custom-year-end').value = '2026';
+            }
             checkCustomPeriod(); 
             showModal('pre-game-modal'); 
             setTimeout(() => $('pg-sheet').classList.remove('translate-y-full'), 10);
@@ -1545,16 +1573,24 @@
             
             if (typeof task5Data === 'undefined') return;
             let fakesCount = Math.ceil(target.length / 2);
-            let poolItems = [...missing]; let att = 0; 
-            // Smart distractors: prefer persons from the same eras as the target
-            let targetEras = [...new Set(target.map(t => t.c))];
-            let sameEraPeople = [...new Set(task5Data.filter(d => targetEras.includes(d.c)).map(d => d.person))];
-            let allP = [...new Set(task5Data.map(d => d.person))]; 
-            // First try same-era fakes
-            let shuffledSameEra = shuffleArray([...sameEraPeople]);
-            for (let p of shuffledSameEra) { if (poolItems.length >= target.length + fakesCount) break; if (!uPoolP.has(p)) { poolItems.push(p); uPoolP.add(p); } }
-            // Then fallback to any era
-            while(poolItems.length < target.length + fakesCount && att < 100) { let randP = allP[Math.floor(Math.random() * allP.length)]; if (!uPoolP.has(randP)) { poolItems.push(randP); uPoolP.add(randP); } att++; }
+            let poolItems = [...missing];
+            /* --- SMART DISTRACTORS для Task5 --- */
+            const targetPeriods = [...new Set(target.map(t => t.c))];
+            const avgYear = Math.round(target.reduce((s,t) => s + (parseInt(t.year,10)||0), 0) / target.length);
+            const personYearMap = {}; task5Data.forEach(d => { if (!personYearMap[d.person]) personYearMap[d.person] = parseInt(d.year,10)||0; });
+            const periodOrder = ['early','18th','19th','20th'];
+            const adjSet = new Set(); targetPeriods.forEach(p => { let i = periodOrder.indexOf(p); if (i > 0) adjSet.add(periodOrder[i-1]); if (i < periodOrder.length-1) adjSet.add(periodOrder[i+1]); });
+            targetPeriods.forEach(p => adjSet.delete(p));
+            // Собираем всех уникальных кандидатов с приоритетом: 0 = тот же период, 1 = соседний, 2 = остальные
+            const scored = []; const seen = new Set();
+            task5Data.forEach(d => {
+                if (seen.has(d.person) || uPoolP.has(d.person)) return; seen.add(d.person);
+                let pri = targetPeriods.includes(d.c) ? 0 : (adjSet.has(d.c) ? 1 : 2);
+                scored.push({ p: d.person, pri, dist: Math.abs(personYearMap[d.person] - avgYear) });
+            });
+            shuffleArray(scored); scored.sort((a,b) => a.pri - b.pri || a.dist - b.dist);
+            const needed = target.length + fakesCount;
+            for (let s of scored) { if (poolItems.length >= needed) break; poolItems.push(s.p); uPoolP.add(s.p); }
             const poolFrag = document.createDocumentFragment(); shuffleArray(poolItems).forEach(txt => { const c = document.createElement('div'); c.className = "dnd-chip"; c.innerText = txt; c.dataset.pureText = txt; poolFrag.appendChild(c); }); $('pool-container').appendChild(poolFrag);
         }
 
@@ -1592,20 +1628,27 @@
             $('task-table-body').appendChild(trFrag);
             
             let fakesCount = Math.ceil(target.length / 2);
-            let poolItems = [...missing]; let att = 0; 
-            // Smart distractors: prefer traits from the same eras as the target
-            let targetEras = [...new Set(target.map(t => t.c))];
-            let sameEraTraits = [...new Set(window.task7Data.filter(d => targetEras.includes(d.c)).map(d => d.trait))];
-            let allT = [...new Set(window.task7Data.map(d => d.trait))]; 
-            // First try same-era fakes
-            let shuffledSameEra = shuffleArray([...sameEraTraits]);
-            for (let t of shuffledSameEra) { if (poolItems.length >= target.length + fakesCount) break; if (!poolItems.includes(t)) poolItems.push(t); }
-            // Then fallback to any era
-            while(poolItems.length < target.length + fakesCount && att < 100) { 
-                let randT = allT[Math.floor(Math.random() * allT.length)]; 
-                if (!poolItems.includes(randT)) poolItems.push(randT); 
-                att++; 
-            }
+            let poolItems = [...missing];
+            /* --- SMART DISTRACTORS для Task7 --- */
+            const targetCultures = new Set(target.map(t => t.culture));
+            const validTraitsForTargets = new Set();
+            window.task7Data.forEach(d => { if (targetCultures.has(d.culture)) validTraitsForTargets.add(d.trait); });
+            const t7Periods = [...new Set(target.map(t => t.c))];
+            const t7PO = ['early','18th','19th','20th'];
+            const t7Adj = new Set(); t7Periods.forEach(p => { let i = t7PO.indexOf(p); if (i > 0) t7Adj.add(t7PO[i-1]); if (i < t7PO.length-1) t7Adj.add(t7PO[i+1]); });
+            t7Periods.forEach(p => t7Adj.delete(p));
+            // Единый список кандидатов с приоритетами
+            const t7Seen = new Set(poolItems);
+            const t7Scored = [];
+            window.task7Data.forEach(d => {
+                if (targetCultures.has(d.culture) || t7Seen.has(d.trait) || validTraitsForTargets.has(d.trait)) return;
+                t7Seen.add(d.trait);
+                let pri = t7Periods.includes(d.c) ? 0 : (t7Adj.has(d.c) ? 1 : 2);
+                t7Scored.push({ t: d.trait, pri });
+            });
+            shuffleArray(t7Scored); t7Scored.sort((a,b) => a.pri - b.pri);
+            const t7Needed = target.length + fakesCount;
+            for (let s of t7Scored) { if (poolItems.length >= t7Needed) break; poolItems.push(s.t); }
             
             const poolFrag = document.createDocumentFragment(); 
             shuffleArray(poolItems).forEach(txt => { 
@@ -1662,7 +1705,7 @@
                 let allowed = getFilteredPool(actualPeriod, rowsCount); if (!allowed || allowed.length === 0) { $('task-table-body').innerHTML = `<tr><td colspan="3" class="p-10 text-center font-bold text-rose-500 bg-white dark:bg-[#1e1e1e]">⚠️ Нет событий!</td></tr>`; return; } target = shuffleArray([...allowed]).slice(0, Math.min(rowsCount, allowed.length)); 
             }
             
-            window.state.currentTargetData = target; let missing = [], hiddenRowsData = [], blanksPerRow = [], availableTypes = [], requiredFakes = { geo: 0, event: 0, year: 0 };
+            window.state.currentTargetData = target; let missing = [], hiddenRowsData = [], blanksPerRow = [], availableTypes = [];
             
             const actualRows = target.length;
             blanksPerRow = Array(actualRows).fill(1); 
@@ -1675,8 +1718,7 @@
             let totalBlanks = blanksPerRow.reduce((a,b)=>a+b,0), types = ['geo', 'event', 'year']; 
             for(let i=0; i<totalBlanks; i++) availableTypes.push(types[i % 3]); 
             
-            let fakesPerType = Math.ceil(actualRows / 4);
-            requiredFakes = { geo: fakesPerType, event: fakesPerType, year: fakesPerType };
+            const fakesPerType = Math.ceil(actualRows / 4), requiredFakes = { geo: fakesPerType, event: fakesPerType, year: fakesPerType };
             
             let lIdx = 0; const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М', 'Н', 'О', 'П']; 
             function popType(av, excl) { let valIds = av.map((t, i) => excl.includes(t) ? -1 : i).filter(i => i !== -1); if (valIds.length === 0) { let fallb = Math.floor(Math.random() * av.length); return av.splice(fallb, 1)[0]; } return av.splice(valIds[Math.floor(Math.random() * valIds.length)], 1)[0]; }
@@ -1694,13 +1736,47 @@
             }); $('task-table-body').appendChild(trFrag);
             
             if (typeof bigData === 'undefined') return;
-            let poolItems = [...missing]; const pFacts = bigData.filter(d => [...new Set(target.map(t => t.c))].includes(d.c));
+            const targetPeriodSet = new Set(target.map(t => t.c));
+            let poolItems = [...missing]; const pFacts = bigData.filter(d => targetPeriodSet.has(d.c));
+            
+            /* --- SMART DISTRACTORS для Task4 --- */
+            function autoYearTraps(yearStr) {
+                const y = parseInt(yearStr, 10); if (!y) return [];
+                const seen = new Set(), candidates = [];
+                bigData.forEach(d => {
+                    const dy = parseInt(d.year, 10);
+                    if (dy && dy !== y && !seen.has(d.year) && Math.abs(dy - y) <= 50) { seen.add(d.year); candidates.push({ val: d.year, dist: Math.abs(dy - y) }); }
+                });
+                return candidates.sort((a,b) => a.dist - b.dist).slice(0, 5).map(c => c.val);
+            }
+            function autoGeoTraps(geoStr, period) {
+                const targetGeos = new Set(target.map(t => t.geo));
+                const seen = new Set(), result = [];
+                shuffleArray(bigData.filter(d => d.c === period && !targetGeos.has(d.geo) && d.geo !== geoStr)).forEach(d => {
+                    if (!seen.has(d.geo)) { seen.add(d.geo); result.push(d.geo); }
+                });
+                return result.slice(0, 5);
+            }
             
             ['geo', 'event', 'year'].forEach(type => {
                 for(let i=0; i<requiredFakes[type]; i++) { 
                     let fnd = false, att = 0, relHid = hiddenRowsData.find(h => h.types.includes(type)), trap = null; 
+                    // 1) Пробуем trapDict (ручные ловушки) — 60% шанс
                     if (typeof trapDict !== 'undefined' && relHid && Math.random() < 0.6) { let pT = trapDict[relHid.row[type]]; if (pT && pT.length > 0) trap = pT[Math.floor(Math.random() * pT.length)]; } 
-                    if (trap && !poolItems.includes(trap)) { poolItems.push(trap); continue; } 
+                    if (trap && !poolItems.includes(trap)) { poolItems.push(trap); continue; }
+                    // 2) Авто-ловушки для годов (близкие даты)
+                    if (type === 'year' && relHid) {
+                        let autoTraps = autoYearTraps(relHid.row.year);
+                        let picked = autoTraps.find(t => !poolItems.includes(t));
+                        if (picked) { poolItems.push(picked); continue; }
+                    }
+                    // 3) Авто-ловушки для гео (тот же период)
+                    if (type === 'geo' && relHid) {
+                        let autoTraps = autoGeoTraps(relHid.row.geo, relHid.row.c);
+                        let picked = autoTraps.find(t => !poolItems.includes(t));
+                        if (picked) { poolItems.push(picked); continue; }
+                    }
+                    // 4) Fallback: случайный из того же периода
                     while(!fnd && att < 50) { 
                         let rF = pFacts[Math.floor(Math.random()*pFacts.length)], val = rF[type]; 
                         if (!poolItems.includes(val)) { poolItems.push(val); fnd = true; } 
@@ -1758,36 +1834,40 @@
 
             // DUEL MODE INTERCEPT
             if (window.state.currentMode === 'duel') {
-                if (!allCorrect || window.state.tableHasMistake) {
-                    window.state.duel.myCombo = 0;
-                    if (!allCorrect) {
-                         haptic('error'); window.state.tableHasMistake = true; showToast('❌', 'Ошибка! Комбо сброшено.', 'bg-rose-500', 'border-rose-700'); $('reveal-btn').classList.remove('hidden');
+                // Award points for each newly correct row immediately
+                if (newlyCorrect > 0) {
+                    if (!window.state.tableHasMistake && allCorrect && filled === total) {
+                        // Perfect completion — award with combo bonus
+                        let prevCombo = window.state.duel.myCombo || 0;
+                        let newCombo = prevCombo + newlyCorrect;
+                        let bonus = 0;
+                        for (let i = prevCombo + 1; i <= newCombo; i++) {
+                            if (i % 5 === 0) bonus += (i / 5);
+                        }
+                        window.state.duel.myCombo = newCombo;
+                        window.state.duel.myScore += newlyCorrect + bonus;
+                        if (bonus > 0) showToast('🔥', `КОМБО x${newCombo}! Бонус +${bonus}`, 'bg-purple-600', 'border-purple-800');
+                        else showToast('✅', `+${newlyCorrect} строк!`, 'bg-emerald-500', 'border-emerald-700');
                     } else {
-                         haptic('success');
-                         window.state.duel.myScore += newlyCorrect;
-                         $('check-buttons').classList.add('hidden'); setTimeout(() => window.generateTable(), 300);
+                        // Partial correct or had mistakes — still award per row but no combo
+                        window.state.duel.myScore += newlyCorrect;
+                        haptic('success');
+                        showToast('✅', `+${newlyCorrect} строк!`, 'bg-emerald-500', 'border-emerald-700');
                     }
-                } else if (allCorrect && filled === total && !window.state.tableHasMistake) {
+                    updateScoreAndStats(newlyCorrect);
+                }
+                if (!allCorrect) {
+                    window.state.duel.myCombo = 0;
+                    haptic('error'); window.state.tableHasMistake = true;
+                    showToast('❌', 'Есть ошибки! Комбо сброшено.', 'bg-rose-500', 'border-rose-700');
+                    $('reveal-btn').classList.remove('hidden');
+                } else if (allCorrect && filled === total) {
                     haptic('success');
-                    let prevCombo = window.state.duel.myCombo || 0;
-                    let newCombo = prevCombo + newlyCorrect;
-                    let bonus = 0;
-                    
-                    for (let i = prevCombo + 1; i <= newCombo; i++) {
-                        if (i % 5 === 0) bonus += (i / 5);
-                    }
-                    
-                    window.state.duel.myCombo = newCombo;
-                    window.state.duel.myScore += newlyCorrect + bonus;
-                    if (bonus > 0) showToast('🔥', `КОМБО x${newCombo}! Бонус +${bonus}`, 'bg-purple-600', 'border-purple-800');
-                    else showToast('✅', `Отлично! +${newlyCorrect}`, 'bg-emerald-500', 'border-emerald-700');
-                    
                     $('check-buttons').classList.add('hidden'); $('reveal-btn').classList.add('hidden');
-                    setTimeout(() => window.generateTable(), 300); 
+                    setTimeout(() => window.generateTable(), 300);
                 }
                 window.updateDuelUI();
                 if (window.updateDuelScoreDb) window.updateDuelScoreDb(window.state.duel.myScore, window.state.duel.myCombo);
-                if (newlyCorrect > 0) { updateScoreAndStats(newlyCorrect); }
                 updateGlobalUI();
                 return; // Выходим из функции, стандартная логика не нужна
             }
@@ -1961,6 +2041,11 @@
         window.openProfileModal = function() {
             $('profile-name-input').value = localStorage.getItem('student_manual_name') || '';
             $('profile-class-code').value = localStorage.getItem('student_class_code') || '';
+            const gEmail = localStorage.getItem('google_email');
+            if ($('profile-google-status')) {
+                $('profile-google-status').textContent = gEmail ? '✅ ' + gEmail : 'Не привязан';
+                $('profile-google-status').className = gEmail ? 'text-[11px] font-bold text-emerald-600 mt-1' : 'text-[11px] font-bold text-gray-400 mt-1';
+            }
             showModal('profile-modal');
         };
         window.saveProfileName = function() { const nm = $('profile-name-input').value.trim(), cd = $('profile-class-code').value.trim(); if (nm) localStorage.setItem('student_manual_name', nm); if (cd !== undefined) localStorage.setItem('student_class_code', cd); showToast('✅', 'Профиль сохранен!', 'bg-emerald-500', 'border-emerald-700'); hideModal('profile-modal'); if (window.syncProgressToCloud) window.syncProgressToCloud(); };
@@ -2078,7 +2163,7 @@
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
@@ -2209,17 +2294,176 @@
                 }
             }
         };
+        // ─── Google auth helper ──────────────────────────────────────────────────
+        function _applyGoogleUser(user) {
+            const gName  = user.displayName || '';
+            const gEmail = user.email       || '';
+            if (gName && !localStorage.getItem('student_manual_name'))
+                localStorage.setItem('student_manual_name', gName);
+            localStorage.setItem('stable_student_id', 'google_' + user.uid);
+            localStorage.setItem('google_uid',   user.uid);
+            localStorage.setItem('google_email', gEmail);
+            const statusEl = $('profile-google-status');
+            if (statusEl) {
+                statusEl.textContent  = '✅ ' + (gEmail || gName);
+                statusEl.className    = 'text-[11px] font-bold text-emerald-600 mt-1';
+            }
+            const nameEl = $('profile-name-input');
+            if (nameEl && gName && !nameEl.value) nameEl.value = gName;
+        }
+
         // ─── Main auth bootstrap ─────────────────────────────────────────────────
+        // ВАЖНО: getRedirectResult нужно вызывать ДО signInAnonymously,
+        // иначе анонимный вход перебивает сессию редиректа.
         const _bootAuth = async () => {
-            await initAuth();
+            let googleSignedIn = false;
+            try {
+                const result = await getRedirectResult(auth);
+                if (result && result.user) {
+                    googleSignedIn = true;
+                    _applyGoogleUser(result.user);
+                    // Тост и синхронизация — в onAuthStateChanged (когда fbUser уже установлен)
+                    window._pendingGoogleToast = result.user.email || result.user.displayName || '';
+                }
+            } catch (e) {
+                console.error('getRedirectResult error:', e);
+
+                // ── Аккаунт Google уже привязан к другой анонимной сессии Firebase.
+                //    Решение — войти под этим аккаунтом напрямую через credential из ошибки.
+                if (e.code === 'auth/credential-already-in-use' ||
+                    e.code === 'auth/email-already-in-use') {
+                    try {
+                        const credential = GoogleAuthProvider.credentialFromError(e);
+                        if (credential) {
+                            const fallbackResult = await signInWithCredential(auth, credential);
+                            googleSignedIn = true;
+                            _applyGoogleUser(fallbackResult.user);
+                            window._pendingGoogleToast = fallbackResult.user.email || fallbackResult.user.displayName || '';
+                        }
+                    } catch (fallbackErr) {
+                        console.error('signInWithCredential fallback error:', fallbackErr);
+                        setTimeout(() => showToast('❌', 'Не удалось войти через Google. Попробуйте ещё раз.', 'bg-rose-500', 'border-rose-700'), 800);
+                    }
+                } else if (e.code && e.code !== 'auth/redirect-cancelled-by-user'
+                                   && e.code !== 'auth/user-cancelled') {
+                    setTimeout(() => showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700'), 800);
+                }
+            }
+
+            // Если Google-аккаунт не найден — запускаем стандартный анонимный вход
+            if (!googleSignedIn) {
+                await initAuth();
+            }
         };
         _bootAuth();
+
+        // ─── Google Sign-In (popup with redirect fallback) ─────────────────────
+        // signInWithPopup works in most environments including WebViews.
+        // If popup is blocked, falls back to signInWithRedirect.
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            // Remember old ID and local data before switching
+            const oldStudentId = localStorage.getItem('stable_student_id') || '';
+            const localStateJson = localStorage.getItem('ege_final_storage_v4') || '{}';
+            const localSolved = window.state.stats.totalSolvedEver || 0;
+            try {
+                // Try popup first — works in most browsers & WebViews
+                const result = await signInWithPopup(auth, provider);
+                if (result && result.user) {
+                    _applyGoogleUser(result.user);
+                    // After applying Google user, new stable_student_id = 'google_' + uid
+                    // Now check if Google account already has data in cloud
+                    const newId = resolveUserId(result.user);
+                    let cloudSolved = 0;
+                    try {
+                        const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', newId));
+                        if (dS.exists()) { cloudSolved = dS.data().totalSolved || 0; }
+                    } catch(e) {}
+                    if (cloudSolved > localSolved) {
+                        // Cloud has more data — load from cloud
+                        await window.loadProgressFromCloud();
+                    } else if (localSolved > 0) {
+                        // Local has more data — push local to cloud under new Google ID
+                        await window.syncProgressToCloud();
+                    }
+                    // If old ID was different (TG or anon), also copy data to new Google doc
+                    if (oldStudentId && oldStudentId !== newId && localSolved > 0 && localSolved >= cloudSolved) {
+                        await window.syncProgressToCloud();
+                    }
+                    updateGlobalUI();
+                    showToast('✅', 'Вход через Google: ' + (result.user.email || result.user.displayName || ''), 'bg-emerald-500', 'border-emerald-700');
+                }
+            } catch (e) {
+                // If popup blocked or failed, try redirect
+                if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+                    try {
+                        await signInWithRedirect(auth, provider);
+                    } catch (redirectErr) {
+                        console.error('signInWithRedirect fallback error:', redirectErr);
+                        showToast('❌', 'Не удалось войти: ' + (redirectErr.code || redirectErr.message), 'bg-rose-500', 'border-rose-700');
+                    }
+                } else if (e.code === 'auth/credential-already-in-use' || e.code === 'auth/email-already-in-use') {
+                    // Account already exists — sign in with credential directly
+                    try {
+                        const credential = GoogleAuthProvider.credentialFromError(e);
+                        if (credential) {
+                            const fallbackResult = await signInWithCredential(auth, credential);
+                            _applyGoogleUser(fallbackResult.user);
+                            const newId = resolveUserId(fallbackResult.user);
+                            let cloudSolved = 0;
+                            try {
+                                const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', newId));
+                                if (dS.exists()) { cloudSolved = dS.data().totalSolved || 0; }
+                            } catch(e2) {}
+                            if (cloudSolved > localSolved) {
+                                await window.loadProgressFromCloud();
+                            } else if (localSolved > 0) {
+                                await window.syncProgressToCloud();
+                            }
+                            updateGlobalUI();
+                            showToast('✅', 'Вход через Google: ' + (fallbackResult.user.email || ''), 'bg-emerald-500', 'border-emerald-700');
+                        }
+                    } catch (credErr) {
+                        console.error('signInWithCredential error:', credErr);
+                        showToast('❌', 'Не удалось войти через Google', 'bg-rose-500', 'border-rose-700');
+                    }
+                } else {
+                    console.error('signInWithGoogle error:', e);
+                    showToast('❌', 'Ошибка Google: ' + (e.code || e.message), 'bg-rose-500', 'border-rose-700');
+                }
+            }
+        };
 
         onAuthStateChanged(auth, async (u) => { 
             fbUser = u; 
             if (u) {
+                // ── Всегда синхронизируем stable_student_id с Google, если вход через Google.
+                //    Это работает и при первом входе, и при повторном открытии на том же/новом устройстве.
+                const googleProvider = (u.providerData || []).find(p => p.providerId === 'google.com');
+                if (googleProvider) {
+                    const gEmail = googleProvider.email || u.email || '';
+                    const gName  = googleProvider.displayName || u.displayName || '';
+                    // Всегда обновляем — без проверки !localStorage, чтобы не было рассинхрона
+                    localStorage.setItem('google_email', gEmail);
+                    localStorage.setItem('google_uid',   u.uid);
+                    localStorage.setItem('stable_student_id', 'google_' + u.uid);
+                    if (gName && !localStorage.getItem('student_manual_name'))
+                        localStorage.setItem('student_manual_name', gName);
+                    _applyGoogleUser(u); // обновляет UI профиля
+                }
+
                 // Загружаем прогресс из облака (ПЕРЕД синхронизацией — иначе затрём облако нулями)
-                await window.loadProgressFromCloud(); 
+                await window.loadProgressFromCloud();
+
+                // Тост о входе через Google (если был редирект)
+                if (window._pendingGoogleToast) {
+                    showToast('✅', 'Вход через Google: ' + window._pendingGoogleToast, 'bg-emerald-500', 'border-emerald-700');
+                    window._pendingGoogleToast = null;
+                }
+
+                // Теперь синхронизируем актуальный (возможно только что загруженный) прогресс в облако
+                window.syncProgressToCloud(); 
                 
                 // Receiver for Homework (per-task system)
                 onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(u)), (docSnap) => {
@@ -2579,7 +2823,7 @@
                 </div>
                 <div style="display:flex;gap:6px;padding-top:8px;border-top:1px solid #f1f5f9">
                     <button onclick="window.promptAssignHw('${safeUid}','${safeName}')" class="flex-1 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📝 ДЗ</button>
-                    <button onclick="window.downloadStudentPDF('${safeUid}')" class="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📄 PDF</button>
+                    <button onclick="window.downloadStudentPDF('${safeUid}')" class="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📄 Отчёт</button>
                 </div>
             </div>`;
         }
@@ -2605,150 +2849,205 @@
         window.downloadStudentPDF = function(uid) {
             const s = window._cachedStudents.find(x => x.uid === uid);
             if (!s) return;
-            const jsPDFLib = window.jspdf;
-            if (!jsPDFLib) {
-                showToast('⏳', 'Загрузка PDF-библиотеки...', 'bg-blue-500', 'border-blue-700');
-                setTimeout(() => window.downloadStudentPDF(uid), 1200);
-                return;
-            }
-            const { jsPDF } = jsPDFLib;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            const W = 210, M = 18;
-            let y = M;
 
-            // Транслитерация для встроенного helvetica
-            const t = str => (str||'').replace(/[а-яА-ЯёЁ]/g, c => ({
-                'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'j','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':"'",'ы':'y','ь':"'",'э':'e','ю':'yu','я':'ya',
-                'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'Yo','Ж':'Zh','З':'Z','И':'I','Й':'J','К':'K','Л':'L','М':'M','Н':'N','О':'O','П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F','Х':'Kh','Ц':'Ts','Ч':'Ch','Ш':'Sh','Щ':'Shch','Ъ':"'",'Ы':'Y','Ь':"'",'Э':'E','Ю':'Yu','Я':'Ya'
-            }[c]||c));
+            // Parse fullStateJson to extract mistakes list
+            let fullState = {};
+            try { fullState = JSON.parse(s.fullStateJson || '{}'); } catch(e) {}
+            const mistakesPool = fullState.mistakesPool || [];
+            const factStreaks = fullState.factStreaks || s.factStreaks || {};
 
-            // Шапка
-            doc.setFillColor(37,99,235); doc.rect(0,0,W,26,'F');
-            doc.setTextColor(255,255,255);
-            doc.setFontSize(15); doc.setFont('helvetica','bold');
-            doc.text(t('Otchet: EGE Trenazhyor Istoriya'), M, 11);
-            doc.setFontSize(9); doc.setFont('helvetica','normal');
-            doc.text(`${new Date().toLocaleDateString('ru-RU')}`, M, 19);
-            doc.setTextColor(40,40,40);
-            y = 34;
-
-            // Имя
-            doc.setFontSize(14); doc.setFont('helvetica','bold');
-            doc.text(t(s.name||'Bez imeni'), M, y); y += 7;
-            doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
-            doc.text(t(`Posledniy vkhod: ${s.lastActiveStr}`), M, y); y += 9;
-
-            // Метрики-плитки
-            const metrics = [
-                { label:'Resheno',  val:s.totalSolved||0,  rgb:[59,130,246] },
-                { label:'Vyucheno', val:s.learnedCount||0, rgb:[16,185,129] },
-                { label:'Strik',    val:s.streak||0,       rgb:[245,158,11] },
-                { label:'Tochnost', val:s.accuracy!==null?`${s.accuracy}%`:'—', rgb:s.accuracy>=80?[16,185,129]:s.accuracy>=60?[245,158,11]:[244,63,94] },
-                { label:'Nedelya',  val:s.wScore||0,       rgb:[139,92,246] },
-                { label:'Vremya',   val:`${s.timeSpentMin}m`, rgb:[168,85,247] },
-            ];
-            const tW = (W - M*2 - 10)/3;
-            metrics.forEach((m,i) => {
-                const cx = M + (i%3)*(tW+5), cy = y + Math.floor(i/3)*18;
-                doc.setFillColor(...m.rgb.map(v => Math.round(v*0.12+230)));
-                doc.roundedRect(cx,cy,tW,14,2,2,'F');
-                doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
-                doc.text(m.label.toUpperCase(), cx+3, cy+5);
-                doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(...m.rgb);
-                doc.text(String(m.val), cx+3, cy+12);
-            });
-            y += 40;
-
-            // Активность 7 дней
-            doc.setDrawColor(229,231,235); doc.setLineWidth(0.3);
-            doc.line(M,y,W-M,y); y += 6;
-            doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
-            doc.text(t('Aktivnost za 7 dney'), M, y); y += 6;
-            const bW = (W-M*2-12)/7, bMaxH = 18;
-            const maxVal = Math.max(...s.last7.map(d=>d.val),1);
-            const dNames = ['Pn','Vt','Sr','Cht','Pt','Sb','Vs'];
-            s.last7.forEach((d,i) => {
-                const bx = M + i*(bW+2), bh = Math.max(1,(d.val/maxVal)*bMaxH), by = y+bMaxH-bh;
-                doc.setFillColor(...(d.val===0?[229,231,235]:i===6?[59,130,246]:[110,231,183]));
-                doc.roundedRect(bx, d.val===0?y+bMaxH-2:by, bW, d.val===0?2:bh, 1,1,'F');
-                const dIdx = (new Date(d.date).getDay()+6)%7;
-                doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
-                doc.text(dNames[dIdx], bx+bW/2-2, y+bMaxH+4);
-                if (d.val>0) { doc.setTextColor(80,80,80); doc.text(String(d.val), bx+bW/2-2, by-1); }
-            });
-            y += bMaxH+10;
-
-            // Точность по эпохам
-            doc.line(M,y,W-M,y); y += 6;
-            doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
-            doc.text(t('Tochnost po epokham'), M, y); y += 6;
-            Object.values(s.eraData).forEach(e => {
-                if (!e.total) return;
-                const bc = e.pct>=80?[16,185,129]:e.pct>=60?[245,158,11]:[244,63,94];
-                doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-                doc.text(t(e.name), M, y+3);
-                const bx2 = M+35, bw2 = W-M*2-35-18;
-                doc.setFillColor(241,245,249); doc.roundedRect(bx2,y,bw2,5,1,1,'F');
-                doc.setFillColor(...bc); doc.roundedRect(bx2,y,bw2*e.pct/100,5,1,1,'F');
-                doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...bc);
-                doc.text(`${e.pct}%  (${e.correct}/${e.total})`, W-M-2, y+4, {align:'right'});
-                y += 8;
-            });
-
-            // Слабая тема
-            if (s.weakEra) {
-                y += 2;
-                doc.setFillColor(254,242,242); doc.roundedRect(M,y,W-M*2,11,2,2,'F');
-                doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(220,38,38);
-                doc.text(t(`Slab. tema: ${s.weakEra.name} — ${s.weakEra.pct}% (${s.weakEra.correct}/${s.weakEra.total})`), M+4, y+7);
-                y += 15;
-            }
-
-            // Разбивка по типам заданий
-            if (s.taskStats && s.taskStats.length > 0) {
-                doc.line(M,y,W-M,y); y += 6;
-                doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
-                doc.text(t('Razbirka po tipam zadaniy'), M, y); y += 7;
-                s.taskStats.forEach(tk => {
-                    const pctLabel = tk.pct !== null ? `${tk.pct}%` : '-';
-                    const bc = tk.pct !== null ? (tk.pct >= 80 ? [16,185,129] : tk.pct >= 60 ? [245,158,11] : [244,63,94]) : [148,163,184];
-                    // Строка задания
-                    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(40,40,40);
-                    doc.text(t(tk.label.replace(/[^\x00-\x7F]/g, '')), M, y+4);
-                    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...bc);
-                    doc.text(`${pctLabel}  (${tk.correct}/${tk.total})`, W-M, y+4, { align: 'right' });
-                    // Общая полоса
-                    const bx3 = M+50, bw3 = W-M*2-50-22;
-                    doc.setFillColor(241,245,249); doc.roundedRect(bx3,y,bw3,5,1,1,'F');
-                    if (tk.pct !== null) { doc.setFillColor(...bc); doc.roundedRect(bx3,y,bw3*tk.pct/100,5,1,1,'F'); }
-                    y += 9;
-                    // Learned facts for this task
-                    if (tk.learned > 0) {
-                        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(16,185,129);
-                        doc.text(t(`  Vyucheno: ${tk.learned} faktov`), M+4, y+3);
-                        y += 6;
-                    }
-                    // Подэпохи
-                    tk.eras.forEach(era => {
-                        const ec = era.pct >= 80 ? [16,185,129] : era.pct >= 60 ? [245,158,11] : [244,63,94];
-                        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
-                        doc.text(`  ${t(era.name)}`, M+4, y+3);
-                        const bx4 = M+38, bw4 = W-M*2-38-20;
-                        doc.setFillColor(241,245,249); doc.roundedRect(bx4,y-0.5,bw4,4,1,1,'F');
-                        doc.setFillColor(...ec); doc.roundedRect(bx4,y-0.5,bw4*era.pct/100,4,1,1,'F');
-                        doc.setTextColor(...ec); doc.text(`${era.pct}%`, W-M, y+3, { align: 'right' });
-                        y += 6;
-                    });
-                    y += 2;
+            // Count learned facts per task
+            function countLearnedForTask(taskKey) {
+                let count = 0;
+                const prefix = taskKey === 'task5' ? 't5_' : taskKey === 'task7' ? 't7_' : null;
+                Object.entries(factStreaks).forEach(([k, v]) => {
+                    const match = prefix ? k.startsWith(prefix) : (!k.startsWith('t5_') && !k.startsWith('t7_'));
+                    if (match && v && (v.level > 0 || (v.streak !== undefined && v.streak >= 3))) count++;
                 });
+                return count;
             }
 
-            // Подвал
-            doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(180,180,180);
-            doc.text(t(`EGE Trenazhyor | ${new Date().toLocaleDateString('ru-RU')} | uid: ${s.uid||''}`), M, 287);
+            // Determine database sizes
+            const task4Total = typeof bigData !== 'undefined' ? bigData.length : 0;
+            const task5Total = typeof task5Data !== 'undefined' ? task5Data.length : 0;
+            const task7Total = window.task7Data ? window.task7Data.length : 0;
+            const task4Learned = countLearnedForTask('task4');
+            const task5Learned = countLearnedForTask('task5');
+            const task7Learned = countLearnedForTask('task7');
 
-            doc.save(`Otchet_${t(s.name||'student').replace(/[^a-zA-Z0-9_]/g,'_')}_${new Date().toISOString().split('T')[0]}.pdf`);
-            showToast('📄', 'PDF-отчёт скачан!', 'bg-blue-500', 'border-blue-700');
+            const timeStr = s.timeSpentMin >= 60 ? `${Math.floor(s.timeSpentMin/60)}ч ${s.timeSpentMin%60}м` : `${s.timeSpentMin}м`;
+            const accStr = s.accuracy !== null ? `${s.accuracy}%` : '—';
+            const accColor = s.accuracy === null ? '#9ca3af' : s.accuracy >= 80 ? '#10b981' : s.accuracy >= 60 ? '#f59e0b' : '#f43f5e';
+            const eraNames = { early: 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век' };
+            const dNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+            // Build era rows
+            let eraRowsHtml = Object.values(s.eraData).filter(e => e.total > 0).map(e => {
+                const c = e.pct >= 80 ? '#10b981' : e.pct >= 60 ? '#f59e0b' : '#f43f5e';
+                return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                    <span style="font-size:12px;color:#6b7280;font-weight:700;min-width:120px">${e.name}</span>
+                    <div style="flex:1;height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
+                        <div style="height:100%;width:${e.pct}%;background:${c};border-radius:4px"></div>
+                    </div>
+                    <span style="font-size:12px;font-weight:700;color:${c};min-width:70px;text-align:right">${e.pct}% (${e.correct}/${e.total})</span>
+                </div>`;
+            }).join('') || '<div style="color:#94a3b8;font-size:12px">Нет данных</div>';
+
+            // Activity bars
+            const maxV = Math.max(...s.last7.map(d=>d.val), 1);
+            let actBarsHtml = s.last7.map((d,i) => {
+                const h = Math.max(3, Math.round((d.val/maxV)*40));
+                const color = d.val === 0 ? '#e5e7eb' : i === 6 ? '#3b82f6' : '#6ee7b7';
+                const dayIdx = (new Date(d.date).getDay()+6)%7;
+                return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">
+                    <div style="font-size:10px;font-weight:700;color:#6b7280">${d.val||''}</div>
+                    <div style="width:100%;max-width:20px;height:${h}px;background:${color};border-radius:3px 3px 0 0"></div>
+                    <span style="font-size:10px;color:#9ca3af;font-weight:700">${dNames[dayIdx]}</span>
+                </div>`;
+            }).join('');
+
+            // Task stats
+            let taskStatsHtml = '';
+            if (s.taskStats && s.taskStats.length > 0) {
+                taskStatsHtml = s.taskStats.map(tk => {
+                    const bc = tk.pct !== null ? (tk.pct >= 80 ? '#10b981' : tk.pct >= 60 ? '#f59e0b' : '#f43f5e') : '#94a3b8';
+                    let erasHtml = tk.eras.map(era => {
+                        const ec = era.pct >= 80 ? '#10b981' : era.pct >= 60 ? '#f59e0b' : '#f43f5e';
+                        return `<div style="display:flex;align-items:center;gap:6px;margin-left:16px;margin-top:3px">
+                            <span style="font-size:11px;color:#9ca3af;min-width:100px">${era.name}</span>
+                            <div style="flex:1;height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden">
+                                <div style="height:100%;width:${era.pct}%;background:${ec};border-radius:3px"></div>
+                            </div>
+                            <span style="font-size:11px;color:${ec};font-weight:700">${era.pct}%</span>
+                        </div>`;
+                    }).join('');
+                    return `<div style="margin-bottom:12px">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="font-size:13px;font-weight:900;color:#1e293b">${tk.label}</span>
+                            <span style="font-size:13px;font-weight:700;color:${bc}">${tk.pct !== null ? tk.pct + '%' : '—'} (${tk.correct}/${tk.total})</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                            <div style="flex:1;height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
+                                <div style="height:100%;width:${tk.pct||0}%;background:${bc};border-radius:4px"></div>
+                            </div>
+                        </div>
+                        ${tk.learned > 0 ? `<div style="font-size:11px;color:#10b981;font-weight:700;margin-top:3px;margin-left:16px">Выучено: ${tk.learned} фактов</div>` : ''}
+                        ${erasHtml}
+                    </div>`;
+                }).join('');
+            }
+
+            // Mistakes list
+            let mistakesHtml = '';
+            if (mistakesPool.length > 0) {
+                const mistakeRows = mistakesPool.slice(0, 50).map((m, i) => {
+                    const f = m.fact || {};
+                    const taskLabel = m.task === 'task5' ? '👤 №5' : m.task === 'task7' ? '🎨 №7' : '📍 №4';
+                    let factDesc = '';
+                    if (m.task === 'task5') factDesc = `${f.person || '?'} — ${f.event || '?'}`;
+                    else if (m.task === 'task7') factDesc = `${f.culture || '?'} — ${f.trait || '?'}`;
+                    else factDesc = `${f.event || '?'} (${f.year || '?'}, ${f.geo || '?'})`;
+                    return `<tr style="border-bottom:1px solid #f1f5f9">
+                        <td style="padding:4px 8px;font-size:11px;color:#94a3b8;font-weight:700;white-space:nowrap">${i+1}</td>
+                        <td style="padding:4px 8px;font-size:11px;font-weight:700;white-space:nowrap">${taskLabel}</td>
+                        <td style="padding:4px 8px;font-size:11px;color:#1e293b">${factDesc}</td>
+                    </tr>`;
+                }).join('');
+                mistakesHtml = `<div style="margin-top:20px;border-top:2px solid #e5e7eb;padding-top:16px">
+                    <h3 style="font-size:14px;font-weight:900;color:#ef4444;margin-bottom:8px">❌ Ошибки ученика (${mistakesPool.length})</h3>
+                    <table style="width:100%;border-collapse:collapse">${mistakeRows}</table>
+                    ${mistakesPool.length > 50 ? '<div style="font-size:11px;color:#94a3b8;margin-top:4px">...и ещё ' + (mistakesPool.length - 50) + '</div>' : ''}
+                </div>`;
+            }
+
+            // Learned facts per task section
+            const learnedSectionHtml = `<div style="margin-top:20px;border-top:2px solid #e5e7eb;padding-top:16px">
+                <h3 style="font-size:14px;font-weight:900;color:#10b981;margin-bottom:10px">🧠 Выучено фактов по заданиям</h3>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;text-align:center">
+                        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">📍 №4 География</div>
+                        <div style="font-size:20px;font-weight:900;color:#3b82f6;margin-top:4px">${task4Learned}</div>
+                        <div style="font-size:10px;color:#94a3b8;font-weight:600">из ${task4Total}</div>
+                    </div>
+                    <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:12px;text-align:center">
+                        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">👤 №5 Личности</div>
+                        <div style="font-size:20px;font-weight:900;color:#8b5cf6;margin-top:4px">${task5Learned}</div>
+                        <div style="font-size:10px;color:#94a3b8;font-weight:600">из ${task5Total}</div>
+                    </div>
+                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;text-align:center">
+                        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">🎨 №7 Культура</div>
+                        <div style="font-size:20px;font-weight:900;color:#f59e0b;margin-top:4px">${task7Learned}</div>
+                        <div style="font-size:10px;color:#94a3b8;font-weight:600">из ${task7Total}</div>
+                    </div>
+                </div>
+            </div>`;
+
+            const htmlContent = `<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Отчёт: ${s.name||'Ученик'}</title>
+<style>
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { margin: 10mm; size: A4; } }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: white; color: #1e293b; max-width: 800px; margin: 0 auto; }
+    h2 { margin: 0; } .section { margin-top: 20px; border-top: 2px solid #e5e7eb; padding-top: 16px; }
+</style></head><body>
+<div style="background:linear-gradient(135deg,#2563eb,#7c3aed);padding:20px 24px;border-radius:16px;margin-bottom:20px">
+    <h2 style="color:white;font-size:18px;font-weight:900;margin:0">🎓 Отчёт: Тренажёр ЕГЭ История</h2>
+    <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px">${new Date().toLocaleDateString('ru-RU')}</div>
+</div>
+<div style="margin-bottom:16px">
+    <div style="font-size:20px;font-weight:900">${s.name || 'Без имени'}</div>
+    <div style="font-size:12px;color:#94a3b8;margin-top:2px">Последний вход: ${s.lastActiveStr}</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Решено</div>
+        <div style="font-size:22px;font-weight:900;color:#3b82f6">${s.totalSolved||0}</div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Выучено</div>
+        <div style="font-size:22px;font-weight:900;color:#10b981">${s.learnedCount||0}</div>
+    </div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Стрик</div>
+        <div style="font-size:22px;font-weight:900;color:#f59e0b">${s.streak||0}🔥</div>
+    </div>
+    <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">За неделю</div>
+        <div style="font-size:22px;font-weight:900;color:#8b5cf6">${s.wScore||0}</div>
+    </div>
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Точность</div>
+        <div style="font-size:22px;font-weight:900;color:${accColor}">${accStr}</div>
+    </div>
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Время</div>
+        <div style="font-size:22px;font-weight:900;color:#a78bfa">${timeStr}</div>
+    </div>
+</div>
+${learnedSectionHtml}
+<div class="section">
+    <h3 style="font-size:14px;font-weight:900;margin-bottom:10px">📊 Активность за 7 дней</h3>
+    <div style="display:flex;align-items:flex-end;gap:4px;height:60px;margin-bottom:4px">${actBarsHtml}</div>
+</div>
+<div class="section">
+    <h3 style="font-size:14px;font-weight:900;margin-bottom:10px">🎯 Точность по эпохам</h3>
+    ${eraRowsHtml}
+    ${s.weakEra ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;font-weight:700;color:#ef4444">⚠️ Слабая тема: ${s.weakEra.name} — ${s.weakEra.pct}% (${s.weakEra.correct}/${s.weakEra.total})</div>` : ''}
+</div>
+${taskStatsHtml ? `<div class="section"><h3 style="font-size:14px;font-weight:900;margin-bottom:10px">📝 Разбивка по типам заданий</h3>${taskStatsHtml}</div>` : ''}
+${mistakesHtml}
+<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#94a3b8;text-align:center">
+    Тренажёр ЕГЭ История | ${new Date().toLocaleDateString('ru-RU')} | uid: ${s.uid||''}
+</div>
+</body></html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Отчёт_${(s.name||'ученик').replace(/[^а-яёА-ЯЁa-zA-Z0-9_\s]/g,'').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('📄', 'Отчёт скачан!', 'bg-blue-500', 'border-blue-700');
         };
 
         window.loadClassProgress = async function() {
@@ -2918,12 +3217,20 @@
                     if (shouldLoad) {
                         try {
                             const cS = JSON.parse(d.fullStateJson);
-                            Object.assign(window.state.stats, cS.stats);
+                            // fullStateJson is saved FLAT (streak, totalSolvedEver, etc. at root level),
+                            // NOT nested under .stats. Use the same logic as initStorage local load.
+                            const statsFields = ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks','hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData'];
+                            statsFields.forEach(k => { if (cS[k] !== undefined) window.state.stats[k] = cS[k]; });
                             if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool;
                             if (cS.hideLearned !== undefined) window.state.hideLearned = cS.hideLearned;
                             if (cS.customYearFrom !== undefined) window.state.yearFrom = cS.customYearFrom;
                             if (cS.customYearTo !== undefined) window.state.yearTo = cS.customYearTo;
                             if (cS.selectedPeriods) window.state.selectedPeriods = cS.selectedPeriods;
+                            // Ensure proper defaults after cloud load
+                            if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
+                            if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task4: 0, task5: 0, task7: 0 };
+                            if (!window.state.stats.achievements) window.state.stats.achievements = [];
+                            if (!window.state.stats.achievementsData) window.state.stats.achievementsData = { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 };
                             localStorage.setItem('ege_final_storage_v4', d.fullStateJson);
                             console.log(`[Sync] Загружено из облака: ${cloudSolved} задач (локально было: ${localSolved})`);
                         } catch(parseErr) {
