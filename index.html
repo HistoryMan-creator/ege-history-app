@@ -2298,6 +2298,7 @@
         function _applyGoogleUser(user) {
             const gName  = user.displayName || '';
             const gEmail = user.email       || '';
+            // Set Google name as fallback only if no manual name is set
             if (gName && !localStorage.getItem('student_manual_name'))
                 localStorage.setItem('student_manual_name', gName);
             localStorage.setItem('stable_student_id', 'google_' + user.uid);
@@ -2309,7 +2310,16 @@
                 statusEl.className    = 'text-[11px] font-bold text-emerald-600 mt-1';
             }
             const nameEl = $('profile-name-input');
-            if (nameEl && gName && !nameEl.value) nameEl.value = gName;
+            if (nameEl) {
+                // Show the stored name (could be from TG/cloud), or Google name as fallback
+                const storedName = localStorage.getItem('student_manual_name') || gName;
+                if (storedName && !nameEl.value) nameEl.value = storedName;
+            }
+            const classEl = $('profile-class-code');
+            if (classEl) {
+                const storedClass = localStorage.getItem('student_class_code') || '';
+                if (storedClass && !classEl.value) classEl.value = storedClass;
+            }
         }
 
         // ─── Main auth bootstrap ─────────────────────────────────────────────────
@@ -2367,35 +2377,55 @@
             const oldStudentId = localStorage.getItem('stable_student_id') || '';
             const localStateJson = localStorage.getItem('ege_final_storage_v4') || '{}';
             const localSolved = window.state.stats.totalSolvedEver || 0;
+            
+            async function _handleGoogleResult(user) {
+                _applyGoogleUser(user);
+                const newId = resolveUserId(user); // now google_<uid>
+                
+                // loadProgressFromCloud will search by google_<uid>, then by email, then by name
+                // This handles the case where data is under TG ID
+                await window.loadProgressFromCloud();
+                
+                const cloudLoaded = window.state.stats.totalSolvedEver || 0;
+                
+                // If cloud had no data but local had some (from anon session), push to cloud
+                if (cloudLoaded === 0 && localSolved > 0) {
+                    // Restore local state that might have been overwritten
+                    try {
+                        const parsed = JSON.parse(localStateJson);
+                        const statsFields = ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks','hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData'];
+                        statsFields.forEach(k => { if (parsed[k] !== undefined) window.state.stats[k] = parsed[k]; });
+                        if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
+                        localStorage.setItem('ege_final_storage_v4', localStateJson);
+                    } catch(e) {}
+                    await window.syncProgressToCloud();
+                } else if (cloudLoaded > 0) {
+                    // Cloud was loaded — also sync back to ensure data is under google_<uid>
+                    await window.syncProgressToCloud();
+                }
+                
+                // Also migrate old TG document to include googleEmail so future lookups work
+                if (oldStudentId && oldStudentId !== newId) {
+                    try {
+                        const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                        const oldDoc = await getDoc(doc(studentsCol, oldStudentId));
+                        if (oldDoc.exists() && (oldDoc.data().totalSolved || 0) > 0) {
+                            await setDoc(doc(studentsCol, oldStudentId), { googleEmail: user.email || '' }, { merge: true });
+                        }
+                    } catch(e) {}
+                }
+                
+                updateGlobalUI();
+                if (window.updateProgressBars) updateProgressBars();
+            }
+            
             try {
-                // Try popup first — works in most browsers & WebViews
                 const result = await signInWithPopup(auth, provider);
                 if (result && result.user) {
-                    _applyGoogleUser(result.user);
-                    // After applying Google user, new stable_student_id = 'google_' + uid
-                    // Now check if Google account already has data in cloud
-                    const newId = resolveUserId(result.user);
-                    let cloudSolved = 0;
-                    try {
-                        const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', newId));
-                        if (dS.exists()) { cloudSolved = dS.data().totalSolved || 0; }
-                    } catch(e) {}
-                    if (cloudSolved > localSolved) {
-                        // Cloud has more data — load from cloud
-                        await window.loadProgressFromCloud();
-                    } else if (localSolved > 0) {
-                        // Local has more data — push local to cloud under new Google ID
-                        await window.syncProgressToCloud();
-                    }
-                    // If old ID was different (TG or anon), also copy data to new Google doc
-                    if (oldStudentId && oldStudentId !== newId && localSolved > 0 && localSolved >= cloudSolved) {
-                        await window.syncProgressToCloud();
-                    }
-                    updateGlobalUI();
+                    await _handleGoogleResult(result.user);
                     showToast('✅', 'Вход через Google: ' + (result.user.email || result.user.displayName || ''), 'bg-emerald-500', 'border-emerald-700');
                 }
             } catch (e) {
-                // If popup blocked or failed, try redirect
                 if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
                     try {
                         await signInWithRedirect(auth, provider);
@@ -2404,24 +2434,11 @@
                         showToast('❌', 'Не удалось войти: ' + (redirectErr.code || redirectErr.message), 'bg-rose-500', 'border-rose-700');
                     }
                 } else if (e.code === 'auth/credential-already-in-use' || e.code === 'auth/email-already-in-use') {
-                    // Account already exists — sign in with credential directly
                     try {
                         const credential = GoogleAuthProvider.credentialFromError(e);
                         if (credential) {
                             const fallbackResult = await signInWithCredential(auth, credential);
-                            _applyGoogleUser(fallbackResult.user);
-                            const newId = resolveUserId(fallbackResult.user);
-                            let cloudSolved = 0;
-                            try {
-                                const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', newId));
-                                if (dS.exists()) { cloudSolved = dS.data().totalSolved || 0; }
-                            } catch(e2) {}
-                            if (cloudSolved > localSolved) {
-                                await window.loadProgressFromCloud();
-                            } else if (localSolved > 0) {
-                                await window.syncProgressToCloud();
-                            }
-                            updateGlobalUI();
+                            await _handleGoogleResult(fallbackResult.user);
                             showToast('✅', 'Вход через Google: ' + (fallbackResult.user.email || ''), 'bg-emerald-500', 'border-emerald-700');
                         }
                     } catch (credErr) {
@@ -2439,22 +2456,36 @@
             fbUser = u; 
             if (u) {
                 // ── Всегда синхронизируем stable_student_id с Google, если вход через Google.
-                //    Это работает и при первом входе, и при повторном открытии на том же/новом устройстве.
                 const googleProvider = (u.providerData || []).find(p => p.providerId === 'google.com');
                 if (googleProvider) {
                     const gEmail = googleProvider.email || u.email || '';
                     const gName  = googleProvider.displayName || u.displayName || '';
-                    // Всегда обновляем — без проверки !localStorage, чтобы не было рассинхрона
                     localStorage.setItem('google_email', gEmail);
                     localStorage.setItem('google_uid',   u.uid);
                     localStorage.setItem('stable_student_id', 'google_' + u.uid);
                     if (gName && !localStorage.getItem('student_manual_name'))
                         localStorage.setItem('student_manual_name', gName);
-                    _applyGoogleUser(u); // обновляет UI профиля
+                    _applyGoogleUser(u);
                 }
 
                 // Загружаем прогресс из облака (ПЕРЕД синхронизацией — иначе затрём облако нулями)
+                // This also loads name and classCode from cloud
                 await window.loadProgressFromCloud();
+                
+                // Update UI with loaded name/class
+                const nameEl = $('profile-name-input');
+                const classEl = $('profile-class-code');
+                if (nameEl && localStorage.getItem('student_manual_name')) nameEl.value = localStorage.getItem('student_manual_name');
+                if (classEl && localStorage.getItem('student_class_code')) classEl.value = localStorage.getItem('student_class_code');
+                // Update Google status UI
+                if (googleProvider) {
+                    const statusEl = $('profile-google-status');
+                    const gEmail = localStorage.getItem('google_email') || '';
+                    if (statusEl && gEmail) {
+                        statusEl.textContent = '✅ ' + gEmail;
+                        statusEl.className = 'text-[11px] font-bold text-emerald-600 mt-1';
+                    }
+                }
 
                 // Тост о входе через Google (если был редирект)
                 if (window._pendingGoogleToast) {
@@ -3205,20 +3236,63 @@ ${mistakesHtml}
         window.loadProgressFromCloud = async function() {
             if (!fbUser || !db) return;
             try {
-                const dS = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(fbUser)));
-                if (dS.exists()) {
-                    const d = dS.data();
+                const currentId = resolveUserId(fbUser);
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                
+                // 1. Try loading by current ID (google_xxx or tg numeric)
+                let dS = await getDoc(doc(studentsCol, currentId));
+                let d = dS.exists() ? dS.data() : null;
+                
+                // 2. If no data or zero progress under current google ID, search by old stable_student_id or by email
+                if ((!d || (d.totalSolved || 0) === 0) && currentId.startsWith('google_')) {
+                    const gEmail = localStorage.getItem('google_email') || (fbUser.email || '');
+                    
+                    // Search all students for matching email or tgId that links to this account
+                    try {
+                        const allDocs = await getDocs(studentsCol);
+                        let bestDoc = null, bestSolved = 0;
+                        allDocs.forEach(docSnap => {
+                            const data = docSnap.data();
+                            const docSolved = data.totalSolved || 0;
+                            // Match by googleEmail field
+                            if (gEmail && data.googleEmail === gEmail && docSolved > bestSolved) {
+                                bestDoc = data; bestSolved = docSolved;
+                            }
+                            // Match by name + classCode if both exist
+                            const localName = localStorage.getItem('student_manual_name') || '';
+                            if (localName && data.name === localName && docSolved > bestSolved) {
+                                bestDoc = data; bestSolved = docSolved;
+                            }
+                        });
+                        if (bestDoc && bestSolved > (d ? (d.totalSolved || 0) : 0)) {
+                            d = bestDoc;
+                            console.log(`[Sync] Найден аккаунт по email/имени с ${bestSolved} задач`);
+                        }
+                    } catch(searchErr) {
+                        console.error('[Sync] Ошибка поиска по email:', searchErr);
+                    }
+                }
+                
+                if (d) {
                     const cloudSolved  = d.totalSolved || 0;
                     const localSolved  = window.state.stats.totalSolvedEver || 0;
-                    // Загружаем облако если:
-                    //   1. В облаке больше решённых задач (основной случай)
-                    //   2. Локальных данных нет вообще (новое устройство, localSolved == 0)
+                    
+                    // Load name and classCode from cloud if local is empty
+                    if (d.name && d.name !== 'Ученик' && !localStorage.getItem('student_manual_name')) {
+                        localStorage.setItem('student_manual_name', d.name);
+                        const nameEl = $('profile-name-input');
+                        if (nameEl) nameEl.value = d.name;
+                    }
+                    if (d.classCode && !localStorage.getItem('student_class_code')) {
+                        localStorage.setItem('student_class_code', d.classCode);
+                        const classEl = $('profile-class-code');
+                        if (classEl) classEl.value = d.classCode;
+                    }
+                    
                     const shouldLoad = d.fullStateJson && (cloudSolved > localSolved || localSolved === 0);
                     if (shouldLoad) {
                         try {
                             const cS = JSON.parse(d.fullStateJson);
-                            // fullStateJson is saved FLAT (streak, totalSolvedEver, etc. at root level),
-                            // NOT nested under .stats. Use the same logic as initStorage local load.
                             const statsFields = ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks','hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData'];
                             statsFields.forEach(k => { if (cS[k] !== undefined) window.state.stats[k] = cS[k]; });
                             if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool;
@@ -3226,7 +3300,6 @@ ${mistakesHtml}
                             if (cS.customYearFrom !== undefined) window.state.yearFrom = cS.customYearFrom;
                             if (cS.customYearTo !== undefined) window.state.yearTo = cS.customYearTo;
                             if (cS.selectedPeriods) window.state.selectedPeriods = cS.selectedPeriods;
-                            // Ensure proper defaults after cloud load
                             if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
                             if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task4: 0, task5: 0, task7: 0 };
                             if (!window.state.stats.achievements) window.state.stats.achievements = [];
@@ -3238,6 +3311,7 @@ ${mistakesHtml}
                         }
                     }
                     if (window.updateGlobalUI) window.updateGlobalUI();
+                    if (window.updateProgressBars) window.updateProgressBars();
                 }
             } catch(e) { console.error('[Sync] loadProgressFromCloud error:', e); }
         };
@@ -3245,7 +3319,8 @@ ${mistakesHtml}
         window.syncProgressToCloud = async function() {
             if (!fbUser || !db) return; const s = window.state.stats; if (!s) return;
             let nw = Date.now();
-            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(fbUser)), { name: localStorage.getItem('student_manual_name') || 'Ученик', tgId: resolveUserId(fbUser), classCode: localStorage.getItem('student_class_code') || '', totalSolved: s.totalSolvedEver || 0, fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}', lastActive: nw }, { merge: true }); } catch(e) {}
+            const gEmail = localStorage.getItem('google_email') || '';
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', resolveUserId(fbUser)), { name: localStorage.getItem('student_manual_name') || 'Ученик', tgId: resolveUserId(fbUser), classCode: localStorage.getItem('student_class_code') || '', googleEmail: gEmail, totalSolved: s.totalSolvedEver || 0, fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}', lastActive: nw }, { merge: true }); } catch(e) {}
         };
     </script>
 </body>
