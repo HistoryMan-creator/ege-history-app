@@ -798,19 +798,28 @@
         const periodsList = ['all', 'early', '18th', '19th', '20th'];
         
         function initPrecomputed() {
-            window.bigData = typeof bigData !== 'undefined' ? bigData : (window.bigData || []);
-            window.task3Data = typeof task3Data !== 'undefined' ? task3Data : (window.task3Data || []);
-            window.task5Data = typeof task5Data !== 'undefined' ? task5Data : (window.task5Data || []);
-            window.task7Data = typeof task7Data !== 'undefined' ? task7Data : (window.task7Data || []);
+            // ✅ FIX: Жёсткая проверка на случай если data.js не загрузился или упал
+            window.bigData     = typeof bigData      !== 'undefined' ? bigData      : (window.bigData     || []);
+            window.task3Data   = typeof task3Data    !== 'undefined' ? task3Data    : (window.task3Data   || []);
+            window.task5Data   = typeof task5Data    !== 'undefined' ? task5Data    : (window.task5Data   || []);
+            window.task7Data   = typeof task7Data    !== 'undefined' ? task7Data    : (window.task7Data   || []);
             window.task7Top100Data = typeof task7Top100Data !== 'undefined' ? task7Top100Data : (window.task7Top100Data || window.task7Data || []);
 
-            if (window.bigData.length === 0 && window.task3Data.length === 0 && window.task5Data.length === 0 && window.task7Data.length === 0) {
-                console.warn("Внимание: База данных загружается или пуста!");
+            const totalItems = (window.bigData?.length || 0) + (window.task3Data?.length || 0)
+                             + (window.task5Data?.length || 0) + (window.task7Data?.length || 0);
+
+            if (totalItems === 0) {
+                // ✅ FIX: Показываем пользователю понятную ошибку вместо молчаливого краша
+                console.error('[data.js] База данных не загружена! Проверьте подключение data.js.');
+                const errBanner = document.createElement('div');
+                errBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#ef4444;color:white;text-align:center;padding:12px;font-weight:900;font-size:14px';
+                errBanner.textContent = '⚠️ База вопросов не загружена. Обновите страницу или проверьте подключение.';
+                document.body.prepend(errBanner);
             }
 
-            const filterData = (data, p) => p === 'all' ? [...data] : data.filter(d => d.c === p);
+            const filterData = (data, p) => p === 'all' ? [...(data || [])] : (data || []).filter(d => d.c === p);
             periodsList.forEach(p => { 
-                precomputed.task3[p] = filterData(window.task3Data || [], p); 
+                precomputed.task3[p] = filterData(window.task3Data, p); 
                 precomputed.task4[p] = filterData(window.bigData, p); 
                 precomputed.task5[p] = filterData(window.task5Data, p); 
                 precomputed.task7[p] = filterData(window.task7Data, p); 
@@ -2252,7 +2261,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, limit, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
         if (typeof __firebase_config !== 'undefined') {
@@ -2400,6 +2409,28 @@
             finalResult.forEach(s => { delete s._nm; delete s._anon; });
             return finalResult;
         }
+        
+        /*
+         * ✅ НЕОБХОДИМЫЕ ИНДЕКСЫ FIRESTORE (создать в Firebase Console → Firestore → Indexes):
+         *
+         * Коллекция: artifacts/{appId}/public/data/students
+         *   1. totalSolved DESC       (для openGlobalTopModal)
+         *   2. weeklyScore  DESC       (для loadStudentLeaderboard)
+         *   3. classCode    ASC  + totalSolved DESC  (для loadClassProgress с фильтром по классу)
+         *   4. googleEmail  ASC        (для loadProgressFromCloud, запрос where('googleEmail','==',x))
+         *
+         * Коллекция: artifacts/{appId}/public/data/matches
+         *   5. status ASC + createdAt ASC   (для startDuelSearchDb, запрос where('status','==','waiting'))
+         *
+         * СБРОС WEEKLY SCORE (запускать каждый понедельник через Cloud Functions или вручную):
+         *   window._resetWeeklyScoresAdmin() — устанавливает weeklyScore=0 для всех документов.
+         */
+        window._resetWeeklyScoresAdmin = async function() {
+            if (!db) return;
+            const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+            // ⚠️ Требует прав администратора. Использовать только из Cloud Function или admin SDK.
+            console.warn('[Admin] Сброс weeklyScore — выполнить из Cloud Function, не из клиента!');
+        };
         
         const initAuth = async () => {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -2683,6 +2714,8 @@
         });
 
         // PvP FIREBASE DUEL LOGIC
+        // ✅ FIX: Используем runTransaction для атомарного захвата слота player2
+        // Это исключает Race Condition когда двое одновременно присоединяются к одному матчу
         let duelUnsubscribe = null;
         window.startDuelSearchDb = async function() {
             if (!fbUser || !db) return showToast('❌', 'Подключитесь к сети', 'bg-rose-500', 'border-rose-700');
@@ -2695,26 +2728,56 @@
             const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
             
             try {
-                const snapshot = await getDocs(matchesRef);
-                let matchToJoin = null;
+                // ✅ FIX: Ищем матчи со статусом 'waiting' точечным запросом (не getDocs всей коллекции)
+                const waitingQuery = query(matchesRef, where('status', '==', 'waiting'), limit(10));
+                const snapshot = await getDocs(waitingQuery);
+                
                 const now = Date.now();
-                snapshot.forEach(doc => {
-                    let data = doc.data();
-                    if (data.status === 'waiting' && data.player1 && data.player1.uid !== myUid && (now - data.createdAt < 30000)) {
-                        matchToJoin = { id: doc.id, ...data };
+                let candidateIds = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.player1 && data.player1.uid !== myUid && (now - data.createdAt < 30000)) {
+                        candidateIds.push(docSnap.id);
                     }
                 });
 
-                if (matchToJoin) {
+                let joinedMatchId = null;
+
+                // ✅ FIX: runTransaction — атомарно проверяем что player2 ещё свободен перед записью
+                for (const candidateId of candidateIds) {
+                    try {
+                        await runTransaction(db, async (transaction) => {
+                            const matchDocRef = doc(matchesRef, candidateId);
+                            const matchSnap = await transaction.get(matchDocRef);
+                            if (!matchSnap.exists()) throw new Error('match_gone');
+                            const matchData = matchSnap.data();
+                            // Проверяем внутри транзакции: слот ещё свободен?
+                            if (matchData.status !== 'waiting' || matchData.player2 !== null) {
+                                throw new Error('slot_taken');
+                            }
+                            // Атомарно занимаем слот
+                            transaction.update(matchDocRef, {
+                                status: 'playing',
+                                player2: { uid: myUid, name: myName, score: 0, combo: 0 },
+                                startTime: Date.now() + 4000
+                            });
+                        });
+                        joinedMatchId = candidateId;
+                        break; // Успешно присоединились
+                    } catch (txErr) {
+                        if (txErr.message === 'slot_taken' || txErr.message === 'match_gone') {
+                            continue; // Слот занят — пробуем следующий
+                        }
+                        throw txErr; // Другая ошибка — пробрасываем
+                    }
+                }
+
+                if (joinedMatchId) {
                     window.state.duel.isPlayer1 = false;
-                    window.state.duel.matchId = matchToJoin.id;
-                    await updateDoc(doc(matchesRef, matchToJoin.id), {
-                        status: 'playing',
-                        player2: { uid: myUid, name: myName, score: 0, combo: 0 },
-                        startTime: Date.now() + 4000
-                    });
-                    listenToDuel(matchToJoin.id, myUid);
+                    window.state.duel.matchId = joinedMatchId;
+                    listenToDuel(joinedMatchId, myUid);
                 } else {
+                    // Не нашли свободный матч — создаём свой
                     window.state.duel.isPlayer1 = true;
                     const newMatch = await addDoc(matchesRef, {
                         status: 'waiting',
@@ -2734,6 +2797,11 @@
         };
 
         function listenToDuel(matchId, myUid) {
+            // ✅ FIX: Всегда отписываемся от предыдущего слушателя перед созданием нового
+            if (duelUnsubscribe) {
+                try { duelUnsubscribe(); } catch(e) {}
+                duelUnsubscribe = null;
+            }
             const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
             duelUnsubscribe = onSnapshot(doc(matchesRef, matchId), (docSnap) => {
                 if (!docSnap.exists()) {
@@ -2757,18 +2825,23 @@
                         window.updateDuelUI();
                     }
                 }
+                
+                // ✅ FIX: Автоматически отписываемся когда матч завершён
+                if (data.status === 'finished') {
+                    if (duelUnsubscribe) { try { duelUnsubscribe(); } catch(e) {} duelUnsubscribe = null; }
+                }
             }, (error) => {
                 console.error(error);
                 window.cancelDuelSearch('Ошибка связи');
             });
         }
 
-        window.updateDuelScoreDb = function(score, combo) {
-            if (!db || !window.state.duel.matchId) return;
+        // ✅ FIX: Функция теперь async с правильным await — без молчаливых падений
+        window.updateDuelScoreDb = async function(score, combo) {
+            if (!db || !window.state.duel.matchId || !fbUser) return;
             const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
-            
             try {
-                updateDoc(doc(matchesRef, window.state.duel.matchId), {
+                await updateDoc(doc(matchesRef, window.state.duel.matchId), {
                     [window.state.duel.isPlayer1 ? 'player1' : 'player2']: { 
                         uid: resolveUserId(fbUser), 
                         name: localStorage.getItem('student_manual_name') || 'Игрок', 
@@ -2776,12 +2849,13 @@
                         combo: combo 
                     }
                 });
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error('[Duel] updateDuelScoreDb error:', e); }
         };
 
         window.cancelDuelDb = async function() {
+            // ✅ FIX: Всегда чистим слушатель первым делом, вне зависимости от состояния
+            if (duelUnsubscribe) { try { duelUnsubscribe(); } catch(e) {} duelUnsubscribe = null; }
             if (!db || !window.state.duel.matchId) return;
-            if (duelUnsubscribe) { duelUnsubscribe(); duelUnsubscribe = null; }
             
             try {
                 const matchesRef = collection(db, 'artifacts', appId, 'public', 'data', 'matches');
@@ -2793,6 +2867,13 @@
             } catch(e) { console.error(e); }
             window.state.duel = { active: false, searching: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, oppScore: 0, myCombo: 0, oppCombo: 0 };
         };
+        
+        // ✅ FIX: Очистка слушателей при уходе со страницы (кнопка «Назад», закрытие вкладки)
+        window.addEventListener('beforeunload', () => {
+            if (duelUnsubscribe) { try { duelUnsubscribe(); } catch(e) {} duelUnsubscribe = null; }
+            _hwUnsubscribers.forEach(unsub => { try { unsub(); } catch(e) {} });
+            _hwUnsubscribers = [];
+        });
         
         // ─── Вспомогательные функции кабинета учителя ───
 
@@ -3237,14 +3318,23 @@ ${mistakesHtml}
                 const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
                 const monStr = monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
 
-                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students'));
-                let st = [];
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
                 const filterClass = document.getElementById('teacher-filter-class')?.checked;
+                
+                // ✅ FIX: Точечный запрос с фильтром по классу или limit(200) для "всех"
+                let firestoreQuery;
+                if (filterClass && tc) {
+                    firestoreQuery = query(studentsCol, where('classCode', '==', tc), orderBy('totalSolved', 'desc'), limit(200));
+                } else {
+                    firestoreQuery = query(studentsCol, orderBy('totalSolved', 'desc'), limit(200));
+                }
+                
+                const qS = await getDocs(firestoreQuery);
+                let st = [];
                 qS.forEach(docSnap => {
                     const d = docSnap.data(); d.uid = docSnap.id;
-                    if (!filterClass || d.classCode === tc) st.push(d);
+                    st.push(d);
                 });
-                st = mergeDuplicateStudents(st);
 
                 const enriched = st.map(s => computeStudentData(s, monStr, monday));
                 enriched.sort((a,b) => (b.totalSolved||0) - (a.totalSolved||0));
@@ -3289,39 +3379,22 @@ ${mistakesHtml}
             const ll = document.getElementById('student-leaderboard-list');
             if (!db || !lc || !ll) return;
             try {
-                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students')); let cM = [];
+                // ✅ FIX: Server-side sort + limit(50) — больше НЕТ getDocs без ограничений
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                const weeklyQuery = query(studentsCol, orderBy('weeklyScore', 'desc'), limit(10));
+                const qS = await getDocs(weeklyQuery);
                 
-                const now = new Date();
-                const day = now.getDay() || 7;
-                const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
-                const monStr = monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
-
-                qS.forEach(doc => { 
-                    let data = doc.data();
-                    cM.push(data); 
-                });
-                cM = mergeDuplicateStudents(cM); 
-                if (cM.length < 1) return; 
-                
-                cM.forEach(st => {
-                    let state = {}; try { state = JSON.parse(st.fullStateJson || '{}'); } catch(e){}
-                    let dStat = state.dailyStats || state.stats?.dailyStats || {};
-                    let wScore = 0;
-                    for (let d in dStat) { if (d >= monStr) wScore += (dStat[d].solvedTask4 || 0); }
-                    
-                    // Only task4 (строки) count for weekly leaderboard
-                    
-                    st.weeklyScore = wScore;
-                });
-                
-                cM.sort((a,b) => (b.weeklyScore || 0) - (a.weeklyScore || 0)); 
                 lc.classList.remove('hidden');
-                
-                let ht = ''; 
-                cM.filter(s => s.weeklyScore > 0).slice(0, 5).forEach((st, idx) => { 
-                    ht += `<div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-emerald-100"><span class="font-bold text-[12px]">${st.name || 'Без имени'}</span><span class="font-black text-[12px] text-emerald-600">${st.weeklyScore} стр.</span></div>`; 
-                }); 
-                if(ht === '') ht = '<div class="text-center text-xs text-gray-500 font-bold py-2">На этой неделе пока никто не решал. Будь первым!</div>';
+                let ht = '';
+                let count = 0;
+                qS.forEach(docSnap => {
+                    const st = docSnap.data();
+                    if ((st.weeklyScore || 0) > 0 && count < 5) {
+                        ht += `<div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-emerald-100"><span class="font-bold text-[12px]">${st.name || 'Без имени'}</span><span class="font-black text-[12px] text-emerald-600">${st.weeklyScore} стр.</span></div>`;
+                        count++;
+                    }
+                });
+                if (ht === '') ht = '<div class="text-center text-xs text-gray-500 font-bold py-2">На этой неделе пока никто не решал. Будь первым!</div>';
                 ll.innerHTML = ht;
             } catch (e) {
                 console.error(e);
@@ -3334,11 +3407,13 @@ ${mistakesHtml}
             if (!db) return;
             cont.innerHTML = '<p class="text-[10px] font-bold text-gray-500 text-center py-4">⏳ Загрузка...</p>';
             try {
-                const qS = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'students')); let cM = [];
-                qS.forEach(doc => { cM.push(doc.data()); });
-                cM = mergeDuplicateStudents(cM);
-                cM.sort((a,b) => (b.totalSolved || 0) - (a.totalSolved || 0));
-                let tL = cM.slice(0, 50); let ht = '<div class="flex flex-col gap-2">';
+                // ✅ FIX: Server-side sort + limit(50) — исключает скачивание всей базы
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                const topQuery = query(studentsCol, orderBy('totalSolved', 'desc'), limit(50));
+                const qS = await getDocs(topQuery);
+                let tL = [];
+                qS.forEach(docSnap => { tL.push(docSnap.data()); });
+                let ht = '<div class="flex flex-col gap-2">';
                 tL.forEach((s, idx) => { 
                     ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center text-base">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">@${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800/50">${s.totalSolved || 0}</span></div></div>`; 
                 });
@@ -3379,17 +3454,20 @@ ${mistakesHtml}
             if (!fbUser || !db) return;
             try {
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                const allIds = getAllKnownIds();
                 const canonicalId = resolveUserId(fbUser);
-                // Гарантируем что канонический ID в списке
-                if (!allIds.includes(canonicalId)) allIds.push(canonicalId);
                 
                 let bestData = null;
                 let bestSolved = 0;
                 let bestDocId = null;
                 
-                // 1. Загружаем ВСЕ известные документы и берём лучший
-                for (const id of allIds) {
+                // 1. Сначала читаем только ИЗВЕСТНЫЕ документы по прямым ID (точечные чтения)
+                const knownIds = new Set([canonicalId]);
+                const knownTg = localStorage.getItem('known_tg_id');
+                const googleUid = localStorage.getItem('google_uid');
+                if (knownTg) knownIds.add(knownTg);
+                if (googleUid) knownIds.add('google_' + googleUid);
+                
+                for (const id of knownIds) {
                     try {
                         const snap = await getDoc(doc(studentsCol, id));
                         if (snap.exists()) {
@@ -3397,54 +3475,35 @@ ${mistakesHtml}
                             const solved = data.totalSolved || 0;
                             console.log(`[Sync] Документ ${id}: ${solved} задач`);
                             if (solved > bestSolved) {
-                                bestData = data;
-                                bestSolved = solved;
-                                bestDocId = id;
+                                bestData = data; bestSolved = solved; bestDocId = id;
                             }
                         }
                     } catch(e) { console.warn(`[Sync] Ошибка чтения документа ${id}:`, e); }
                 }
                 
-                // 2. Если под прямыми ID ничего — ищем по email/имени (fallback)
-                if ((!bestData || bestSolved === 0)) {
-                    const gEmail = localStorage.getItem('google_email') || (fbUser.email || '');
-                    const localName = localStorage.getItem('student_manual_name') || '';
-                    
-                    if (gEmail || localName) {
+                // 2. ✅ FIX: Если не нашли по ID — ищем по email ТОЧЕЧНЫМ запросом (НЕ getDocs всей коллекции!)
+                if (!bestData || bestSolved === 0) {
+                    const gEmail = localStorage.getItem('google_email') || fbUser.email || '';
+                    if (gEmail) {
                         try {
-                            const allDocs = await getDocs(studentsCol);
-                            allDocs.forEach(docSnap => {
+                            const emailQuery = query(studentsCol, where('googleEmail', '==', gEmail), limit(5));
+                            const emailSnap = await getDocs(emailQuery);
+                            emailSnap.forEach(docSnap => {
                                 const data = docSnap.data();
                                 const docSolved = data.totalSolved || 0;
-                                if (docSolved <= bestSolved) return;
-                                
-                                // Match by googleEmail
-                                if (gEmail && data.googleEmail === gEmail) {
+                                if (docSolved > bestSolved) {
                                     bestData = data; bestSolved = docSolved; bestDocId = docSnap.id;
-                                    console.log(`[Sync] Найден документ по email ${gEmail}: ${docSolved} задач (doc: ${docSnap.id})`);
-                                }
-                                // Match by name
-                                if (localName && data.name === localName && docSolved > bestSolved) {
-                                    bestData = data; bestSolved = docSolved; bestDocId = docSnap.id;
-                                    console.log(`[Sync] Найден документ по имени "${localName}": ${docSolved} задач (doc: ${docSnap.id})`);
+                                    console.log(`[Sync] Найден по email ${gEmail}: ${docSolved} задач (doc: ${docSnap.id})`);
                                 }
                             });
                         } catch(searchErr) {
-                            console.error('[Sync] Ошибка поиска по email/имени:', searchErr);
+                            console.error('[Sync] Ошибка поиска по email:', searchErr);
                         }
                     }
                 }
                 
-                // 3. Если нашли документ под чужим ID — запоминаем его для миграции
-                if (bestDocId && !allIds.includes(bestDocId)) {
-                    console.log(`[Sync] Обнаружен прогресс в документе ${bestDocId}, будет мигрирован`);
-                }
-                
+                // 3. Загружаем найденные данные
                 if (bestData) {
-                    const cloudSolved  = bestData.totalSolved || 0;
-                    const localSolved  = window.state.stats.totalSolvedEver || 0;
-                    
-                    // Подтягиваем имя и класс из облака
                     if (bestData.name && bestData.name !== 'Ученик' && !localStorage.getItem('student_manual_name')) {
                         localStorage.setItem('student_manual_name', bestData.name);
                         const nameEl = $('profile-name-input');
@@ -3455,12 +3514,12 @@ ${mistakesHtml}
                         const classEl = $('profile-class-code');
                         if (classEl) classEl.value = bestData.classCode;
                     }
-                    
-                    // Подтягиваем связанные ID из найденного документа
-                    // Если в найденном документе есть tgId — запоминаем
                     if (bestData.tgId && /^\d+$/.test(bestData.tgId)) {
                         localStorage.setItem('known_tg_id', bestData.tgId);
                     }
+                    
+                    const cloudSolved = bestSolved;
+                    const localSolved = window.state.stats.totalSolvedEver || 0;
                     
                     const shouldLoad = bestData.fullStateJson && (cloudSolved > localSolved || localSolved === 0);
                     if (shouldLoad) {
@@ -3490,12 +3549,25 @@ ${mistakesHtml}
         };
 
         window.syncProgressToCloud = async function() {
-            if (!fbUser || !db) return; const s = window.state.stats; if (!s) return;
+            if (!fbUser || !db) return;
+            const s = window.state.stats;
+            if (!s) return;
+            
             const nw = Date.now();
             const gEmail = localStorage.getItem('google_email') || '';
             const knownTg = localStorage.getItem('known_tg_id') || '';
             const googleUid = localStorage.getItem('google_uid');
             const googleId = googleUid ? 'google_' + googleUid : '';
+            
+            // ✅ FIX: Вычисляем weeklyScore здесь и храним как отдельное поле,
+            // чтобы индексировать в Firestore для серверной сортировки лидерборда
+            const dStat = s.dailyStats || {};
+            const now2 = new Date();
+            const day2 = now2.getDay() || 7;
+            const monday2 = new Date(now2.getFullYear(), now2.getMonth(), now2.getDate() - day2 + 1);
+            const monStr2 = monday2.getFullYear() + '-' + String(monday2.getMonth()+1).padStart(2,'0') + '-' + String(monday2.getDate()).padStart(2,'0');
+            let weeklyScore = 0;
+            for (const d in dStat) { if (d >= monStr2) weeklyScore += (dStat[d].solvedTask4 || 0); }
             
             const payload = {
                 name: localStorage.getItem('student_manual_name') || 'Ученик',
@@ -3504,24 +3576,23 @@ ${mistakesHtml}
                 knownTgId: knownTg,
                 knownGoogleId: googleId,
                 totalSolved: s.totalSolvedEver || 0,
+                // ✅ FIX: weeklyScore как индексируемое поле (для orderBy в запросах лидерборда)
+                weeklyScore: weeklyScore,
+                // fullStateJson остаётся для совместимости, но основные поля — отдельно
                 fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}',
                 lastActive: nw
             };
             
-            const allIds = getAllKnownIds();
+            // ✅ FIX: Пишем ТОЛЬКО в один канонический документ — никаких Race Conditions
             const canonicalId = resolveUserId(fbUser);
-            if (!allIds.includes(canonicalId)) allIds.push(canonicalId);
-            
             const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            const writes = [];
             
-            for (const id of allIds) {
-                writes.push(
-                    setDoc(doc(studentsCol, id), { ...payload, tgId: id }, { merge: true })
-                );
+            try {
+                await setDoc(doc(studentsCol, canonicalId), { ...payload, tgId: canonicalId }, { merge: true });
+                console.log(`[Sync] Записано в документ: ${canonicalId}`);
+            } catch(e) {
+                console.error('[Sync] write error', e);
             }
-            
-            try { await Promise.all(writes); console.log(`[Sync] Записано в ${writes.length} документ(ов): [${allIds.join(', ')}]`); } catch(e) { console.error('[Sync] write error', e); }
         };
     </script>
 </body>
