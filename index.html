@@ -12,8 +12,10 @@
     
     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
     
-    <!-- ПОДКЛЮЧЕНИЕ БАЗЫ ДАННЫХ -->
-    <script src="data.js"></script>
+    <!-- ПОДКЛЮЧЕНИЕ БАЗЫ ДАННЫХ (defer — не блокирует рендер) -->
+    <script src="data.js" defer></script>
+    <!-- Сигнал готовности: выполняется строго после data.js (defer-скрипты идут по порядку) -->
+    <script defer>document.dispatchEvent(new Event('app:ready'));</script>
 
     <style>
         html, body { overscroll-behavior-y: none; transition: background-color 0.4s, color 0.4s; }
@@ -102,11 +104,217 @@
         .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
 
         body.zen-mode-active main { padding-bottom: 20px !important; }
+
+        /* ─── SKELETON SCREEN ─────────────────────────────────────── */
+        #app-skeleton {
+            position: fixed; inset: 0; z-index: 99999;
+            background: #f0f9ff;
+            display: flex; align-items: center; justify-content: center; padding: 1rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #app-skeleton.sk-gone { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        /* пузырьки */
+        .sk-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: .35; }
+        @keyframes sk-bubble {
+            0%   { transform: translateY(0) scale(1); opacity: 0; }
+            10%  { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.6); opacity: 0; }
+        }
+        .sk-b { position: absolute; bottom: 0; border-radius: 50%; border: 2px solid #38bdf8; animation: sk-bubble 3.5s infinite linear; }
+        .sk-b1 { width:14px;height:14px;left:12%;animation-delay:.3s; }
+        .sk-b2 { width: 9px;height: 9px;left:44%;animation-delay:1.4s; }
+        .sk-b3 { width:20px;height:20px;left:72%;animation-delay:.9s; }
+        .sk-b4 { width:11px;height:11px;left:57%;animation-delay:2.2s; }
+
+        /* карточка */
+        .sk-card {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 380px;
+            background: rgba(255,255,255,.97);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
+            box-shadow: 0 8px 40px rgba(14,165,233,.18);
+            border: 1px solid rgba(255,255,255,.7);
+            padding: 2rem 1.75rem 1.75rem;
+            display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+        }
+
+        /* анимации SVG */
+        @keyframes sk-ground { from{stroke-dashoffset:0} to{stroke-dashoffset:40} }
+        .sk-ground { animation: sk-ground 1s infinite linear; }
+        @keyframes sk-scene { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+        .sk-scene { animation: sk-scene .4s infinite alternate ease-in-out; }
+        @keyframes sk-leg-l { 0%{transform:rotate(30deg)} 100%{transform:rotate(-30deg)} }
+        @keyframes sk-leg-r { 0%{transform:rotate(-30deg)} 100%{transform:rotate(30deg)} }
+        .sk-leg-l { transform-origin:175px 120px; animation:sk-leg-l .4s infinite alternate ease-in-out; }
+        .sk-leg-r { transform-origin:190px 120px; animation:sk-leg-r .4s infinite alternate ease-in-out; }
+        @keyframes sk-zzz {
+            0%{transform:translate(0,0) scale(.5);opacity:0} 20%{opacity:1} 80%{opacity:1}
+            100%{transform:translate(-10px,-20px) scale(1.5);opacity:0}
+        }
+        .sk-zzz { animation:sk-zzz 2.5s infinite ease-out; opacity:0; }
+        .sk-z1{animation-delay:0s} .sk-z2{animation-delay:.8s} .sk-z3{animation-delay:1.6s}
+
+        /* текст */
+        .sk-title {
+            font-weight:900; font-size:1rem; letter-spacing:.1em;
+            text-transform:uppercase; color:#0c4a6e;
+        }
+        @keyframes sk-dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
+        .sk-dots::after { content:''; animation:sk-dots 1.5s infinite; }
+
+        /* прогресс-бар */
+        .sk-bar-wrap {
+            width:100%; background:#e0f2fe; border-radius:9999px;
+            height:10px; overflow:hidden; border:1px solid #bae6fd;
+            box-shadow:inset 0 2px 4px rgba(0,0,0,.06);
+        }
+        @keyframes sk-prog { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
+        .sk-bar {
+            height:100%; border-radius:9999px;
+            background:linear-gradient(90deg,#facc15,#f59e0b);
+            animation:sk-prog 3s cubic-bezier(.4,0,.2,1) infinite;
+            position:relative; overflow:hidden;
+        }
+        @keyframes sk-shimmer { 0%{left:-60%} 100%{left:120%} }
+        .sk-bar::after {
+            content:''; position:absolute; top:0; bottom:0; width:50%;
+            background:rgba(255,255,255,.4); transform:skewX(-20deg);
+            left:-60%; animation:sk-shimmer 1.6s .5s infinite ease-in-out;
+        }
+        /* ─────────────────────────────────────────────────────────── */
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-[#121212] text-slate-800 dark:text-gray-300 font-sans antialiased min-h-screen flex flex-col relative">
 
+    <!-- ═══════════════════════════════════════════════════════════
+         SKELETON SCREEN — виден мгновенно, пока data.js грузится
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="app-skeleton">
+      <div class="sk-bg">
+        <div class="sk-b sk-b1"></div><div class="sk-b sk-b2"></div>
+        <div class="sk-b sk-b3"></div><div class="sk-b sk-b4"></div>
+      </div>
+      <div class="sk-card">
+        <svg viewBox="0 0 260 140" style="width:100%;max-width:280px;height:auto;overflow:visible">
+          <line x1="-50" y1="133" x2="310" y2="133" stroke="#fcd34d" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 20" class="sk-ground"/>
+          <line x1="0" y1="133" x2="260" y2="133" stroke="#d97706" stroke-width="2"/>
+          <g class="sk-leg-l">
+            <line x1="175" y1="120" x2="175" y2="131" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+            <line x1="175" y1="124" x2="175" y2="131" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <line x1="173" y1="126" x2="177" y2="126" stroke="#ef4444" stroke-width="1"/>
+            <line x1="173" y1="128" x2="177" y2="128" stroke="#3b82f6" stroke-width="1"/>
+            <ellipse cx="179" cy="132" rx="6" ry="3.5" fill="#1e293b"/>
+            <circle cx="174" cy="132.5" r="1.5" fill="#1e293b"/>
+          </g>
+          <g class="sk-leg-r">
+            <line x1="190" y1="120" x2="190" y2="131" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+            <line x1="190" y1="124" x2="190" y2="131" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <line x1="188" y1="126" x2="192" y2="126" stroke="#ef4444" stroke-width="1"/>
+            <line x1="188" y1="128" x2="192" y2="128" stroke="#3b82f6" stroke-width="1"/>
+            <ellipse cx="194" cy="132" rx="6" ry="3.5" fill="#1e293b"/>
+            <circle cx="189" cy="132.5" r="1.5" fill="#1e293b"/>
+          </g>
+          <g class="sk-scene">
+            <path d="M 50 118 Q 30 113,15 131" fill="none" stroke="#1e293b" stroke-width="13" stroke-linecap="round"/>
+            <path d="M 50 118 Q 30 113,15 131" fill="none" stroke="#ff8a9f" stroke-width="10" stroke-linecap="round"/>
+            <line x1="105" y1="118" x2="125" y2="131" stroke="#1e293b" stroke-width="17" stroke-linecap="round"/>
+            <line x1="105" y1="118" x2="125" y2="131" stroke="#b5e61d" stroke-width="14" stroke-linecap="round"/>
+            <line x1="120" y1="128" x2="135" y2="133" stroke="#1e293b" stroke-width="9" stroke-linecap="round"/>
+            <line x1="120" y1="128" x2="135" y2="133" stroke="#ff8a9f" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 60 131 Q 25 128,22 108 Q 20 93,35 93 Q 55 93,65 103 C 75 73,110 73,115 103 C 115 131,100 131,60 131 Z" fill="#ff8a9f" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M 75 95 Q 80 98,85 94" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 80 88 C 100 88,112 98,114 131 L 75 131 C 70 113,75 93,80 88 Z" fill="#b5e61d" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M 82 92 C 90 88,98 92,95 100 C 92 108,80 102,82 92 Z" fill="#a855f7" stroke="#1e293b" stroke-width="1.5"/>
+            <path d="M 105 110 C 115 105,115 125,105 125 C 95 125,95 115,105 110 Z" fill="#a855f7" stroke="#1e293b" stroke-width="1.5"/>
+            <path d="M 80 118 C 90 112,95 125,90 131 L 78 131 C 75 125,75 122,80 118 Z" fill="#a855f7" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="105" y1="103" x2="130" y2="103" stroke="#1e293b" stroke-width="20" stroke-linecap="round"/>
+            <line x1="105" y1="103" x2="130" y2="103" stroke="#b5e61d" stroke-width="16" stroke-linecap="round"/>
+            <line x1="125" y1="103" x2="145" y2="104" stroke="#1e293b" stroke-width="11" stroke-linecap="round"/>
+            <line x1="125" y1="103" x2="145" y2="104" stroke="#ff8a9f" stroke-width="7" stroke-linecap="round"/>
+            <path d="M 65 108 Q 80 88,95 98" fill="none" stroke="#1e293b" stroke-width="11" stroke-linecap="round"/>
+            <path d="M 65 108 Q 80 88,95 98" fill="none" stroke="#ff8a9f" stroke-width="7" stroke-linecap="round"/>
+            <path d="M 33 87 L 38 85 L 41 88" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 43 89 L 48 87 L 51 90" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+            <ellipse cx="38" cy="95" rx="4" ry="6" fill="white" stroke="#1e293b" stroke-width="1.5"/>
+            <circle cx="39" cy="97" r="1.5" fill="#1e293b"/>
+            <path d="M 34 95 A 4 6 0 0 1 42 95 Z" fill="#c084fc" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="33" y1="95" x2="43" y2="95" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
+            <ellipse cx="48" cy="97" rx="4.5" ry="6.5" fill="white" stroke="#1e293b" stroke-width="1.5"/>
+            <circle cx="49" cy="99" r="1.5" fill="#1e293b"/>
+            <path d="M 43.5 97 A 4.5 6.5 0 0 1 52.5 97 Z" fill="#c084fc" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="42.5" y1="97" x2="53.5" y2="97" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 34 105 C 39 102,45 107,41 113 C 37 113,31 110,34 105 Z" fill="#4c0519" stroke="#1e293b" stroke-width="1.5"/>
+            <rect x="35" y="103.5" width="2.5" height="3.5" fill="white" stroke="#1e293b" stroke-width="1" transform="rotate(-15 35 103.5)"/>
+            <path d="M 36 109 C 39 107,43 110,40 113 C 38 113,35 111,36 109 Z" fill="#fca5a5" stroke="#1e293b" stroke-width="1"/>
+            <text x="35" y="75" font-family="Arial" font-size="8" font-weight="bold" fill="#38bdf8" class="sk-zzz sk-z1">Z</text>
+            <text x="25" y="60" font-family="Arial" font-size="10" font-weight="bold" fill="#38bdf8" class="sk-zzz sk-z2">Z</text>
+            <text x="10" y="40" font-family="Arial" font-size="14" font-weight="bold" fill="#38bdf8" class="sk-zzz sk-z3">Z</text>
+            <circle cx="20" cy="128" r="3" fill="#fcd34d"/>
+            <circle cx="35" cy="130" r="2" fill="#fcd34d"/>
+            <line x1="160" y1="85" x2="142" y2="102" stroke="#ca8a04" stroke-width="6" stroke-linecap="round"/>
+            <line x1="160" y1="85" x2="142" y2="102" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="142" cy="102" r="4.5" fill="#fde047" stroke="#ca8a04" stroke-width="1.5"/>
+            <path d="M 165 80 L 153 87 L 156 92 L 168 85 Z" fill="white" stroke="#94a3b8" stroke-width="1"/>
+            <rect x="160" y="55" width="40" height="45" rx="3" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+            <circle cx="168" cy="65" r="3" fill="#ca8a04" opacity=".6"/>
+            <circle cx="188" cy="60" r="4" fill="#ca8a04" opacity=".6"/>
+            <circle cx="165" cy="85" r="4.5" fill="#ca8a04" opacity=".6"/>
+            <circle cx="195" cy="80" r="2.5" fill="#ca8a04" opacity=".6"/>
+            <circle cx="180" cy="72" r="3.5" fill="#ca8a04" opacity=".6"/>
+            <rect x="160" y="100" width="40" height="8" fill="white" stroke="#94a3b8" stroke-width="1"/>
+            <polygon points="175,100 180,105 185,100" fill="white" stroke="#94a3b8" stroke-width="1"/>
+            <polygon points="180,103 182,112 178,112" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+            <rect x="160" y="108" width="40" height="12" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+            <line x1="167" y1="110" x2="167" y2="114" stroke="#1e293b" stroke-width="2"/>
+            <line x1="187" y1="110" x2="187" y2="114" stroke="#1e293b" stroke-width="2"/>
+            <line x1="193" y1="110" x2="193" y2="114" stroke="#1e293b" stroke-width="2"/>
+            <circle cx="178" cy="68" r="8" fill="white" stroke="#1e293b" stroke-width="1.5"/>
+            <circle cx="194" cy="68" r="8" fill="white" stroke="#1e293b" stroke-width="1.5"/>
+            <circle cx="182" cy="70" r="3" fill="#38bdf8"/>
+            <circle cx="182" cy="70" r="1.5" fill="#1e293b"/>
+            <circle cx="198" cy="70" r="3" fill="#38bdf8"/>
+            <circle cx="198" cy="70" r="1.5" fill="#1e293b"/>
+            <path d="M 173 75 Q 178 77 183 75" fill="none" stroke="#ca8a04" stroke-width="1.5"/>
+            <path d="M 189 75 Q 194 77 199 75" fill="none" stroke="#ca8a04" stroke-width="1.5"/>
+            <line x1="178" y1="60" x2="178" y2="56" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="173" y1="62" x2="170" y2="58" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="183" y1="62" x2="186" y2="58" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="194" y1="60" x2="194" y2="56" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="189" y1="62" x2="186" y2="58" stroke="#1e293b" stroke-width="1.5"/>
+            <line x1="199" y1="62" x2="202" y2="58" stroke="#1e293b" stroke-width="1.5"/>
+            <path d="M 197 73 Q 205 73 203 78 Q 200 81 196 78" fill="#fde047" stroke="#ca8a04" stroke-width="1.5"/>
+            <path d="M 173 84 Q 185 80 198 84" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="180" y="81" width="4" height="4" fill="white" stroke="#1e293b" stroke-width="1"/>
+            <rect x="186" y="81" width="4" height="4" fill="white" stroke="#1e293b" stroke-width="1"/>
+            <line x1="175" y1="92" x2="146" y2="106" stroke="#ca8a04" stroke-width="6" stroke-linecap="round"/>
+            <line x1="175" y1="92" x2="146" y2="106" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="146" cy="106" r="4.5" fill="#fde047" stroke="#ca8a04" stroke-width="1.5"/>
+            <path d="M 180 87 L 168 93 L 171 98 L 183 92 Z" fill="white" stroke="#94a3b8" stroke-width="1"/>
+          </g>
+        </svg>
+        <div style="width:100%;text-align:center;display:flex;flex-direction:column;gap:.75rem">
+          <p class="sk-title">Спускаемся на дно<span class="sk-dots"></span></p>
+          <div class="sk-bar-wrap"><div class="sk-bar"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- ═══════════════════════ КОНЕЦ SKELETON ═══════════════════ -->
+
     <script>
+      (function() {
+        function dismissSkeleton() {
+          var el = document.getElementById('app-skeleton');
+          if (!el || el.classList.contains('sk-gone')) return;
+          el.classList.add('sk-gone');
+          el.addEventListener('transitionend', function() { el.remove(); }, { once: true });
+        }
+        document.addEventListener('app:ready', dismissSkeleton);
+        // Запасной таймаут: убрать skeleton через 8 сек даже если событие не пришло
+        setTimeout(dismissSkeleton, 8000);
+      })();
+    </script>
         const $ = id => document.getElementById(id);
         const $$ = sel => document.querySelectorAll(sel);
         
@@ -982,9 +1190,11 @@
             $('modal-main-title').innerText = title;
             $('modal-score').innerHTML = `<span class="${color}">${myS}</span> <span class="text-gray-400 text-3xl mx-2">:</span> <span class="text-gray-500">${oppS}</span>`;
             
-            showModal('game-over-modal'); 
+            showModal('game-over-modal');
             $('board-overlay').classList.remove('hidden');
-            saveProgress(); updateGlobalUI();
+            saveLocal(); // ✅ Локально мгновенно
+            syncNow();   // ✅ Немедленно в облако — дуэль завершена
+            updateGlobalUI();
         };
 
         window.secretClicks = 0; window.secretTimer = null;
@@ -1026,7 +1236,7 @@
                     window.state.stats.achievementsData.hwDone++; if (isPerfectHw) window.state.stats.achievementsData.hwPerfect++; setTimeout(() => showToast('🎉', 'Долг учителю выполнен!', 'bg-emerald-500', 'border-emerald-700'), 2000);
                 }
             }
-            saveProgress(); updateGlobalUI();
+            saveLocal(); updateGlobalUI();
         }
 
         function updateFactSRS(fKey, isCorrect, isSure) {
@@ -1359,14 +1569,64 @@
             setTimeout(() => $$('.modal-content-hidden').forEach(el => el.classList.remove('modal-content-hidden')), 500);
             updateGlobalUI(); updateProgressBars(); checkOnboarding(); checkURLForHomework();
             setInterval(() => {
-                window.state.stats.totalTimeSpent = (window.state.stats.totalTimeSpent || 0) + 1; const today = getTodayString(); if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 }; window.state.stats.dailyStats[today].timeSpent++;
-                if (window.state.stats.totalTimeSpent % 5 === 0 && !window.state.isHomeworkMode) saveProgress();
+                window.state.stats.totalTimeSpent = (window.state.stats.totalTimeSpent || 0) + 1;
+                const today = getTodayString();
+                if (!window.state.stats.dailyStats[today]) window.state.stats.dailyStats[today] = { timeSpent: 0, solved: 0 };
+                window.state.stats.dailyStats[today].timeSpent++;
+                // ✅ FIX: Только localStorage каждые 30 сек — облако через debounce/syncNow
+                // Было: saveProgress() каждые 5 сек → ~720 облачных записей/час на игрока
+                // Стало: saveLocal() каждые 30 сек → 0 облачных записей от таймера
+                if (window.state.stats.totalTimeSpent % 30 === 0) saveLocal();
             }, 1000);
         }
 
-        function saveProgress() {
-            localStorage.setItem('ege_final_storage_v4', JSON.stringify({ streak: window.state.stats.streak, totalSolvedEver: window.state.stats.totalSolvedEver, solvedByTask: window.state.stats.solvedByTask, flashcardsSolved: window.state.stats.flashcardsSolved, eraStats: window.state.stats.eraStats, factStreaks: window.state.stats.factStreaks, hwFlashcardsToSolve: window.state.stats.hwFlashcardsToSolve, mistakesPool: window.state.mistakesPool, hideLearned: window.state.hideLearned, totalTimeSpent: window.state.stats.totalTimeSpent, bestSpeedrunScore: window.state.stats.bestSpeedrunScore, dailyStats: window.state.stats.dailyStats, achievements: window.state.stats.achievements, achievementsData: window.state.stats.achievementsData }));
+        // ─── Сохранение прогресса ────────────────────────────────────────────────
+        // saveLocal()  — только localStorage, вызывается при каждом действии (бесплатно, мгновенно)
+        // scheduleSyncToCloud() — debounced 2 мин, для фоновой синхронизации в облако
+        // syncNow()    — немедленная отправка в облако, только на ключевых событиях
+
+        function saveLocal() {
+            localStorage.setItem('ege_final_storage_v4', JSON.stringify({
+                streak: window.state.stats.streak,
+                totalSolvedEver: window.state.stats.totalSolvedEver,
+                solvedByTask: window.state.stats.solvedByTask,
+                flashcardsSolved: window.state.stats.flashcardsSolved,
+                eraStats: window.state.stats.eraStats,
+                factStreaks: window.state.stats.factStreaks,
+                hwFlashcardsToSolve: window.state.stats.hwFlashcardsToSolve,
+                mistakesPool: window.state.mistakesPool,
+                hideLearned: window.state.hideLearned,
+                totalTimeSpent: window.state.stats.totalTimeSpent,
+                bestSpeedrunScore: window.state.stats.bestSpeedrunScore,
+                dailyStats: window.state.stats.dailyStats,
+                achievements: window.state.stats.achievements,
+                achievementsData: window.state.stats.achievementsData
+            }));
+        }
+
+        let _cloudSyncTimer = null;
+        function scheduleSyncToCloud() {
+            // ✅ Debounce: откладываем облачную синхронизацию на 2 минуты.
+            // Если игрок решает карточки подряд — в облако уйдёт один запрос, а не 100.
+            if (_cloudSyncTimer) clearTimeout(_cloudSyncTimer);
+            _cloudSyncTimer = setTimeout(() => {
+                _cloudSyncTimer = null;
+                if (window.syncProgressToCloud) window.syncProgressToCloud();
+            }, 2 * 60 * 1000); // 2 минуты
+        }
+
+        function syncNow() {
+            // ✅ Немедленная синхронизация: вызывать ТОЛЬКО на ключевых событиях
+            // (завершение таблицы, конец игры, конец дуэли).
+            if (_cloudSyncTimer) { clearTimeout(_cloudSyncTimer); _cloudSyncTimer = null; }
             if (window.syncProgressToCloud) window.syncProgressToCloud();
+        }
+
+        // saveProgress() = saveLocal + поставить в очередь облачную синхронизацию.
+        // Заменяет старый вариант, который писал в облако при каждом вызове.
+        function saveProgress() {
+            saveLocal();
+            scheduleSyncToCloud();
         }
 
         function checkURLForHomework() {
@@ -1991,7 +2251,7 @@
                 
                 $('check-buttons').classList.add('hidden'); $('check-buttons').classList.remove('flex'); $('reveal-btn').classList.add('hidden'); $('next-btn').classList.remove('hidden');
                 $('next-btn').innerHTML = window.state.currentMode === 'detective' ? '📂 Следующее дело' : '➡️ Дальше';
-                if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0) { window.state.hwCurrentPool.splice(0, rows.length); if (window.state.hwCurrentPool.length === 0) endGame(); } else saveProgress(); checkAchievements(); 
+                if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0) { window.state.hwCurrentPool.splice(0, rows.length); if (window.state.hwCurrentPool.length === 0) endGame(); } else { saveLocal(); syncNow(); } checkAchievements();
             } else { 
                 haptic('error'); 
                 window.state.stats.streak = 0; 
@@ -2025,7 +2285,7 @@
                     tr.querySelectorAll('.dnd-slot').forEach(slot => { if (!slot.classList.contains('correct-slot')) { slot._userChildren = Array.from(slot.childNodes); slot.innerHTML = `<div class="dnd-chip in-slot revealed-chip">${slot.dataset.expected}</div>`; slot.classList.remove('incorrect-slot'); slot.classList.add('revealed-slot', 'has-item'); } });
                 });
                 window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
-                $('check-buttons').classList.add('hidden'); $('check-buttons').classList.remove('flex'); $('next-btn').classList.remove('hidden'); $('next-btn').innerHTML = isDet ? '📂 Следующее дело' : '➡️ Дальше'; updateGlobalUI(); saveProgress();
+                $('check-buttons').classList.add('hidden'); $('check-buttons').classList.remove('flex'); $('next-btn').classList.remove('hidden'); $('next-btn').innerHTML = isDet ? '📂 Следующее дело' : '➡️ Дальше'; updateGlobalUI(); saveLocal();
             } else {
                 btn.innerHTML = isDet ? '👀 Запросить подсказку штаба' : '👀 Сдаюсь, покажи ответы';
                 rows.forEach(tr => tr.querySelectorAll('.dnd-slot').forEach(slot => { if (slot.classList.contains('revealed-slot')) { slot.classList.remove('revealed-slot'); slot.innerHTML = ''; if (slot._userChildren && slot._userChildren.length > 0) { slot._userChildren.forEach(c => slot.appendChild(c)); slot.classList.add('has-item', 'incorrect-slot'); } else slot.classList.remove('has-item', 'incorrect-slot'); } }));
@@ -2069,7 +2329,9 @@
 
         function endGame() {
             clearInterval(window.state.timerInterval); $('modal-score').innerText = window.state.stats.streak;
-            if (window.state.currentMode === 'speedrun') { if (window.state.stats.streak > (window.state.stats.bestSpeedrunScore || 0)) { window.state.stats.bestSpeedrunScore = window.state.stats.streak; saveProgress(); checkAchievements(); } }
+            if (window.state.currentMode === 'speedrun') { if (window.state.stats.streak > (window.state.stats.bestSpeedrunScore || 0)) { window.state.stats.bestSpeedrunScore = window.state.stats.streak; checkAchievements(); } }
+            saveLocal(); // ✅ Сохраняем локально сразу
+            syncNow();   // ✅ И немедленно в облако — игра завершена, это ключевое событие
             showModal('game-over-modal'); $('board-overlay').classList.remove('hidden');
         }
 
@@ -2414,23 +2676,31 @@
          * ✅ НЕОБХОДИМЫЕ ИНДЕКСЫ FIRESTORE (создать в Firebase Console → Firestore → Indexes):
          *
          * Коллекция: artifacts/{appId}/public/data/students
-         *   1. totalSolved DESC       (для openGlobalTopModal)
-         *   2. weeklyScore  DESC       (для loadStudentLeaderboard)
-         *   3. classCode    ASC  + totalSolved DESC  (для loadClassProgress с фильтром по классу)
-         *   4. googleEmail  ASC        (для loadProgressFromCloud, запрос where('googleEmail','==',x))
+         *   1. totalSolved  DESC                              (для openGlobalTopModal)
+         *   2. weeklyScore  DESC                              (для loadStudentLeaderboard)
+         *   3. classCode    ASC  + totalSolved DESC           (для loadClassProgress с фильтром)
+         *   4. googleEmail  ASC                               (для loadProgressFromCloud)
          *
          * Коллекция: artifacts/{appId}/public/data/matches
-         *   5. status ASC + createdAt ASC   (для startDuelSearchDb, запрос where('status','==','waiting'))
+         *   5. status ASC + createdAt ASC                     (для startDuelSearchDb)
          *
-         * СБРОС WEEKLY SCORE (запускать каждый понедельник через Cloud Functions или вручную):
-         *   window._resetWeeklyScoresAdmin() — устанавливает weeklyScore=0 для всех документов.
+         * Документ-кэш лидерборда (обновляется клиентом раз в 10 мин):
+         *   artifacts/{appId}/public/data/leaderboards/global
+         *   Поля: { top: Array<{name,username,totalSolved}>, updatedAt: number }
+         *   → При 1000 игроков: 1 чтение/открытие топа вместо 20.
+         *
+         * СБРОС WEEKLY SCORE (каждый понедельник через Cloud Functions):
+         *   Обнулять поле weeklyScore у всех документов students.
+         *   Пример Cloud Function (Node.js):
+         *   exports.resetWeeklyScores = functions.pubsub
+         *     .schedule('every monday 00:00').onRun(async () => {
+         *       const snap = await admin.firestore()
+         *         .collection('artifacts/APP_ID/public/data/students').get();
+         *       const batch = admin.firestore().batch();
+         *       snap.docs.forEach(d => batch.update(d.ref, { weeklyScore: 0 }));
+         *       await batch.commit();
+         *     });
          */
-        window._resetWeeklyScoresAdmin = async function() {
-            if (!db) return;
-            const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            // ⚠️ Требует прав администратора. Использовать только из Cloud Function или admin SDK.
-            console.warn('[Admin] Сброс weeklyScore — выполнить из Cloud Function, не из клиента!');
-        };
         
         const initAuth = async () => {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -3379,9 +3649,9 @@ ${mistakesHtml}
             const ll = document.getElementById('student-leaderboard-list');
             if (!db || !lc || !ll) return;
             try {
-                // ✅ FIX: Server-side sort + limit(50) — больше НЕТ getDocs без ограничений
+                // ✅ FIX: limit(5) — главный экран, не нужно больше 5 строк
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                const weeklyQuery = query(studentsCol, orderBy('weeklyScore', 'desc'), limit(10));
+                const weeklyQuery = query(studentsCol, orderBy('weeklyScore', 'desc'), limit(5));
                 const qS = await getDocs(weeklyQuery);
                 
                 lc.classList.remove('hidden');
@@ -3407,16 +3677,32 @@ ${mistakesHtml}
             if (!db) return;
             cont.innerHTML = '<p class="text-[10px] font-bold text-gray-500 text-center py-4">⏳ Загрузка...</p>';
             try {
-                // ✅ FIX: Server-side sort + limit(50) — исключает скачивание всей базы
-                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                const topQuery = query(studentsCol, orderBy('totalSolved', 'desc'), limit(50));
-                const qS = await getDocs(topQuery);
+                // ✅ FIX: Сначала пробуем кэш-документ (leaderboards/global) —
+                // 1 чтение вместо 20 чтений. Если кэша нет — делаем прямой запрос.
+                const lbCacheRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboards', 'global');
                 let tL = [];
-                qS.forEach(docSnap => { tL.push(docSnap.data()); });
+                let fromCache = false;
+                try {
+                    const cacheSnap = await getDoc(lbCacheRef);
+                    if (cacheSnap.exists() && cacheSnap.data().top && cacheSnap.data().updatedAt > Date.now() - 15 * 60 * 1000) {
+                        tL = cacheSnap.data().top; // Свежий кэш (< 15 мин)
+                        fromCache = true;
+                    }
+                } catch(cacheErr) { /* Кэша нет — идём напрямую */ }
+
+                if (!fromCache) {
+                    // ✅ Уменьшен limit: 50 → 20 (снижает стоимость в 2.5 раза)
+                    const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                    const topQuery = query(studentsCol, orderBy('totalSolved', 'desc'), limit(20));
+                    const qS = await getDocs(topQuery);
+                    qS.forEach(docSnap => { tL.push(docSnap.data()); });
+                }
+
                 let ht = '<div class="flex flex-col gap-2">';
                 tL.forEach((s, idx) => { 
                     ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center text-base">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">@${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800/50">${s.totalSolved || 0}</span></div></div>`; 
                 });
+                if (fromCache) ht += `<div class="text-center text-[9px] text-gray-400 pt-1">Обновлено ${new Date(tL._updatedAt || Date.now()).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})}</div>`;
                 ht += '</div>'; cont.innerHTML = ht;
             } catch (e) { 
                 console.error(e);
@@ -3576,7 +3862,7 @@ ${mistakesHtml}
                 knownTgId: knownTg,
                 knownGoogleId: googleId,
                 totalSolved: s.totalSolvedEver || 0,
-                // ✅ FIX: weeklyScore как индексируемое поле (для orderBy в запросах лидерборда)
+                // ✅ weeklyScore как индексируемое поле (для orderBy в запросах лидерборда)
                 weeklyScore: weeklyScore,
                 // fullStateJson остаётся для совместимости, но основные поля — отдельно
                 fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}',
@@ -3592,6 +3878,43 @@ ${mistakesHtml}
                 console.log(`[Sync] Записано в документ: ${canonicalId}`);
             } catch(e) {
                 console.error('[Sync] write error', e);
+                return; // Не обновляем кэш если основная запись упала
+            }
+
+            // ── Кэш лидерборда ────────────────────────────────────────────────
+            // ✅ Клиентская стратегия: тот, кто синхронизируется, попутно обновляет
+            // кэш-документ leaderboards/global. Это даёт свежий кэш без Cloud Functions.
+            // Защита: не чаще 1 раза в 10 минут на устройство (localStorage throttle).
+            // При 1000 активных игроков — максимум 6 обновлений кэша в минуту,
+            // что стоит 6 записей × 20 чтений = 126 операций/мин (безопасно).
+            const CACHE_TTL = 10 * 60 * 1000; // 10 минут
+            const lastCacheUpdate = parseInt(localStorage.getItem('_lbCacheUpdatedAt') || '0');
+            if (nw - lastCacheUpdate > CACHE_TTL) {
+                try {
+                    const topQuery = query(
+                        studentsCol,
+                        orderBy('totalSolved', 'desc'),
+                        limit(20)
+                    );
+                    const topSnap = await getDocs(topQuery);
+                    const topData = [];
+                    topSnap.forEach(d => {
+                        const sd = d.data();
+                        // Храним только нужные поля — не весь документ
+                        topData.push({
+                            name:        sd.name        || 'Аноним',
+                            username:    sd.username    || '',
+                            totalSolved: sd.totalSolved || 0
+                        });
+                    });
+                    const lbCacheRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboards', 'global');
+                    await setDoc(lbCacheRef, { top: topData, updatedAt: nw });
+                    localStorage.setItem('_lbCacheUpdatedAt', String(nw));
+                    console.log(`[Cache] Лидерборд обновлён: ${topData.length} игроков`);
+                } catch(cacheErr) {
+                    // Не критично — кэш обновится при следующей синхронизации
+                    console.warn('[Cache] Ошибка обновления кэша лидерборда:', cacheErr);
+                }
             }
         };
     </script>
