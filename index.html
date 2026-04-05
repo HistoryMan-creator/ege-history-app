@@ -391,7 +391,11 @@
             </div>
             
             <div class="flex items-center justify-center gap-3 sm:gap-6 flex-1 px-2">
-                <div class="flex items-center gap-1" title="Стрик"><span class="text-xs sm:text-sm">🔥</span><span class="text-xs sm:text-sm font-black text-yellow-400" id="stat-streak">0</span></div>
+                <span id="stat-streak" class="hidden">0</span>
+                <div class="flex items-center gap-1 cursor-pointer active:scale-95 transition-transform select-none" onclick="openEGEModal()" title="Прогноз балла ЕГЭ">
+                    <span class="text-xs sm:text-sm">📊</span>
+                    <span class="text-xs sm:text-sm font-black text-yellow-300" id="stat-ege">—</span>
+                </div>
                 <div class="flex items-center gap-1" title="Решено"><span class="text-xs sm:text-sm">✅</span><span class="text-xs sm:text-sm font-black text-emerald-400" id="stat-solved">0</span></div>
                 <div class="flex items-center gap-1 hidden sm:flex" title="Выучено"><span class="text-xs sm:text-sm">🎓</span><span class="text-xs sm:text-sm font-black text-purple-400" id="stat-learned">0</span></div>
                 <div class="flex items-center gap-1" title="Память"><span class="text-xs sm:text-sm">🧠</span><span class="text-xs sm:text-sm font-black text-emerald-400" id="stat-memory">100%</span></div>
@@ -2437,9 +2441,167 @@
             window.updateZenButton();
         }
 
+        // ═══════════════════════════════════════════════════════════
+        //  ПРОГНОЗ БАЛЛА ЕГЭ
+        // ═══════════════════════════════════════════════════════════
+        function estimateEGEScore(stats) {
+            const streaks = stats.factStreaks || {};
+            const es      = stats.eraStats   || {};
+            const ERAS    = ['early','18th','19th','20th'];
+            const W       = { early:.30, '18th':.15, '19th':.25, '20th':.30 };
+
+            // 1. Выученные факты по заданиям — ГЛАВНЫЙ сигнал (до +65 очков)
+            // task4 — главное задание, наибольший вес
+            let d4=0, d5=0, d3=0, d7=0;
+            Object.entries(streaks).forEach(([k,v]) => {
+                if (!v || typeof v !== 'object') return;
+                const learned = v.level >= 1 || (v.level === 0 && (v.streak||0) >= 3);
+                if (!learned) return;
+                if (k.startsWith('t5_'))      d5++;
+                else if (k.startsWith('t7_')) d7++;
+                else if (k.startsWith('t3_')) d3++;
+                else                          d4++;
+            });
+            // Нормировка: кол-во фактов на «100%» вклад по каждому заданию
+            // task4 на ~20% выше task3, на ~25% выше task5; task7 — наименьший
+            const s4 = 20 * Math.min(d4 / 500, 1);  // task4: max +20 (главное задание)
+            const s3 = 17 * Math.min(d3 / 150, 1);  // task3: max +17 (20% ниже task4)
+            const s5 = 16 * Math.min(d5 / 250, 1);  // task5: max +16 (25% ниже task4)
+            const s7 = 12 * Math.min(d7 / 180, 1);  // task7: max +12 (наименьший)
+            const factBase = s4 + s5 + s3 + s7;     // 0–65
+
+            // 2. Баланс эпох — штраф если эпоха недорешена (до −25 очков)
+            const isNew = !!(es.task4 || es.task3);
+            const eTot = {}; let sumT = 0;
+            ERAS.forEach(era => {
+                let t = 0;
+                (isNew ? ['task3','task4','task5','task7'] : [null]).forEach(tk => {
+                    const e = tk ? (es[tk]||{})[era] : es[era];
+                    if (e) t += e.total || 0;
+                });
+                eTot[era] = t; sumT += t;
+            });
+            let pen = 0, minR = 1, weakEra = null;
+            if (sumT >= 40) {
+                ERAS.forEach(era => {
+                    const a = eTot[era] / sumT, ex = W[era];
+                    const r = a / ex;
+                    if (r < minR) { minR = r; weakEra = era; }
+                    if (a < ex * 0.5) {
+                        const def = (ex * 0.5 - a) / (ex * 0.5);
+                        pen += def * W[era] * 25;
+                    }
+                });
+            }
+            pen = Math.min(pen, 25);
+
+            // 3. Точность — мягкая поправка ±5 (норма 85–94%)
+            let tc = 0, tt = 0;
+            (isNew ? ['task3','task4','task5','task7'] : [null]).forEach(tk => {
+                ERAS.forEach(era => {
+                    const e = tk ? (es[tk]||{})[era] : es[era];
+                    if (e) { tc += e.correct||0; tt += e.total||0; }
+                });
+            });
+            const accAdj = tt >= 30 ? Math.max(-5, Math.min(5, (tc/tt - 0.87) * 50)) : 0;
+
+            // 4. Потолок от слабейшей эпохи + итог
+            const ceil = sumT >= 40 ? Math.round(55 + 45 * Math.min(minR, 1)) : 100;
+            const raw  = 30 + factBase - pen + accAdj;
+            const score = Math.max(20, Math.min(100, Math.min(ceil, Math.round(raw))));
+
+            const ERA_NAMES = { early:'До XVIII в.', '18th':'XVIII в.', '19th':'XIX в.', '20th':'XX в.' };
+            return { score, ceiling: ceil, factBase: Math.round(factBase), pen: Math.round(pen),
+                     accAdj: Math.round(accAdj), d4, d5, d3, d7, s4, s5, s3, s7,
+                     weakEra: weakEra ? ERA_NAMES[weakEra] : null,
+                     accuracy: tt >= 30 ? Math.round(tc/tt*100) : null };
+        }
+
+        window.openEGEModal = function() {
+            haptic('light');
+            const r = estimateEGEScore(window.state.stats);
+            const score = r.score;
+            const color = score >= 85 ? '#0F6E56' : score >= 70 ? '#185FA5' : score >= 55 ? '#BA7517' : '#A32D2D';
+            const grade = score >= 85 ? 'Отлично' : score >= 70 ? 'Хорошо' : score >= 55 ? 'Средне' : 'Слабо';
+
+            const rows = [
+                { label:'База', val:'+30', pct:43, color:'#888' },
+                { label:'Задание №4 (факты)', val:'+'+Math.round(r.s4), pct:Math.round((r.s4/20)*100), color:'#185FA5' },
+                { label:'Задание №3 (процессы)', val:'+'+Math.round(r.s3), pct:Math.round((r.s3/17)*100), color:'#1D9E75' },
+                { label:'Задание №5 (даты)', val:'+'+Math.round(r.s5), pct:Math.round((r.s5/16)*100), color:'#8b5cf6' },
+                { label:'Задание №7 (культура)', val:'+'+Math.round(r.s7), pct:Math.round((r.s7/12)*100), color:'#d97706' },
+                { label:'Штраф за эпохи', val:'−'+r.pen, pct:Math.round((r.pen/25)*100), color:'#E24B4A', neg:true },
+                { label:'Поправка точности'+(r.accuracy?` (${r.accuracy}%)`:''), val:(r.accAdj>=0?'+':'')+r.accAdj, pct:Math.round((Math.abs(r.accAdj)/5)*100), color: r.accAdj >= 0 ? '#1D9E75' : '#E24B4A', neg: r.accAdj < 0 },
+            ];
+
+            const rowsHtml = rows.map(row => `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span style="font-size:11px;color:#888;min-width:160px;flex-shrink:0">${row.label}</span>
+                <div style="flex:1;height:5px;background:rgba(128,128,128,0.15);border-radius:3px;overflow:hidden">
+                  <div style="height:100%;width:${row.pct}%;background:${row.color};border-radius:3px;transition:width .3s"></div>
+                </div>
+                <span style="font-size:12px;font-weight:700;color:${row.neg?'#E24B4A':row.color};min-width:36px;text-align:right">${row.val}</span>
+              </div>`).join('');
+
+            const potentialRow = r.ceiling < 100 && r.weakEra ? `
+              <div style="background:rgba(234,179,8,0.12);border:0.5px solid rgba(234,179,8,0.4);border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-top:12px">
+                ⚠ Слабое место: <b>${r.weakEra}</b>. Потолок = ${r.ceiling}. Прокачай эту эпоху — выйдешь на ${Math.min(100, r.score + (100 - r.ceiling))}+.
+              </div>` : '';
+
+            const ceilRow = r.ceiling < 100 ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;opacity:.7">
+                <span style="font-size:11px;color:#888;min-width:160px;flex-shrink:0">Потолок (слаб. эпоха)</span>
+                <div style="flex:1;height:5px;background:rgba(128,128,128,0.15);border-radius:3px;overflow:hidden"><div style="height:100%;width:${r.ceiling}%;background:#888;border-radius:3px"></div></div>
+                <span style="font-size:12px;font-weight:700;color:#888;min-width:36px;text-align:right">≤${r.ceiling}</span></div>` : '';
+
+            const factsRow = `<div style="margin:12px 0 8px;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Выучено фактов</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                ${[['📍 №4',r.d4,500,'#185FA5'],['👤 №5',r.d5,250,'#8b5cf6'],['🔗 №3',r.d3,150,'#1D9E75'],['🎨 №7',r.d7,180,'#d97706']].map(([lbl,cnt,mx,clr])=>`
+                <div style="background:rgba(128,128,128,0.07);border-radius:8px;padding:8px 10px">
+                  <div style="font-size:11px;color:#888;margin-bottom:4px">${lbl}</div>
+                  <div style="font-size:16px;font-weight:700;color:${clr}">${cnt}<span style="font-size:10px;font-weight:400;color:#aaa"> / ${mx}</span></div>
+                  <div style="margin-top:4px;height:3px;background:rgba(128,128,128,0.15);border-radius:2px"><div style="height:100%;width:${Math.min(100,Math.round(cnt/mx*100))}%;background:${clr};border-radius:2px"></div></div>
+                </div>`).join('')}
+              </div>`;
+
+            // Используем существующий модал-контейнер через innerHTML overlay
+            const overlayId = 'ege-score-overlay';
+            let overlay = document.getElementById(overlayId);
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = overlayId;
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;padding:0';
+                overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `<div style="background:var(--tw-bg-opacity,1);background-color:#fff;width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:24px 20px 32px;max-height:90vh;overflow-y:auto" class="dark:bg-[#1e1e1e]">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#888">Прогноз ЕГЭ по истории</div>
+                  <div style="display:flex;align-items:baseline;gap:8px;margin-top:2px">
+                    <span style="font-size:48px;font-weight:500;color:${color};line-height:1">${score}</span>
+                    <span style="font-size:13px;color:${color};font-weight:700">${grade}</span>
+                  </div>
+                </div>
+                <button onclick="document.getElementById('${overlayId}').remove()" style="font-size:20px;color:#aaa;background:none;border:none;cursor:pointer;padding:4px 8px">✕</button>
+              </div>
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#888;margin-bottom:8px">Из чего складывается</div>
+              ${rowsHtml}${ceilRow}${potentialRow}${factsRow}
+              <div style="margin-top:16px;font-size:10px;color:#aaa;text-align:center">Прогноз основан на количестве выученных фактов и охвате эпох. Не учитывает задания 18–24.</div>
+            </div>`;
+        };
+
         function updateGlobalUI() {
             let totalL = 0, freshL = 0, now = Date.now();
             Object.values(window.state.stats.factStreaks || {}).forEach(d => { if (window.isFactLearned(d)) { totalL++; if (d.nextReview > now) freshL++; } });
+            // EGE score badge
+            const egeResult = estimateEGEScore(window.state.stats);
+            const egeEl = $('stat-ege');
+            if (egeEl) {
+                egeEl.textContent = '~' + egeResult.score;
+                const sc = egeResult.score;
+                egeEl.className = 'text-xs sm:text-sm font-black ' +
+                    (sc >= 85 ? 'text-emerald-400' : sc >= 70 ? 'text-blue-300' : sc >= 55 ? 'text-yellow-300' : 'text-rose-400');
+            }
             updateText($('stat-streak'), window.state.stats.streak); updateText($('stat-solved'), window.state.stats.totalSolvedEver); if($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver); updateText($('stat-learned'), totalL); updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver); updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
             // Per-task solved counters
             const sbt = window.state.stats.solvedByTask || {};
