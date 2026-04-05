@@ -996,8 +996,19 @@
             if (unlockedAny) saveProgress();
         }
 
-        const DOM = {};
         function updateText(el, text) { if (el && el.innerText !== String(text)) el.innerText = text; }
+
+        // Возвращает ключ эпохи для факта; task5 не имеет поля c — определяем по году
+        function getEraFromFact(fact, task) {
+            if (task === 'task5') {
+                const y = parseInt(fact.year, 10) || 0;
+                if (y < 1700) return 'early';
+                if (y < 1800) return '18th';
+                if (y < 1900) return '19th';
+                return '20th';
+            }
+            return fact.c || null;
+        }
 
         const precomputed = { task3: {}, task4: {}, task5: {}, task7: {} };
         const periodsList = ['all', 'early', '18th', '19th', '20th'];
@@ -1023,6 +1034,13 @@
             }
 
             const filterData = (data, p) => p === 'all' ? [...(data || [])] : (data || []).filter(d => d.c === p);
+            // task5Data не имеет поля c — присваиваем его по году, чтобы работали и фильтр, и eraStats
+            window.task5Data.forEach(d => {
+                if (!d.c) {
+                    const y = parseInt(d.year, 10) || 0;
+                    d.c = y < 1700 ? 'early' : y < 1800 ? '18th' : y < 1900 ? '19th' : '20th';
+                }
+            });
             periodsList.forEach(p => { 
                 precomputed.task3[p] = filterData(window.task3Data, p); 
                 precomputed.task4[p] = filterData(window.bigData, p); 
@@ -1033,7 +1051,7 @@
 
         window.state = {
             selectedChip: null, currentTask: 'task4', pendingTask: 'task4', pendingMode: 'normal',
-            stats: { streak: 0, rowsSolved: 0, totalSolvedEver: 0, solvedByTask: { task3: 0, task4: 0, task5: 0, task7: 0 }, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
+            stats: { streak: 0, totalSolvedEver: 0, solvedByTask: { task3: 0, task4: 0, task5: 0, task7: 0 }, flashcardsSolved: 0, eraStats: {}, factStreaks: {}, totalTimeSpent: 0, bestSpeedrunScore: 0, dailyStats: {}, hwFlashcardsToSolve: 0, hwTask4: 0, hwTask5: 0, hwTask7: 0, achievements: [], achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 } },
             mistakesPool: [], currentTargetData: [], currentMode: 'normal', timeLeft: 0, timerInterval: null, hideLearned: false, isHomeworkMode: false, hwTargetIndices: [], hwCurrentPool: [], answersRevealed: false,
             isTeacherAdmin: false, focusMode: false, studyIndex: 0, errorStreak: 0,
             duel: { active: false, matchId: null, isPlayer1: false, oppName: '', myScore: 0, myCombo: 0, oppScore: 0, oppCombo: 0, searching: false }
@@ -1211,6 +1229,23 @@
         const factKey = (f) => window.state.currentTask === 'task7' ? 't7_' + f.culture : (window.state.currentTask === 'task5' ? 't5_' + f.event : (window.state.currentTask === 'task3' ? 't3_' + f.process + '|' + f.fact : f.event));
         window.isFactLearned = function(val) { if (typeof val === 'number') return val >= 3; if (val && val.level !== undefined) return val.level > 0; if (val && val.streak !== undefined) return val.streak >= 3; return false; };
         function getYearFromFact(d) { if (!d) return 0; if (d.year) { let m = String(d.year).match(/\d+/); return m ? parseInt(m[0]) : 0; } return 0; }
+
+        // === ГЛОБАЛЬНЫЕ КОНСТАНТЫ ЭПОХ ===
+        const TASK_EPOCHS       = ['early', '18th', '19th', '20th'];
+        const TASK_EPOCH_NAMES  = { early: 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век' };
+        const TASK_EPOCH_SHORT  = { early: 'Древность', '18th': 'XVIII в.', '19th': 'XIX в.', '20th': 'XX в.' };
+
+        // Подсчёт выученных фактов для задания (factStreaks — необязателен, по умолчанию из state)
+        function countLearnedForTask(taskKey, streaks) {
+            let count = 0;
+            const src = streaks || window.state.stats.factStreaks || {};
+            const prefix = taskKey === 'task5' ? 't5_' : taskKey === 'task7' ? 't7_' : taskKey === 'task3' ? 't3_' : null;
+            Object.entries(src).forEach(([k, v]) => {
+                const match = prefix ? k.startsWith(prefix) : (!k.startsWith('t5_') && !k.startsWith('t7_') && !k.startsWith('t3_'));
+                if (match && v && (v.level > 0 || (v.streak !== undefined && v.streak >= 3))) count++;
+            });
+            return count;
+        }
 
         function updateScoreAndStats(linesCount, isPerfectHw = false) {
             window.state.stats.totalSolvedEver += linesCount; 
@@ -1858,9 +1893,32 @@
                 let count = Math.min(rowsCount, window.state.hwCurrentPool.length); 
                 window.state.hwCurrentPool.slice(0, count).forEach(i => { let f = (typeof task3Data !== 'undefined' ? task3Data : [])[i]; if(f) target.push(f); });
             } else {
-                let uP = new Set(); let uF = new Set(); let shuf = shuffleArray([...allowed]);
-                for (let f of shuf) { if (target.length >= rowsCount) break; if (uP.has(f.process) || uF.has(f.fact)) continue; target.push(f); uP.add(f.process); uF.add(f.fact); }
-                if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!uF.has(f.fact)) { target.push(f); uP.add(f.process); uF.add(f.fact); } }
+                // === АЛГОРИТМ ЕГЭ №3: строго по одному процессу из каждой из 4 эпох ===
+                // (early / 18th / 19th / 20th) — нельзя допускать два процесса одной эпохи
+                const canUseEpochAlgo3 = actualPeriod === 'all' && rowsCount === 4;
+                let algoSuccess3 = false;
+                if (canUseEpochAlgo3) {
+                    const epochs3 = ['early', '18th', '19th', '20th'];
+                    const ep3pools = {};
+                    epochs3.forEach(ep => { ep3pools[ep] = shuffleArray(allowed.filter(f => f.c === ep)); });
+                    if (epochs3.every(ep => ep3pools[ep].length > 0)) {
+                        let uP3 = new Set(), uF3 = new Set();
+                        epochs3.forEach(ep => {
+                            for (let f of ep3pools[ep]) {
+                                if (uP3.has(f.process) || uF3.has(f.fact)) continue;
+                                target.push(f); uP3.add(f.process); uF3.add(f.fact); break;
+                            }
+                        });
+                        if (target.length === 4) { shuffleArray(target); algoSuccess3 = true; }
+                    }
+                }
+                // Фолбэк: старая логика (при фильтре эпохи или если данных не хватает)
+                if (!algoSuccess3) {
+                    target = [];
+                    let uP = new Set(); let uF = new Set(); let shuf = shuffleArray([...allowed]);
+                    for (let f of shuf) { if (target.length >= rowsCount) break; if (uP.has(f.process) || uF.has(f.fact)) continue; target.push(f); uP.add(f.process); uF.add(f.fact); }
+                    if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!uF.has(f.fact)) { target.push(f); uP.add(f.process); uF.add(f.fact); } }
+                }
             }
 
             // Year sort option for task3
@@ -1911,9 +1969,38 @@
                 let count = Math.min(rowsCount, window.state.hwCurrentPool.length); 
                 window.state.hwCurrentPool.slice(0, count).forEach(i => { let f = (typeof task5Data !== 'undefined' ? task5Data : [])[i]; if(f) target.push(f); });
             } else {
-                let uE = new Set(); let uP = new Set(); let svo = 0; let shuf = shuffleArray([...allowed]);
-                for (let f of shuf) { if (target.length >= rowsCount) break; if (uE.has(f.event) || uP.has(f.person)) continue; let isSVO = f.year == 2022 || (f.event && String(f.event).includes('СВО')); if (isSVO && svo >= 1) continue; target.push(f); uE.add(f.event); uP.add(f.person); if (isSVO) svo++; }
-                if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!uE.has(f.event) && !uP.has(f.person)) { target.push(f); uE.add(f.event); uP.add(f.person); } }
+                // === АЛГОРИТМ ЕГЭ №5: 4 слота по эпохам ===
+                // Слот 1: early (IX–XVII, year < 1700)
+                // Слот 2: XVIII–XIX (1700 ≤ year ≤ 1899)
+                // Слот 3: ВСЕГДА ВОВ (1941–1945)
+                // Слот 4: 60% СВО (year ≥ 2022), 40% другой XX век (1900–1940, кроме ВОВ и СВО)
+                const canUseSlotAlgo5 = actualPeriod === 'all' && rowsCount === 4;
+                let algoSuccess5 = false;
+                if (canUseSlotAlgo5) {
+                    const isEarly5   = f => f.year < 1700;
+                    const is1819_5   = f => f.year >= 1700 && f.year <= 1899;
+                    const isWW2_5    = f => f.year >= 1941 && f.year <= 1945;
+                    const isSVO_5    = f => f.year >= 2022;
+                    const isOther20_5 = f => f.year >= 1900 && f.year < 1941;
+                    const pick1_5 = (pool, usedE, usedP) => { for (let f of pool) { if (!usedE.has(f.event) && !usedP.has(f.person)) { usedE.add(f.event); usedP.add(f.person); return f; } } return null; };
+                    const slotUE = new Set(), slotUP = new Set();
+                    const shuf5 = shuffleArray([...allowed]);
+                    const slot1 = pick1_5(shuf5.filter(isEarly5), slotUE, slotUP);
+                    const slot2 = pick1_5(shuf5.filter(is1819_5), slotUE, slotUP);
+                    const slot3 = pick1_5(shuf5.filter(isWW2_5), slotUE, slotUP);
+                    const wantSVO = Math.random() < 0.6;
+                    const slot4 = wantSVO
+                        ? (pick1_5(shuf5.filter(isSVO_5), slotUE, slotUP) || pick1_5(shuf5.filter(isOther20_5), slotUE, slotUP))
+                        : (pick1_5(shuf5.filter(isOther20_5), slotUE, slotUP) || pick1_5(shuf5.filter(isSVO_5), slotUE, slotUP));
+                    const slots5 = [slot1, slot2, slot3, slot4].filter(Boolean);
+                    if (slots5.length === 4) { target = shuffleArray(slots5); algoSuccess5 = true; }
+                }
+                // Фолбэк: старая логика (при фильтре эпохи или если слотов не хватает)
+                if (!algoSuccess5) {
+                    let uE = new Set(); let uP = new Set(); let svo = 0; let shuf = shuffleArray([...allowed]);
+                    for (let f of shuf) { if (target.length >= rowsCount) break; if (uE.has(f.event) || uP.has(f.person)) continue; let isSVO = f.year == 2022 || (f.event && String(f.event).includes('СВО')); if (isSVO && svo >= 1) continue; target.push(f); uE.add(f.event); uP.add(f.person); if (isSVO) svo++; }
+                    if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!uE.has(f.event) && !uP.has(f.person)) { target.push(f); uE.add(f.event); uP.add(f.person); } }
+                }
             }
 
             window.state.currentTargetData = target; let missing = []; let uPoolP = new Set(); const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М']; const trFrag = document.createDocumentFragment();
@@ -1962,9 +2049,42 @@
                 let count = Math.min(rowsCount, window.state.hwCurrentPool.length); 
                 window.state.hwCurrentPool.slice(0, count).forEach(i => { let f = (window.task7Data || [])[i]; if(f) target.push(f); });
             } else {
-                let uC = new Set(); let shuf = shuffleArray([...allowed]);
-                for (let f of shuf) { if (target.length >= rowsCount) break; if (!uC.has(f.culture)) { target.push(f); uC.add(f.culture); } }
-                if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!target.includes(f)) { target.push(f); } }
+                // === АЛГОРИТМ ЕГЭ №7: две схемы по эпохам, шанс 50/50 ===
+                // Схема A (1+1+1+1): по 1 из early / XVIII / XIX / XX
+                // Схема B (1+0+2+1): 1 из early, 2 из XIX (разные культуры), 1 из XX
+                const canUseSchemeAlgo7 = actualPeriod === 'all' && rowsCount === 4;
+                let algoSuccess7 = false;
+                if (canUseSchemeAlgo7) {
+                    const pickFrom7 = (pool, count7, usedC7) => {
+                        const res7 = [];
+                        for (let f of shuffleArray([...pool])) {
+                            if (res7.length >= count7) break;
+                            if (!usedC7.has(f.culture)) { res7.push(f); usedC7.add(f.culture); }
+                        }
+                        return res7;
+                    };
+                    const ep7 = {};
+                    ['early','18th','19th','20th'].forEach(ep => { ep7[ep] = allowed.filter(f => f.c === ep); });
+                    const useSchemeA = Math.random() < 0.5;
+                    const usedC7 = new Set();
+                    let picked7 = [];
+                    if (useSchemeA) {
+                        // Схема A: 1+1+1+1
+                        ['early','18th','19th','20th'].forEach(ep => { picked7.push(...pickFrom7(ep7[ep], 1, usedC7)); });
+                    } else {
+                        // Схема B: 1+0+2+1
+                        picked7.push(...pickFrom7(ep7['early'], 1, usedC7));
+                        picked7.push(...pickFrom7(ep7['19th'],  2, usedC7));
+                        picked7.push(...pickFrom7(ep7['20th'],  1, usedC7));
+                    }
+                    if (picked7.length === 4) { target = shuffleArray(picked7); algoSuccess7 = true; }
+                }
+                // Фолбэк: старая логика (при фильтре эпохи или недостатке данных)
+                if (!algoSuccess7) {
+                    let uC = new Set(); let shuf = shuffleArray([...allowed]);
+                    for (let f of shuf) { if (target.length >= rowsCount) break; if (!uC.has(f.culture)) { target.push(f); uC.add(f.culture); } }
+                    if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!target.includes(f)) { target.push(f); } }
+                }
             }
 
             window.state.currentTargetData = target; let missing = []; const letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М']; const trFrag = document.createDocumentFragment();
@@ -2051,7 +2171,32 @@
             if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0) { 
                 let count = Math.min(rowsCount, window.state.hwCurrentPool.length); window.state.hwCurrentPool.slice(0, count).forEach(i => target.push((typeof bigData !== 'undefined' ? bigData : [])[i])); 
             } else { 
-                let allowed = getFilteredPool(actualPeriod, rowsCount); if (!allowed || allowed.length === 0) { $('task-table-body').innerHTML = `<tr><td colspan="3" class="p-10 text-center font-bold text-rose-500 bg-white dark:bg-[#1e1e1e]">⚠️ Нет событий!</td></tr>`; return; } target = shuffleArray([...allowed]).slice(0, Math.min(rowsCount, allowed.length)); 
+                let allowed = getFilteredPool(actualPeriod, rowsCount); if (!allowed || allowed.length === 0) { $('task-table-body').innerHTML = `<tr><td colspan="3" class="p-10 text-center font-bold text-rose-500 bg-white dark:bg-[#1e1e1e]">⚠️ Нет событий!</td></tr>`; return; }
+                // === АЛГОРИТМ ЕГЭ №4: разнообразие эпох (25% шанс на 2×XX век) ===
+                const canUseEpochAlgo4 = actualPeriod === 'all' && rowsCount === 4;
+                let algoSuccess4 = false;
+                if (canUseEpochAlgo4) {
+                    const ep4 = {};
+                    ['early','18th','19th','20th'].forEach(ep => { ep4[ep] = shuffleArray(allowed.filter(f => f.c === ep)); });
+                    const pick1e4 = (pool, usedEv) => { for (let f of pool) { if (!usedEv.has(f.event)) { usedEv.add(f.event); return f; } } return null; };
+                    const usedEv4 = new Set();
+                    const use20twice = Math.random() < 0.25;
+                    let picked4 = [];
+                    if (use20twice && ep4['20th'].length >= 2) {
+                        // 25%: 2 из XX, 1 из early, 1 из XVIII или XIX
+                        const p20a = pick1e4(ep4['20th'], usedEv4);
+                        const p20b = pick1e4(ep4['20th'], usedEv4);
+                        const pEa  = pick1e4(ep4['early'], usedEv4);
+                        const midEp = Math.random() < 0.5 ? '18th' : '19th';
+                        const pMid = pick1e4(ep4[midEp], usedEv4) || pick1e4(ep4[midEp === '18th' ? '19th' : '18th'], usedEv4);
+                        picked4 = [p20a, p20b, pEa, pMid].filter(Boolean);
+                    } else {
+                        // 75%: по одному из каждой эпохи
+                        ['early','18th','19th','20th'].forEach(ep => { const f = pick1e4(ep4[ep], usedEv4); if(f) picked4.push(f); });
+                    }
+                    if (picked4.length === 4) { target = shuffleArray(picked4); algoSuccess4 = true; }
+                }
+                if (!algoSuccess4) { target = shuffleArray([...allowed]).slice(0, Math.min(rowsCount, allowed.length)); }
             }
             
             window.state.currentTargetData = target; let missing = [], hiddenRowsData = [], blanksPerRow = [], availableTypes = [];
@@ -2170,10 +2315,11 @@
                         ));
                         if (!tr.dataset.scored) {
                             const tk = window.state.currentMode === 'duel' ? 'task4' : window.state.currentTask;
+                            const eraKey = getEraFromFact(fact, tk);
                             if (!window.state.stats.eraStats[tk]) window.state.stats.eraStats[tk] = {};
-                            if (!window.state.stats.eraStats[tk][fact.c]) window.state.stats.eraStats[tk][fact.c] = { correct: 0, total: 0 };
-                            window.state.stats.eraStats[tk][fact.c].total++;
-                            if (rowAllCor && rowFilled === slots.length) { window.state.stats.eraStats[tk][fact.c].correct++; updateFactSRS(fKey, true, isSure); if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); tr.dataset.scored = "correct"; newlyCorrect++; } 
+                            if (eraKey && !window.state.stats.eraStats[tk][eraKey]) window.state.stats.eraStats[tk][eraKey] = { correct: 0, total: 0 };
+                            if (eraKey) window.state.stats.eraStats[tk][eraKey].total++;
+                            if (rowAllCor && rowFilled === slots.length) { if (eraKey) window.state.stats.eraStats[tk][eraKey].correct++; updateFactSRS(fKey, true, isSure); if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); tr.dataset.scored = "correct"; newlyCorrect++; } 
                             else { updateFactSRS(fKey, false, false); if (mIdx === -1) window.state.mistakesPool.push({ fact: fact, task: window.state.currentTask }); tr.dataset.scored = "incorrect"; }
                         } else if (tr.dataset.scored === "incorrect" && rowAllCor && rowFilled === slots.length) { tr.dataset.scored = "fixed"; if(mIdx !== -1) window.state.mistakesPool.splice(mIdx, 1); }
                     } else {
@@ -2342,8 +2488,8 @@
         window.openStatsModal = function() {
             updateGlobalUI(); if (window.loadStudentLeaderboard) window.loadStudentLeaderboard();
             if ($('stats-era-container')) {
-                const eNames = { early: 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век' };
                 const tasks = [
+                    { key: 'task3', label: '🔗 Задание №3', color: 'text-emerald-600 dark:text-emerald-400' },
                     { key: 'task4', label: '📍 Задание №4', color: 'text-blue-600 dark:text-blue-400' },
                     { key: 'task5', label: '👤 Задание №5', color: 'text-purple-600 dark:text-purple-400' },
                     { key: 'task7', label: '🎨 Задание №7', color: 'text-amber-600 dark:text-amber-400' },
@@ -2354,7 +2500,7 @@
                     const totalAttempts = Object.values(taskEra).reduce((s, e) => s + (e.total || 0), 0);
                     if (!totalAttempts) return;
                     eH += `<div class="mb-3"><div class="text-[10px] font-black ${color} uppercase tracking-widest mb-2 px-1">${label}</div>`;
-                    for (const [eKey, eName] of Object.entries(eNames)) {
+                    for (const [eKey, eName] of Object.entries(TASK_EPOCH_NAMES)) {
                         const e = taskEra[eKey] || { correct: 0, total: 0 };
                         if (!e.total) continue;
                         const pc = Math.round((e.correct / e.total) * 100);
@@ -2372,7 +2518,7 @@
                 });
                 $('stats-era-container').innerHTML = eH || '<p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center py-4">Ещё нет данных</p>';
             }
-            if ($('stats-daily-container')) { const dStat = window.state.stats.dailyStats || {}; const dts = Object.keys(dStat).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7); if (dts.length > 0) { let dH = ''; dts.forEach(d => { const day = dStat[d]; const mins = Math.floor((day.timeSpent || 0) / 60); const t4 = day.solvedTask4 || 0; const t5 = day.solvedTask5 || 0; const t7 = day.solvedTask7 || 0; const total = day.solved || 0; const taskParts = []; if (t4) taskParts.push(`<span class="text-blue-500">📍${t4}</span>`); if (t5) taskParts.push(`<span class="text-purple-500">👤${t5}</span>`); if (t7) taskParts.push(`<span class="text-amber-500">🎨${t7}</span>`); const taskStr = taskParts.length > 0 ? taskParts.join(' ') : `<span class="text-examBlue dark:text-blue-400">${total}</span>`; dH += `<div class="bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-100 dark:border-[#2c2c2c]"><div class="flex justify-between items-center"><span class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">${new Date(d).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'})}</span><span class="font-bold text-yellow-600 dark:text-yellow-500 text-[11px]">⏱ ${mins} мин</span></div><div class="flex gap-3 mt-1.5 text-[11px] font-black">${taskStr}<span class="text-gray-400 ml-auto">Всего: ${total}</span></div></div>`; }); $('stats-daily-container').innerHTML = dH; } else $('stats-daily-container').innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">Пока нет данных.</p>'; }
+            if ($('stats-daily-container')) { const dStat = window.state.stats.dailyStats || {}; const dts = Object.keys(dStat).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7); if (dts.length > 0) { let dH = ''; dts.forEach(d => { const day = dStat[d]; const mins = Math.floor((day.timeSpent || 0) / 60); const t3 = day.solvedTask3 || 0; const t4 = day.solvedTask4 || 0; const t5 = day.solvedTask5 || 0; const t7 = day.solvedTask7 || 0; const total = day.solved || 0; const taskParts = []; if (t3) taskParts.push(`<span class="text-emerald-500">🔗${t3}</span>`); if (t4) taskParts.push(`<span class="text-blue-500">📍${t4}</span>`); if (t5) taskParts.push(`<span class="text-purple-500">👤${t5}</span>`); if (t7) taskParts.push(`<span class="text-amber-500">🎨${t7}</span>`); const taskStr = taskParts.length > 0 ? taskParts.join(' ') : `<span class="text-examBlue dark:text-blue-400">${total}</span>`; dH += `<div class="bg-gray-50 dark:bg-[#181818] p-3 rounded-xl border border-gray-100 dark:border-[#2c2c2c]"><div class="flex justify-between items-center"><span class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">${new Date(d).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'})}</span><span class="font-bold text-yellow-600 dark:text-yellow-500 text-[11px]">⏱ ${mins} мин</span></div><div class="flex gap-3 mt-1.5 text-[11px] font-black">${taskStr}<span class="text-gray-400 ml-auto">Всего: ${total}</span></div></div>`; }); $('stats-daily-container').innerHTML = dH; } else $('stats-daily-container').innerHTML = '<p class="text-[11px] font-bold text-gray-500 text-center py-4 uppercase tracking-widest">Пока нет данных.</p>'; }
             showModal('stats-modal');
         };
 
@@ -2382,7 +2528,7 @@
             else { 
                 let ht = '<div class="flex flex-col gap-2">'; 
                 pool.forEach((m, idx) => { 
-                    let mTitle = m.task === 'task7' ? '🎨 Задание 7' : (m.task === 'task5' ? '👤 Задание 5' : '📍 Задание 4');
+                    let mTitle = m.task === 'task7' ? '🎨 Задание 7' : (m.task === 'task5' ? '👤 Задание 5' : (m.task === 'task3' ? '🔗 Задание 3' : '📍 Задание 4'));
                     let mContent = m.task === 'task7' ? `<span class="text-amber-600 dark:text-amber-400">${m.fact.culture}</span> ➡️ ${m.fact.trait}` : (m.task === 'task5' ? `<span class="text-blue-600 dark:text-blue-400">${m.fact.person}</span> ➡️ ${m.fact.event}` : (m.task === 'task3' ? `<span class="text-emerald-600 dark:text-emerald-400">${m.fact.process}</span> ➡️ ${m.fact.fact}` : `<span class="text-emerald-600 dark:text-emerald-400">${m.fact.geo}</span> | <span class="text-blue-600 dark:text-blue-400">${m.fact.year}</span><br>${m.fact.event}`));
                     ht += `<div class="bg-white dark:bg-[#1e1e1e] p-3 rounded-xl border border-rose-100 dark:border-rose-900/30 shadow-sm flex gap-3 text-sm"><div class="font-black text-rose-300 w-4 text-right shrink-0">${idx + 1}.</div><div class="flex flex-col"><span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">${mTitle}</span><span class="font-medium text-gray-800 dark:text-gray-300 leading-tight">${mContent}</span></div></div>`; 
                 }); 
@@ -2421,7 +2567,12 @@
             const tM = Math.floor((window.state.stats.totalTimeSpent || 0) / 60); 
             const lC = Object.values(window.state.stats.factStreaks || {}).filter(window.isFactLearned).length; 
             let t = `🎓 Отчет: Тренажер ЕГЭ История\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n⏱ Время: ${tM} мин\n✅ Решено: ${window.state.stats.totalSolvedEver}\n🃏 Карточек: ${window.state.stats.flashcardsSolved || 0}\n🔥 Стрик: ${window.state.stats.streak}\n🧠 Выучено: ${lC} фактов\n\n📊 По эпохам:\n`; 
-            Object.entries({'early': 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век'}).forEach(([k, n]) => { const d = window.state.stats.eraStats[k] || { correct: 0, total: 0 }; t += `- ${n}: ${d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0}% (${d.correct} из ${d.total})\n`; }); 
+            const rawEra = window.state.stats.eraStats || {};
+            Object.entries(TASK_EPOCH_NAMES).forEach(([k, n]) => {
+                let correct = 0, total = 0;
+                ['task3','task4','task5','task7'].forEach(tk => { const e = (rawEra[tk] || {})[k] || {}; correct += e.correct || 0; total += e.total || 0; });
+                t += `- ${n}: ${total > 0 ? Math.round((correct / total) * 100) : 0}% (${correct} из ${total})\n`;
+            });
             if (window.state.mistakesPool.length > 0) { 
                 t += `\n⚠️ Ошибки:\n`; 
                 window.state.mistakesPool.forEach((m, i) => { 
@@ -2508,7 +2659,7 @@
         };
         window.giveUpRedPencil = function() { $$('#rp-content .target-node[data-type="fake"]').forEach(n => { if (!n.classList.contains('crossed')) { n.classList.add('crossed', 'show-correction'); n.innerHTML += `<span class="correction-badge">${n.dataset.correct}</span>`; } }); rpFakesFound = rpFakesTotal; window.updateRPCounter(); if(window.state) { window.state.stats.streak = 0; updateGlobalUI(); saveProgress(); } $('rp-next-btn').classList.remove('hidden'); $('rp-giveup-btn').classList.add('hidden'); };
 
-        window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud = async function() {}; window.loadClassProgress = function() { $('teacher-class-stats').innerHTML = '<p class=\"text-[11px] font-bold uppercase tracking-widest text-gray-500 text-center mt-5\">Синхронизация...</p>'; };
+        window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud = async function() {}; window.loadClassProgress = function() {};
 
         document.addEventListener('DOMContentLoaded', initStorage);
     </script>
@@ -2519,7 +2670,7 @@
     <!-- === FIREBASE === -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, limit, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig;
@@ -3191,15 +3342,6 @@
 
             // Per-task breakdown для PDF (with learned counts)
             const allFactStreaks = stats.factStreaks || state.factStreaks || {};
-            function countLearnedForTask(taskKey) {
-                let count = 0;
-                const prefix = taskKey === 'task5' ? 't5_' : taskKey === 'task7' ? 't7_' : null;
-                Object.entries(allFactStreaks).forEach(([k, v]) => {
-                    const match = prefix ? k.startsWith(prefix) : (!k.startsWith('t5_') && !k.startsWith('t7_'));
-                    if (match && v && (v.level > 0 || v.streak >= 3)) count++;
-                });
-                return count;
-            }
             const taskStats = taskDefs.map(({ key, label, color }) => {
                 const taskEra = isNewFormat ? (rawEra[key] || {}) : (key === 'task4' ? rawEra : {});
                 let tc = 0, tt = 0;
@@ -3210,7 +3352,7 @@
                     tt += e.total   || 0;
                     if (e.total > 0) eras.push({ name: eName, correct: e.correct, total: e.total, pct: Math.round((e.correct/e.total)*100) });
                 }
-                const learned = countLearnedForTask(key);
+                const learned = countLearnedForTask(key, allFactStreaks);
                 return { key, label, color, correct: tc, total: tt, pct: tt > 0 ? Math.round((tc/tt)*100) : null, eras, learned };
             }).filter(t => t.total > 0 || t.learned > 0);
 
@@ -3377,198 +3519,210 @@
             const mistakesPool = fullState.mistakesPool || [];
             const factStreaks = fullState.factStreaks || s.factStreaks || {};
 
-            // Count learned facts per task
-            function countLearnedForTask(taskKey) {
-                let count = 0;
-                const prefix = taskKey === 'task5' ? 't5_' : taskKey === 'task7' ? 't7_' : null;
-                Object.entries(factStreaks).forEach(([k, v]) => {
-                    const match = prefix ? k.startsWith(prefix) : (!k.startsWith('t5_') && !k.startsWith('t7_'));
-                    if (match && v && (v.level > 0 || (v.streak !== undefined && v.streak >= 3))) count++;
-                });
-                return count;
-            }
-
             // Determine database sizes
             const task4Total = typeof bigData !== 'undefined' ? bigData.length : 0;
             const task5Total = typeof task5Data !== 'undefined' ? task5Data.length : 0;
             const task7Total = window.task7Data ? window.task7Data.length : 0;
-            const task4Learned = countLearnedForTask('task4');
-            const task5Learned = countLearnedForTask('task5');
-            const task7Learned = countLearnedForTask('task7');
+            const task4Learned = countLearnedForTask('task4', factStreaks);
+            const task5Learned = countLearnedForTask('task5', factStreaks);
+            const task7Learned = countLearnedForTask('task7', factStreaks);
 
             const timeStr = s.timeSpentMin >= 60 ? `${Math.floor(s.timeSpentMin/60)}ч ${s.timeSpentMin%60}м` : `${s.timeSpentMin}м`;
             const accStr = s.accuracy !== null ? `${s.accuracy}%` : '—';
             const accColor = s.accuracy === null ? '#9ca3af' : s.accuracy >= 80 ? '#10b981' : s.accuracy >= 60 ? '#f59e0b' : '#f43f5e';
-            const eraNames = { early: 'Древность и Смута', '18th': 'XVIII век', '19th': 'XIX век', '20th': 'XX век' };
-            const dNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
-            // Build era rows
-            let eraRowsHtml = Object.values(s.eraData).filter(e => e.total > 0).map(e => {
-                const c = e.pct >= 80 ? '#10b981' : e.pct >= 60 ? '#f59e0b' : '#f43f5e';
-                return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span style="font-size:12px;color:#6b7280;font-weight:700;min-width:120px">${e.name}</span>
-                    <div style="flex:1;height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
-                        <div style="height:100%;width:${e.pct}%;background:${c};border-radius:4px"></div>
-                    </div>
-                    <span style="font-size:12px;font-weight:700;color:${c};min-width:70px;text-align:right">${e.pct}% (${e.correct}/${e.total})</span>
-                </div>`;
-            }).join('') || '<div style="color:#94a3b8;font-size:12px">Нет данных</div>';
+            // ─── Генерация настоящего PDF через jsPDF ────────────────────────────
+            if (typeof window.jspdf === 'undefined' && typeof jspdf === 'undefined') {
+                showToast('❌', 'jsPDF не загружен', 'bg-rose-500', 'border-rose-700');
+                return;
+            }
+            const { jsPDF } = window.jspdf || jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const PW = 210, PH = 297, M = 14, CW = PW - M * 2;
+            let y = M;
 
-            // Activity bars
-            const maxV = Math.max(...s.last7.map(d=>d.val), 1);
-            let actBarsHtml = s.last7.map((d,i) => {
-                const h = Math.max(3, Math.round((d.val/maxV)*40));
-                const color = d.val === 0 ? '#e5e7eb' : i === 6 ? '#3b82f6' : '#6ee7b7';
-                const dayIdx = (new Date(d.date).getDay()+6)%7;
-                return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">
-                    <div style="font-size:10px;font-weight:700;color:#6b7280">${d.val||''}</div>
-                    <div style="width:100%;max-width:20px;height:${h}px;background:${color};border-radius:3px 3px 0 0"></div>
-                    <span style="font-size:10px;color:#9ca3af;font-weight:700">${dNames[dayIdx]}</span>
-                </div>`;
-            }).join('');
+            // ── helpers ──────────────────────────────────────────────────────────
+            const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+            function needSpace(mm) { if (y + mm > PH - M) { doc.addPage(); y = M; } }
+            function hline(yy, r, g, b) { doc.setDrawColor(r||229,g||231,b||235); doc.setLineWidth(0.3); doc.line(M, yy, M + CW, yy); }
+            function labelVal(lbl, val, x, yy, lw, vColor) {
+                doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,116,139);
+                doc.text(lbl, x, yy);
+                doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(...(vColor||[30,41,59]));
+                doc.text(String(val), x, yy + 5.5);
+            }
+            function sectionTitle(title) {
+                needSpace(10);
+                hline(y); y += 4;
+                doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(30,41,59);
+                doc.text(title, M, y); y += 6;
+            }
+            function bar(x, yy, w, pct, colorArr) {
+                doc.setFillColor(241,245,249); doc.roundedRect(x, yy, w, 3, 1, 1, 'F');
+                if (pct > 0) { doc.setFillColor(...colorArr); doc.roundedRect(x, yy, clamp(w * pct / 100, 1, w), 3, 1, 1, 'F'); }
+            }
+            function pctColor(p) { return p >= 80 ? [16,185,129] : p >= 60 ? [245,158,11] : [244,63,94]; }
 
-            // Task stats
-            let taskStatsHtml = '';
+            // ── Header ───────────────────────────────────────────────────────────
+            doc.setFillColor(37,99,235); doc.roundedRect(M, y, CW, 16, 3, 3, 'F');
+            doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255);
+            doc.text('Отчёт: Тренажёр ЕГЭ История', M + 4, y + 6.5);
+            doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(191,219,254);
+            doc.text(new Date().toLocaleDateString('ru-RU'), M + 4, y + 12.5);
+            y += 20;
+
+            // ── Student name + last active ────────────────────────────────────────
+            doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(30,41,59);
+            doc.text(s.name || 'Без имени', M, y); y += 5;
+            doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(148,163,184);
+            doc.text('Последний вход: ' + s.lastActiveStr, M, y); y += 8;
+
+            // ── Stats grid (2 rows × 3 cols) ────────────────────────────────────
+            const stats6 = [
+                { l: 'Решено',    v: s.totalSolved||0,    c: [59,130,246] },
+                { l: 'Выучено',   v: s.learnedCount||0,   c: [16,185,129] },
+                { l: 'Стрик',     v: (s.streak||0)+'',    c: [245,158,11] },
+                { l: 'За неделю', v: s.wScore||0,          c: [139,92,246] },
+                { l: 'Точность',  v: accStr,               c: accColor === '#9ca3af' ? [148,163,184] : accColor === '#10b981' ? [16,185,129] : accColor === '#f59e0b' ? [245,158,11] : [244,63,94] },
+                { l: 'Время',     v: timeStr,              c: [167,139,250] },
+            ];
+            const cellW = CW / 3, cellH = 13;
+            stats6.forEach((st, i) => {
+                const cx = M + (i % 3) * cellW, cy = y + Math.floor(i / 3) * (cellH + 2);
+                doc.setFillColor(248,250,252); doc.roundedRect(cx, cy, cellW - 2, cellH, 2, 2, 'F');
+                doc.setDrawColor(226,232,240); doc.setLineWidth(0.2); doc.roundedRect(cx, cy, cellW - 2, cellH, 2, 2, 'S');
+                doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(100,116,139);
+                doc.text(st.l.toUpperCase(), cx + (cellW-2)/2, cy + 3.5, { align: 'center' });
+                doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...st.c);
+                doc.text(String(st.v), cx + (cellW-2)/2, cy + 10, { align: 'center' });
+            });
+            y += (cellH + 2) * 2 + 4;
+
+            // ── Learned per task ─────────────────────────────────────────────────
+            sectionTitle('Выучено фактов по заданиям');
+            const lt = [
+                { l: '№4 География', v: task4Learned, tot: task4Total, c: [59,130,246] },
+                { l: '№5 Личности',  v: task5Learned, tot: task5Total, c: [139,92,246] },
+                { l: '№7 Культура',  v: task7Learned, tot: task7Total, c: [245,158,11] },
+            ];
+            const ltW = CW / 3;
+            lt.forEach((t, i) => {
+                const cx = M + i * ltW;
+                doc.setFillColor(248,250,252); doc.roundedRect(cx, y, ltW - 2, 16, 2, 2, 'F');
+                doc.setDrawColor(226,232,240); doc.setLineWidth(0.2); doc.roundedRect(cx, y, ltW - 2, 16, 2, 2, 'S');
+                doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(100,116,139);
+                doc.text(t.l, cx + (ltW-2)/2, y + 4, { align: 'center' });
+                doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(...t.c);
+                doc.text(String(t.v), cx + (ltW-2)/2, y + 11, { align: 'center' });
+                doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(148,163,184);
+                doc.text('из ' + t.tot, cx + (ltW-2)/2, y + 14.5, { align: 'center' });
+            });
+            y += 20;
+
+            // ── Era accuracy ─────────────────────────────────────────────────────
+            sectionTitle('Точность по эпохам');
+            Object.values(s.eraData).filter(e => e.total > 0).forEach(e => {
+                needSpace(9);
+                const pc = e.pct; const cc = pctColor(pc);
+                doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(107,114,128);
+                doc.text(e.name, M, y + 2.5);
+                bar(M + 52, y, CW - 52 - 22, pc, cc);
+                doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...cc);
+                doc.text(pc + '%', M + CW - 1, y + 2.5, { align: 'right' });
+                if (s.weakEra && s.weakEra.name === e.name) {
+                    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(239,68,68);
+                    doc.text('(слабая тема)', M + CW - 28, y + 2.5);
+                }
+                y += 7;
+            });
+
+            // ── Activity 7 days ──────────────────────────────────────────────────
+            sectionTitle('Активность за 7 дней');
+            const maxV2 = Math.max(...s.last7.map(d => d.val), 1);
+            const bW = CW / 7 - 2, barMaxH = 20;
+            const days7 = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+            needSpace(barMaxH + 10);
+            s.last7.forEach((d, i) => {
+                const bx = M + i * (CW / 7);
+                const bh = Math.max(1, Math.round((d.val / maxV2) * barMaxH));
+                const by = y + barMaxH - bh;
+                const cc = d.val === 0 ? [229,231,235] : i === 6 ? [59,130,246] : [110,231,183];
+                doc.setFillColor(...cc); doc.roundedRect(bx, by, bW, bh, 1, 1, 'F');
+                if (d.val > 0) {
+                    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(100,116,139);
+                    doc.text(String(d.val), bx + bW/2, by - 1, { align: 'center' });
+                }
+                const dayIdx = (new Date(d.date).getDay() + 6) % 7;
+                doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(156,163,175);
+                doc.text(days7[dayIdx], bx + bW/2, y + barMaxH + 4, { align: 'center' });
+            });
+            y += barMaxH + 9;
+
+            // ── Task stats breakdown ──────────────────────────────────────────────
             if (s.taskStats && s.taskStats.length > 0) {
-                taskStatsHtml = s.taskStats.map(tk => {
-                    const bc = tk.pct !== null ? (tk.pct >= 80 ? '#10b981' : tk.pct >= 60 ? '#f59e0b' : '#f43f5e') : '#94a3b8';
-                    let erasHtml = tk.eras.map(era => {
-                        const ec = era.pct >= 80 ? '#10b981' : era.pct >= 60 ? '#f59e0b' : '#f43f5e';
-                        return `<div style="display:flex;align-items:center;gap:6px;margin-left:16px;margin-top:3px">
-                            <span style="font-size:11px;color:#9ca3af;min-width:100px">${era.name}</span>
-                            <div style="flex:1;height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden">
-                                <div style="height:100%;width:${era.pct}%;background:${ec};border-radius:3px"></div>
-                            </div>
-                            <span style="font-size:11px;color:${ec};font-weight:700">${era.pct}%</span>
-                        </div>`;
-                    }).join('');
-                    return `<div style="margin-bottom:12px">
-                        <div style="display:flex;justify-content:space-between;align-items:center">
-                            <span style="font-size:13px;font-weight:900;color:#1e293b">${tk.label}</span>
-                            <span style="font-size:13px;font-weight:700;color:${bc}">${tk.pct !== null ? tk.pct + '%' : '—'} (${tk.correct}/${tk.total})</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-                            <div style="flex:1;height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
-                                <div style="height:100%;width:${tk.pct||0}%;background:${bc};border-radius:4px"></div>
-                            </div>
-                        </div>
-                        ${tk.learned > 0 ? `<div style="font-size:11px;color:#10b981;font-weight:700;margin-top:3px;margin-left:16px">Выучено: ${tk.learned} фактов</div>` : ''}
-                        ${erasHtml}
-                    </div>`;
-                }).join('');
+                sectionTitle('Разбивка по типам заданий');
+                s.taskStats.forEach(tk => {
+                    needSpace(10);
+                    const pc = tk.pct !== null ? tk.pct : 0;
+                    const cc = tk.pct !== null ? pctColor(pc) : [148,163,184];
+                    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(30,41,59);
+                    doc.text(tk.label, M, y + 3);
+                    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...cc);
+                    doc.text((tk.pct !== null ? pc + '%' : '—') + ' (' + tk.correct + '/' + tk.total + ')', M + CW, y + 3, { align: 'right' });
+                    bar(M, y + 4.5, CW, pc, cc);
+                    y += 11;
+                    tk.eras.forEach(era => {
+                        needSpace(7);
+                        const ec = pctColor(era.pct);
+                        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(107,114,128);
+                        doc.text(era.name, M + 6, y + 2.5);
+                        bar(M + 52, y, CW - 52 - 18, era.pct, ec);
+                        doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...ec);
+                        doc.text(era.pct + '%', M + CW, y + 2.5, { align: 'right' });
+                        y += 6;
+                    });
+                    y += 2;
+                });
             }
 
-            // Mistakes list
-            let mistakesHtml = '';
+            // ── Mistakes ─────────────────────────────────────────────────────────
             if (mistakesPool.length > 0) {
-                const mistakeRows = mistakesPool.slice(0, 50).map((m, i) => {
-                    const f = m.fact || {};
-                    const taskLabel = m.task === 'task5' ? '👤 №5' : m.task === 'task7' ? '🎨 №7' : '📍 №4';
-                    let factDesc = '';
-                    if (m.task === 'task5') factDesc = `${f.person || '?'} — ${f.event || '?'}`;
-                    else if (m.task === 'task7') factDesc = `${f.culture || '?'} — ${f.trait || '?'}`;
-                    else factDesc = `${f.event || '?'} (${f.year || '?'}, ${f.geo || '?'})`;
-                    return `<tr style="border-bottom:1px solid #f1f5f9">
-                        <td style="padding:4px 8px;font-size:11px;color:#94a3b8;font-weight:700;white-space:nowrap">${i+1}</td>
-                        <td style="padding:4px 8px;font-size:11px;font-weight:700;white-space:nowrap">${taskLabel}</td>
-                        <td style="padding:4px 8px;font-size:11px;color:#1e293b">${factDesc}</td>
-                    </tr>`;
-                }).join('');
-                mistakesHtml = `<div style="margin-top:20px;border-top:2px solid #e5e7eb;padding-top:16px">
-                    <h3 style="font-size:14px;font-weight:900;color:#ef4444;margin-bottom:8px">❌ Ошибки ученика (${mistakesPool.length})</h3>
-                    <table style="width:100%;border-collapse:collapse">${mistakeRows}</table>
-                    ${mistakesPool.length > 50 ? '<div style="font-size:11px;color:#94a3b8;margin-top:4px">...и ещё ' + (mistakesPool.length - 50) + '</div>' : ''}
-                </div>`;
+                sectionTitle('Ошибки (' + mistakesPool.length + ')');
+                const shown = mistakesPool.slice(0, 50);
+                shown.forEach((m, i) => {
+                    needSpace(7);
+                    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(244,63,94);
+                    doc.text(String(i + 1) + '.', M, y + 2.5);
+                    const taskLabel = m.task === 'task7' ? '№7' : m.task === 'task5' ? '№5' : m.task === 'task3' ? '№3' : '№4';
+                    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(100,116,139);
+                    doc.text('[' + taskLabel + ']', M + 6, y + 2.5);
+                    let mText = '';
+                    if (m.task === 'task7') mText = m.fact.culture + ' → ' + m.fact.trait;
+                    else if (m.task === 'task5') mText = m.fact.event + ' → ' + m.fact.person;
+                    else if (m.task === 'task3') mText = m.fact.process + ' → ' + m.fact.fact;
+                    else mText = m.fact.geo + ' | ' + m.fact.year + ' | ' + m.fact.event;
+                    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(30,41,59);
+                    const lines = doc.splitTextToSize(mText, CW - 18);
+                    doc.text(lines, M + 18, y + 2.5);
+                    y += Math.max(6, lines.length * 3.8);
+                });
+                if (mistakesPool.length > 50) {
+                    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(148,163,184);
+                    doc.text('...и ещё ' + (mistakesPool.length - 50) + ' ошибок', M, y); y += 5;
+                }
             }
 
-            // Learned facts per task section
-            const learnedSectionHtml = `<div style="margin-top:20px;border-top:2px solid #e5e7eb;padding-top:16px">
-                <h3 style="font-size:14px;font-weight:900;color:#10b981;margin-bottom:10px">🧠 Выучено фактов по заданиям</h3>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;text-align:center">
-                        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">📍 №4 География</div>
-                        <div style="font-size:20px;font-weight:900;color:#3b82f6;margin-top:4px">${task4Learned}</div>
-                        <div style="font-size:10px;color:#94a3b8;font-weight:600">из ${task4Total}</div>
-                    </div>
-                    <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:12px;text-align:center">
-                        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">👤 №5 Личности</div>
-                        <div style="font-size:20px;font-weight:900;color:#8b5cf6;margin-top:4px">${task5Learned}</div>
-                        <div style="font-size:10px;color:#94a3b8;font-weight:600">из ${task5Total}</div>
-                    </div>
-                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;text-align:center">
-                        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">🎨 №7 Культура</div>
-                        <div style="font-size:20px;font-weight:900;color:#f59e0b;margin-top:4px">${task7Learned}</div>
-                        <div style="font-size:10px;color:#94a3b8;font-weight:600">из ${task7Total}</div>
-                    </div>
-                </div>
-            </div>`;
+            // ── Footer ───────────────────────────────────────────────────────────
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let p = 1; p <= pageCount; p++) {
+                doc.setPage(p);
+                doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(148,163,184);
+                doc.text('Тренажёр ЕГЭ История | uid: ' + (s.uid||'') + ' | стр. ' + p + '/' + pageCount, PW/2, PH - 6, { align: 'center' });
+            }
 
-            const htmlContent = `<!DOCTYPE html>
-<html lang="ru"><head><meta charset="UTF-8"><title>Отчёт: ${s.name||'Ученик'}</title>
-<style>
-    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { margin: 10mm; size: A4; } }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: white; color: #1e293b; max-width: 800px; margin: 0 auto; }
-    h2 { margin: 0; } .section { margin-top: 20px; border-top: 2px solid #e5e7eb; padding-top: 16px; }
-</style></head><body>
-<div style="background:linear-gradient(135deg,#2563eb,#7c3aed);padding:20px 24px;border-radius:16px;margin-bottom:20px">
-    <h2 style="color:white;font-size:18px;font-weight:900;margin:0">🎓 Отчёт: Тренажёр ЕГЭ История</h2>
-    <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px">${new Date().toLocaleDateString('ru-RU')}</div>
-</div>
-<div style="margin-bottom:16px">
-    <div style="font-size:20px;font-weight:900">${s.name || 'Без имени'}</div>
-    <div style="font-size:12px;color:#94a3b8;margin-top:2px">Последний вход: ${s.lastActiveStr}</div>
-</div>
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
-    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Решено</div>
-        <div style="font-size:22px;font-weight:900;color:#3b82f6">${s.totalSolved||0}</div>
-    </div>
-    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Выучено</div>
-        <div style="font-size:22px;font-weight:900;color:#10b981">${s.learnedCount||0}</div>
-    </div>
-    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Стрик</div>
-        <div style="font-size:22px;font-weight:900;color:#f59e0b">${s.streak||0}🔥</div>
-    </div>
-    <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">За неделю</div>
-        <div style="font-size:22px;font-weight:900;color:#8b5cf6">${s.wScore||0}</div>
-    </div>
-    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Точность</div>
-        <div style="font-size:22px;font-weight:900;color:${accColor}">${accStr}</div>
-    </div>
-    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center">
-        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase">Время</div>
-        <div style="font-size:22px;font-weight:900;color:#a78bfa">${timeStr}</div>
-    </div>
-</div>
-${learnedSectionHtml}
-<div class="section">
-    <h3 style="font-size:14px;font-weight:900;margin-bottom:10px">📊 Активность за 7 дней</h3>
-    <div style="display:flex;align-items:flex-end;gap:4px;height:60px;margin-bottom:4px">${actBarsHtml}</div>
-</div>
-<div class="section">
-    <h3 style="font-size:14px;font-weight:900;margin-bottom:10px">🎯 Точность по эпохам</h3>
-    ${eraRowsHtml}
-    ${s.weakEra ? `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;font-weight:700;color:#ef4444">⚠️ Слабая тема: ${s.weakEra.name} — ${s.weakEra.pct}% (${s.weakEra.correct}/${s.weakEra.total})</div>` : ''}
-</div>
-${taskStatsHtml ? `<div class="section"><h3 style="font-size:14px;font-weight:900;margin-bottom:10px">📝 Разбивка по типам заданий</h3>${taskStatsHtml}</div>` : ''}
-${mistakesHtml}
-<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#94a3b8;text-align:center">
-    Тренажёр ЕГЭ История | ${new Date().toLocaleDateString('ru-RU')} | uid: ${s.uid||''}
-</div>
-</body></html>`;
-
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Отчёт_${(s.name||'ученик').replace(/[^а-яёА-ЯЁa-zA-Z0-9_\s]/g,'').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.html`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('📄', 'Отчёт скачан!', 'bg-blue-500', 'border-blue-700');
+            const safeName = (s.name||'ученик').replace(/[^а-яёА-ЯЁa-zA-Z0-9_\s]/g,'').replace(/\s+/g,'_');
+            doc.save('Отчёт_' + safeName + '_' + new Date().toISOString().split('T')[0] + '.pdf');
+            showToast('📄', 'PDF отчёт скачан!', 'bg-blue-500', 'border-blue-700');
         };
 
         window.loadClassProgress = async function() {
@@ -3679,10 +3833,12 @@ ${mistakesHtml}
                 const lbCacheRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboards', 'global');
                 let tL = [];
                 let fromCache = false;
+                let cacheUpdatedAt = 0;
                 try {
                     const cacheSnap = await getDoc(lbCacheRef);
                     if (cacheSnap.exists() && cacheSnap.data().top && cacheSnap.data().updatedAt > Date.now() - 15 * 60 * 1000) {
-                        tL = cacheSnap.data().top; // Свежий кэш (< 15 мин)
+                        tL = cacheSnap.data().top;
+                        cacheUpdatedAt = cacheSnap.data().updatedAt || 0;
                         fromCache = true;
                     }
                 } catch(cacheErr) { /* Кэша нет — идём напрямую */ }
@@ -3699,7 +3855,7 @@ ${mistakesHtml}
                 tL.forEach((s, idx) => { 
                     ht += `<div class="bg-white dark:bg-[#1e1e1e] rounded-xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center transition-transform hover:-translate-y-0.5"><div class="flex items-center gap-3"><span class="text-xl sm:text-2xl drop-shadow-sm font-black">${idx===0?'🥇':(idx===1?'🥈':(idx===2?'🥉':`<span class="text-gray-400 w-5 inline-block text-center text-base">${idx+1}</span>`))}</span><div class="flex flex-col"><span class="font-black text-xs sm:text-sm text-gray-800 dark:text-gray-300 leading-tight">${s.name || 'Аноним'}</span>${s.username ? `<span class="text-[9px] font-bold text-blue-500 block leading-tight">@${s.username}</span>` : ''}</div></div><div class="text-right flex flex-col items-end"><span class="text-sm font-black text-examBlue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800/50">${s.totalSolved || 0}</span></div></div>`; 
                 });
-                if (fromCache) ht += `<div class="text-center text-[9px] text-gray-400 pt-1">Обновлено ${new Date(tL._updatedAt || Date.now()).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})}</div>`;
+                if (fromCache) ht += `<div class="text-center text-[9px] text-gray-400 pt-1">Обновлено ${new Date(cacheUpdatedAt).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})}</div>`;
                 ht += '</div>'; cont.innerHTML = ht;
             } catch (e) { 
                 console.error(e);
@@ -3812,9 +3968,6 @@ ${mistakesHtml}
                             statsFields.forEach(k => { if (cS[k] !== undefined) window.state.stats[k] = cS[k]; });
                             if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool;
                             if (cS.hideLearned !== undefined) window.state.hideLearned = cS.hideLearned;
-                            if (cS.customYearFrom !== undefined) window.state.yearFrom = cS.customYearFrom;
-                            if (cS.customYearTo !== undefined) window.state.yearTo = cS.customYearTo;
-                            if (cS.selectedPeriods) window.state.selectedPeriods = cS.selectedPeriods;
                             if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
                             if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
                             if (!window.state.stats.achievements) window.state.stats.achievements = [];
