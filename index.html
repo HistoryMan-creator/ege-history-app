@@ -937,8 +937,7 @@
     </div>
 
 
-    <!-- jsPDF для PDF-отчётов: defer — не блокирует первую отрисовку -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <!-- jsPDF грузится лениво (см. loadJsPDFOnDemand в firebase-sync.js) — не нужен при старте -->
 
     <!-- === FIREBASE === -->
     <script src="firebase-sync.js" type="module"></script>

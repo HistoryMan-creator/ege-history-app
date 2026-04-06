@@ -844,7 +844,7 @@
             if (cont) cont.innerHTML = sorted.map((s, i) => renderStudentCard(s, i)).join('');
         };
 
-        window.downloadStudentPDF = function(uid) {
+        window.downloadStudentPDF = async function(uid) {
             const s = window._cachedStudents.find(x => x.uid === uid);
             if (!s) return;
 
@@ -866,10 +866,21 @@
             const accStr = s.accuracy !== null ? `${s.accuracy}%` : '—';
             const accColor = s.accuracy === null ? '#9ca3af' : s.accuracy >= 80 ? '#10b981' : s.accuracy >= 60 ? '#f59e0b' : '#f43f5e';
 
-            // ─── Генерация настоящего PDF через jsPDF ────────────────────────────
+            // ─── Ленивая загрузка jsPDF — не грузим при старте, только по запросу ──
             if (typeof window.jspdf === 'undefined' && typeof jspdf === 'undefined') {
-                showToast('❌', 'jsPDF не загружен', 'bg-rose-500', 'border-rose-700');
-                return;
+                showToast('⏳', 'Загружаем PDF-модуль...', 'bg-blue-500', 'border-blue-700');
+                try {
+                    await new Promise((resolve, reject) => {
+                        const sc = document.createElement('script');
+                        sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                        sc.onload = resolve;
+                        sc.onerror = () => reject(new Error('jsPDF load failed'));
+                        document.head.appendChild(sc);
+                    });
+                } catch(err) {
+                    showToast('❌', 'Ошибка загрузки PDF-модуля', 'bg-rose-500', 'border-rose-700');
+                    return;
+                }
             }
             const { jsPDF } = window.jspdf || jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
