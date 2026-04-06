@@ -104,9 +104,12 @@ window.finishOnboarding = function() {
 };
 
 // === PULL-TO-REFRESH ===
-(function initPullToRefresh() {
+// БАГ-ФИКс: эта функция вызывалась как IIFE с $ из app.js, который ещё не загружен.
+// $ — это const из app.js, он не доступен когда выполняется ui.js (defer-порядок).
+// Решение: используем document.getElementById напрямую и откладываем до app:ready.
+document.addEventListener('app:ready', function initPullToRefresh() {
     let startY = 0, pulling = false;
-    const lobby = $('lobby-area');
+    const lobby = document.getElementById('lobby-area');
     if (!lobby) return;
     lobby.addEventListener('touchstart', function(e) {
         if (window.scrollY === 0 && !document.body.classList.contains('in-game')) {
@@ -119,14 +122,14 @@ window.finishOnboarding = function() {
         const diff = e.touches[0].clientY - startY;
         if (diff > 80) {
             pulling = false;
-            haptic('medium');
-            updateProgressBars();
-            updateGlobalUI();
+            if (typeof haptic === 'function') haptic('medium');
+            if (typeof updateProgressBars === 'function') updateProgressBars();
+            if (typeof updateGlobalUI === 'function') updateGlobalUI();
             showToast('🔄', 'Обновлено!', 'bg-blue-500', 'border-blue-700');
         }
     }, { passive: true });
     lobby.addEventListener('touchend', function() { pulling = false; }, { passive: true });
-})();
+}, { once: true });
 
 window.openGlobalSettings = function() {
     $('pre-game-title').innerText = 'Глобальные настройки';

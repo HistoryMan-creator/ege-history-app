@@ -315,7 +315,7 @@ function generateTask5Table() {
         // Фолбэк: старая логика (при фильтре эпохи или если слотов не хватает)
         if (!algoSuccess5) {
             let uE = new Set(); let uP = new Set(); let svo = 0; let shuf = shuffleArray([...allowed]);
-            for (let f of shuf) { if (target.length >= rowsCount) break; if (uE.has(f.event) || uP.has(f.person)) continue; let isSVO = f.year == 2022 || (f.event && String(f.event).includes('СВО')); if (isSVO && svo >= 1) continue; target.push(f); uE.add(f.event); uP.add(f.person); if (isSVO) svo++; }
+            for (let f of shuf) { if (target.length >= rowsCount) break; if (uE.has(f.event) || uP.has(f.person)) continue; let isSVO = f.year === 2022 || (f.event && String(f.event).includes('СВО')); if (isSVO && svo >= 1) continue; target.push(f); uE.add(f.event); uP.add(f.person); if (isSVO) svo++; }
             if (target.length < rowsCount) for (let f of shuf) { if (target.length >= rowsCount) break; if (!uE.has(f.event) && !uP.has(f.person)) { target.push(f); uE.add(f.event); uP.add(f.person); } }
         }
     }

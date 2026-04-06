@@ -625,13 +625,15 @@ function generateTable() {
     if (window.state.currentMode === 'mistakes') {
         let mPool = window.state.mistakesPool || [];
         let availableTasks = [];
+        // FIX: использует TASK_CONFIG вместо ternary-цепочек, которые он и заменял
+        const now = Date.now();
         ['task3', 'task4', 'task5', 'task7'].forEach(t => {
-            let hasM = mPool.some(m => m.task === t);
-            let p = t === 'task7' ? (window.task7Data||[]) : (t === 'task5' ? (typeof task5Data !== 'undefined' ? task5Data : []) : (t === 'task3' ? (typeof task3Data !== 'undefined' ? task3Data : []) : (typeof bigData !== 'undefined' ? bigData : [])));
-            let now = Date.now();
-            let hasE = p.some(f => {
-                let k = t === 'task7' ? 't7_'+f.culture : (t === 'task5' ? 't5_'+f.event : (t === 'task3' ? 't3_'+f.process+'|'+f.fact : f.event));
-                let d = window.state.stats.factStreaks[k];
+            const cfg = TASK_CONFIG[t];
+            const hasM = mPool.some(m => m.task === t);
+            const p    = cfg ? cfg.data() : [];
+            const hasE = p.some(f => {
+                const k = cfg ? cfg.keyFn(f) : f.event;
+                const d = window.state.stats.factStreaks[k];
                 return d && d.level > 0 && d.nextReview <= now;
             });
             if (hasM || hasE) availableTasks.push(t);
@@ -1010,6 +1012,64 @@ window.loadProgressFromCloud = async function() {}; window.syncProgressToCloud =
 // FIX 3.2: Централизованное делегирование событий через data-action.
 // Заменяет десятки inline onclick="func()" → один обработчик на document.
 // HTML кнопки используют: data-action="actionName" и опционально data-arg / data-arg2.
+//
+// ОПТИМИЗАЦИЯ: ACTION_HANDLERS вынесен из тела listener'а — создаётся один раз,
+// а не 50+ стрелочных функций на каждый клик. Каждый handler принимает (arg, arg2).
+const ACTION_HANDLERS = {
+    // Лобби
+    handleLogoClick:        ()           => window.handleLogoClick?.(),
+    openGlobalSettings:     ()           => window.openGlobalSettings?.(),
+    openStatsModal:         ()           => window.openStatsModal?.(),
+    openGlobalTopModal:     ()           => window.openGlobalTopModal?.(),
+    openEGEModal:           ()           => window.openEGEModal?.(),
+    toggleFocusMode:        ()           => window.toggleFocusMode?.(),
+    toggleTheme:            ()           => window.toggleTheme?.(),
+    startDuelSearch:        ()           => window.startDuelSearch?.(),
+    cancelDuelSearch:       ()           => window.cancelDuelSearch?.(),
+    startHwFromBanner:      ()           => window.startHwFromBanner?.(),
+    backToLobby:            ()           => window.backToLobby?.(),
+    // Карточки заданий лобби: data-arg="task4" data-arg2="normal"
+    quickStartGame:         (arg, arg2)  => window.quickStartGame?.(arg, arg2 || 'normal'),
+    pickTaskForMode:        (arg)        => window.pickTaskForMode?.(arg),
+    confirmTaskPick:        (arg)        => window.confirmTaskPick?.(arg),
+    closeTaskPicker:        ()           => window.closeTaskPicker?.(),
+    // Игровые кнопки
+    checkAnswersTrue:       ()           => window.checkAnswers?.(true),
+    checkAnswersFalse:      ()           => window.checkAnswers?.(false),
+    generateTable:          ()           => window.generateTable?.(),
+    toggleAnswers:          ()           => window.toggleAnswers?.(),
+    // Красный карандаш
+    giveUpRedPencil:        ()           => window.giveUpRedPencil?.(),
+    nextRedPencilCase:      ()           => window.nextRedPencilCase?.(),
+    // Настройки
+    applyGlobalSettings:    ()           => window.applyGlobalSettings?.(),
+    closePreGameModal:      ()           => window.closePreGameModal?.(),
+    checkCustomPeriod:      ()           => window.checkCustomPeriod?.(),
+    setPgRows:              (arg)        => window.setPgRows?.(Number(arg)),
+    // Онбординг
+    nextOnbStep:            (arg)        => window.nextOnbStep?.(Number(arg)),
+    finishOnboarding:       ()           => window.finishOnboarding?.(),
+    // Модалки
+    hideModal:              (arg)        => window.hideModal?.(arg),
+    openProfileModal:       ()           => window.openProfileModal?.(),
+    openAchievementsModal:  ()           => window.openAchievementsModal?.(),
+    openMistakesListModal:  ()           => window.openMistakesListModal?.(),
+    copyTextReport:         ()           => window.copyTextReport?.(),
+    shareTelegram:          ()           => window.shareTelegram?.(),
+    closeGameOverModal:     ()           => window.closeGameOverModal?.(),
+    signInWithGoogle:       ()           => window.signInWithGoogle?.(),
+    saveProfileName:        ()           => window.saveProfileName?.(),
+    saveTeacherClassCode:   ()           => window.saveTeacherClassCode?.(),
+    switchTeacherTab:       (arg)        => window.switchTeacherTab?.(arg),
+    // Домашнее задание
+    selectHwTask:           (arg)        => window.selectHwTask?.(arg),
+    setHwRows:              (arg)        => window.setHwRows?.(Number(arg)),
+    setHwDeadline:          (arg)        => window.setHwDeadline?.(Number(arg)),
+    submitAssignHw:         ()           => window.submitAssignHw?.(),
+    nextStudyCard:          ()           => window.nextStudyCard?.(),
+    openMapModal:           (arg)        => window.openMapModal?.(arg),
+};
+
 document.addEventListener('click', function(e) {
     // Backdrop-клик: только если пользователь кликнул точно по оверлею, а не по его содержимому
     if (e.target.dataset.backdrop && e.target === e.target.closest('[data-backdrop]')) {
@@ -1021,67 +1081,10 @@ document.addEventListener('click', function(e) {
     const el = e.target.closest('[data-action]');
     if (!el) return;
     const action = el.dataset.action;
-    const arg  = el.dataset.arg  || null;
-    const arg2 = el.dataset.arg2 || null;
-
-    const handlers = {
-        // Лобби
-        handleLogoClick:        () => window.handleLogoClick && window.handleLogoClick(),
-        openGlobalSettings:     () => window.openGlobalSettings && window.openGlobalSettings(),
-        openStatsModal:         () => window.openStatsModal && window.openStatsModal(),
-        openGlobalTopModal:     () => window.openGlobalTopModal && window.openGlobalTopModal(),
-        openEGEModal:           () => window.openEGEModal && window.openEGEModal(),
-        toggleFocusMode:        () => window.toggleFocusMode && window.toggleFocusMode(),
-        toggleTheme:            () => window.toggleTheme && window.toggleTheme(),
-        startDuelSearch:        () => window.startDuelSearch && window.startDuelSearch(),
-        cancelDuelSearch:       () => window.cancelDuelSearch && window.cancelDuelSearch(),
-        startHwFromBanner:      () => window.startHwFromBanner && window.startHwFromBanner(),
-        backToLobby:            () => window.backToLobby && window.backToLobby(),
-        // Карточки заданий лобби: data-arg="task4" data-arg2="normal"
-        quickStartGame:         () => window.quickStartGame && window.quickStartGame(arg, arg2 || 'normal'),
-        pickTaskForMode:        () => window.pickTaskForMode && window.pickTaskForMode(arg),
-        confirmTaskPick:        () => window.confirmTaskPick && window.confirmTaskPick(arg),
-        closeTaskPicker:        () => window.closeTaskPicker && window.closeTaskPicker(),
-        // Игровые кнопки
-        checkAnswersTrue:       () => window.checkAnswers && window.checkAnswers(true),
-        checkAnswersFalse:      () => window.checkAnswers && window.checkAnswers(false),
-        generateTable:          () => window.generateTable && window.generateTable(),
-        toggleAnswers:          () => window.toggleAnswers && window.toggleAnswers(),
-        // Красный карандаш
-        giveUpRedPencil:        () => window.giveUpRedPencil && window.giveUpRedPencil(),
-        nextRedPencilCase:      () => window.nextRedPencilCase && window.nextRedPencilCase(),
-        // Настройки
-        applyGlobalSettings:    () => window.applyGlobalSettings && window.applyGlobalSettings(),
-        closePreGameModal:      () => window.closePreGameModal && window.closePreGameModal(),
-        checkCustomPeriod:      () => window.checkCustomPeriod && window.checkCustomPeriod(),
-        setPgRows:              () => window.setPgRows && window.setPgRows(Number(arg)),
-        // Онбординг
-        nextOnbStep:            () => window.nextOnbStep && window.nextOnbStep(Number(arg)),
-        finishOnboarding:       () => window.finishOnboarding && window.finishOnboarding(),
-        // Модалки
-        hideModal:              () => window.hideModal && window.hideModal(arg),
-        openProfileModal:       () => window.openProfileModal && window.openProfileModal(),
-        openAchievementsModal:  () => window.openAchievementsModal && window.openAchievementsModal(),
-        openMistakesListModal:  () => window.openMistakesListModal && window.openMistakesListModal(),
-        copyTextReport:         () => window.copyTextReport && window.copyTextReport(),
-        shareTelegram:          () => window.shareTelegram && window.shareTelegram(),
-        closeGameOverModal:     () => window.closeGameOverModal && window.closeGameOverModal(),
-        signInWithGoogle:       () => window.signInWithGoogle && window.signInWithGoogle(),
-        saveProfileName:        () => window.saveProfileName && window.saveProfileName(),
-        saveTeacherClassCode:   () => window.saveTeacherClassCode && window.saveTeacherClassCode(),
-        switchTeacherTab:       () => window.switchTeacherTab && window.switchTeacherTab(arg),
-        // Домашнее задание
-        selectHwTask:           () => window.selectHwTask && window.selectHwTask(arg),
-        setHwRows:              () => window.setHwRows && window.setHwRows(Number(arg)),
-        setHwDeadline:          () => window.setHwDeadline && window.setHwDeadline(Number(arg)),
-        submitAssignHw:         () => window.submitAssignHw && window.submitAssignHw(),
-        nextStudyCard:          () => window.nextStudyCard && window.nextStudyCard(),
-        openMapModal:           () => window.openMapModal && window.openMapModal(arg),
-    };
-
-    if (handlers[action]) {
+    const handler = ACTION_HANDLERS[action];
+    if (handler) {
         e.stopPropagation();
-        handlers[action]();
+        handler(el.dataset.arg || null, el.dataset.arg2 || null);
     }
 }, true); // capture: true — срабатывает раньше любых других onClick
 
