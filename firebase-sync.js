@@ -700,7 +700,10 @@
                 const dStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                 const val = (dStat[dStr] && dStat[dStr].solved) || 0;
                 const valT4 = (dStat[dStr] && dStat[dStr].solvedTask4) || 0;
-                if (dStr >= monStr) { wScore += val; wScoreTask4 += valT4; }
+                // ✅ FIX: НЕ складываем solved + solvedTaskX (двойной подсчёт!)
+                const perTaskVal = (dStat[dStr] ? ((dStat[dStr].solvedTask4||0)+(dStat[dStr].solvedTask3||0)+(dStat[dStr].solvedTask5||0)+(dStat[dStr].solvedTask7||0)) : 0);
+                const dayScore = perTaskVal > 0 ? perTaskVal : val;
+                if (dStr >= monStr) { wScore += dayScore; wScoreTask4 += valT4; }
                 last7.push({ date: dStr, val, t4: (dStat[dStr] && dStat[dStr].solvedTask4) || 0, t5: (dStat[dStr] && dStat[dStr].solvedTask5) || 0, t7: (dStat[dStr] && dStat[dStr].solvedTask7) || 0, mins: dStat[dStr] ? Math.floor((dStat[dStr].timeSpent || 0) / 60) : 0 });
             }
             // No totalSolved fallback — must come from actual dailyStats
@@ -1152,35 +1155,52 @@
                 // затем вычисляем weeklyScore клиентски — это надёжнее чем orderBy weeklyScore,
                 // который пропускает документы без этого поля.
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                const monday = new Date(); monday.setDate(monday.getDate() - monday.getDay() + 1); monday.setHours(0,0,0,0);
+                // ✅ FIX: Корректный расчёт понедельника (воскресенье = 7, не 0)
+                const monday = new Date();
+                const dayOfWeek = monday.getDay() || 7;
+                monday.setDate(monday.getDate() - dayOfWeek + 1);
+                monday.setHours(0,0,0,0);
                 const monStr = monday.toISOString().split('T')[0];
 
                 // Пробуем взять из кэша loadClassProgress если учитель уже загрузил данные
                 let students = window._cachedStudents || [];
 
                 if (!students.length) {
-                    // Прямой запрос: до 100 студентов, сортировка по totalSolved
-                    const q = query(studentsCol, orderBy('totalSolved', 'desc'), limit(100));
-                    const snap = await getDocs(q);
-                    students = snap.docs.map(d => {
-                        const raw = d.data();
-                        // вычисляем wScore из fullStateJson
-                        let wScore = raw.weeklyScore || 0; // используем поле если есть
-                        try {
-                            const st = JSON.parse(raw.fullStateJson || '{}');
-                            const ds = (st.stats || st).dailyStats || {};
-                            let computed = 0;
-                            for (const day in ds) {
-                                if (day >= monStr) {
-                                    computed += (ds[day].solvedTask4||0)+(ds[day].solvedTask3||0)
-                                              + (ds[day].solvedTask5||0)+(ds[day].solvedTask7||0)
-                                              + (ds[day].solved||0);
+                    // ✅ FIX: Сначала пробуем weeklyScore (ловит активных игроков вне топ-100 totalSolved)
+                    try {
+                        const weeklyQ = query(studentsCol, orderBy('weeklyScore', 'desc'), limit(50));
+                        const weeklySnap = await getDocs(weeklyQ);
+                        const weeklyStudents = weeklySnap.docs.map(d => {
+                            const raw = d.data();
+                            return { name: raw.name || 'Без имени', wScore: raw.weeklyScore || 0 };
+                        }).filter(s => s.wScore > 0);
+                        if (weeklyStudents.length > 0) students = weeklyStudents;
+                    } catch(weeklyErr) {
+                        console.warn('[Leaderboard] weeklyScore index missing, fallback to totalSolved');
+                    }
+                    // Fallback: totalSolved + клиентский подсчёт
+                    if (!students.length) {
+                        const q = query(studentsCol, orderBy('totalSolved', 'desc'), limit(100));
+                        const snap = await getDocs(q);
+                        students = snap.docs.map(d => {
+                            const raw = d.data();
+                            let wScore = raw.weeklyScore || 0;
+                            try {
+                                const st = JSON.parse(raw.fullStateJson || '{}');
+                                const ds = (st.stats || st).dailyStats || {};
+                                let computed = 0;
+                                for (const day in ds) {
+                                    if (day >= monStr) {
+                                        const perTask = (ds[day].solvedTask4||0)+(ds[day].solvedTask3||0)
+                                                  + (ds[day].solvedTask5||0)+(ds[day].solvedTask7||0);
+                                        computed += perTask > 0 ? perTask : (ds[day].solved||0);
+                                    }
                                 }
-                            }
-                            if (computed > 0) wScore = computed; // предпочитаем computed
-                        } catch(e2) {}
-                        return { name: raw.name || 'Без имени', wScore };
-                    });
+                                if (computed > 0) wScore = computed;
+                            } catch(e2) {}
+                            return { name: raw.name || 'Без имени', wScore };
+                        });
+                    }
                 } else {
                     // Используем уже загруженные данные учителя
                     students = students.map(s => ({ name: s.name || 'Без имени', wScore: s.wScoreTask4 || 0 }));
@@ -1388,11 +1408,14 @@
             let weeklyScore = 0;
             for (const d in dStat) {
                 if (d >= monStr2) {
-                    weeklyScore += (dStat[d].solvedTask4 || 0)
-                                + (dStat[d].solvedTask3 || 0)
-                                + (dStat[d].solvedTask5 || 0)
-                                + (dStat[d].solvedTask7 || 0)
-                                + (dStat[d].solved || 0);  // старый формат до разбивки по заданиям
+                    // ✅ FIX: НЕ суммируем solved + solvedTaskX — это двойной подсчёт!
+                    // solved = общий счётчик, solvedTaskX = разбивка по заданиям.
+                    // Используем per-task если есть, иначе fallback на старый solved.
+                    const perTask = (dStat[d].solvedTask4 || 0)
+                                  + (dStat[d].solvedTask3 || 0)
+                                  + (dStat[d].solvedTask5 || 0)
+                                  + (dStat[d].solvedTask7 || 0);
+                    weeklyScore += perTask > 0 ? perTask : (dStat[d].solved || 0);
                 }
             }
             
