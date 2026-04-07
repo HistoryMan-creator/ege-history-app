@@ -315,11 +315,15 @@
       })();
     </script>
 
-    <!-- JS разбит на модули (Fix 1.1): параллельная загрузка, нет блокировки парсера -->
-    <!-- Порядок defer гарантирован: ui.js → app.js → modes.js → data.js → app:ready -->
+    <!-- JS разбит на модули: config → utils → state → table → ui → modes → app -->
+    <!-- Порядок defer гарантирован браузером: выполняются строго по порядку в DOM -->
+    <script src="config.js" defer></script>
+    <script src="utils.js" defer></script>
+    <script src="state.js" defer></script>
+    <script src="table.js" defer></script>
     <script src="ui.js" defer></script>
-    <script src="app.js" defer></script>
     <script src="modes.js" defer></script>
+    <script src="app.js" defer></script>
 
     <!-- ШАПКА -->
     <header id="main-header" class="bg-examBlue dark:bg-[#121212] text-white shadow-md sticky top-0 z-50 no-print transition-colors duration-400">

@@ -700,7 +700,10 @@
                 const dStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                 const val = (dStat[dStr] && dStat[dStr].solved) || 0;
                 const valT4 = (dStat[dStr] && dStat[dStr].solvedTask4) || 0;
-                if (dStr >= monStr) { wScore += val; wScoreTask4 += valT4; }
+                // ✅ FIX: НЕ складываем solved + solvedTaskX (двойной подсчёт!)
+                const perTaskVal = (dStat[dStr] ? ((dStat[dStr].solvedTask4||0)+(dStat[dStr].solvedTask3||0)+(dStat[dStr].solvedTask5||0)+(dStat[dStr].solvedTask7||0)) : 0);
+                const dayScore = perTaskVal > 0 ? perTaskVal : val;
+                if (dStr >= monStr) { wScore += dayScore; wScoreTask4 += valT4; }
                 last7.push({ date: dStr, val, t4: (dStat[dStr] && dStat[dStr].solvedTask4) || 0, t5: (dStat[dStr] && dStat[dStr].solvedTask5) || 0, t7: (dStat[dStr] && dStat[dStr].solvedTask7) || 0, mins: dStat[dStr] ? Math.floor((dStat[dStr].timeSpent || 0) / 60) : 0 });
             }
             // No totalSolved fallback — must come from actual dailyStats
@@ -1148,8 +1151,11 @@
             lc.classList.remove('hidden');
             ll.innerHTML = '<div class="text-center text-xs text-gray-400 py-2">⏳ Загрузка...</div>';
             try {
+                // Берём всех студентов по totalSolved (этот индекс точно есть),
+                // затем вычисляем weeklyScore клиентски — это надёжнее чем orderBy weeklyScore,
+                // который пропускает документы без этого поля.
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                // ✅ FIX Bug 2: getDay() = 0 в воскресенье → || 7
+                // ✅ FIX: Корректный расчёт понедельника (воскресенье = 7, не 0)
                 const monday = new Date();
                 const dayOfWeek = monday.getDay() || 7;
                 monday.setDate(monday.getDate() - dayOfWeek + 1);
@@ -1160,16 +1166,17 @@
                 let students = window._cachedStudents || [];
 
                 if (!students.length) {
-                    // ✅ FIX Bug 3: Сначала пробуем weeklyScore (ловит активных новичков)
+                    // ✅ FIX: Сначала пробуем weeklyScore (ловит активных игроков вне топ-100 totalSolved)
                     try {
                         const weeklyQ = query(studentsCol, orderBy('weeklyScore', 'desc'), limit(50));
                         const weeklySnap = await getDocs(weeklyQ);
-                        const weeklyStudents = weeklySnap.docs
-                            .map(d => ({ name: d.data().name || 'Без имени', wScore: d.data().weeklyScore || 0 }))
-                            .filter(s => s.wScore > 0);
+                        const weeklyStudents = weeklySnap.docs.map(d => {
+                            const raw = d.data();
+                            return { name: raw.name || 'Без имени', wScore: raw.weeklyScore || 0 };
+                        }).filter(s => s.wScore > 0);
                         if (weeklyStudents.length > 0) students = weeklyStudents;
                     } catch(weeklyErr) {
-                        console.warn('[Leaderboard] weeklyScore index missing, fallback');
+                        console.warn('[Leaderboard] weeklyScore index missing, fallback to totalSolved');
                     }
                     // Fallback: totalSolved + клиентский подсчёт
                     if (!students.length) {
@@ -1184,9 +1191,8 @@
                                 let computed = 0;
                                 for (const day in ds) {
                                     if (day >= monStr) {
-                                        // ✅ FIX Bug 1: НЕ суммируем solved + solvedTaskX (двойной подсчёт!)
                                         const perTask = (ds[day].solvedTask4||0)+(ds[day].solvedTask3||0)
-                                                  +(ds[day].solvedTask5||0)+(ds[day].solvedTask7||0);
+                                                  + (ds[day].solvedTask5||0)+(ds[day].solvedTask7||0);
                                         computed += perTask > 0 ? perTask : (ds[day].solved||0);
                                     }
                                 }
@@ -1402,10 +1408,13 @@
             let weeklyScore = 0;
             for (const d in dStat) {
                 if (d >= monStr2) {
-                    // ✅ FIX: solved — это уже сумма всех задач. Нельзя складывать solved + solvedTaskX.
-                    // Если есть per-task поля — используем их, иначе fallback на solved (старый формат).
-                    const perTask = (dStat[d].solvedTask4 || 0) + (dStat[d].solvedTask3 || 0)
-                                  + (dStat[d].solvedTask5 || 0) + (dStat[d].solvedTask7 || 0);
+                    // ✅ FIX: НЕ суммируем solved + solvedTaskX — это двойной подсчёт!
+                    // solved = общий счётчик, solvedTaskX = разбивка по заданиям.
+                    // Используем per-task если есть, иначе fallback на старый solved.
+                    const perTask = (dStat[d].solvedTask4 || 0)
+                                  + (dStat[d].solvedTask3 || 0)
+                                  + (dStat[d].solvedTask5 || 0)
+                                  + (dStat[d].solvedTask7 || 0);
                     weeklyScore += perTask > 0 ? perTask : (dStat[d].solved || 0);
                 }
             }
