@@ -1461,6 +1461,7 @@
                         return;
                     }
                     } // end else (merge branch)
+                } // end if (allFound.size > 1)
 
                 // 3. Один документ — стандартная загрузка
                 if (bestData?.name && bestData.name !== 'Ученик' && !localStorage.getItem('student_manual_name')) {
@@ -1850,37 +1851,60 @@
         // Генерирует/возвращает 8-значный PIN для текущего аккаунта.
         // PIN хранится в Firestore и позволяет связать два устройства.
         window.getOrCreateSyncPin = async function() {
-            if (!fbUser || !db) return null;
+            // Ждём fbUser максимум 5 секунд
+            if (!fbUser) {
+                await new Promise(resolve => {
+                    let attempts = 0;
+                    const check = setInterval(() => {
+                        attempts++;
+                        if (fbUser || attempts >= 50) { clearInterval(check); resolve(); }
+                    }, 100);
+                });
+            }
+            if (!fbUser || !db) {
+                showToast('❌', 'Нет соединения с сервером', 'bg-rose-500', 'border-rose-700');
+                return null;
+            }
             const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
             const canonicalId = resolveUserId(fbUser);
             try {
                 const snap = await getDoc(doc(studentsCol, canonicalId));
                 if (snap.exists() && snap.data().syncPin) return snap.data().syncPin;
-                // Создаём новый PIN
                 const pin = String(Math.floor(10000000 + Math.random() * 90000000));
                 await setDoc(doc(studentsCol, canonicalId), { syncPin: pin, syncPinCreated: Date.now() }, { merge: true });
                 return pin;
-            } catch(e) { console.error('[PIN]', e); return null; }
+            } catch(e) {
+                console.error('[PIN]', e);
+                showToast('❌', 'Ошибка: ' + (e.message || e.code || 'нет доступа'), 'bg-rose-500', 'border-rose-700');
+                return null;
+            }
         };
 
-        // Показывает PIN в UI и копирует в буфер
         window.showSyncPin = async function() {
             const btn = document.getElementById('sync-pin-btn');
             const display = document.getElementById('sync-pin-display');
-            if (btn) btn.disabled = true;
-            if (display) display.textContent = '⏳ Генерация...';
+            if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+            if (display) { display.textContent = 'Загрузка...'; display.style.color = '#9ca3af'; display.style.fontSize = '12px'; display.style.letterSpacing = 'normal'; }
             const pin = await window.getOrCreateSyncPin();
-            if (!pin) { if (display) display.textContent = '❌ Ошибка'; if (btn) btn.disabled = false; return; }
+            if (btn) { btn.disabled = false; btn.textContent = '📋 Мой PIN'; }
+            if (!pin) {
+                if (display) { display.textContent = '— ошибка —'; display.style.color = '#ef4444'; }
+                return;
+            }
             if (display) {
-                display.textContent = pin;
-                display.style.letterSpacing = '4px';
-                display.style.fontSize = '22px';
+                // Форматируем PIN как XXXX-XXXX для читаемости
+                display.textContent = pin.slice(0, 4) + '-' + pin.slice(4);
+                display.style.letterSpacing = '3px';
+                display.style.fontSize = '20px';
                 display.style.fontWeight = '900';
                 display.style.color = '#3b82f6';
             }
-            if (btn) btn.disabled = false;
-            // Копируем в буфер
-            try { await navigator.clipboard.writeText(pin); showToast('📋', 'PIN скопирован: ' + pin, 'bg-blue-500', 'border-blue-700'); } catch(e) {}
+            try {
+                await navigator.clipboard.writeText(pin);
+                showToast('📋', 'PIN скопирован: ' + pin, 'bg-blue-500', 'border-blue-700');
+            } catch(e) {
+                showToast('🔑', 'Ваш PIN: ' + pin, 'bg-blue-500', 'border-blue-700');
+            }
         };
 
         // Привязать к аккаунту по чужому PIN
