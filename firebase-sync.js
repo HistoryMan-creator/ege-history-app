@@ -1295,127 +1295,194 @@
             }
         };
         
+        // ─── Умное глубокое слияние нескольких fullStateJson ────────────────────
+        function deepMergeStates(jsonStrings) {
+            const states = jsonStrings.map(j => {
+                try { const p = JSON.parse(j); return p.stats ? p : { stats: p }; }
+                catch(e) { return null; }
+            }).filter(Boolean);
+            if (!states.length) return null;
+            if (states.length === 1) return states[0];
+
+            const merged = { stats: {}, mistakesPool: [] };
+            const st = merged.stats;
+
+            ['totalSolvedEver','streak','bestSpeedrunScore','flashcardsSolved','totalTimeSpent'].forEach(k => {
+                st[k] = Math.max(...states.map(s => s.stats?.[k] || 0));
+            });
+            st.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
+            states.forEach(s => {
+                const sbt = s.stats?.solvedByTask || {};
+                ['task3','task4','task5','task7'].forEach(k => { st.solvedByTask[k] = Math.max(st.solvedByTask[k], sbt[k] || 0); });
+            });
+            st.factStreaks = {};
+            states.forEach(s => {
+                Object.entries(s.stats?.factStreaks || {}).forEach(([k, v]) => {
+                    const cur = st.factStreaks[k];
+                    if (!cur || (v.level||0) > (cur.level||0) || ((v.level||0)===(cur.level||0) && (v.streak||0)>(cur.streak||0)))
+                        st.factStreaks[k] = v;
+                });
+            });
+            st.eraStats = {};
+            states.forEach(s => {
+                Object.entries(s.stats?.eraStats || {}).forEach(([task, eras]) => {
+                    if (!st.eraStats[task]) st.eraStats[task] = {};
+                    Object.entries(eras).forEach(([era, val]) => {
+                        if (!st.eraStats[task][era]) st.eraStats[task][era] = { correct:0, total:0 };
+                        st.eraStats[task][era].correct = Math.max(st.eraStats[task][era].correct, val.correct||0);
+                        st.eraStats[task][era].total   = Math.max(st.eraStats[task][era].total,   val.total||0);
+                    });
+                });
+            });
+            st.dailyStats = {};
+            states.forEach(s => {
+                Object.entries(s.stats?.dailyStats || {}).forEach(([date, val]) => {
+                    if (!st.dailyStats[date] || (val.solved||0) > (st.dailyStats[date].solved||0))
+                        st.dailyStats[date] = val;
+                });
+            });
+            const achSet = new Set();
+            states.forEach(s => (s.stats?.achievements || []).forEach(a => achSet.add(a)));
+            st.achievements = [...achSet];
+            st.achievementsData = states.reduce((best, s) => {
+                const a = s.stats?.achievementsData || {};
+                return { nightOwls: Math.max(best.nightOwls||0,a.nightOwls||0), earlyBirds: Math.max(best.earlyBirds||0,a.earlyBirds||0), hwDone: Math.max(best.hwDone||0,a.hwDone||0), hwPerfect: Math.max(best.hwPerfect||0,a.hwPerfect||0), maxMistakes: Math.max(best.maxMistakes||0,a.maxMistakes||0) };
+            }, {});
+            const mistakeKeys = new Set();
+            states.forEach(s => {
+                (s.mistakesPool || s.stats?.mistakesPool || []).forEach(m => {
+                    const key = JSON.stringify(m.fact);
+                    if (!mistakeKeys.has(key)) { mistakeKeys.add(key); merged.mistakesPool.push(m); }
+                });
+            });
+            return merged;
+        }
+
         window.loadProgressFromCloud = async function() {
             if (!fbUser || !db) return;
             try {
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
                 const canonicalId = resolveUserId(fbUser);
-                
-                let bestData = null;
-                let bestSolved = 0;
-                let bestDocId = null;
-                
-                // 1. Сначала читаем только ИЗВЕСТНЫЕ документы по прямым ID (точечные чтения)
+                const allFound = new Map(); // docId → data
+
+                // 1а. По прямым известным ID
                 const knownIds = new Set([canonicalId]);
                 const knownTg = localStorage.getItem('known_tg_id');
                 const googleUid = localStorage.getItem('google_uid');
                 if (knownTg) knownIds.add(knownTg);
                 if (googleUid) knownIds.add('google_' + googleUid);
-                
                 for (const id of knownIds) {
                     try {
                         const snap = await getDoc(doc(studentsCol, id));
-                        if (snap.exists()) {
-                            const data = snap.data();
-                            const solved = data.totalSolved || 0;
-                            console.log(`[Sync] Документ ${id}: ${solved} задач`);
-                            if (solved > bestSolved) {
-                                bestData = data; bestSolved = solved; bestDocId = id;
-                            }
+                        if (snap.exists() && !snap.data()._mergedInto) {
+                            allFound.set(id, snap.data());
+                            console.log(`[Sync] ID ${id}: ${snap.data().totalSolved||0} задач`);
                         }
-                    } catch(e) { console.warn(`[Sync] Ошибка чтения документа ${id}:`, e); }
+                    } catch(e) { console.warn(`[Sync] Ошибка чтения ${id}:`, e); }
                 }
-                
-                // 2. ✅ FIX: Ищем по email ВСЕГДА (не только когда нет данных по ID).
-                //    Это нужно для кейса: ТГ-аккаунт + браузер с той же почтой.
-                //    Документ ТГ не знает google_uid браузера и наоборот.
+
+                // 1б. По email — ВСЕГДА (ловит ТГ-документ из браузерной сессии)
                 const gEmail = localStorage.getItem('google_email') || fbUser.email || '';
                 if (gEmail) {
                     try {
-                        const emailQuery = query(studentsCol, where('googleEmail', '==', gEmail), limit(5));
-                        const emailSnap = await getDocs(emailQuery);
+                        const emailSnap = await getDocs(query(studentsCol, where('googleEmail', '==', gEmail), limit(5)));
                         emailSnap.forEach(docSnap => {
-                            const data = docSnap.data();
-                            const docSolved = data.totalSolved || 0;
-                            if (docSolved > bestSolved) {
-                                bestData = data; bestSolved = docSolved; bestDocId = docSnap.id;
-                                console.log(`[Sync] Найден по email ${gEmail}: ${docSolved} задач (doc: ${docSnap.id})`);
+                            if (!allFound.has(docSnap.id) && !docSnap.data()._mergedInto) {
+                                allFound.set(docSnap.id, docSnap.data());
+                                console.log(`[Sync] Email ${gEmail}: doc ${docSnap.id} (${docSnap.data().totalSolved||0} задач)`);
                             }
                         });
-                    } catch(searchErr) {
-                        console.error('[Sync] Ошибка поиска по email:', searchErr);
-                    }
+                    } catch(e) { console.warn('[Sync] Email search error:', e); }
                 }
-                
-                // 2b. Если и по email ничего — ищем по name (крайний fallback для ТГ без почты)
-                if (!bestData || bestSolved === 0) {
+
+                // 1в. По имени — последний fallback
+                if (allFound.size === 0) {
                     const storedName = localStorage.getItem('student_manual_name');
                     if (storedName && storedName !== 'Ученик' && storedName.length > 2) {
                         try {
-                            const nameQuery = query(studentsCol, where('name', '==', storedName), limit(5));
-                            const nameSnap = await getDocs(nameQuery);
+                            const nameSnap = await getDocs(query(studentsCol, where('name', '==', storedName), limit(3)));
                             nameSnap.forEach(docSnap => {
-                                const data = docSnap.data();
-                                const docSolved = data.totalSolved || 0;
-                                if (docSolved > bestSolved) {
-                                    bestData = data; bestSolved = docSolved; bestDocId = docSnap.id;
-                                    console.log(`[Sync] Найден по имени ${storedName}: ${docSolved} задач (doc: ${docSnap.id})`);
-                                }
+                                if (!allFound.has(docSnap.id) && !docSnap.data()._mergedInto)
+                                    allFound.set(docSnap.id, docSnap.data());
                             });
-                        } catch(nameErr) {
-                            console.warn('[Sync] Ошибка поиска по имени:', nameErr);
-                        }
+                        } catch(e) {}
                     }
                 }
-                
-                // 3. Загружаем найденные данные
-                if (bestData) {
-                    if (bestData.name && bestData.name !== 'Ученик' && !localStorage.getItem('student_manual_name')) {
-                        localStorage.setItem('student_manual_name', bestData.name);
-                        const nameEl = $('profile-name-input');
-                        if (nameEl) nameEl.value = bestData.name;
-                    }
-                    if (bestData.classCode && !localStorage.getItem('student_class_code')) {
-                        localStorage.setItem('student_class_code', bestData.classCode);
-                        const classEl = $('profile-class-code');
-                        if (classEl) classEl.value = bestData.classCode;
-                    }
-                    // ✅ FIX: Сохраняем найденный TG-id и email — при следующем запуске
-                    // браузерная сессия сразу найдёт ТГ-документ по knownTg
-                    if (bestData.tgId && /^\d+$/.test(String(bestData.tgId))) {
-                        localStorage.setItem('known_tg_id', String(bestData.tgId));
-                    }
-                    if (bestData.knownTgId && /^\d+$/.test(String(bestData.knownTgId))) {
-                        localStorage.setItem('known_tg_id', String(bestData.knownTgId));
-                    }
-                    if (bestData.googleEmail && !localStorage.getItem('google_email')) {
-                        localStorage.setItem('google_email', bestData.googleEmail);
-                    }
-                    
-                    const cloudSolved = bestSolved;
-                    const localSolved = window.state.stats.totalSolvedEver || 0;
-                    
-                    const shouldLoad = bestData.fullStateJson && (cloudSolved > localSolved || localSolved === 0);
-                    if (shouldLoad) {
+
+                if (allFound.size === 0) return;
+
+                // 2. Несколько документов → сливаем, помечаем дубли
+                let bestData = null, bestSolved = 0, bestDocId = null;
+                allFound.forEach((data, id) => {
+                    if ((data.totalSolved||0) >= bestSolved) { bestSolved = data.totalSolved||0; bestData = data; bestDocId = id; }
+                });
+
+                if (allFound.size > 1) {
+                    console.log(`[Sync] 🔀 Найдено ${allFound.size} документов — слияние`);
+                    const merged = deepMergeStates([...allFound.values()].map(d => d.fullStateJson).filter(j => j && j.length > 10));
+                    if (merged) {
+                        const st = merged.stats;
+                        ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
+                         'hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData']
+                            .forEach(k => { if (st[k] !== undefined) window.state.stats[k] = st[k]; });
+                        if (merged.mistakesPool) window.state.mistakesPool = merged.mistakesPool;
+                        const mergedJson = JSON.stringify(merged);
+                        localStorage.setItem('ege_final_storage_v4', mergedJson);
                         try {
-                            const cS = JSON.parse(bestData.fullStateJson);
-                            const statsFields = ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks','hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData'];
-                            statsFields.forEach(k => { if (cS[k] !== undefined) window.state.stats[k] = cS[k]; });
-                            if (cS.mistakesPool) window.state.mistakesPool = cS.mistakesPool;
-                            if (cS.hideLearned !== undefined) window.state.hideLearned = cS.hideLearned;
-                            if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
-                            if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
-                            if (!window.state.stats.achievements) window.state.stats.achievements = [];
-                            if (!window.state.stats.achievementsData) window.state.stats.achievementsData = { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 };
-                            localStorage.setItem('ege_final_storage_v4', bestData.fullStateJson);
-                            console.log(`[Sync] Загружено из облака: ${cloudSolved} задач из документа ${bestDocId} (локально было: ${localSolved})`);
-                        } catch(parseErr) {
-                            console.error('[Sync] Ошибка парсинга fullStateJson:', parseErr);
+                            await setDoc(doc(studentsCol, canonicalId), {
+                                fullStateJson: mergedJson,
+                                totalSolved: window.state.stats.totalSolvedEver || 0,
+                                _mergedFrom: [...allFound.keys()].filter(id => id !== canonicalId),
+                                _mergedAt: Date.now()
+                            }, { merge: true });
+                        } catch(e) { console.error('[Sync] Merge write error:', e); }
+                        for (const [id] of allFound) {
+                            if (id === canonicalId) continue;
+                            try { await setDoc(doc(studentsCol, id), { _mergedInto: canonicalId, _mergedAt: Date.now() }, { merge: true }); }
+                            catch(e) {}
                         }
+                        if (window.updateGlobalUI) window.updateGlobalUI();
+                        if (window.updateProgressBars) window.updateProgressBars();
+                        if (typeof showToast === 'function') showToast('🔀', 'Аккаунты объединены!', 'bg-emerald-500', 'border-emerald-700');
+                        return;
                     }
-                    if (window.updateGlobalUI) window.updateGlobalUI();
-                    if (window.updateProgressBars) window.updateProgressBars();
                 }
+
+                // 3. Один документ — стандартная загрузка
+                if (bestData?.name && bestData.name !== 'Ученик' && !localStorage.getItem('student_manual_name')) {
+                    localStorage.setItem('student_manual_name', bestData.name);
+                    const nameEl = document.getElementById('profile-name-input');
+                    if (nameEl) nameEl.value = bestData.name;
+                }
+                if (bestData?.classCode && !localStorage.getItem('student_class_code')) {
+                    localStorage.setItem('student_class_code', bestData.classCode);
+                    const classEl = document.getElementById('profile-class-code');
+                    if (classEl) classEl.value = bestData.classCode;
+                }
+                if (bestData?.tgId && /^\d+$/.test(String(bestData.tgId))) localStorage.setItem('known_tg_id', String(bestData.tgId));
+                if (bestData?.knownTgId && /^\d+$/.test(String(bestData.knownTgId))) localStorage.setItem('known_tg_id', String(bestData.knownTgId));
+                if (bestData?.googleEmail && !localStorage.getItem('google_email')) localStorage.setItem('google_email', bestData.googleEmail);
+
+                const shouldLoad = bestData?.fullStateJson && (bestSolved > (window.state.stats.totalSolvedEver||0) || (window.state.stats.totalSolvedEver||0) === 0);
+                if (shouldLoad) {
+                    try {
+                        const cS = JSON.parse(bestData.fullStateJson);
+                        const inner = cS.stats ? cS : { stats: cS };
+                        ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
+                         'hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData']
+                            .forEach(k => { if (inner.stats[k] !== undefined) window.state.stats[k] = inner.stats[k]; });
+                        if (inner.mistakesPool || inner.stats?.mistakesPool)
+                            window.state.mistakesPool = inner.mistakesPool || inner.stats.mistakesPool;
+                        if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
+                        if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3:0, task4:0, task5:0, task7:0 };
+                        if (!window.state.stats.achievements) window.state.stats.achievements = [];
+                        if (!window.state.stats.achievementsData) window.state.stats.achievementsData = {};
+                        localStorage.setItem('ege_final_storage_v4', bestData.fullStateJson);
+                        console.log(`[Sync] Загружено ${bestSolved} задач из ${bestDocId}`);
+                    } catch(parseErr) { console.error('[Sync] Parse error:', parseErr); }
+                }
+                if (window.updateGlobalUI) window.updateGlobalUI();
+                if (window.updateProgressBars) window.updateProgressBars();
             } catch(e) { console.error('[Sync] loadProgressFromCloud error:', e); }
         };
 
@@ -1425,12 +1492,10 @@
             if (!s) return;
             
             const nw = Date.now();
-            const gEmail = localStorage.getItem('google_email') || fbUser.email || '';
+            const gEmail = localStorage.getItem('google_email') || '';
             const knownTg = localStorage.getItem('known_tg_id') || '';
             const googleUid = localStorage.getItem('google_uid');
             const googleId = googleUid ? 'google_' + googleUid : '';
-            // Также сохраняем email из профиля как запасной для межаккаунтного поиска
-            const profileEmail = localStorage.getItem('student_profile_email') || gEmail;
             
             // ✅ FIX: Вычисляем weeklyScore здесь и храним как отдельное поле,
             // чтобы индексировать в Firestore для серверной сортировки лидерборда
@@ -1456,7 +1521,7 @@
             const payload = {
                 name: localStorage.getItem('student_manual_name') || 'Ученик',
                 classCode: localStorage.getItem('student_class_code') || '',
-                googleEmail: profileEmail,   // ← теперь всегда заполнен если есть почта
+                googleEmail: gEmail,
                 knownTgId: knownTg,
                 knownGoogleId: googleId,
                 totalSolved: s.totalSolvedEver || 0,
@@ -1515,4 +1580,128 @@
                     console.warn('[Cache] Ошибка обновления кэша лидерборда:', cacheErr);
                 }
             }
+        };
+
+        // ─── Инструмент дедупликации для учителя ────────────────────────────────
+        // Сканирует всех студентов, находит дубли (по email/tgId/имени), сливает их.
+        // Вызывается из кабинета учителя кнопкой "🔀 Устранить дубли"
+        window.runDeduplication = async function() {
+            if (!db) return showToast('❌', 'Нет подключения', 'bg-rose-500', 'border-rose-700');
+            const btn = document.getElementById('dedup-btn');
+            const logEl = document.getElementById('dedup-log');
+            if (btn) btn.disabled = true;
+            if (logEl) { logEl.innerHTML = '<div style="color:#6b7280;font-size:11px">⏳ Загрузка всех студентов...</div>'; logEl.classList.remove('hidden'); }
+
+            try {
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                // Читаем всех студентов (максимум 500 — для больших классов хватит)
+                const allSnap = await getDocs(query(studentsCol, orderBy('totalSolved', 'desc'), limit(500)));
+                const all = [];
+                allSnap.forEach(docSnap => {
+                    const d = docSnap.data();
+                    if (!d._mergedInto) all.push({ id: docSnap.id, ...d });
+                });
+
+                if (logEl) logEl.innerHTML += `<div style="color:#6b7280;font-size:11px">📋 Загружено ${all.length} документов</div>`;
+
+                // Группируем по связям
+                const groups = []; // каждая группа = Set doc IDs
+                const assigned = new Set();
+
+                function findGroup(docId) {
+                    for (const g of groups) if (g.has(docId)) return g;
+                    return null;
+                }
+
+                all.forEach(doc => {
+                    if (assigned.has(doc.id)) return;
+                    const myGroup = new Set([doc.id]);
+                    assigned.add(doc.id);
+
+                    all.forEach(other => {
+                        if (other.id === doc.id || assigned.has(other.id)) return;
+                        let linked = false;
+                        // Связь по email
+                        if (doc.googleEmail && other.googleEmail && doc.googleEmail === other.googleEmail) linked = true;
+                        // Связь по tgId
+                        if (!linked && doc.tgId && other.tgId && String(doc.tgId) === String(other.tgId)) linked = true;
+                        if (!linked && doc.knownTgId && other.id === String(doc.knownTgId)) linked = true;
+                        if (!linked && other.knownTgId && doc.id === String(other.knownTgId)) linked = true;
+                        // Связь через _mergedFrom/knownGoogleId
+                        if (!linked && doc.knownGoogleId && other.id === doc.knownGoogleId) linked = true;
+                        if (!linked && other.knownGoogleId && doc.id === other.knownGoogleId) linked = true;
+                        // Связь по ФИО (нечёткая, порог 0.9)
+                        if (!linked) {
+                            const nm1 = (doc.name||'').trim().toLowerCase().replace(/\s+/g,' ');
+                            const nm2 = (other.name||'').trim().toLowerCase().replace(/\s+/g,' ');
+                            if (nm1 && nm2 && nm1 !== 'ученик' && nm2 !== 'ученик') {
+                                linked = nameSimilarity(nm1, nm2) > 0.9;
+                            }
+                        }
+                        if (linked) { myGroup.add(other.id); assigned.add(other.id); }
+                    });
+
+                    groups.push(myGroup);
+                });
+
+                const dupeGroups = groups.filter(g => g.size > 1);
+                if (logEl) logEl.innerHTML += `<div style="color:#f59e0b;font-size:11px;margin-top:4px">🔍 Найдено ${dupeGroups.length} групп дублей</div>`;
+
+                if (!dupeGroups.length) {
+                    if (logEl) logEl.innerHTML += '<div style="color:#10b981;font-size:11px;margin-top:4px">✅ Дублей не найдено!</div>';
+                    if (btn) btn.disabled = false;
+                    return;
+                }
+
+                let merged = 0, skipped = 0;
+                for (const group of dupeGroups) {
+                    const ids = [...group];
+                    const docs = all.filter(d => ids.includes(d.id));
+                    // Канонический = тот у кого больше решено (и не начинается с anon_)
+                    docs.sort((a,b) => {
+                        if (a.id.startsWith('anon_') && !b.id.startsWith('anon_')) return 1;
+                        if (!a.id.startsWith('anon_') && b.id.startsWith('anon_')) return -1;
+                        return (b.totalSolved||0) - (a.totalSolved||0);
+                    });
+                    const canonical = docs[0];
+                    const dupes = docs.slice(1);
+                    const names = docs.map(d => `${d.name||'?'}(${d.totalSolved||0})`).join(' + ');
+
+                    try {
+                        // Слияние fullStateJson
+                        const jsonStrings = docs.map(d => d.fullStateJson).filter(j => j && j.length > 10);
+                        const mergedState = deepMergeStates(jsonStrings);
+                        const mergedJson = mergedState ? JSON.stringify(mergedState) : canonical.fullStateJson;
+                        const mergedTotal = mergedState ? (mergedState.stats.totalSolvedEver || canonical.totalSolved || 0) : (canonical.totalSolved || 0);
+
+                        await setDoc(doc(studentsCol, canonical.id), {
+                            fullStateJson: mergedJson,
+                            totalSolved: mergedTotal,
+                            _mergedFrom: dupes.map(d => d.id),
+                            _mergedAt: Date.now()
+                        }, { merge: true });
+
+                        for (const dupe of dupes) {
+                            await setDoc(doc(studentsCol, dupe.id), {
+                                _mergedInto: canonical.id,
+                                _mergedAt: Date.now()
+                            }, { merge: true });
+                        }
+
+                        if (logEl) logEl.innerHTML += `<div style="color:#10b981;font-size:11px;margin-top:2px">✅ ${names} → <b>${canonical.id}</b></div>`;
+                        merged++;
+                    } catch(e) {
+                        if (logEl) logEl.innerHTML += `<div style="color:#ef4444;font-size:11px;margin-top:2px">❌ Ошибка: ${names}: ${e.message}</div>`;
+                        skipped++;
+                    }
+                }
+
+                if (logEl) logEl.innerHTML += `<div style="color:#3b82f6;font-size:11px;font-weight:700;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px">🎉 Готово: объединено ${merged} групп, пропущено ${skipped}</div>`;
+                showToast('🔀', `Дедупликация: объединено ${merged} дублей`, 'bg-emerald-500', 'border-emerald-700');
+                if (window.loadClassProgress) window.loadClassProgress();
+            } catch(e) {
+                console.error('[Dedup] error:', e);
+                if (logEl) logEl.innerHTML += `<div style="color:#ef4444;font-size:11px">❌ Ошибка: ${e.message}</div>`;
+            }
+            if (btn) btn.disabled = false;
         };
