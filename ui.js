@@ -543,7 +543,7 @@ function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved, hwMode }) {
     const container = document.getElementById('top-stats-bar');
     if (!container) return;
 
-    // Если есть активное ДЗ — показываем ДЗ-баннер вместо статов
+    // ── ДЗ-режим: вся центральная зона отдаётся под баннер ──────────────────
     if (hwMode && hwMode.total > 0) {
         const parts = [];
         if (hwMode.t3 > 0) parts.push('🔗' + hwMode.t3);
@@ -554,36 +554,49 @@ function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved, hwMode }) {
         const dlStr = dlRaw ? ' · до ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) : '';
         container.innerHTML = `
         <div data-card onclick="window.showHwTasksSequential&&window.showHwTasksSequential()"
-             style="display:flex;align-items:center;gap:6px;background:rgba(239,68,68,0.85);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:5px 10px;cursor:pointer;max-width:100%;overflow:hidden;animation:hwPulse 2s ease-in-out infinite">
-          <span style="font-size:13px">🔥</span>
-          <span style="font-size:10px;font-weight:900;color:#fff;white-space:nowrap;text-overflow:ellipsis;overflow:hidden">
+             style="display:flex;align-items:center;gap:5px;background:rgba(239,68,68,0.82);border:1px solid rgba(255,255,255,0.22);border-radius:9px;padding:4px 10px;cursor:pointer;max-width:100%;overflow:hidden;animation:hwPulse 2s ease-in-out infinite;width:100%">
+          <span style="font-size:12px;flex-shrink:0">🔥</span>
+          <span style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">
             ДЗ: ${hwMode.total} строк${parts.length ? ' · ' + parts.join(' ') : ''}${dlStr}
           </span>
-          <span style="font-size:9px;color:rgba(255,255,255,0.7);white-space:nowrap;flex-shrink:0">▶ начать</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.65);white-space:nowrap;flex-shrink:0">▶</span>
         </div>
-        <style>@keyframes hwPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}50%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}</style>`;
+        <style>@keyframes hwPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}50%{box-shadow:0 0 0 4px rgba(239,68,68,0)}}</style>`;
         return;
     }
 
-    // Цвета
+    // ── Цвета ────────────────────────────────────────────────────────────────
     const scoreColor = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
-    const accColor   = accuracy === null ? 'rgba(255,255,255,0.45)' : accuracy >= 85 ? '#34d399' : accuracy >= 70 ? '#60a5fa' : accuracy >= 50 ? '#fbbf24' : '#f87171';
-    const accText    = accuracy !== null ? accuracy + '%' : '—';
+    const accColor   = accuracy === null ? 'rgba(255,255,255,0.38)' : accuracy >= 85 ? '#34d399' : accuracy >= 70 ? '#60a5fa' : accuracy >= 50 ? '#fbbf24' : '#f87171';
     const daysColor  = daysLeft <= 14 ? '#f87171' : daysLeft <= 30 ? '#fbbf24' : '#a78bfa';
-    const daysLabel  = daysLeft === 0 ? 'ЕГЭ!' : daysLeft === 1 ? '1д' : daysLeft + 'д';
 
-    const pill = (content, onclick) =>
-        `<div data-card onclick="${onclick}" style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:4px 7px;cursor:pointer;white-space:nowrap;flex-shrink:0">${content}</div>`;
+    // Форматы для разных размеров экрана
+    const daysLabel  = daysLeft === 0 ? 'ЕГЭ!' : daysLeft + 'д';
+    const accText    = accuracy !== null ? accuracy + '%' : '—';
 
-    const label = (t) => `<span style="font-size:8px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase">${t}</span>`;
-    const val   = (t, color) => `<span style="font-size:13px;font-weight:900;color:${color};line-height:1">${t}</span>`;
+    // ── Рендер: 4 иконки без текстовых подписей, только иконка + значение ───
+    // Разделители — вертикальные черты. Всё в одну строку, overflow hidden.
+    const sep = `<span style="color:rgba(255,255,255,0.18);font-size:14px;flex-shrink:0;user-select:none">│</span>`;
 
-    container.innerHTML = `<div style="display:flex;align-items:center;gap:3px;width:100%;justify-content:center;overflow:hidden">
-        ${pill(label('ЕГЭ') + val('~' + sc, scoreColor), "window.openEGEModal&&window.openEGEModal()")}
-        ${pill('<span style="font-size:10px">📅</span>' + val(daysLabel, daysColor), "window.openEGEModal&&window.openEGEModal()")}
-        ${pill(label('точн') + val(accText, accColor), "window.openStatsModal&&window.openStatsModal()")}
-        ${pill('<span style="font-size:10px">🧠</span>' + val(totalL, '#c4b5fd'), "window.openStatsModal&&window.openStatsModal()")}
-    </div>`;
+    const stat = (icon, value, color, onclick, title) =>
+        `<div data-card onclick="${onclick}" title="${title}"
+              style="display:flex;align-items:center;gap:3px;cursor:pointer;flex-shrink:0;padding:3px 6px;border-radius:7px;transition:background .15s"
+              onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background=''"
+              ontouchstart="this.style.background='rgba(255,255,255,0.1)'" ontouchend="this.style.background=''">
+           <span style="font-size:11px;line-height:1;flex-shrink:0">${icon}</span>
+           <span style="font-size:13px;font-weight:900;color:${color};line-height:1;letter-spacing:-.3px">${value}</span>
+         </div>`;
+
+    container.innerHTML =
+        `<div style="display:flex;align-items:center;justify-content:center;gap:0;width:100%;overflow:hidden;min-width:0">` +
+            stat('📊', '~' + sc,   scoreColor, "window.openEGEModal&&window.openEGEModal()",   'Прогноз ЕГЭ') +
+            sep +
+            stat('📅', daysLabel,  daysColor,  "window.openEGEModal&&window.openEGEModal()",   'Дней до ЕГЭ') +
+            sep +
+            stat('🎯', accText,    accColor,   "window.openStatsModal&&window.openStatsModal()", 'Точность ответов') +
+            sep +
+            stat('🧠', totalL,     '#c4b5fd',  "window.openStatsModal&&window.openStatsModal()", 'Фактов выучено') +
+        `</div>`;
 }
 
 let toastTimeout = null;

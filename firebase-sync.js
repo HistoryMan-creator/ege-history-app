@@ -1395,19 +1395,8 @@
                     } catch(e) { console.warn('[Sync] Email search error:', e); }
                 }
 
-                // 1в. По имени — последний fallback
-                if (allFound.size === 0) {
-                    const storedName = localStorage.getItem('student_manual_name');
-                    if (storedName && storedName !== 'Ученик' && storedName.length > 2) {
-                        try {
-                            const nameSnap = await getDocs(query(studentsCol, where('name', '==', storedName), limit(3)));
-                            nameSnap.forEach(docSnap => {
-                                if (!allFound.has(docSnap.id) && !docSnap.data()._mergedInto)
-                                    allFound.set(docSnap.id, docSnap.data());
-                            });
-                        } catch(e) {}
-                    }
-                }
+                // 1в. По имени — ОТКЛЮЧЕНО: слишком рискованно (все "Ученик" сольются)
+                // Имя используется только в ручной дедупликации с дополнительными проверками
 
                 if (allFound.size === 0) return;
 
@@ -1419,6 +1408,18 @@
 
                 if (allFound.size > 1) {
                     console.log(`[Sync] 🔀 Найдено ${allFound.size} документов — слияние`);
+                    // ── Защита: не сливаем если нет жёсткого общего идентификатора
+                    //    (email или tgId). Без него возможно случайное слияние чужих аккаунтов.
+                    const sharedEmail = [...allFound.values()].every(d => d.googleEmail && d.googleEmail === gEmail);
+                    const sharedTg    = [...allFound.values()].every(d => d.tgId && d.tgId === localStorage.getItem('known_tg_id'));
+                    const hasCrossRef  = [...allFound.keys()].some(id => id === canonicalId);
+                    if (!sharedEmail && !sharedTg && !hasCrossRef) {
+                        console.warn('[Sync] Пропускаем авто-слияние: нет жёсткого общего ID');
+                        // Загружаем только лучший документ без слияния
+                        allFound.forEach((data, id) => {
+                            if ((data.totalSolved||0) >= bestSolved) { bestSolved = data.totalSolved||0; bestData = data; bestDocId = id; }
+                        });
+                    } else {
                     const merged = deepMergeStates([...allFound.values()].map(d => d.fullStateJson).filter(j => j && j.length > 10));
                     if (merged) {
                         const st = merged.stats;
@@ -1446,7 +1447,7 @@
                         if (typeof showToast === 'function') showToast('🔀', 'Аккаунты объединены!', 'bg-emerald-500', 'border-emerald-700');
                         return;
                     }
-                }
+                    } // end else (merge branch)
 
                 // 3. Один документ — стандартная загрузка
                 if (bestData?.name && bestData.name !== 'Ученик' && !localStorage.getItem('student_manual_name')) {
@@ -1592,9 +1593,23 @@
             if (btn) btn.disabled = true;
             if (logEl) { logEl.innerHTML = '<div style="color:#6b7280;font-size:11px">⏳ Загрузка всех студентов...</div>'; logEl.classList.remove('hidden'); }
 
+            // ── Список стандартных/анонимных имён, которые НЕЛЬЗЯ использовать
+            //    как идентификатор — слишком распространены
+            const ANON_NAMES = new Set([
+                'ученик', 'без имени', 'аноним', 'anonymous', 'student', 'noname',
+                'новый ученик', 'ученик без имени', 'учеников', 'имя'
+            ]);
+            function isAnonName(name) {
+                if (!name || name.trim().length < 2) return true;
+                const nm = name.trim().toLowerCase().replace(/\s+/g,' ');
+                if (ANON_NAMES.has(nm)) return true;
+                // "ученик 1", "ученик123", "student5" и т.п.
+                if (/^(ученик|аноним|anonymous|student)\s*\d*$/.test(nm)) return true;
+                return false;
+            }
+
             try {
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                // Читаем всех студентов (максимум 500 — для больших классов хватит)
                 const allSnap = await getDocs(query(studentsCol, orderBy('totalSolved', 'desc'), limit(500)));
                 const all = [];
                 allSnap.forEach(docSnap => {
@@ -1604,41 +1619,54 @@
 
                 if (logEl) logEl.innerHTML += `<div style="color:#6b7280;font-size:11px">📋 Загружено ${all.length} документов</div>`;
 
-                // Группируем по связям
-                const groups = []; // каждая группа = Set doc IDs
+                const groups = [];
                 const assigned = new Set();
 
-                function findGroup(docId) {
-                    for (const g of groups) if (g.has(docId)) return g;
-                    return null;
-                }
+                all.forEach(docA => {
+                    if (assigned.has(docA.id)) return;
+                    const myGroup = new Set([docA.id]);
+                    assigned.add(docA.id);
 
-                all.forEach(doc => {
-                    if (assigned.has(doc.id)) return;
-                    const myGroup = new Set([doc.id]);
-                    assigned.add(doc.id);
-
-                    all.forEach(other => {
-                        if (other.id === doc.id || assigned.has(other.id)) return;
+                    all.forEach(docB => {
+                        if (docB.id === docA.id || assigned.has(docB.id)) return;
                         let linked = false;
-                        // Связь по email
-                        if (doc.googleEmail && other.googleEmail && doc.googleEmail === other.googleEmail) linked = true;
-                        // Связь по tgId
-                        if (!linked && doc.tgId && other.tgId && String(doc.tgId) === String(other.tgId)) linked = true;
-                        if (!linked && doc.knownTgId && other.id === String(doc.knownTgId)) linked = true;
-                        if (!linked && other.knownTgId && doc.id === String(other.knownTgId)) linked = true;
-                        // Связь через _mergedFrom/knownGoogleId
-                        if (!linked && doc.knownGoogleId && other.id === doc.knownGoogleId) linked = true;
-                        if (!linked && other.knownGoogleId && doc.id === other.knownGoogleId) linked = true;
-                        // Связь по ФИО (нечёткая, порог 0.9)
-                        if (!linked) {
-                            const nm1 = (doc.name||'').trim().toLowerCase().replace(/\s+/g,' ');
-                            const nm2 = (other.name||'').trim().toLowerCase().replace(/\s+/g,' ');
-                            if (nm1 && nm2 && nm1 !== 'ученик' && nm2 !== 'ученик') {
-                                linked = nameSimilarity(nm1, nm2) > 0.9;
+
+                        // ✅ ЖЁСТКИЕ связи — однозначная идентификация
+                        // 1. Одинаковый email (оба непустые)
+                        if (docA.googleEmail && docB.googleEmail &&
+                            docA.googleEmail === docB.googleEmail) linked = true;
+
+                        // 2. Одинаковый числовой tgId (оба непустые)
+                        if (!linked && docA.tgId && docB.tgId &&
+                            /^\d+$/.test(String(docA.tgId)) &&
+                            String(docA.tgId) === String(docB.tgId)) linked = true;
+
+                        // 3. Перекрёстные ссылки knownTgId / knownGoogleId
+                        if (!linked && docA.knownTgId && docB.id === String(docA.knownTgId)) linked = true;
+                        if (!linked && docB.knownTgId && docA.id === String(docB.knownTgId)) linked = true;
+                        if (!linked && docA.knownGoogleId && docB.id === docA.knownGoogleId) linked = true;
+                        if (!linked && docB.knownGoogleId && docA.id === docB.knownGoogleId) linked = true;
+
+                        // ⚠️ МЯГКАЯ связь — ФИО — ТОЛЬКО если:
+                        //   а) оба имени не анонимные
+                        //   б) совпадает ещё хотя бы один фактор (classCode, или один ID известен другому)
+                        if (!linked && !isAnonName(docA.name) && !isAnonName(docB.name)) {
+                            const nmA = normalizeName(docA.name);
+                            const nmB = normalizeName(docB.name);
+                            const nameSim = nameSimilarity(nmA, nmB);
+                            if (nameSim > 0.92) {
+                                // Требуем подтверждающий фактор
+                                const sameClass = docA.classCode && docB.classCode &&
+                                    docA.classCode === docB.classCode;
+                                const crossRef = (docA._mergedFrom || []).includes(docB.id) ||
+                                    (docB._mergedFrom || []).includes(docA.id);
+                                if (sameClass || crossRef) linked = true;
+                                // Если сходство почти идеальное (0.99+) — только тогда без доп. фактора
+                                if (!linked && nameSim > 0.99 && nmA.length > 8) linked = true;
                             }
                         }
-                        if (linked) { myGroup.add(other.id); assigned.add(other.id); }
+
+                        if (linked) { myGroup.add(docB.id); assigned.add(docB.id); }
                     });
 
                     groups.push(myGroup);
@@ -1657,10 +1685,25 @@
                 for (const group of dupeGroups) {
                     const ids = [...group];
                     const docs = all.filter(d => ids.includes(d.id));
-                    // Канонический = тот у кого больше решено (и не начинается с anon_)
+
+                    // Дополнительная проверка: не сливаем если ВСЕ имена анонимные
+                    // (значит группа образована только по _mergedFrom — ок, сливаем;
+                    //  но если только по имени — пропускаем)
+                    const nonAnonCount = docs.filter(d => !isAnonName(d.name)).length;
+                    if (nonAnonCount === 0 && docs.every(d => {
+                        // Проверяем: есть ли жёсткая связь?
+                        return !d.googleEmail && !d.tgId && !d.knownTgId && !d.knownGoogleId;
+                    })) {
+                        if (logEl) logEl.innerHTML += `<div style="color:#9ca3af;font-size:10px;margin-top:2px">⏭ Пропущено: группа анонимных без жёстких ID (${docs.map(d=>d.id.slice(0,12)).join(', ')})</div>`;
+                        skipped++;
+                        continue;
+                    }
+
+                    // Канонический: не anon_ → больше totalSolved
                     docs.sort((a,b) => {
-                        if (a.id.startsWith('anon_') && !b.id.startsWith('anon_')) return 1;
-                        if (!a.id.startsWith('anon_') && b.id.startsWith('anon_')) return -1;
+                        const aAnon = a.id.startsWith('anon_');
+                        const bAnon = b.id.startsWith('anon_');
+                        if (aAnon !== bAnon) return aAnon ? 1 : -1;
                         return (b.totalSolved||0) - (a.totalSolved||0);
                     });
                     const canonical = docs[0];
@@ -1668,11 +1711,10 @@
                     const names = docs.map(d => `${d.name||'?'}(${d.totalSolved||0})`).join(' + ');
 
                     try {
-                        // Слияние fullStateJson
                         const jsonStrings = docs.map(d => d.fullStateJson).filter(j => j && j.length > 10);
                         const mergedState = deepMergeStates(jsonStrings);
                         const mergedJson = mergedState ? JSON.stringify(mergedState) : canonical.fullStateJson;
-                        const mergedTotal = mergedState ? (mergedState.stats.totalSolvedEver || canonical.totalSolved || 0) : (canonical.totalSolved || 0);
+                        const mergedTotal = mergedState ? (mergedState.stats?.totalSolvedEver || canonical.totalSolved || 0) : (canonical.totalSolved || 0);
 
                         await setDoc(doc(studentsCol, canonical.id), {
                             fullStateJson: mergedJson,
@@ -1688,16 +1730,16 @@
                             }, { merge: true });
                         }
 
-                        if (logEl) logEl.innerHTML += `<div style="color:#10b981;font-size:11px;margin-top:2px">✅ ${names} → <b>${canonical.id}</b></div>`;
+                        if (logEl) logEl.innerHTML += `<div style="color:#10b981;font-size:11px;margin-top:2px">✅ ${names} → <b>${canonical.id.slice(0,16)}…</b></div>`;
                         merged++;
                     } catch(e) {
-                        if (logEl) logEl.innerHTML += `<div style="color:#ef4444;font-size:11px;margin-top:2px">❌ Ошибка: ${names}: ${e.message}</div>`;
+                        if (logEl) logEl.innerHTML += `<div style="color:#ef4444;font-size:11px;margin-top:2px">❌ ${names}: ${e.message}</div>`;
                         skipped++;
                     }
                 }
 
-                if (logEl) logEl.innerHTML += `<div style="color:#3b82f6;font-size:11px;font-weight:700;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px">🎉 Готово: объединено ${merged} групп, пропущено ${skipped}</div>`;
-                showToast('🔀', `Дедупликация: объединено ${merged} дублей`, 'bg-emerald-500', 'border-emerald-700');
+                if (logEl) logEl.innerHTML += `<div style="color:#3b82f6;font-size:11px;font-weight:700;margin-top:6px;border-top:1px solid #e5e7eb;padding-top:6px">🎉 Объединено: ${merged} групп · Пропущено: ${skipped}</div>`;
+                showToast('🔀', `Объединено ${merged} дублей`, 'bg-emerald-500', 'border-emerald-700');
                 if (window.loadClassProgress) window.loadClassProgress();
             } catch(e) {
                 console.error('[Dedup] error:', e);
