@@ -1326,23 +1326,44 @@
                     } catch(e) { console.warn(`[Sync] Ошибка чтения документа ${id}:`, e); }
                 }
                 
-                // 2. ✅ FIX: Если не нашли по ID — ищем по email ТОЧЕЧНЫМ запросом (НЕ getDocs всей коллекции!)
+                // 2. ✅ FIX: Ищем по email ВСЕГДА (не только когда нет данных по ID).
+                //    Это нужно для кейса: ТГ-аккаунт + браузер с той же почтой.
+                //    Документ ТГ не знает google_uid браузера и наоборот.
+                const gEmail = localStorage.getItem('google_email') || fbUser.email || '';
+                if (gEmail) {
+                    try {
+                        const emailQuery = query(studentsCol, where('googleEmail', '==', gEmail), limit(5));
+                        const emailSnap = await getDocs(emailQuery);
+                        emailSnap.forEach(docSnap => {
+                            const data = docSnap.data();
+                            const docSolved = data.totalSolved || 0;
+                            if (docSolved > bestSolved) {
+                                bestData = data; bestSolved = docSolved; bestDocId = docSnap.id;
+                                console.log(`[Sync] Найден по email ${gEmail}: ${docSolved} задач (doc: ${docSnap.id})`);
+                            }
+                        });
+                    } catch(searchErr) {
+                        console.error('[Sync] Ошибка поиска по email:', searchErr);
+                    }
+                }
+                
+                // 2b. Если и по email ничего — ищем по name (крайний fallback для ТГ без почты)
                 if (!bestData || bestSolved === 0) {
-                    const gEmail = localStorage.getItem('google_email') || fbUser.email || '';
-                    if (gEmail) {
+                    const storedName = localStorage.getItem('student_manual_name');
+                    if (storedName && storedName !== 'Ученик' && storedName.length > 2) {
                         try {
-                            const emailQuery = query(studentsCol, where('googleEmail', '==', gEmail), limit(5));
-                            const emailSnap = await getDocs(emailQuery);
-                            emailSnap.forEach(docSnap => {
+                            const nameQuery = query(studentsCol, where('name', '==', storedName), limit(5));
+                            const nameSnap = await getDocs(nameQuery);
+                            nameSnap.forEach(docSnap => {
                                 const data = docSnap.data();
                                 const docSolved = data.totalSolved || 0;
                                 if (docSolved > bestSolved) {
                                     bestData = data; bestSolved = docSolved; bestDocId = docSnap.id;
-                                    console.log(`[Sync] Найден по email ${gEmail}: ${docSolved} задач (doc: ${docSnap.id})`);
+                                    console.log(`[Sync] Найден по имени ${storedName}: ${docSolved} задач (doc: ${docSnap.id})`);
                                 }
                             });
-                        } catch(searchErr) {
-                            console.error('[Sync] Ошибка поиска по email:', searchErr);
+                        } catch(nameErr) {
+                            console.warn('[Sync] Ошибка поиска по имени:', nameErr);
                         }
                     }
                 }
@@ -1359,8 +1380,16 @@
                         const classEl = $('profile-class-code');
                         if (classEl) classEl.value = bestData.classCode;
                     }
-                    if (bestData.tgId && /^\d+$/.test(bestData.tgId)) {
-                        localStorage.setItem('known_tg_id', bestData.tgId);
+                    // ✅ FIX: Сохраняем найденный TG-id и email — при следующем запуске
+                    // браузерная сессия сразу найдёт ТГ-документ по knownTg
+                    if (bestData.tgId && /^\d+$/.test(String(bestData.tgId))) {
+                        localStorage.setItem('known_tg_id', String(bestData.tgId));
+                    }
+                    if (bestData.knownTgId && /^\d+$/.test(String(bestData.knownTgId))) {
+                        localStorage.setItem('known_tg_id', String(bestData.knownTgId));
+                    }
+                    if (bestData.googleEmail && !localStorage.getItem('google_email')) {
+                        localStorage.setItem('google_email', bestData.googleEmail);
                     }
                     
                     const cloudSolved = bestSolved;
@@ -1396,10 +1425,12 @@
             if (!s) return;
             
             const nw = Date.now();
-            const gEmail = localStorage.getItem('google_email') || '';
+            const gEmail = localStorage.getItem('google_email') || fbUser.email || '';
             const knownTg = localStorage.getItem('known_tg_id') || '';
             const googleUid = localStorage.getItem('google_uid');
             const googleId = googleUid ? 'google_' + googleUid : '';
+            // Также сохраняем email из профиля как запасной для межаккаунтного поиска
+            const profileEmail = localStorage.getItem('student_profile_email') || gEmail;
             
             // ✅ FIX: Вычисляем weeklyScore здесь и храним как отдельное поле,
             // чтобы индексировать в Firestore для серверной сортировки лидерборда
@@ -1425,7 +1456,7 @@
             const payload = {
                 name: localStorage.getItem('student_manual_name') || 'Ученик',
                 classCode: localStorage.getItem('student_class_code') || '',
-                googleEmail: gEmail,
+                googleEmail: profileEmail,   // ← теперь всегда заполнен если есть почта
                 knownTgId: knownTg,
                 knownGoogleId: googleId,
                 totalSolved: s.totalSolvedEver || 0,

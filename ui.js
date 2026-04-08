@@ -11,15 +11,18 @@
         /* Скрыть старый блок статов шапки */
         '#stat-solved,#stat-learned,#stat-memory{display:none!important}' +
         'button[data-action="openEGEModal"]{display:none!important}' +
-        /* Правые кнопки — больше отступов, не так в облипку */
+        /* Скрыть старый центральный блок статистики целиком */
+        '#main-header .flex-1.px-2{display:none!important}' +
+        /* Правые кнопки — отступы */
         '#main-header button[data-action="toggleFocusMode"],' +
         '#main-header button[data-action="toggleTheme"],' +
         '#main-header button[data-action="openGlobalTopModal"]{' +
             'padding:6px 10px!important;margin:0 2px!important;border-radius:10px!important' +
         '}' +
-        /* Карточки top-stats-bar */
-        '#top-stats-bar [data-card]{transition:opacity .15s,transform .15s}' +
-        '#top-stats-bar [data-card]:active{opacity:.75;transform:scale(.97)}';
+        /* top-stats-bar — инлайн в строке шапки */
+        '#top-stats-bar{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}' +
+        '#top-stats-bar [data-card]{transition:opacity .15s,transform .15s;cursor:pointer}' +
+        '#top-stats-bar [data-card]:active{opacity:.75;transform:scale(.95)}';
     (document.head || document.documentElement).appendChild(s);
 })();
 
@@ -28,34 +31,31 @@ function patchHeaderDOM() {
     const header = document.getElementById('main-header');
     if (!header) return;
 
-    // 1. Скрыть родительские контейнеры старых стат-элементов
-    ['stat-solved', 'stat-learned', 'stat-memory'].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        // Прячем непосредственного родителя (flex-col wrapper)
-        if (el.parentElement) el.parentElement.style.display = 'none';
-    });
+    // 1. Найти центральный div с иконками (flex-1 px-2) и заменить его на top-stats-bar
+    const centerDiv = header.querySelector('.flex-1.px-2');
+    if (centerDiv && !document.getElementById('top-stats-bar')) {
+        // Создаём top-stats-bar ВМЕСТО старого центра — прямо в той же строке
+        const bar = document.createElement('div');
+        bar.id = 'top-stats-bar';
+        bar.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;padding:0 4px';
+        centerDiv.parentNode.replaceChild(bar, centerDiv);
+    } else if (!document.getElementById('top-stats-bar')) {
+        // Fallback: создаём внутри шапки
+        const bar = document.createElement('div');
+        bar.id = 'top-stats-bar';
+        bar.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;padding:0 4px';
+        const headerRow = header.querySelector('div');
+        if (headerRow) headerRow.insertBefore(bar, headerRow.children[1]);
+    }
 
-    // 2. Скрыть кнопку openEGEModal (она теперь на карточке балла)
-    const egeBtn = header.querySelector('button[data-action="openEGEModal"]');
-    if (egeBtn) egeBtn.style.display = 'none';
-
-    // 3. Убрать фиксированную высоту h-10/h-12 из первого div шапки
+    // 2. Убрать фиксированную высоту h-10/h-12 из первой строки шапки
     const headerRow = header.querySelector('div');
     if (headerRow) {
         ['h-10', 'h-12', 'sm:h-12'].forEach(c => headerRow.classList.remove(c));
         headerRow.style.minHeight = '44px';
     }
 
-    // 4. Добавить top-stats-bar под строкой кнопок (если ещё нет)
-    if (!document.getElementById('top-stats-bar')) {
-        const bar = document.createElement('div');
-        bar.id = 'top-stats-bar';
-        bar.style.cssText = 'width:100%;border-top:1px solid rgba(255,255,255,0.08)';
-        header.appendChild(bar);
-    }
-
-    // 5. Скрыть чекбокс "скрывать выученное" в настройках
+    // 3. Скрыть чекбокс "скрывать выученное" в настройках
     const hll = document.getElementById('pg-hide-learned-container');
     if (hll) hll.style.display = 'none';
 }
@@ -304,6 +304,71 @@ window.startHwFromBanner = function() {
     quickStartGame(best.cnt > 0 ? best.key : 'task4', 'normal');
 };
 
+// ── Показать задания ДЗ последовательно (мини просмотрщик) ─────────────────
+window.showHwTasksSequential = function() {
+    haptic('light');
+    const s = window.state.stats;
+    // Собираем список заданий с их количеством
+    const tasks = [];
+    if ((s.hwTask3||0) > 0) tasks.push({ key: 'task3', emoji: '🔗', name: 'Задание №3 — Процессы', cnt: s.hwTask3 });
+    if ((s.hwTask4||0) > 0) tasks.push({ key: 'task4', emoji: '📍', name: 'Задание №4 — География', cnt: s.hwTask4 });
+    if ((s.hwTask5||0) > 0) tasks.push({ key: 'task5', emoji: '👤', name: 'Задание №5 — Личности', cnt: s.hwTask5 });
+    if ((s.hwTask7||0) > 0) tasks.push({ key: 'task7', emoji: '🎨', name: 'Задание №7 — Культура', cnt: s.hwTask7 });
+    if (!tasks.length) return;
+
+    const total = tasks.reduce((a, t) => a + t.cnt, 0);
+    const dlRaw = localStorage.getItem('teacher_hw_deadline');
+    const dlStr = dlRaw ? ' · срок: ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'long'}) : '';
+
+    const overlayId = 'hw-seq-overlay';
+    let overlay = document.getElementById(overlayId);
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = overlayId;
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;padding:0';
+        overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+        document.body.appendChild(overlay);
+    }
+
+    let idx = 0;
+    function renderStep() {
+        const t = tasks[idx];
+        const isLast = idx === tasks.length - 1;
+        overlay.innerHTML = `
+        <div style="background:#fff;width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:20px 20px 28px;box-shadow:0 -8px 40px rgba(0,0,0,0.2)" class="dark:bg-[#1e1e1e]">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div>
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#9ca3af">Домашнее задание</div>
+              <div style="font-size:13px;font-weight:900;color:#111;margin-top:2px" class="dark:text-white">${t.emoji} ${t.name}</div>
+            </div>
+            <button onclick="document.getElementById('${overlayId}').remove()" style="font-size:20px;color:#aaa;background:none;border:none;cursor:pointer;padding:4px 8px">✕</button>
+          </div>
+
+          <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:28px;font-weight:900;color:#ef4444;line-height:1">${t.cnt} <span style="font-size:14px;font-weight:600;color:#9ca3af">строк</span></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:4px">Задание ${idx+1} из ${tasks.length} · всего ${total} строк${dlStr}</div>
+            <div style="display:flex;gap:4px;margin-top:10px">
+              ${tasks.map((tt, i) => `<div style="flex:1;height:4px;border-radius:2px;background:${i < idx ? '#10b981' : i === idx ? '#ef4444' : 'rgba(0,0,0,0.1)'}"></div>`).join('')}
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button onclick="(function(){document.getElementById('${overlayId}').remove();quickStartGame('${t.key}','normal');})()"
+              style="width:100%;background:#ef4444;color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.02em">
+              ▶ Начать ${t.emoji} ${t.name}
+            </button>
+            ${!isLast ? `<button onclick="(function(){window._hwSeqIdx=(window._hwSeqIdx||0)+1;document.getElementById('${overlayId}')._nextStep&&document.getElementById('${overlayId}')._nextStep();})()"
+              style="width:100%;background:rgba(0,0,0,0.05);color:#374151;border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:700;cursor:pointer" class="dark:bg-white/10 dark:text-gray-300">
+              Следующее задание →
+            </button>` : ''}
+          </div>
+        </div>`;
+        // Bind next step
+        overlay._nextStep = () => { idx = Math.min(idx + 1, tasks.length - 1); renderStep(); };
+    }
+    renderStep();
+};
+
 window.openEGEModal = function() {
     haptic('light');
     const r = estimateEGEScore(window.state.stats);
@@ -342,12 +407,18 @@ window.openEGEModal = function() {
 
     const factsRow = `<div style="margin:12px 0 8px;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Выучено фактов</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${[['📍 №4',r.d4,500,'#185FA5'],['👤 №5',r.d5,250,'#8b5cf6'],['🔗 №3',r.d3,150,'#1D9E75'],['🎨 №7',r.d7,180,'#d97706']].map(([lbl,cnt,mx,clr])=>`
-        <div style="background:rgba(128,128,128,0.07);border-radius:8px;padding:8px 10px">
-          <div style="font-size:11px;color:#888;margin-bottom:4px">${lbl}</div>
-          <div style="font-size:16px;font-weight:700;color:${clr}">${cnt}<span style="font-size:10px;font-weight:400;color:#aaa"> / ${mx}</span></div>
-          <div style="margin-top:4px;height:3px;background:rgba(128,128,128,0.15);border-radius:2px"><div style="height:100%;width:${Math.min(100,Math.round(cnt/mx*100))}%;background:${clr};border-radius:2px"></div></div>
-        </div>`).join('')}
+        ${(function(){
+          const mx4 = typeof bigData !== 'undefined' ? bigData.length : 500;
+          const mx5 = typeof task5Data !== 'undefined' ? task5Data.length : 250;
+          const mx3 = typeof task3Data !== 'undefined' ? task3Data.length : 150;
+          const mx7 = typeof window.task7Data !== 'undefined' ? window.task7Data.length : (typeof task7Top100Data !== 'undefined' ? task7Top100Data.length : 180);
+          return [['📍 №4',r.d4,mx4,'#185FA5'],['👤 №5',r.d5,mx5,'#8b5cf6'],['🔗 №3',r.d3,mx3,'#1D9E75'],['🎨 №7',r.d7,mx7,'#d97706']].map(([lbl,cnt,mx,clr])=>`
+          <div style="background:rgba(128,128,128,0.07);border-radius:8px;padding:8px 10px">
+            <div style="font-size:11px;color:#888;margin-bottom:4px">${lbl}</div>
+            <div style="font-size:16px;font-weight:700;color:${clr}">${cnt}<span style="font-size:10px;font-weight:400;color:#aaa"> / ${mx}</span></div>
+            <div style="margin-top:4px;height:3px;background:rgba(128,128,128,0.15);border-radius:2px"><div style="height:100%;width:${Math.min(100,Math.round(cnt/mx*100))}%;background:${clr};border-radius:2px"></div></div>
+          </div>`).join('');
+        })()}
       </div>`;
 
     // Используем существующий модал-контейнер через innerHTML overlay
@@ -404,8 +475,16 @@ function updateGlobalUI() {
     const egeResult = estimateEGEScore(window.state.stats);
     const sc = egeResult.score;
 
-    // ── Обновляем новую панель верхней строки ──
-    renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved: window.state.stats.totalSolvedEver || 0 });
+    // ── Обновляем панель верхней строки ──
+    const hwTotal = window.state.stats.hwFlashcardsToSolve || 0;
+    const hwMode = hwTotal > 0 ? {
+        total: hwTotal,
+        t3: window.state.stats.hwTask3 || 0,
+        t4: window.state.stats.hwTask4 || 0,
+        t5: window.state.stats.hwTask5 || 0,
+        t7: window.state.stats.hwTask7 || 0,
+    } : null;
+    renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved: window.state.stats.totalSolvedEver || 0, hwMode });
 
     // Обратная совместимость — старые элементы если есть
     const egeEl = $('stat-ege');
@@ -432,25 +511,20 @@ function updateGlobalUI() {
         updateText($('hw-remaining'), window.state.hwCurrentPool.length);
 
     if (window.state.stats.hwFlashcardsToSolve > 0) {
-        if ($('personal-hw-alert')) $('personal-hw-alert').classList.remove('hidden');
-        if ($('personal-hw-remaining')) updateText($('personal-hw-remaining'), window.state.stats.hwFlashcardsToSolve);
+        if ($('lobby-hw-banner')) $('lobby-hw-banner').classList.remove('hidden');
+        if ($('lobby-hw-remaining')) updateText($('lobby-hw-remaining'), window.state.stats.hwFlashcardsToSolve);
+        const dlRawL = localStorage.getItem('teacher_hw_deadline');
+        if ($('lobby-hw-deadline')) $('lobby-hw-deadline').textContent = dlRawL
+            ? ('Срок: ' + new Date(dlRawL + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'long'})) : '';
         if ($('personal-hw-breakdown')) {
             const parts = [];
             if ((window.state.stats.hwTask3||0) > 0) parts.push('🔗№3:' + window.state.stats.hwTask3);
             if ((window.state.stats.hwTask4||0) > 0) parts.push('📍№4:' + window.state.stats.hwTask4);
             if ((window.state.stats.hwTask5||0) > 0) parts.push('👤№5:' + window.state.stats.hwTask5);
             if ((window.state.stats.hwTask7||0) > 0) parts.push('🎨№7:' + window.state.stats.hwTask7);
-            const dlRaw = localStorage.getItem('teacher_hw_deadline');
-            const dlStr = dlRaw ? ' · до ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) : '';
-            $('personal-hw-breakdown').textContent = (parts.length ? parts.join(' ') : '') + dlStr;
+            $('personal-hw-breakdown').textContent = parts.join(' ');
         }
-        if ($('lobby-hw-banner')) $('lobby-hw-banner').classList.remove('hidden');
-        if ($('lobby-hw-remaining')) updateText($('lobby-hw-remaining'), window.state.stats.hwFlashcardsToSolve);
-        const dlRawL = localStorage.getItem('teacher_hw_deadline');
-        if ($('lobby-hw-deadline')) $('lobby-hw-deadline').textContent = dlRawL
-            ? ('Срок: ' + new Date(dlRawL + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'long'})) : '';
     } else {
-        if ($('personal-hw-alert')) $('personal-hw-alert').classList.add('hidden');
         if ($('lobby-hw-banner')) $('lobby-hw-banner').classList.add('hidden');
     }
 
@@ -464,76 +538,51 @@ function updateGlobalUI() {
     }
 }
 
-// ── Рендер новой красивой верхней панели ──────────────────────────────────
-function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved }) {
-    const container = $('top-stats-bar');
+// ── Рендер компактной панели статистики (инлайн в шапке) ─────────────────
+function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved, hwMode }) {
+    const container = document.getElementById('top-stats-bar');
     if (!container) return;
 
-    // Цвет балла ЕГЭ
-    const scoreColor = sc >= 85 ? '#10b981' : sc >= 70 ? '#3b82f6' : sc >= 55 ? '#f59e0b' : '#ef4444';
-    const scorePct = Math.round((sc / 100) * 100);
-
-    // Цвет точности
-    const accColor = accuracy === null ? '#9ca3af' : accuracy >= 85 ? '#10b981' : accuracy >= 70 ? '#3b82f6' : accuracy >= 50 ? '#f59e0b' : '#ef4444';
-    const accText = accuracy !== null ? accuracy + '%' : '—';
-    const accPct = accuracy !== null ? accuracy : 0;
-
-    // Дней до ЕГЭ — цвет
-    const daysColor = daysLeft <= 14 ? '#ef4444' : daysLeft <= 30 ? '#f59e0b' : '#6366f1';
-    const daysLabel = daysLeft === 0 ? 'Сегодня!' : daysLeft === 1 ? '1 день' : daysLeft + ' дней';
-
-    const isDark = document.documentElement.classList.contains('dark');
-    const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(128,128,128,0.06)';
-    const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(128,128,128,0.15)';
-    const labelColor = isDark ? '#6b7280' : '#9ca3af';
-    const subColor = isDark ? '#4b5563' : '#9ca3af';
-
-    container.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:5px;padding:6px 8px 5px;width:100%;box-sizing:border-box;max-width:540px;margin:0 auto">
-
-      <!-- Дней до ЕГЭ -->
-      <div data-card onclick="window.openEGEModal&&window.openEGEModal()"
-           style="cursor:pointer;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.22);border-radius:12px;padding:7px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0">
-        <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap">До ЕГЭ</span>
-        <span style="font-size:${daysLeft > 99 ? '13' : '16'}px;font-weight:900;color:${daysColor};line-height:1.15;white-space:nowrap">${daysLabel}</span>
-        <span style="font-size:8px;color:${subColor};font-weight:600;white-space:nowrap">1 июня</span>
-      </div>
-
-      <!-- Балл ЕГЭ с прогресс-баром -->
-      <div data-card onclick="window.openEGEModal&&window.openEGEModal()"
-           style="cursor:pointer;background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;min-width:0">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px">
-          <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Балл ЕГЭ</span>
-          <span style="font-size:17px;font-weight:900;color:${scoreColor};line-height:1">~${sc}</span>
+    // Если есть активное ДЗ — показываем ДЗ-баннер вместо статов
+    if (hwMode && hwMode.total > 0) {
+        const parts = [];
+        if (hwMode.t3 > 0) parts.push('🔗' + hwMode.t3);
+        if (hwMode.t4 > 0) parts.push('📍' + hwMode.t4);
+        if (hwMode.t5 > 0) parts.push('👤' + hwMode.t5);
+        if (hwMode.t7 > 0) parts.push('🎨' + hwMode.t7);
+        const dlRaw = localStorage.getItem('teacher_hw_deadline');
+        const dlStr = dlRaw ? ' · до ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) : '';
+        container.innerHTML = `
+        <div data-card onclick="window.showHwTasksSequential&&window.showHwTasksSequential()"
+             style="display:flex;align-items:center;gap:6px;background:rgba(239,68,68,0.85);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:5px 10px;cursor:pointer;max-width:100%;overflow:hidden;animation:hwPulse 2s ease-in-out infinite">
+          <span style="font-size:13px">🔥</span>
+          <span style="font-size:10px;font-weight:900;color:#fff;white-space:nowrap;text-overflow:ellipsis;overflow:hidden">
+            ДЗ: ${hwMode.total} строк${parts.length ? ' · ' + parts.join(' ') : ''}${dlStr}
+          </span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.7);white-space:nowrap;flex-shrink:0">▶ начать</span>
         </div>
-        <div style="height:6px;background:rgba(128,128,128,0.15);border-radius:4px;overflow:hidden">
-          <div style="height:100%;width:${scorePct}%;background:linear-gradient(90deg,${scoreColor}cc,${scoreColor});border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:8px;color:${subColor};font-weight:600">20</span>
-          <span style="font-size:8px;color:${subColor};font-weight:500">${sc >= 85 ? '🏆 Отлично' : sc >= 70 ? '👍 Хорошо' : sc >= 55 ? '📈 Средне' : '💪 Тренируйся'}</span>
-          <span style="font-size:8px;color:${subColor};font-weight:600">100</span>
-        </div>
-      </div>
+        <style>@keyframes hwPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}50%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}</style>`;
+        return;
+    }
 
-      <!-- Точность -->
-      <div data-card onclick="window.openStatsModal&&window.openStatsModal()"
-           style="cursor:pointer;background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:7px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
-        <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;line-height:1">Точность</span>
-        <span style="font-size:16px;font-weight:900;color:${accColor};line-height:1.1">${accText}</span>
-        <div style="height:4px;width:100%;background:rgba(128,128,128,0.15);border-radius:2px;overflow:hidden">
-          <div style="height:100%;width:${accPct}%;background:linear-gradient(90deg,${accColor}aa,${accColor});border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
-        </div>
-      </div>
+    // Цвета
+    const scoreColor = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
+    const accColor   = accuracy === null ? 'rgba(255,255,255,0.45)' : accuracy >= 85 ? '#34d399' : accuracy >= 70 ? '#60a5fa' : accuracy >= 50 ? '#fbbf24' : '#f87171';
+    const accText    = accuracy !== null ? accuracy + '%' : '—';
+    const daysColor  = daysLeft <= 14 ? '#f87171' : daysLeft <= 30 ? '#fbbf24' : '#a78bfa';
+    const daysLabel  = daysLeft === 0 ? 'ЕГЭ!' : daysLeft === 1 ? '1д' : daysLeft + 'д';
 
-      <!-- Фактов и строк -->
-      <div data-card onclick="window.openStatsModal&&window.openStatsModal()"
-           style="cursor:pointer;background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:7px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0">
-        <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap">Фактов</span>
-        <span style="font-size:16px;font-weight:900;color:#8b5cf6;line-height:1.1">${totalL}</span>
-        <span style="font-size:8px;color:${subColor};font-weight:600;white-space:nowrap">${totalSolved} строк</span>
-      </div>
+    const pill = (content, onclick) =>
+        `<div data-card onclick="${onclick}" style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:4px 7px;cursor:pointer;white-space:nowrap;flex-shrink:0">${content}</div>`;
 
+    const label = (t) => `<span style="font-size:8px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase">${t}</span>`;
+    const val   = (t, color) => `<span style="font-size:13px;font-weight:900;color:${color};line-height:1">${t}</span>`;
+
+    container.innerHTML = `<div style="display:flex;align-items:center;gap:3px;width:100%;justify-content:center;overflow:hidden">
+        ${pill(label('ЕГЭ') + val('~' + sc, scoreColor), "window.openEGEModal&&window.openEGEModal()")}
+        ${pill('<span style="font-size:10px">📅</span>' + val(daysLabel, daysColor), "window.openEGEModal&&window.openEGEModal()")}
+        ${pill(label('точн') + val(accText, accColor), "window.openStatsModal&&window.openStatsModal()")}
+        ${pill('<span style="font-size:10px">🧠</span>' + val(totalL, '#c4b5fd'), "window.openStatsModal&&window.openStatsModal()")}
     </div>`;
 }
 
