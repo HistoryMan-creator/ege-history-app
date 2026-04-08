@@ -471,6 +471,9 @@ function updateGlobalUI() {
     });
     const accuracy = totalAttempts >= 10 ? Math.round(totalCorrect / totalAttempts * 100) : null;
 
+    // ── ЕГЭ-баллы за задания ──
+    const egePoints = window.state.stats.egePoints || 0;
+
     // ── Балл ЕГЭ ──
     const egeResult = estimateEGEScore(window.state.stats);
     const sc = egeResult.score;
@@ -484,7 +487,7 @@ function updateGlobalUI() {
         t5: window.state.stats.hwTask5 || 0,
         t7: window.state.stats.hwTask7 || 0,
     } : null;
-    renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved: window.state.stats.totalSolvedEver || 0, hwMode });
+    renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved: window.state.stats.totalSolvedEver || 0, hwMode });
 
     // Обратная совместимость — старые элементы если есть
     const egeEl = $('stat-ege');
@@ -539,11 +542,11 @@ function updateGlobalUI() {
 }
 
 // ── Рендер компактной панели статистики (инлайн в шапке) ─────────────────
-function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved, hwMode }) {
+function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) {
     const container = document.getElementById('top-stats-bar');
     if (!container) return;
 
-    // ── ДЗ-режим: вся центральная зона отдаётся под баннер ──────────────────
+    // ── ДЗ-режим ────────────────────────────────────────────────────────────
     if (hwMode && hwMode.total > 0) {
         const parts = [];
         if (hwMode.t3 > 0) parts.push('🔗' + hwMode.t3);
@@ -566,36 +569,32 @@ function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved, hwMode }) {
     }
 
     // ── Цвета ────────────────────────────────────────────────────────────────
-    const scoreColor = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
-    const accColor   = accuracy === null ? 'rgba(255,255,255,0.38)' : accuracy >= 85 ? '#34d399' : accuracy >= 70 ? '#60a5fa' : accuracy >= 50 ? '#fbbf24' : '#f87171';
-    const daysColor  = daysLeft <= 14 ? '#f87171' : daysLeft <= 30 ? '#fbbf24' : '#a78bfa';
+    const scoreColor  = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
+    const daysColor   = daysLeft <= 14 ? '#f87171' : daysLeft <= 30 ? '#fbbf24' : '#a78bfa';
+    const daysLabel   = daysLeft === 0 ? 'ЕГЭ!' : daysLeft + 'д';
+    // ЕГЭ-баллы: светло-голубой → зелёный по накоплению
+    const ptsColor    = egePoints >= 500 ? '#34d399' : egePoints >= 200 ? '#60a5fa' : egePoints >= 50 ? '#fbbf24' : 'rgba(255,255,255,0.75)';
 
-    // Форматы для разных размеров экрана
-    const daysLabel  = daysLeft === 0 ? 'ЕГЭ!' : daysLeft + 'д';
-    const accText    = accuracy !== null ? accuracy + '%' : '—';
-
-    // ── Рендер: 4 иконки без текстовых подписей, только иконка + значение ───
-    // Разделители — вертикальные черты. Всё в одну строку, overflow hidden.
-    const sep = `<span style="color:rgba(255,255,255,0.18);font-size:14px;flex-shrink:0;user-select:none">│</span>`;
+    const sep = `<span style="color:rgba(255,255,255,0.18);font-size:14px;flex-shrink:0;user-select:none;line-height:1">│</span>`;
 
     const stat = (icon, value, color, onclick, title) =>
         `<div data-card onclick="${onclick}" title="${title}"
-              style="display:flex;align-items:center;gap:3px;cursor:pointer;flex-shrink:0;padding:3px 6px;border-radius:7px;transition:background .15s"
+              style="display:flex;align-items:center;gap:3px;cursor:pointer;flex-shrink:0;padding:3px 6px;border-radius:7px"
               onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background=''"
               ontouchstart="this.style.background='rgba(255,255,255,0.1)'" ontouchend="this.style.background=''">
-           <span style="font-size:11px;line-height:1;flex-shrink:0">${icon}</span>
+           <span style="font-size:12px;line-height:1;flex-shrink:0">${icon}</span>
            <span style="font-size:13px;font-weight:900;color:${color};line-height:1;letter-spacing:-.3px">${value}</span>
          </div>`;
 
     container.innerHTML =
         `<div style="display:flex;align-items:center;justify-content:center;gap:0;width:100%;overflow:hidden;min-width:0">` +
-            stat('📊', '~' + sc,   scoreColor, "window.openEGEModal&&window.openEGEModal()",   'Прогноз ЕГЭ') +
+            stat('📊', '~' + sc,          scoreColor, "window.openEGEModal&&window.openEGEModal()",    'Прогноз ЕГЭ') +
             sep +
-            stat('📅', daysLabel,  daysColor,  "window.openEGEModal&&window.openEGEModal()",   'Дней до ЕГЭ') +
+            stat('📅', daysLabel,          daysColor,  "window.openEGEModal&&window.openEGEModal()",    'Дней до ЕГЭ') +
             sep +
-            stat('🎯', accText,    accColor,   "window.openStatsModal&&window.openStatsModal()", 'Точность ответов') +
+            stat('⭐', egePoints + 'б',    ptsColor,   "window.openStatsModal&&window.openStatsModal()", 'Набрано баллов (по критериям ЕГЭ)') +
             sep +
-            stat('🧠', totalL,     '#c4b5fd',  "window.openStatsModal&&window.openStatsModal()", 'Фактов выучено') +
+            stat('🧠', totalL,             '#c4b5fd',  "window.openStatsModal&&window.openStatsModal()", 'Фактов выучено') +
         `</div>`;
 }
 

@@ -233,19 +233,28 @@ function saveProgress() {
 }
 
 // --- Статистика ---
-function updateScoreAndStats(linesCount, isPerfectHw) {
+function updateScoreAndStats(linesCount, isPerfectHw, egePointsToAdd) {
     isPerfectHw = isPerfectHw || false;
+    egePointsToAdd = egePointsToAdd || 0;
     const s = window.state.stats;
     const curTask = window.state.currentTask || 'task4';
     s.totalSolvedEver += linesCount;
     if (!s.solvedByTask) s.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
     s.solvedByTask[curTask] = (s.solvedByTask[curTask] || 0) + linesCount;
 
+    // ── ЕГЭ-баллы ──────────────────────────────────────────────────────────
+    if (!s.egePoints) s.egePoints = 0;
+    s.egePoints += egePointsToAdd;
+
     const today = getTodayString();
     if (!s.dailyStats[today]) s.dailyStats[today] = { timeSpent: 0, solved: 0 };
     s.dailyStats[today].solved += linesCount;
     const dtKey = 'solved' + curTask.charAt(0).toUpperCase() + curTask.slice(1);
     s.dailyStats[today][dtKey] = (s.dailyStats[today][dtKey] || 0) + linesCount;
+    // Ежедневные ЕГЭ-баллы
+    if (egePointsToAdd > 0) {
+        s.dailyStats[today].egePoints = (s.dailyStats[today].egePoints || 0) + egePointsToAdd;
+    }
 
     const h = new Date().getHours();
     if (h >= 0 && h < 5) s.achievementsData.nightOwls += linesCount;
@@ -298,6 +307,7 @@ function loadFromStorage() {
         if (!window.state.stats.achievements) window.state.stats.achievements = [];
         if (!window.state.stats.achievementsData) window.state.stats.achievementsData = { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 };
         if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
+        if (!window.state.stats.egePoints) window.state.stats.egePoints = 0;
 
         // Миграция factStreaks
         const now = Date.now();

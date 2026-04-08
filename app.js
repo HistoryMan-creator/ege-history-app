@@ -201,6 +201,24 @@ window.handleSettingsChange = function() {
     else if (window.generateTable) generateTable();
 };
 
+// === ЕГЭ-БАЛЛЫ ЗА ЗАДАНИЕ ===
+// Критерии оценивания:
+//   task4: 3 балла — без ошибок, 2 — 1 ошибка, 1 — 2 ошибки, 0 — 3+
+//   task3, task5, task7: 2 балла — без ошибок, 1 — 1 ошибка, 0 — 2+
+// «Ошибка» = строка, которую ученик исправлял хотя бы раз (scored="fixed")
+// или строка, на которую был показан ответ (answersRevealed)
+function calculateEgePoints(rows, task) {
+    if (window.state.answersRevealed) return 0;
+    const errCount = [...rows].filter(tr =>
+        tr.dataset.scored === 'fixed' || tr.dataset.scored === 'incorrect'
+    ).length;
+    if (task === 'task4') {
+        return errCount === 0 ? 3 : errCount === 1 ? 2 : errCount === 2 ? 1 : 0;
+    } else {
+        return errCount === 0 ? 2 : errCount === 1 ? 1 : 0;
+    }
+}
+
 // === ПРОВЕРКА ОТВЕТОВ ===
 function checkAnswers(isSure) {
     isSure = isSure !== false;
@@ -308,7 +326,12 @@ function checkAnswers(isSure) {
     }
 
     // NORMAL MODE
-    if (newlyCorrect > 0) updateScoreAndStats(newlyCorrect, !window.state.tableHasMistake && allCorrect);
+    if (newlyCorrect > 0) {
+        const egePts = (allCorrect && filled === total)
+            ? calculateEgePoints(rows, window.state.currentTask || 'task4')
+            : 0;
+        updateScoreAndStats(newlyCorrect, !window.state.tableHasMistake && allCorrect, egePts);
+    }
     window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
 
     const isDet = window.state.currentMode === 'detective';

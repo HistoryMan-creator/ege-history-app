@@ -692,7 +692,7 @@
             }).filter(t => t.total > 0 || t.learned > 0);
 
             const dStat = stats.dailyStats || state.dailyStats || {};
-            let wScore = 0, wScoreTask4 = 0;
+            let wScore = 0, wScoreTask4 = 0, wEgePoints = 0;
             const now = new Date();
             const last7 = [];
             for (let i = 6; i >= 0; i--) {
@@ -700,11 +700,11 @@
                 const dStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                 const val = (dStat[dStr] && dStat[dStr].solved) || 0;
                 const valT4 = (dStat[dStr] && dStat[dStr].solvedTask4) || 0;
-                // ✅ FIX: НЕ складываем solved + solvedTaskX (двойной подсчёт!)
                 const perTaskVal = (dStat[dStr] ? ((dStat[dStr].solvedTask4||0)+(dStat[dStr].solvedTask3||0)+(dStat[dStr].solvedTask5||0)+(dStat[dStr].solvedTask7||0)) : 0);
                 const dayScore = perTaskVal > 0 ? perTaskVal : val;
-                if (dStr >= monStr) { wScore += dayScore; wScoreTask4 += valT4; }
-                last7.push({ date: dStr, val, t4: (dStat[dStr] && dStat[dStr].solvedTask4) || 0, t5: (dStat[dStr] && dStat[dStr].solvedTask5) || 0, t7: (dStat[dStr] && dStat[dStr].solvedTask7) || 0, mins: dStat[dStr] ? Math.floor((dStat[dStr].timeSpent || 0) / 60) : 0 });
+                const dayEge = (dStat[dStr] && dStat[dStr].egePoints) || 0;
+                if (dStr >= monStr) { wScore += dayScore; wScoreTask4 += valT4; wEgePoints += dayEge; }
+                last7.push({ date: dStr, val, t4: (dStat[dStr] && dStat[dStr].solvedTask4) || 0, t5: (dStat[dStr] && dStat[dStr].solvedTask5) || 0, t7: (dStat[dStr] && dStat[dStr].solvedTask7) || 0, mins: dStat[dStr] ? Math.floor((dStat[dStr].timeSpent || 0) / 60) : 0, egePoints: dayEge });
             }
             // No totalSolved fallback — must come from actual dailyStats
 
@@ -719,7 +719,7 @@
                 if (e.total >= 5 && e.pct !== null && e.pct < weakPct) { weakPct = e.pct; weakEra = e; }
             }
 
-            return { ...s, streak, timeSpentMin, learnedCount, accuracy, eraData, taskStats, wScore, wScoreTask4, last7, dStat,
+            return { ...s, streak, timeSpentMin, learnedCount, accuracy, eraData, taskStats, wScore, wScoreTask4, wEgePoints, last7, dStat,
                      daysSinceActive, isToday: daysSinceActive === 0, atRisk: daysSinceActive >= 3,
                      lastActiveStr, weakEra, totalCorrect, totalAttempts };
         }
@@ -797,7 +797,7 @@
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 0;border-bottom:1px solid #f1f5f9;text-align:center">
                     <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Решено</div><div style="font-size:13px;font-weight:900;color:#3b82f6">${s.totalSolved||0}</div></div>
-                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Неделя</div><div style="font-size:13px;font-weight:900;color:#8b5cf6">${s.wScore}</div></div>
+                    <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">⭐ Баллы</div><div style="font-size:13px;font-weight:900;color:#f59e0b">${s.egePoints||0}</div></div>
                     <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Выучено</div><div style="font-size:13px;font-weight:900;color:#10b981">${s.learnedCount}</div></div>
                     <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Стрик</div><div style="font-size:13px;font-weight:900;color:#f59e0b">${s.streak}🔥</div></div>
                     <div><div style="font-size:8px;color:#94a3b8;font-weight:700;text-transform:uppercase">Точность</div><div style="font-size:13px;font-weight:900;color:${accColor}">${accStr}</div></div>
@@ -825,6 +825,7 @@
                 <div style="display:flex;gap:6px;padding-top:8px;border-top:1px solid #f1f5f9">
                     <button onclick="window.promptAssignHw('${safeUid}','${safeName}')" class="flex-1 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📝 ДЗ</button>
                     <button onclick="window.downloadStudentPDF('${safeUid}')" class="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95">📄 Отчёт</button>
+                    <button onclick="window.selectStudentForMerge('${safeUid}','${safeName}')" data-student-uid="${safeUid}" class="bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors active:scale-95" title="Объединить с другим аккаунтом">🔀</button>
                 </div>
             </div>`;
         }
@@ -1126,13 +1127,21 @@
                     window.sortAndRenderStudents();
                 }
 
-                // Топ недели
+                // Топ недели — сортируем по ЕГЭ-баллам (новый показатель), если нет — по строкам
                 if (wCont) {
-                    const weeklySt = [...enriched].sort((a,b)=>(b.wScoreTask4||0)-(a.wScoreTask4||0)).filter(s=>s.wScoreTask4>0);
+                    const weeklySt = [...enriched]
+                        .sort((a,b) => (b.wEgePoints||0) - (a.wEgePoints||0) || (b.wScore||0) - (a.wScore||0))
+                        .filter(s => (s.wEgePoints||0) > 0 || (s.wScore||0) > 0);
                     let wHt = weeklySt.length
-                        ? weeklySt.map((s,idx) => `<div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center mb-2">
-                            <div class="flex items-center gap-3"><span class="text-2xl font-black">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':`<span class="text-gray-400 w-6 inline-block text-center text-lg">${idx+1}</span>`}</span><span class="font-black text-sm dark:text-gray-200">${s.name||'Без имени'}</span></div>
-                            <span class="text-base font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl">${s.wScoreTask4} стр.</span>
+                        ? weeklySt.map((s,idx) => `<div class="bg-white dark:bg-[#1e1e1e] rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-[#2c2c2c] flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-3">
+                              <span class="text-2xl font-black">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':`<span class="text-gray-400 w-6 inline-block text-center text-lg">${idx+1}</span>`}</span>
+                              <span class="font-black text-sm dark:text-gray-200">${s.name||'Без имени'}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                              ${s.wEgePoints > 0 ? `<span class="text-sm font-black text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-lg">⭐ ${s.wEgePoints}б</span>` : ''}
+                              <span class="text-xs font-bold text-gray-400">${s.wScore} стр.</span>
+                            </div>
                           </div>`).join('')
                         : '<p class="text-center py-4 text-xs font-bold text-gray-500">На этой неделе пока нет активности</p>';
                     wCont.innerHTML = wHt;
@@ -1206,12 +1215,13 @@
                     }
                 } else {
                     // Используем уже загруженные данные учителя
-                    students = students.map(s => ({ name: s.name || 'Без имени', wScore: s.wScoreTask4 || 0 }));
+                    students = students.map(s => ({ name: s.name || 'Без имени', wScore: s.wScore || 0, wEge: s.wEgePoints || 0 }));
                 }
 
+                // Сортируем по ЕГЭ-баллам, если нет — по строкам
                 const top = students
-                    .filter(s => s.wScore > 0)
-                    .sort((a,b) => b.wScore - a.wScore)
+                    .filter(s => (s.wScore||0) > 0 || (s.wEge||0) > 0)
+                    .sort((a,b) => (b.wEge||0) - (a.wEge||0) || (b.wScore||0) - (a.wScore||0))
                     .slice(0, 10);
 
                 const medals = ['🥇','🥈','🥉'];
@@ -1219,7 +1229,10 @@
                     ? top.map((s,i) => `<div class="flex items-center gap-2 bg-white dark:bg-[#1e1e1e] p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40 mb-1.5">
                         <span class="text-sm w-6 text-center shrink-0">${medals[i]||i+1}</span>
                         <span class="flex-1 font-bold text-[12px] truncate dark:text-gray-200">${s.name}</span>
-                        <span class="font-black text-[12px] text-emerald-600 dark:text-emerald-400 shrink-0">${s.wScore} стр.</span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          ${(s.wEge||0) > 0 ? `<span class="font-black text-[11px] text-yellow-600 dark:text-yellow-400">⭐${s.wEge}б</span>` : ''}
+                          <span class="font-bold text-[10px] text-gray-400">${s.wScore}стр</span>
+                        </div>
                       </div>`).join('')
                     : '<div class="text-center text-xs text-gray-500 font-bold py-2">На этой неделе пока нет активности</div>';
                 ll.innerHTML = ht;
@@ -1506,16 +1519,15 @@
             const monday2 = new Date(now2.getFullYear(), now2.getMonth(), now2.getDate() - day2 + 1);
             const monStr2 = monday2.getFullYear() + '-' + String(monday2.getMonth()+1).padStart(2,'0') + '-' + String(monday2.getDate()).padStart(2,'0');
             let weeklyScore = 0;
+            let weeklyEgePoints = 0; // баллы по критериям ЕГЭ за неделю
             for (const d in dStat) {
                 if (d >= monStr2) {
-                    // ✅ FIX: НЕ суммируем solved + solvedTaskX — это двойной подсчёт!
-                    // solved = общий счётчик, solvedTaskX = разбивка по заданиям.
-                    // Используем per-task если есть, иначе fallback на старый solved.
                     const perTask = (dStat[d].solvedTask4 || 0)
                                   + (dStat[d].solvedTask3 || 0)
                                   + (dStat[d].solvedTask5 || 0)
                                   + (dStat[d].solvedTask7 || 0);
                     weeklyScore += perTask > 0 ? perTask : (dStat[d].solved || 0);
+                    weeklyEgePoints += (dStat[d].egePoints || 0);
                 }
             }
             
@@ -1526,10 +1538,10 @@
                 knownTgId: knownTg,
                 knownGoogleId: googleId,
                 totalSolved: s.totalSolvedEver || 0,
-                // ✅ weeklyScore как индексируемое поле (для orderBy в запросах лидерборда)
+                egePoints: s.egePoints || 0,         // накопленные ЕГЭ-баллы
                 weeklyScore: weeklyScore,
-                weekStartStr: monStr2,  // метка недели для валидации на клиенте
-                // fullStateJson остаётся для совместимости, но основные поля — отдельно
+                weeklyEgePoints: weeklyEgePoints,     // ЕГЭ-баллы за неделю
+                weekStartStr: monStr2,
                 fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}',
                 lastActive: nw
             };
@@ -1746,4 +1758,199 @@
                 if (logEl) logEl.innerHTML += `<div style="color:#ef4444;font-size:11px">❌ Ошибка: ${e.message}</div>`;
             }
             if (btn) btn.disabled = false;
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ── РУЧНОЕ СЛИЯНИЕ АККАУНТОВ (кабинет учителя) ──────────────────
+        // ═══════════════════════════════════════════════════════════════════
+        // Состояние: первый выбранный ученик
+        window._mergeSelectionA = null;
+
+        window.selectStudentForMerge = function(uid, name) {
+            if (!window._mergeSelectionA) {
+                // Первый выбор
+                window._mergeSelectionA = { uid, name };
+                showToast('🔀', `Выбран: ${name}. Теперь выбери второй аккаунт`, 'bg-blue-500', 'border-blue-700');
+                // Подсветить карточку
+                document.querySelectorAll('[data-student-uid]').forEach(el => {
+                    el.style.outline = el.dataset.studentUid === uid ? '3px solid #3b82f6' : '';
+                });
+            } else if (window._mergeSelectionA.uid === uid) {
+                // Отмена выбора
+                window._mergeSelectionA = null;
+                showToast('❌', 'Выбор отменён', 'bg-gray-500', 'border-gray-700');
+                document.querySelectorAll('[data-student-uid]').forEach(el => el.style.outline = '');
+            } else {
+                // Второй выбор → показываем диалог подтверждения
+                const A = window._mergeSelectionA;
+                const B = { uid, name };
+                window._mergeSelectionA = null;
+                document.querySelectorAll('[data-student-uid]').forEach(el => el.style.outline = '');
+
+                const overlayId = 'merge-confirm-overlay';
+                let ov = document.getElementById(overlayId);
+                if (!ov) { ov = document.createElement('div'); ov.id = overlayId; document.body.appendChild(ov); }
+                ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px';
+                ov.innerHTML = `
+                <div style="background:#fff;border-radius:20px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)" class="dark:bg-[#1e1e1e]">
+                  <h3 style="font-size:16px;font-weight:900;margin-bottom:4px;color:#111" class="dark:text-white">🔀 Объединить аккаунты?</h3>
+                  <p style="font-size:11px;color:#9ca3af;margin-bottom:16px">Данные будут объединены. Это действие необратимо.</p>
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px">
+                      <div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:2px">Аккаунт A (главный)</div>
+                      <div style="font-size:13px;font-weight:900;color:#1d4ed8">${A.name}</div>
+                      <div style="font-size:9px;color:#9ca3af;margin-top:1px;word-break:break-all">${A.uid}</div>
+                    </div>
+                    <div style="text-align:center;font-size:18px">+</div>
+                    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:10px 12px">
+                      <div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:2px">Аккаунт B (поглощается)</div>
+                      <div style="font-size:13px;font-weight:900;color:#854d0e">${B.name}</div>
+                      <div style="font-size:9px;color:#9ca3af;margin-top:1px;word-break:break-all">${B.uid}</div>
+                    </div>
+                  </div>
+                  <div style="font-size:10px;color:#9ca3af;margin-bottom:14px;line-height:1.5">
+                    Данные объединятся (максимумы). Аккаунт B получит пометку "_mergedInto" и перестанет отображаться.
+                  </div>
+                  <div style="display:flex;gap:8px">
+                    <button onclick="document.getElementById('${overlayId}').remove()" 
+                      style="flex:1;background:#f3f4f6;color:#374151;border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer">Отмена</button>
+                    <button onclick="window._doManualMerge('${A.uid}','${B.uid}');document.getElementById('${overlayId}').remove()"
+                      style="flex:1;background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer">✅ Объединить</button>
+                  </div>
+                </div>`;
+            }
+        };
+
+        window._doManualMerge = async function(uidA, uidB) {
+            if (!db) return showToast('❌', 'Нет подключения', 'bg-rose-500', 'border-rose-700');
+            try {
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                const [snapA, snapB] = await Promise.all([getDoc(doc(studentsCol, uidA)), getDoc(doc(studentsCol, uidB))]);
+                const dataA = snapA.exists() ? snapA.data() : {};
+                const dataB = snapB.exists() ? snapB.data() : {};
+                const merged = deepMergeStates([dataA.fullStateJson, dataB.fullStateJson].filter(j => j && j.length > 10));
+                const mergedJson = merged ? JSON.stringify(merged) : dataA.fullStateJson;
+                const mergedTotal = merged ? (merged.stats?.totalSolvedEver || dataA.totalSolved || 0) : (dataA.totalSolved || 0);
+                await setDoc(doc(studentsCol, uidA), {
+                    fullStateJson: mergedJson, totalSolved: mergedTotal,
+                    _mergedFrom: [...(dataA._mergedFrom || []), uidB], _mergedAt: Date.now()
+                }, { merge: true });
+                await setDoc(doc(studentsCol, uidB), { _mergedInto: uidA, _mergedAt: Date.now() }, { merge: true });
+                showToast('✅', 'Аккаунты объединены!', 'bg-emerald-500', 'border-emerald-700');
+                if (window.loadClassProgress) window.loadClassProgress();
+            } catch(e) {
+                console.error('[ManualMerge]', e);
+                showToast('❌', 'Ошибка слияния: ' + e.message, 'bg-rose-500', 'border-rose-700');
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ── ПИН-КОД ДЛЯ ПРИВЯЗКИ АККАУНТА ──────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════
+        // Генерирует/возвращает 8-значный PIN для текущего аккаунта.
+        // PIN хранится в Firestore и позволяет связать два устройства.
+        window.getOrCreateSyncPin = async function() {
+            if (!fbUser || !db) return null;
+            const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+            const canonicalId = resolveUserId(fbUser);
+            try {
+                const snap = await getDoc(doc(studentsCol, canonicalId));
+                if (snap.exists() && snap.data().syncPin) return snap.data().syncPin;
+                // Создаём новый PIN
+                const pin = String(Math.floor(10000000 + Math.random() * 90000000));
+                await setDoc(doc(studentsCol, canonicalId), { syncPin: pin, syncPinCreated: Date.now() }, { merge: true });
+                return pin;
+            } catch(e) { console.error('[PIN]', e); return null; }
+        };
+
+        // Показывает PIN в UI и копирует в буфер
+        window.showSyncPin = async function() {
+            const btn = document.getElementById('sync-pin-btn');
+            const display = document.getElementById('sync-pin-display');
+            if (btn) btn.disabled = true;
+            if (display) display.textContent = '⏳ Генерация...';
+            const pin = await window.getOrCreateSyncPin();
+            if (!pin) { if (display) display.textContent = '❌ Ошибка'; if (btn) btn.disabled = false; return; }
+            if (display) {
+                display.textContent = pin;
+                display.style.letterSpacing = '4px';
+                display.style.fontSize = '22px';
+                display.style.fontWeight = '900';
+                display.style.color = '#3b82f6';
+            }
+            if (btn) btn.disabled = false;
+            // Копируем в буфер
+            try { await navigator.clipboard.writeText(pin); showToast('📋', 'PIN скопирован: ' + pin, 'bg-blue-500', 'border-blue-700'); } catch(e) {}
+        };
+
+        // Привязать к аккаунту по чужому PIN
+        window.linkByPin = async function() {
+            if (!fbUser || !db) return showToast('❌', 'Нет соединения', 'bg-rose-500', 'border-rose-700');
+            const input = document.getElementById('sync-pin-input');
+            const pin = input ? input.value.trim() : '';
+            if (!/^\d{8}$/.test(pin)) return showToast('⚠️', 'Введите 8-значный PIN', 'bg-amber-500', 'border-amber-700');
+
+            try {
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+                // Ищем документ с этим PIN
+                const pinQuery = query(studentsCol, where('syncPin', '==', pin), limit(2));
+                const pinSnap = await getDocs(pinQuery);
+                if (pinSnap.empty) return showToast('❌', 'PIN не найден', 'bg-rose-500', 'border-rose-700');
+
+                let targetDoc = null;
+                const canonicalId = resolveUserId(fbUser);
+                pinSnap.forEach(docSnap => {
+                    if (docSnap.id !== canonicalId) targetDoc = docSnap;
+                });
+                if (!targetDoc) return showToast('⚠️', 'Это ваш собственный PIN', 'bg-amber-500', 'border-amber-700');
+
+                const targetData = targetDoc.data();
+                // Объединяем данные: берём лучшее из двух
+                const mySnap = await getDoc(doc(studentsCol, canonicalId));
+                const myData = mySnap.exists() ? mySnap.data() : {};
+
+                const mySolved = myData.totalSolved || 0;
+                const theirSolved = targetData.totalSolved || 0;
+
+                // Канонический = тот у кого больше прогресса
+                const keepId   = theirSolved > mySolved ? targetDoc.id : canonicalId;
+                const absorbId = theirSolved > mySolved ? canonicalId   : targetDoc.id;
+                const keepData = theirSolved > mySolved ? targetData : myData;
+                const absData  = theirSolved > mySolved ? myData : targetData;
+
+                const merged = deepMergeStates([keepData.fullStateJson, absData.fullStateJson].filter(j => j && j.length > 10));
+                const mergedJson = merged ? JSON.stringify(merged) : keepData.fullStateJson;
+                const mergedTotal = merged ? (merged.stats?.totalSolvedEver || Math.max(mySolved, theirSolved)) : Math.max(mySolved, theirSolved);
+
+                await setDoc(doc(studentsCol, keepId), {
+                    fullStateJson: mergedJson, totalSolved: mergedTotal,
+                    _mergedFrom: [...(keepData._mergedFrom || []), absorbId],
+                    _mergedAt: Date.now(), syncPin: keepData.syncPin || targetData.syncPin || ''
+                }, { merge: true });
+                await setDoc(doc(studentsCol, absorbId), { _mergedInto: keepId, _mergedAt: Date.now() }, { merge: true });
+
+                // Если наш аккаунт поглощён — обновляем stable_student_id
+                if (absorbId === canonicalId) {
+                    localStorage.setItem('stable_student_id', keepId);
+                    if (/^\d+$/.test(keepId)) localStorage.setItem('known_tg_id', keepId);
+                }
+
+                // Загружаем объединённые данные
+                if (merged) {
+                    const st = merged.stats;
+                    ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
+                     'totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData','egePoints']
+                        .forEach(k => { if (st[k] !== undefined) window.state.stats[k] = st[k]; });
+                    if (merged.mistakesPool) window.state.mistakesPool = merged.mistakesPool;
+                    localStorage.setItem('ege_final_storage_v4', mergedJson);
+                }
+
+                showToast('✅', 'Аккаунты успешно привязаны!', 'bg-emerald-500', 'border-emerald-700');
+                if (input) input.value = '';
+                if (window.updateGlobalUI) window.updateGlobalUI();
+                if (window.updateProgressBars) window.updateProgressBars();
+            } catch(e) {
+                console.error('[PIN link]', e);
+                showToast('❌', 'Ошибка: ' + e.message, 'bg-rose-500', 'border-rose-700');
+            }
         };
