@@ -31,7 +31,7 @@ window.state = {
     currentMode: 'normal',
     timeLeft: 0,
     timerInterval: null,
-    hideLearned: false,
+    hideLearned: true,
     isHomeworkMode: false,
     hwTargetIndices: [],
     hwCurrentPool: [],
@@ -141,17 +141,14 @@ function getFilteredPool(period, limit) {
             setTimeout(() => backToLobby(), 1500);
             return null;
         }
-    } else if (window.state.hideLearned) {
-        pool = pool.filter(f => {
+    } else {
+        // Всегда скрываем выученные факты автоматически для всех
+        const filtered = pool.filter(f => {
             const d = window.state.stats.factStreaks[factKey(f)];
             return !(d && d.level > 0 && d.nextReview > now);
         });
-        if (pool.length < (limit || 1)) {
-            showToast('ℹ️', 'В этом фильтре всё свежо в памяти!', 'bg-blue-600', 'border-blue-800');
-            $('toggle-hide-learned').checked = false;
-            window.state.hideLearned = false;
-            return getFilteredPool(period, limit);
-        }
+        // Если всё выучено в текущем фильтре — показываем весь пул (не блокируем)
+        pool = filtered.length >= (limit || 1) ? filtered : pool;
     }
     return pool;
 }
@@ -292,7 +289,7 @@ function loadFromStorage() {
         Object.assign(window.state.stats, parsed);
         if (parsed.streak !== undefined) window.state.stats.streak = parsed.streak;
         if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
-        if (parsed.hideLearned !== undefined) window.state.hideLearned = parsed.hideLearned;
+        window.state.hideLearned = true; // всегда скрываем выученное автоматически
 
         // Гарантируем структуру
         if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};

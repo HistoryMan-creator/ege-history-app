@@ -474,8 +474,7 @@ function initStorage() {
 
     loadFromStorage();
     if (localStorage.getItem('ege_theme') === 'dark') document.documentElement.classList.add('dark');
-    DOM['toggle-hide-learned'].checked = window.state.hideLearned;
-    DOM['pg-hide-learned'].checked = window.state.hideLearned;
+    // hideLearned теперь всегда true — чекбоксы не нужны
 
     setTimeout(() => $$('.modal-content-hidden').forEach(el => el.classList.remove('modal-content-hidden')), 500);
     updateGlobalUI();

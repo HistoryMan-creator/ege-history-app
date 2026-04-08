@@ -318,7 +318,9 @@ function generateTwoColumnTable() {
         });
     } else {
         const picker = EPOCH_PICKERS[task];
-        if (actualPeriod === 'all' && picker) target = picker(allowed, rowsCount) || [];
+        // Умный подбор работает если доступны все эпохи (all, или кастом покрывающий все)
+        const coversAll = TASK_EPOCHS.every(e => allowed.some(f => f.c === e));
+        if (coversAll && picker) target = picker(allowed, rowsCount) || [];
         if (target.length === 0) {
             // Fallback: случайный выбор с дедупликацией
             target = [];
@@ -409,7 +411,9 @@ function generateTask4Table() {
             $('task-table-body').innerHTML = `<tr><td colspan="3" class="p-10 text-center font-bold text-rose-500 bg-white dark:bg-[#1e1e1e]">⚠️ Нет событий!</td></tr>`;
             return;
         }
-        if (actualPeriod === 'all') target = pickTargetTask4(allowed, rowsCount) || [];
+        // Умный подбор работает если доступны все эпохи (all, или кастом покрывающий все)
+        const coversAllEpochs4 = TASK_EPOCHS.every(e => allowed.some(f => f.c === e));
+        if (coversAllEpochs4) target = pickTargetTask4(allowed, rowsCount) || [];
         if (target.length === 0) target = shuffleArray([...allowed]).slice(0, Math.min(rowsCount, allowed.length));
     }
 

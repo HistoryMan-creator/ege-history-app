@@ -1172,7 +1172,10 @@
                         const weeklySnap = await getDocs(weeklyQ);
                         const weeklyStudents = weeklySnap.docs.map(d => {
                             const raw = d.data();
-                            return { name: raw.name || 'Без имени', wScore: raw.weeklyScore || 0 };
+                            // Валидируем что weeklyScore относится к текущей неделе
+                            const isCurrentWeek = raw.weekStartStr === monStr;
+                            const wScore = isCurrentWeek ? (raw.weeklyScore || 0) : 0;
+                            return { name: raw.name || 'Без имени', wScore };
                         }).filter(s => s.wScore > 0);
                         if (weeklyStudents.length > 0) students = weeklyStudents;
                     } catch(weeklyErr) {
@@ -1428,6 +1431,7 @@
                 totalSolved: s.totalSolvedEver || 0,
                 // ✅ weeklyScore как индексируемое поле (для orderBy в запросах лидерборда)
                 weeklyScore: weeklyScore,
+                weekStartStr: monStr2,  // метка недели для валидации на клиенте
                 // fullStateJson остаётся для совместимости, но основные поля — отдельно
                 fullStateJson: localStorage.getItem('ege_final_storage_v4') || '{}',
                 lastActive: nw

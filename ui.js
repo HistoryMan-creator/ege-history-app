@@ -2,6 +2,29 @@
 // Загружается первым (нет зависимостей от app.js)
 'use strict';
 
+// Инжектируем стили для top-stats-bar сразу при загрузке
+(function injectTopBarStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        #top-stats-bar { width: 100%; }
+        #top-stats-bar [data-card] {
+            transition: opacity .15s, transform .15s;
+        }
+        #top-stats-bar [data-card]:active {
+            opacity: .75;
+            transform: scale(.97);
+        }
+        .dark #top-stats-bar [data-dark-bg] {
+            background: rgba(255,255,255,0.04) !important;
+            border-color: rgba(255,255,255,0.08) !important;
+        }
+        .dark #top-stats-bar [data-dark-text] {
+            color: #e5e7eb !important;
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
 window.showModal = function(id) {
     const m = document.getElementById(id); if(!m) return;
     m.classList.remove('hidden'); m.classList.add('flex');
@@ -131,6 +154,56 @@ document.addEventListener('app:ready', function initPullToRefresh() {
     lobby.addEventListener('touchend', function() { pulling = false; }, { passive: true });
 }, { once: true });
 
+// ═══════════════════════════════════════════════════════════
+//  АВТОМАТИЧЕСКАЯ ИНЪЕКЦИЯ ВЕРХНЕЙ ПАНЕЛИ В DOM
+//  Перестраивает шапку без правки HTML вручную:
+//  - Находит header#main-header
+//  - Скрывает старые элементы статистики
+//  - Добавляет новую панель #top-stats-bar под строкой кнопок
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('app:ready', function initTopBar() {
+    const header = document.getElementById('main-header');
+    if (!header) return;
+
+    // Найти строку шапки (первый div внутри header)
+    const headerRow = header.querySelector('div');
+    if (!headerRow) return;
+
+    // Найти и скрыть блок статов (содержит stat-solved, stat-learned, stat-memory)
+    const statsSolved = document.getElementById('stat-solved');
+    if (statsSolved) {
+        // Идём вверх до div с flex-1 (прямой потомок headerRow)
+        let statsWrapper = statsSolved.parentElement;
+        while (statsWrapper && statsWrapper.parentElement !== headerRow) {
+            statsWrapper = statsWrapper.parentElement;
+        }
+        if (statsWrapper) {
+            statsWrapper.style.display = 'none';
+            // Убрать фиксированную высоту шапки чтобы панель вмещалась
+            headerRow.classList.remove('h-10', 'h-12', 'sm:h-12');
+            headerRow.style.minHeight = '48px';
+            headerRow.style.alignItems = 'center';
+        }
+    }
+
+    // Создать новый бар полной ширины под строкой кнопок
+    if (!document.getElementById('top-stats-bar')) {
+        const bar = document.createElement('div');
+        bar.id = 'top-stats-bar';
+        bar.style.cssText = 'width:100%;border-top:1px solid rgba(255,255,255,0.08)';
+        header.appendChild(bar);
+    }
+
+    // Скрыть кнопку "скрывать выученное" в настройках
+    const hideLearnedEl = document.getElementById('pg-hide-learned-container');
+    if (hideLearnedEl) hideLearnedEl.style.display = 'none';
+
+    // Первый рендер
+    if (typeof updateGlobalUI === 'function') updateGlobalUI();
+
+    console.log('[TopBar] ✅ Новая панель статистики инициализирована');
+}, { once: true });
+
 window.openGlobalSettings = function() {
     $('pre-game-title').innerText = 'Глобальные настройки';
     
@@ -138,7 +211,7 @@ window.openGlobalSettings = function() {
     $('pg-rows-container').classList.remove('hidden');
     $('pg-case-container').classList.add('hidden'); 
     $('pg-database-container').classList.remove('hidden'); 
-    $('pg-hide-learned-container').classList.remove('hidden');
+    if ($('pg-hide-learned-container')) $('pg-hide-learned-container').classList.add('hidden'); // выключено — всегда активно
     
     // Hide period & rows for detective mode (Secret Archive uses its own case system)
     if (window.state.currentMode === 'detective') {
@@ -181,9 +254,7 @@ window.applyGlobalSettings = function() {
     $('custom-year-end').value = $('pg-custom-year-end').value;
     $('filter-case').value = $('pg-filter-case').value;
     if ($('filter-database')) $('filter-database').value = $('pg-filter-database').value;
-    const hideLearned = $('pg-hide-learned').checked; 
-    $('toggle-hide-learned').checked = hideLearned; 
-    window.state.hideLearned = hideLearned; 
+    // hideLearned всегда активно автоматически — не нужно из UI
     
     saveProgress();
     closePreGameModal();
@@ -309,30 +380,63 @@ window.openEGEModal = function() {
 };
 
 function updateGlobalUI() {
-    let totalL = 0, freshL = 0, now = Date.now();
-    Object.values(window.state.stats.factStreaks || {}).forEach(d => { if (window.isFactLearned(d)) { totalL++; if (d.nextReview > now) freshL++; } });
-    // EGE score badge
+    const now = Date.now();
+    let totalL = 0, freshL = 0;
+    Object.values(window.state.stats.factStreaks || {}).forEach(d => {
+        if (window.isFactLearned(d)) { totalL++; if (d.nextReview > now) freshL++; }
+    });
+
+    // ── Счётчик дней до ЕГЭ (1 июня 2026, 10:00 МСК = 07:00 UTC) ──
+    const EGE_DATE = new Date('2026-06-01T07:00:00Z');
+    const daysLeft = Math.max(0, Math.ceil((EGE_DATE - now) / 86400000));
+
+    // ── Средняя точность по всем заданиям ──
+    let totalCorrect = 0, totalAttempts = 0;
+    const es = window.state.stats.eraStats || {};
+    ['task3','task4','task5','task7'].forEach(tk => {
+        ['early','18th','19th','20th'].forEach(era => {
+            const e = (es[tk] || {})[era] || {};
+            totalCorrect += e.correct || 0;
+            totalAttempts += e.total || 0;
+        });
+    });
+    const accuracy = totalAttempts >= 10 ? Math.round(totalCorrect / totalAttempts * 100) : null;
+
+    // ── Балл ЕГЭ ──
     const egeResult = estimateEGEScore(window.state.stats);
+    const sc = egeResult.score;
+
+    // ── Обновляем новую панель верхней строки ──
+    renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved: window.state.stats.totalSolvedEver || 0 });
+
+    // Обратная совместимость — старые элементы если есть
     const egeEl = $('stat-ege');
     if (egeEl) {
-        egeEl.textContent = '~' + egeResult.score;
-        const sc = egeResult.score;
+        egeEl.textContent = '~' + sc;
         egeEl.className = 'text-xs sm:text-sm font-black ' +
             (sc >= 85 ? 'text-emerald-400' : sc >= 70 ? 'text-blue-300' : sc >= 55 ? 'text-yellow-300' : 'text-rose-400');
     }
-    updateText($('stat-streak'), window.state.stats.streak); updateText($('stat-solved'), window.state.stats.totalSolvedEver); if($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver); updateText($('stat-learned'), totalL); updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver); updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
+    updateText($('stat-streak'), window.state.stats.streak);
+    updateText($('stat-solved'), window.state.stats.totalSolvedEver);
+    if ($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver);
+    updateText($('stat-learned'), totalL);
+    updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver);
+    updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
+
     // Per-task solved counters
     const sbt = window.state.stats.solvedByTask || {};
     if ($('modal-stat-task3')) $('modal-stat-task3').textContent = sbt.task3 || 0;
-    if($('modal-stat-task4')) updateText($('modal-stat-task4'), sbt.task4 || 0);
-    if($('modal-stat-task5')) updateText($('modal-stat-task5'), sbt.task5 || 0);
-    if($('modal-stat-task7')) updateText($('modal-stat-task7'), sbt.task7 || 0);
-    if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0 && $('hw-remaining')) updateText($('hw-remaining'), window.state.hwCurrentPool.length);
-    if (window.state.stats.hwFlashcardsToSolve > 0) { 
-        if($('personal-hw-alert')) $('personal-hw-alert').classList.remove('hidden'); 
-        if($('personal-hw-remaining')) updateText($('personal-hw-remaining'), window.state.stats.hwFlashcardsToSolve); 
-        // Per-task breakdown
-        if($('personal-hw-breakdown')) {
+    if ($('modal-stat-task4')) updateText($('modal-stat-task4'), sbt.task4 || 0);
+    if ($('modal-stat-task5')) updateText($('modal-stat-task5'), sbt.task5 || 0);
+    if ($('modal-stat-task7')) updateText($('modal-stat-task7'), sbt.task7 || 0);
+
+    if (window.state.isHomeworkMode && window.state.hwTargetIndices && window.state.hwTargetIndices.length > 0 && $('hw-remaining'))
+        updateText($('hw-remaining'), window.state.hwCurrentPool.length);
+
+    if (window.state.stats.hwFlashcardsToSolve > 0) {
+        if ($('personal-hw-alert')) $('personal-hw-alert').classList.remove('hidden');
+        if ($('personal-hw-remaining')) updateText($('personal-hw-remaining'), window.state.stats.hwFlashcardsToSolve);
+        if ($('personal-hw-breakdown')) {
             const parts = [];
             if ((window.state.stats.hwTask3||0) > 0) parts.push('🔗№3:' + window.state.stats.hwTask3);
             if ((window.state.stats.hwTask4||0) > 0) parts.push('📍№4:' + window.state.stats.hwTask4);
@@ -342,14 +446,97 @@ function updateGlobalUI() {
             const dlStr = dlRaw ? ' · до ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) : '';
             $('personal-hw-breakdown').textContent = (parts.length ? parts.join(' ') : '') + dlStr;
         }
-        if($('lobby-hw-banner')) $('lobby-hw-banner').classList.remove('hidden');
-        if($('lobby-hw-remaining')) updateText($('lobby-hw-remaining'), window.state.stats.hwFlashcardsToSolve);
+        if ($('lobby-hw-banner')) $('lobby-hw-banner').classList.remove('hidden');
+        if ($('lobby-hw-remaining')) updateText($('lobby-hw-remaining'), window.state.stats.hwFlashcardsToSolve);
         const dlRawL = localStorage.getItem('teacher_hw_deadline');
-        if($('lobby-hw-deadline')) $('lobby-hw-deadline').textContent = dlRawL ? ('Срок: ' + new Date(dlRawL + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'long'})) : ''; 
-    } 
-    else { if($('personal-hw-alert')) $('personal-hw-alert').classList.add('hidden'); if($('lobby-hw-banner')) $('lobby-hw-banner').classList.add('hidden'); }
-    let h = totalL === 0 ? 100 : Math.round((freshL / totalL) * 100); let hC = 'text-emerald-400'; if (h < 50) hC = 'text-rose-400'; else if (h < 80) hC = 'text-yellow-400';
-    if ($('stat-memory')) { $('stat-memory').parentElement.classList.remove('text-emerald-400', 'text-rose-400', 'text-yellow-400'); $('stat-memory').parentElement.classList.add(hC); updateText($('stat-memory'), h + '%'); }
+        if ($('lobby-hw-deadline')) $('lobby-hw-deadline').textContent = dlRawL
+            ? ('Срок: ' + new Date(dlRawL + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'long'})) : '';
+    } else {
+        if ($('personal-hw-alert')) $('personal-hw-alert').classList.add('hidden');
+        if ($('lobby-hw-banner')) $('lobby-hw-banner').classList.add('hidden');
+    }
+
+    let h = totalL === 0 ? 100 : Math.round((freshL / totalL) * 100);
+    let hC = 'text-emerald-400';
+    if (h < 50) hC = 'text-rose-400'; else if (h < 80) hC = 'text-yellow-400';
+    if ($('stat-memory')) {
+        $('stat-memory').parentElement.classList.remove('text-emerald-400','text-rose-400','text-yellow-400');
+        $('stat-memory').parentElement.classList.add(hC);
+        updateText($('stat-memory'), h + '%');
+    }
+}
+
+// ── Рендер новой красивой верхней панели ──────────────────────────────────
+function renderTopBar({ daysLeft, sc, accuracy, totalL, totalSolved }) {
+    const container = $('top-stats-bar');
+    if (!container) return;
+
+    // Цвет балла ЕГЭ
+    const scoreColor = sc >= 85 ? '#10b981' : sc >= 70 ? '#3b82f6' : sc >= 55 ? '#f59e0b' : '#ef4444';
+    const scorePct = Math.round((sc / 100) * 100);
+
+    // Цвет точности
+    const accColor = accuracy === null ? '#9ca3af' : accuracy >= 85 ? '#10b981' : accuracy >= 70 ? '#3b82f6' : accuracy >= 50 ? '#f59e0b' : '#ef4444';
+    const accText = accuracy !== null ? accuracy + '%' : '—';
+    const accPct = accuracy !== null ? accuracy : 0;
+
+    // Дней до ЕГЭ — цвет
+    const daysColor = daysLeft <= 14 ? '#ef4444' : daysLeft <= 30 ? '#f59e0b' : '#6366f1';
+    const daysLabel = daysLeft === 0 ? 'Сегодня!' : daysLeft === 1 ? '1 день' : daysLeft + ' дней';
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(128,128,128,0.06)';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(128,128,128,0.15)';
+    const labelColor = isDark ? '#6b7280' : '#9ca3af';
+    const subColor = isDark ? '#4b5563' : '#9ca3af';
+
+    container.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:5px;padding:6px 8px 5px;width:100%;box-sizing:border-box;max-width:540px;margin:0 auto">
+
+      <!-- Дней до ЕГЭ -->
+      <div data-card onclick="window.openEGEModal&&window.openEGEModal()"
+           style="cursor:pointer;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.22);border-radius:12px;padding:7px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0">
+        <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap">До ЕГЭ</span>
+        <span style="font-size:${daysLeft > 99 ? '13' : '16'}px;font-weight:900;color:${daysColor};line-height:1.15;white-space:nowrap">${daysLabel}</span>
+        <span style="font-size:8px;color:${subColor};font-weight:600;white-space:nowrap">1 июня</span>
+      </div>
+
+      <!-- Балл ЕГЭ с прогресс-баром -->
+      <div data-card onclick="window.openEGEModal&&window.openEGEModal()"
+           style="cursor:pointer;background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px">
+          <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Балл ЕГЭ</span>
+          <span style="font-size:17px;font-weight:900;color:${scoreColor};line-height:1">~${sc}</span>
+        </div>
+        <div style="height:6px;background:rgba(128,128,128,0.15);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${scorePct}%;background:linear-gradient(90deg,${scoreColor}cc,${scoreColor});border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:8px;color:${subColor};font-weight:600">20</span>
+          <span style="font-size:8px;color:${subColor};font-weight:500">${sc >= 85 ? '🏆 Отлично' : sc >= 70 ? '👍 Хорошо' : sc >= 55 ? '📈 Средне' : '💪 Тренируйся'}</span>
+          <span style="font-size:8px;color:${subColor};font-weight:600">100</span>
+        </div>
+      </div>
+
+      <!-- Точность -->
+      <div data-card onclick="window.openStatsModal&&window.openStatsModal()"
+           style="cursor:pointer;background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:7px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
+        <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;line-height:1">Точность</span>
+        <span style="font-size:16px;font-weight:900;color:${accColor};line-height:1.1">${accText}</span>
+        <div style="height:4px;width:100%;background:rgba(128,128,128,0.15);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${accPct}%;background:linear-gradient(90deg,${accColor}aa,${accColor});border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
+        </div>
+      </div>
+
+      <!-- Фактов и строк -->
+      <div data-card onclick="window.openStatsModal&&window.openStatsModal()"
+           style="cursor:pointer;background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:7px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0">
+        <span style="font-size:8.5px;font-weight:700;color:${labelColor};text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap">Фактов</span>
+        <span style="font-size:16px;font-weight:900;color:#8b5cf6;line-height:1.1">${totalL}</span>
+        <span style="font-size:8px;color:${subColor};font-weight:600;white-space:nowrap">${totalSolved} строк</span>
+      </div>
+
+    </div>`;
 }
 
 let toastTimeout = null;
