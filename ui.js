@@ -2,28 +2,70 @@
 // Загружается первым (нет зависимостей от app.js)
 'use strict';
 
-// Инжектируем стили для top-stats-bar сразу при загрузке
-(function injectTopBarStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        #top-stats-bar { width: 100%; }
-        #top-stats-bar [data-card] {
-            transition: opacity .15s, transform .15s;
-        }
-        #top-stats-bar [data-card]:active {
-            opacity: .75;
-            transform: scale(.97);
-        }
-        .dark #top-stats-bar [data-dark-bg] {
-            background: rgba(255,255,255,0.04) !important;
-            border-color: rgba(255,255,255,0.08) !important;
-        }
-        .dark #top-stats-bar [data-dark-text] {
-            color: #e5e7eb !important;
-        }
-    `;
-    document.head.appendChild(style);
+// ── CSS: скрываем старые стат-элементы через CSS немедленно,
+//    без ожидания JS-событий. Это работает даже до DOMContentLoaded.
+(function() {
+    const s = document.createElement('style');
+    s.id = '_topbar_css';
+    s.textContent =
+        /* Скрыть старый блок статов шапки */
+        '#stat-solved,#stat-learned,#stat-memory{display:none!important}' +
+        'button[data-action="openEGEModal"]{display:none!important}' +
+        /* Правые кнопки — больше отступов, не так в облипку */
+        '#main-header button[data-action="toggleFocusMode"],' +
+        '#main-header button[data-action="toggleTheme"],' +
+        '#main-header button[data-action="openGlobalTopModal"]{' +
+            'padding:6px 10px!important;margin:0 2px!important;border-radius:10px!important' +
+        '}' +
+        /* Карточки top-stats-bar */
+        '#top-stats-bar [data-card]{transition:opacity .15s,transform .15s}' +
+        '#top-stats-bar [data-card]:active{opacity:.75;transform:scale(.97)}';
+    (document.head || document.documentElement).appendChild(s);
 })();
+
+// ── DOM патч: запускаем как можно раньше ────────────────────────────────────
+function patchHeaderDOM() {
+    const header = document.getElementById('main-header');
+    if (!header) return;
+
+    // 1. Скрыть родительские контейнеры старых стат-элементов
+    ['stat-solved', 'stat-learned', 'stat-memory'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        // Прячем непосредственного родителя (flex-col wrapper)
+        if (el.parentElement) el.parentElement.style.display = 'none';
+    });
+
+    // 2. Скрыть кнопку openEGEModal (она теперь на карточке балла)
+    const egeBtn = header.querySelector('button[data-action="openEGEModal"]');
+    if (egeBtn) egeBtn.style.display = 'none';
+
+    // 3. Убрать фиксированную высоту h-10/h-12 из первого div шапки
+    const headerRow = header.querySelector('div');
+    if (headerRow) {
+        ['h-10', 'h-12', 'sm:h-12'].forEach(c => headerRow.classList.remove(c));
+        headerRow.style.minHeight = '44px';
+    }
+
+    // 4. Добавить top-stats-bar под строкой кнопок (если ещё нет)
+    if (!document.getElementById('top-stats-bar')) {
+        const bar = document.createElement('div');
+        bar.id = 'top-stats-bar';
+        bar.style.cssText = 'width:100%;border-top:1px solid rgba(255,255,255,0.08)';
+        header.appendChild(bar);
+    }
+
+    // 5. Скрыть чекбокс "скрывать выученное" в настройках
+    const hll = document.getElementById('pg-hide-learned-container');
+    if (hll) hll.style.display = 'none';
+}
+
+// Запускаем максимально рано
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchHeaderDOM, { once: true });
+} else {
+    patchHeaderDOM();
+}
 
 window.showModal = function(id) {
     const m = document.getElementById(id); if(!m) return;
@@ -154,54 +196,10 @@ document.addEventListener('app:ready', function initPullToRefresh() {
     lobby.addEventListener('touchend', function() { pulling = false; }, { passive: true });
 }, { once: true });
 
-// ═══════════════════════════════════════════════════════════
-//  АВТОМАТИЧЕСКАЯ ИНЪЕКЦИЯ ВЕРХНЕЙ ПАНЕЛИ В DOM
-//  Перестраивает шапку без правки HTML вручную:
-//  - Находит header#main-header
-//  - Скрывает старые элементы статистики
-//  - Добавляет новую панель #top-stats-bar под строкой кнопок
-// ═══════════════════════════════════════════════════════════
-document.addEventListener('app:ready', function initTopBar() {
-    const header = document.getElementById('main-header');
-    if (!header) return;
-
-    // Найти строку шапки (первый div внутри header)
-    const headerRow = header.querySelector('div');
-    if (!headerRow) return;
-
-    // Найти и скрыть блок статов (содержит stat-solved, stat-learned, stat-memory)
-    const statsSolved = document.getElementById('stat-solved');
-    if (statsSolved) {
-        // Идём вверх до div с flex-1 (прямой потомок headerRow)
-        let statsWrapper = statsSolved.parentElement;
-        while (statsWrapper && statsWrapper.parentElement !== headerRow) {
-            statsWrapper = statsWrapper.parentElement;
-        }
-        if (statsWrapper) {
-            statsWrapper.style.display = 'none';
-            // Убрать фиксированную высоту шапки чтобы панель вмещалась
-            headerRow.classList.remove('h-10', 'h-12', 'sm:h-12');
-            headerRow.style.minHeight = '48px';
-            headerRow.style.alignItems = 'center';
-        }
-    }
-
-    // Создать новый бар полной ширины под строкой кнопок
-    if (!document.getElementById('top-stats-bar')) {
-        const bar = document.createElement('div');
-        bar.id = 'top-stats-bar';
-        bar.style.cssText = 'width:100%;border-top:1px solid rgba(255,255,255,0.08)';
-        header.appendChild(bar);
-    }
-
-    // Скрыть кнопку "скрывать выученное" в настройках
-    const hideLearnedEl = document.getElementById('pg-hide-learned-container');
-    if (hideLearnedEl) hideLearnedEl.style.display = 'none';
-
-    // Первый рендер
+// app:ready — дополнительный рендер на случай если patchHeaderDOM отработал раньше initStorage
+document.addEventListener('app:ready', function() {
+    patchHeaderDOM(); // idempotent — повторный вызов безопасен
     if (typeof updateGlobalUI === 'function') updateGlobalUI();
-
-    console.log('[TopBar] ✅ Новая панель статистики инициализирована');
 }, { once: true });
 
 window.openGlobalSettings = function() {
