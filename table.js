@@ -6,13 +6,85 @@
 //  АЛГОРИТМЫ ПОДБОРА СТРОК ПО ЭПОХАМ
 // ═══════════════════════════════════════════════════════════
 
+// ── Fingerprint: события с одним годом+гео = «близнецы», не должны
+//    попадать вместе в одно задание и в дистракторы ──
+function eventFingerprint(d) {
+    const y = String(d.year).replace(/\D/g, '');
+    const g = (d.geo || '').toLowerCase().replace(/^(река |село |деревня |мыс |озеро )/, '').trim();
+    return y + '|' + g;
+}
+
+// ── Тематические группы: события одной группы НЕ попадают как дистракторы ──
+// Если в задании "присоединение Новгорода", то "присоединение Пскова" не будет дистрактором.
+const _thematicRules = [
+    { id: 'join',       re: /присоединени|включени.*состав|вхожден.*состав|ликвидация независимости/i },
+    { id: 'treaty_swe', re: /(?:мир|договор|перемири).*швец|швец.*(?:мир|договор)|столбов.*мир|ништадт.*мир|або.*мир|верель|фридрихсгам/i },
+    { id: 'treaty_tur', re: /(?:мир|договор).*(?:турц|осман|перси|иран)|кючук|яссы.*(?:договор|мир)|адрианопол.*(?:договор|мир)|бухарест.*(?:договор|мир)|сан-стефан|ункяр|туркманчай/i },
+    { id: 'treaty_pol', re: /(?:мир|договор|перемири).*(?:реч|поспол|поль)|деулин.*перемири|андрусов|поляновк/i },
+    { id: 'mongol',     re: /батый|батыя|нашестви.*монгол|монгол.*нашестви|монгольск.*войск/i },
+    { id: 'revolt',     re: /восстани|бунт(?!ую)|мятеж/i },
+    { id: 'found',      re: /^основани|основание/i },
+    { id: 'suvorov',    re: /суворов/i },
+    { id: 'ww2_ops',    re: /операци.*(?:багратион|искра|уран|кутузов|румянцев)|контрнаступлен.*(?:сталинград|москв)/i },
+    { id: 'crimean_w',  re: /крымск.*войн|оборон.*севастопол.*крымск|синоп.*эскадр/i },
+    { id: 'svo',        re: /специальн.*военн.*операц|вхожден.*(?:днр|лнр|херсон|запорож|донецк|луганск|российск.*федерац.*2022)/i },
+];
+
+function getEventGroup(d) {
+    const text = (d.event || '') + ' ' + (d.geo || '');
+    for (const rule of _thematicRules) {
+        if (rule.re.test(text)) return rule.id;
+    }
+    return null;
+}
+
+// Кеш: строится один раз при первом вызове
+let _groupCache = null;
+function getGroupBannedValues(target) {
+    if (!_groupCache) {
+        _groupCache = {};
+        (window.bigData || []).forEach((d, i) => {
+            const g = getEventGroup(d);
+            if (g) {
+                if (!_groupCache[g]) _groupCache[g] = [];
+                _groupCache[g].push(d);
+            }
+        });
+    }
+    const targetGroups = new Set();
+    target.forEach(t => {
+        const g = getEventGroup(t);
+        if (g) targetGroups.add(g);
+    });
+    const banned = new Set();
+    for (const g of targetGroups) {
+        (_groupCache[g] || []).forEach(d => {
+            if (!target.includes(d)) {
+                banned.add(String(d.geo));
+                banned.add(String(d.event));
+                banned.add(String(d.year));
+            }
+        });
+    }
+    return banned;
+}
+
 // Task4: 75% — по одной из каждой эпохи, 25% — 2×XX + early + XVIII/XIX
 function pickTargetTask4(allowed, rowsCount) {
     if (rowsCount !== 4) return null;
     const ep = {};
     TASK_EPOCHS.forEach(e => { ep[e] = shuffleArray(allowed.filter(f => f.c === e)); });
     const usedEv = new Set();
-    const pick1 = (pool) => { for (const f of pool) { if (!usedEv.has(f.event)) { usedEv.add(f.event); return f; } } return null; };
+    const usedFP = new Set(); // fingerprints — запрет близнецов
+    const pick1 = (pool) => {
+        for (const f of pool) {
+            const fp = eventFingerprint(f);
+            if (!usedEv.has(f.event) && !usedFP.has(fp)) {
+                usedEv.add(f.event); usedFP.add(fp); return f;
+            }
+        }
+        return null;
+    };
     const use20twice = Math.random() < 0.25;
     let picked = [];
     if (use20twice && ep['20th'].length >= 2) {
@@ -229,6 +301,20 @@ function generateDistractorsTask4(target, poolItems) {
         }
     }
 
+    // ── Запрет на значения из «событий-близнецов» (same year+geo) ──
+    const targetFPs = new Set(target.map(eventFingerprint));
+    const bannedVals = new Set(poolItems.map(String));
+    window.bigData.forEach(d => {
+        if (targetFPs.has(eventFingerprint(d)) && !target.includes(d)) {
+            bannedVals.add(String(d.geo));
+            bannedVals.add(String(d.event));
+            bannedVals.add(String(d.year));
+        }
+    });
+    // ── Запрет на значения из тематической группы ──
+    const groupBanned = getGroupBannedValues(target);
+    groupBanned.forEach(v => bannedVals.add(v));
+
     // Авто-ловушки для годов
     function autoYearTraps(yearStr) {
         const y = parseInt(yearStr, 10);
@@ -262,24 +348,24 @@ function generateDistractorsTask4(target, poolItems) {
                 const pT = trapDict[relHid.row[type]];
                 if (pT && pT.length > 0) {
                     const trap = pT[Math.floor(Math.random() * pT.length)];
-                    if (!poolItems.includes(trap)) { poolItems.push(trap); continue; }
+                    if (!bannedVals.has(trap)) { poolItems.push(trap); bannedVals.add(trap); continue; }
                 }
             }
             // Авто-ловушки для годов
             if (type === 'year' && relHid) {
-                const picked = autoYearTraps(relHid.row.year).find(t => !poolItems.includes(t));
-                if (picked) { poolItems.push(picked); continue; }
+                const picked = autoYearTraps(relHid.row.year).find(t => !bannedVals.has(t));
+                if (picked) { poolItems.push(picked); bannedVals.add(picked); continue; }
             }
             // Авто-ловушки для гео
             if (type === 'geo' && relHid) {
-                const picked = autoGeoTraps(relHid.row.geo, relHid.row.c).find(t => !poolItems.includes(t));
-                if (picked) { poolItems.push(picked); continue; }
+                const picked = autoGeoTraps(relHid.row.geo, relHid.row.c).find(t => !bannedVals.has(t));
+                if (picked) { poolItems.push(picked); bannedVals.add(picked); continue; }
             }
             // Fallback
             let fnd = false, att = 0;
             while (!fnd && att < 50) {
                 const rF = pFacts[Math.floor(Math.random() * pFacts.length)];
-                if (rF && !poolItems.includes(rF[type])) { poolItems.push(rF[type]); fnd = true; }
+                if (rF && !bannedVals.has(rF[type])) { poolItems.push(rF[type]); bannedVals.add(rF[type]); fnd = true; }
                 att++;
             }
         }

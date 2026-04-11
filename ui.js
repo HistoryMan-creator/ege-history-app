@@ -493,8 +493,8 @@ function updateGlobalUI() {
     const egeEl = $('stat-ege');
     if (egeEl) {
         egeEl.textContent = '~' + sc;
-        egeEl.className = 'text-xs sm:text-sm font-black ' +
-            (sc >= 85 ? 'text-emerald-400' : sc >= 70 ? 'text-blue-300' : sc >= 55 ? 'text-yellow-300' : 'text-rose-400');
+        egeEl.className = 'text-sm font-black ' +
+            (sc >= 85 ? 'text-emerald-400' : sc >= 70 ? 'text-blue-400' : sc >= 55 ? 'text-yellow-300' : 'text-rose-400');
     }
     updateText($('stat-streak'), window.state.stats.streak);
     updateText($('stat-solved'), window.state.stats.totalSolvedEver);
@@ -532,12 +532,13 @@ function updateGlobalUI() {
     }
 
     let h = totalL === 0 ? 100 : Math.round((freshL / totalL) * 100);
-    let hC = 'text-emerald-400';
-    if (h < 50) hC = 'text-rose-400'; else if (h < 80) hC = 'text-yellow-400';
     if ($('stat-memory')) {
-        $('stat-memory').parentElement.classList.remove('text-emerald-400','text-rose-400','text-yellow-400');
-        $('stat-memory').parentElement.classList.add(hC);
-        updateText($('stat-memory'), h + '%');
+        const mem = $('stat-memory');
+        mem.classList.remove('text-emerald-400','text-rose-400','text-yellow-400');
+        if (h < 50) mem.classList.add('text-rose-400');
+        else if (h < 80) mem.classList.add('text-yellow-400');
+        else mem.classList.add('text-emerald-400');
+        updateText(mem, h + '%');
     }
 }
 

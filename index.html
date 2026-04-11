@@ -326,35 +326,34 @@
     <script src="app.js" defer></script>
 
     <!-- ШАПКА -->
-    <header id="main-header" class="bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-[#2c2c2c] sticky top-0 z-50 no-print transition-colors duration-400">
-        <div class="max-w-7xl mx-auto px-3 py-1.5 flex justify-between items-center h-11 sm:h-12">
-            <div class="flex items-center gap-2.5 cursor-pointer active:scale-90 transition-transform shrink-0" data-action="handleLogoClick">
+    <header id="main-header" class="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-[#0f0f0f] dark:to-[#141414] text-white sticky top-0 z-50 no-print transition-colors duration-400">
+        <div class="max-w-7xl mx-auto px-3 flex justify-between items-center h-11 sm:h-12">
+            <div class="flex items-center gap-2 cursor-pointer active:scale-90 transition-transform shrink-0" data-action="handleLogoClick">
                 <span class="text-xl sm:text-2xl">🏛️</span>
-                <span class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-200 tracking-tight hidden sm:inline">ЕГЭ История</span>
             </div>
-            <div class="flex items-center justify-center gap-3 sm:gap-5 flex-1 px-2">
+            <div class="flex items-center justify-center gap-3 sm:gap-4 flex-1 px-3">
                 <span id="stat-streak" class="hidden">0</span>
-                <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-[#2c2c2c] active:scale-95 transition-all rounded-lg px-2 py-1 select-none">
+                <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="flex items-center gap-1 bg-white/8 hover:bg-white/15 active:scale-95 transition-all rounded-lg px-2 py-1 select-none">
                     <span class="text-xs">📊</span>
-                    <span class="text-sm font-black text-amber-600 dark:text-amber-400" id="stat-ege">—</span>
+                    <span class="text-sm font-black text-amber-300" id="stat-ege">—</span>
                 </button>
-                <div class="flex items-center gap-1" title="Всего решено строк">
-                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400" id="stat-solved">0</span>
-                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500">строк</span>
+                <div class="flex items-center gap-1.5" title="Всего решено строк">
+                    <span class="text-[9px] font-bold text-white/40 uppercase">строк</span>
+                    <span class="text-sm font-black text-emerald-400" id="stat-solved">0</span>
                 </div>
-                <div class="flex items-center gap-1" title="Фактов в памяти">
-                    <span class="text-sm font-black text-violet-600 dark:text-violet-400" id="stat-learned">0</span>
-                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500">фактов</span>
+                <div class="flex items-center gap-1.5" title="Фактов в памяти">
+                    <span class="text-[9px] font-bold text-white/40 uppercase">фактов</span>
+                    <span class="text-sm font-black text-violet-400" id="stat-learned">0</span>
                 </div>
-                <div class="flex items-center gap-1 hidden sm:flex" title="Доля свежих карточек">
-                    <span class="text-sm font-black text-blue-600 dark:text-blue-400" id="stat-memory">100%</span>
-                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500">память</span>
+                <div class="hidden sm:flex items-center gap-1.5" title="Доля свежих карточек">
+                    <span class="text-[9px] font-bold text-white/40 uppercase">память</span>
+                    <span class="text-sm font-black text-emerald-400" id="stat-memory">100%</span>
                 </div>
             </div>
-            <div class="flex items-center shrink-0 gap-1">
-                <button data-action="openGlobalTopModal" title="Глобальный топ" class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#2c2c2c] rounded-lg transition-colors text-sm active:scale-95">🏆</button>
-                <button data-action="toggleFocusMode" class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#2c2c2c] rounded-lg transition-colors text-sm active:scale-95" title="Дзен режим">🧘</button>
-                <button data-action="toggleTheme" class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#2c2c2c] rounded-lg transition-colors text-sm active:scale-95" title="Сменить тему">🌙</button>
+            <div class="flex items-center shrink-0 gap-0.5 sm:gap-1 border-l border-white/10 pl-2 ml-1">
+                <button data-action="openGlobalTopModal" title="Глобальный топ" class="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-sm active:scale-95">🏆</button>
+                <button data-action="toggleFocusMode" class="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-sm active:scale-95" title="Дзен режим">🧘</button>
+                <button data-action="toggleTheme" class="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-sm active:scale-95" title="Сменить тему">🌙</button>
             </div>
         </div>
     </header>
