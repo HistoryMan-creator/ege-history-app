@@ -1498,6 +1498,24 @@
                 }
                 if (window.updateGlobalUI) window.updateGlobalUI();
                 if (window.updateProgressBars) window.updateProgressBars();
+
+                // ── FIX: после восстановления known_tg_id / google_uid из облака
+                // пересчитываем canonical ID — он мог измениться
+                const newCanonical = resolveUserId(fbUser);
+                if (newCanonical !== canonicalId && bestDocId && bestDocId !== newCanonical) {
+                    // Канонический ID изменился — копируем данные в новый документ
+                    // и помечаем старый как merged
+                    try {
+                        const bestPayload = allFound.get(bestDocId) || bestData;
+                        if (bestPayload) {
+                            await setDoc(doc(studentsCol, newCanonical), { ...bestPayload, tgId: newCanonical }, { merge: true });
+                            if (bestDocId !== newCanonical) {
+                                await setDoc(doc(studentsCol, bestDocId), { _mergedInto: newCanonical, _mergedAt: Date.now() }, { merge: true });
+                            }
+                            console.log(`[Sync] Canonical ID changed ${canonicalId} → ${newCanonical}, migrated`);
+                        }
+                    } catch(e) { console.warn('[Sync] Canonical migration error:', e); }
+                }
             } catch(e) { console.error('[Sync] loadProgressFromCloud error:', e); }
         };
 

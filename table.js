@@ -70,22 +70,22 @@ function pickTargetTask7(allowed, rowsCount) {
     if (rowsCount !== 4) return null;
     const ep = {};
     TASK_EPOCHS.forEach(e => { ep[e] = allowed.filter(f => f.c === e); });
-    const pickFrom = (pool, count, usedC) => {
+    const pickFrom = (pool, count, usedC, usedT) => {
         const res = [];
         for (const f of shuffleArray([...pool])) {
             if (res.length >= count) break;
-            if (!usedC.has(f.culture)) { res.push(f); usedC.add(f.culture); }
+            if (!usedC.has(f.culture) && !usedT.has(f.trait)) { res.push(f); usedC.add(f.culture); usedT.add(f.trait); }
         }
         return res;
     };
-    const usedC = new Set();
+    const usedC = new Set(), usedT = new Set();
     let picked = [];
     if (Math.random() < 0.5) {
-        TASK_EPOCHS.forEach(e => { picked.push(...pickFrom(ep[e], 1, usedC)); });
+        TASK_EPOCHS.forEach(e => { picked.push(...pickFrom(ep[e], 1, usedC, usedT)); });
     } else {
-        picked.push(...pickFrom(ep['early'], 1, usedC));
-        picked.push(...pickFrom(ep['19th'], 2, usedC));
-        picked.push(...pickFrom(ep['20th'], 1, usedC));
+        picked.push(...pickFrom(ep['early'], 1, usedC, usedT));
+        picked.push(...pickFrom(ep['19th'], 2, usedC, usedT));
+        picked.push(...pickFrom(ep['20th'], 1, usedC, usedT));
     }
     return picked.length === 4 ? shuffleArray(picked) : null;
 }
@@ -145,7 +145,14 @@ function generateDistractors(task, target, missing) {
         if (poolItems.length >= needed) break;
         poolItems.push(s.val);
     }
-    return poolItems;
+    // ── FIX: финальная дедупликация пула ──
+    const uniquePool = [];
+    const seenPool = new Set();
+    for (const item of poolItems) {
+        const str = String(item);
+        if (!seenPool.has(str)) { seenPool.add(str); uniquePool.push(item); }
+    }
+    return uniquePool;
 }
 
 function generateDistractorsTask4(target, poolItems) {
@@ -183,6 +190,44 @@ function generateDistractorsTask4(target, poolItems) {
         rowChoices.push(chosen);
         chosen.forEach(key => poolItems.push(row[key]));
     });
+
+    // ── FIX: устраняем дубликаты скрытых значений ──
+    // Если два слота ожидают одинаковый текст (напр. два "Тула"), пользователь
+    // не сможет понять, какой чип куда — меняем скрытое поле на другое.
+    const hiddenValues = new Map(); // value → [{rowIdx, typeIdx}]
+    rowChoices.forEach((chosen, ri) => {
+        chosen.forEach((key, ti) => {
+            const val = String(target[ri][key]);
+            if (!hiddenValues.has(val)) hiddenValues.set(val, []);
+            hiddenValues.get(val).push({ ri, ti });
+        });
+    });
+    for (const [val, slots] of hiddenValues) {
+        if (slots.length < 2) continue;
+        // Оставляем первый, остальные пробуем заменить
+        for (let s = 1; s < slots.length; s++) {
+            const { ri, ti } = slots[s];
+            const row = target[ri];
+            const curKey = rowChoices[ri][ti];
+            const allHiddenVals = new Set();
+            rowChoices.forEach((ch, i) => ch.forEach((k, j) => {
+                if (i !== ri || j !== ti) allHiddenVals.add(String(target[i][k]));
+            }));
+            // Пробуем заменить на другой тип, значение которого уникально
+            const alt = types.filter(t => t !== curKey && !rowChoices[ri].includes(t));
+            for (const newKey of alt) {
+                if (!allHiddenVals.has(String(row[newKey]))) {
+                    // Убираем старое значение из пула, добавляем новое
+                    const oldIdx = poolItems.indexOf(String(row[curKey]));
+                    if (oldIdx !== -1) poolItems.splice(oldIdx, 1);
+                    poolItems.push(row[newKey]);
+                    rowChoices[ri][ti] = newKey;
+                    hiddenRowsData[ri].types[ti] = newKey;
+                    break;
+                }
+            }
+        }
+    }
 
     // Авто-ловушки для годов
     function autoYearTraps(yearStr) {
@@ -240,7 +285,15 @@ function generateDistractorsTask4(target, poolItems) {
         }
     });
 
-    return { poolItems, rowChoices, blanksPerRow };
+    // ── FIX: финальная дедупликация пула ──
+    const uniquePool = [];
+    const seenPool = new Set();
+    for (const item of poolItems) {
+        const s = String(item);
+        if (!seenPool.has(s)) { seenPool.add(s); uniquePool.push(item); }
+    }
+
+    return { poolItems: uniquePool, rowChoices, blanksPerRow };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -325,7 +378,7 @@ function generateTwoColumnTable() {
             // Fallback: случайный выбор с дедупликацией
             target = [];
             const dedupeKey = task === 'task7' ? 'culture' : (task === 'task3' ? 'process' : 'event');
-            const dedupeKey2 = task === 'task3' ? 'fact' : (task === 'task5' ? 'person' : null);
+            const dedupeKey2 = task === 'task3' ? 'fact' : (task === 'task5' ? 'person' : 'trait');
             const used1 = new Set(), used2 = new Set();
             const shuf = shuffleArray([...allowed]);
             for (const f of shuf) {

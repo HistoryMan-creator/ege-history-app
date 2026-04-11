@@ -327,10 +327,14 @@ function checkAnswers(isSure) {
 
     // NORMAL MODE
     if (newlyCorrect > 0) {
-        const egePts = (allCorrect && filled === total)
-            ? calculateEgePoints(rows, window.state.currentTask || 'task4')
-            : 0;
-        updateScoreAndStats(newlyCorrect, !window.state.tableHasMistake && allCorrect, egePts);
+        updateScoreAndStats(newlyCorrect, !window.state.tableHasMistake && allCorrect, 0);
+    }
+    // ── FIX: ЕГЭ-баллы начисляются когда ВСЯ таблица решена, даже если были ошибки ──
+    if (allCorrect && filled === total) {
+        const egePts = calculateEgePoints(rows, window.state.currentTask || 'task4');
+        if (egePts > 0) {
+            updateScoreAndStats(0, false, egePts);
+        }
     }
     window.state.stats.achievementsData.maxMistakes = Math.max(window.state.stats.achievementsData.maxMistakes || 0, window.state.mistakesPool.length);
 
