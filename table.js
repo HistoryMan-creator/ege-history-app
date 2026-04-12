@@ -108,7 +108,28 @@ function pickTargetTask5(allowed, rowsCount) {
     const isSVO = f => f.year >= 2022;
     const isOther20 = f => f.year >= 1900 && f.year < 1941;
     const slotUE = new Set(), slotUP = new Set();
-    const pick1 = (pool) => { for (const f of pool) { if (!slotUE.has(f.event) && !slotUP.has(f.person)) { slotUE.add(f.event); slotUP.add(f.person); return f; } } return null; };
+    // Кросс-проверка: event → все person'ы
+    const eventPersons = {};
+    (window.task5Data || []).forEach(d => {
+        if (!eventPersons[d.event]) eventPersons[d.event] = new Set();
+        eventPersons[d.event].add(d.person);
+    });
+    const selectedPersons = new Set(), selectedEvents = new Set();
+    const pick1 = (pool) => {
+        for (const f of pool) {
+            if (slotUE.has(f.event) || slotUP.has(f.person)) continue;
+            // Прямая: ранее выбранный person подходит этому event?
+            const myAlts = eventPersons[f.event] || new Set();
+            const fwd = [...selectedPersons].some(sp => myAlts.has(sp));
+            // Обратная: person этого event подходит ранее выбранному event?
+            const rev = [...selectedEvents].some(se => (eventPersons[se] || new Set()).has(f.person));
+            if (fwd || rev) continue;
+            slotUE.add(f.event); slotUP.add(f.person);
+            selectedPersons.add(f.person); selectedEvents.add(f.event);
+            return f;
+        }
+        return null;
+    };
     const shuf = shuffleArray([...allowed]);
     const slot1 = pick1(shuf.filter(isEarly));
     const slot2 = pick1(shuf.filter(is1819));
@@ -126,22 +147,44 @@ function pickTargetTask7(allowed, rowsCount) {
     if (rowsCount !== 4) return null;
     const ep = {};
     TASK_EPOCHS.forEach(e => { ep[e] = allowed.filter(f => f.c === e); });
-    const pickFrom = (pool, count, usedC, usedT) => {
+
+    // Строим индекс: для каждой culture — все её traits из БД
+    const cultureTraits = {};
+    (window.task7Data || []).forEach(d => {
+        if (!cultureTraits[d.culture]) cultureTraits[d.culture] = new Set();
+        cultureTraits[d.culture].add(d.trait);
+    });
+
+    const pickFrom = (pool, count, usedC, usedT, selectedTraits, selectedCultures) => {
         const res = [];
         for (const f of shuffleArray([...pool])) {
             if (res.length >= count) break;
-            if (!usedC.has(f.culture) && !usedT.has(f.trait)) { res.push(f); usedC.add(f.culture); usedT.add(f.trait); }
+            if (usedC.has(f.culture) || usedT.has(f.trait)) continue;
+            const myAltTraits = cultureTraits[f.culture] || new Set();
+            // Прямая проверка: ранее выбранный trait подходит этой culture?
+            const fwd = [...selectedTraits].some(st => myAltTraits.has(st));
+            // Обратная проверка: trait этой записи подходит ранее выбранной culture?
+            const rev = [...selectedCultures].some(sc => {
+                const scAlts = cultureTraits[sc] || new Set();
+                return scAlts.has(f.trait);
+            });
+            if (fwd || rev) continue;
+            res.push(f);
+            usedC.add(f.culture);
+            usedT.add(f.trait);
+            selectedTraits.add(f.trait);
+            selectedCultures.add(f.culture);
         }
         return res;
     };
-    const usedC = new Set(), usedT = new Set();
+    const usedC = new Set(), usedT = new Set(), selectedTraits = new Set(), selectedCultures = new Set();
     let picked = [];
     if (Math.random() < 0.5) {
-        TASK_EPOCHS.forEach(e => { picked.push(...pickFrom(ep[e], 1, usedC, usedT)); });
+        TASK_EPOCHS.forEach(e => { picked.push(...pickFrom(ep[e], 1, usedC, usedT, selectedTraits, selectedCultures)); });
     } else {
-        picked.push(...pickFrom(ep['early'], 1, usedC, usedT));
-        picked.push(...pickFrom(ep['19th'], 2, usedC, usedT));
-        picked.push(...pickFrom(ep['20th'], 1, usedC, usedT));
+        picked.push(...pickFrom(ep['early'], 1, usedC, usedT, selectedTraits, selectedCultures));
+        picked.push(...pickFrom(ep['19th'], 2, usedC, usedT, selectedTraits, selectedCultures));
+        picked.push(...pickFrom(ep['20th'], 1, usedC, usedT, selectedTraits, selectedCultures));
     }
     return picked.length === 4 ? shuffleArray(picked) : null;
 }
@@ -177,10 +220,15 @@ function generateDistractors(task, target, missing) {
     const field = fieldMap[task];
 
     const usedVals = new Set(poolItems);
-    // Для task7 дополнительно исключаем trait'ы целевых культур
-    if (task === 'task7') {
-        const targetCultures = new Set(target.map(t => t.culture));
-        dataSource.forEach(d => { if (targetCultures.has(d.culture)) usedVals.add(d[field]); });
+    // Исключаем ВСЕ альтернативные ответы для того же видимого поля
+    // task7: все trait'ы той же culture. task5: все person'ы того же event. task3: все fact'ы того же process
+    const displayMap = { task3: 'process', task5: 'event', task7: 'culture' };
+    const displayField = displayMap[task];
+    if (displayField) {
+        const targetDisplayVals = new Set(target.map(t => t[displayField]));
+        dataSource.forEach(d => {
+            if (targetDisplayVals.has(d[displayField])) usedVals.add(d[field]);
+        });
     }
 
     const scored = [];
@@ -496,14 +544,50 @@ function generateTwoColumnTable() {
             const dedupeKey = task === 'task7' ? 'culture' : (task === 'task3' ? 'process' : 'event');
             const dedupeKey2 = task === 'task3' ? 'fact' : (task === 'task5' ? 'person' : 'trait');
             const used1 = new Set(), used2 = new Set();
+            // Task7: дополнительная проверка на кросс-неоднозначность
+            const selectedTraits = new Set();
+            const selectedCultures7 = new Set();
+            const cultureTraits7 = {};
+            if (task === 'task7') {
+                (window.task7Data || []).forEach(d => {
+                    if (!cultureTraits7[d.culture]) cultureTraits7[d.culture] = new Set();
+                    cultureTraits7[d.culture].add(d.trait);
+                });
+            }
+            // Task5: аналогичная проверка для event→person
+            const selectedPersons5 = new Set();
+            const selectedEvents5 = new Set();
+            const eventPersons5 = {};
+            if (task === 'task5') {
+                (window.task5Data || []).forEach(d => {
+                    if (!eventPersons5[d.event]) eventPersons5[d.event] = new Set();
+                    eventPersons5[d.event].add(d.person);
+                });
+            }
             const shuf = shuffleArray([...allowed]);
             for (const f of shuf) {
                 if (target.length >= rowsCount) break;
                 if (used1.has(f[dedupeKey])) continue;
                 if (dedupeKey2 && used2.has(f[dedupeKey2])) continue;
+                // Task7: trait не должен быть альтернативой другой уже выбранной culture и наоборот
+                if (task === 'task7') {
+                    const myAlts = cultureTraits7[f.culture] || new Set();
+                    const fwd = [...selectedTraits].some(st => myAlts.has(st));
+                    const rev = [...selectedCultures7].some(sc => (cultureTraits7[sc]||new Set()).has(f[dedupeKey2]));
+                    if (fwd || rev) continue;
+                }
+                // Task5: person не должен быть альтернативой другого уже выбранного event и наоборот
+                if (task === 'task5') {
+                    const myAlts = eventPersons5[f.event] || new Set();
+                    const fwd = [...selectedPersons5].some(sp => myAlts.has(sp));
+                    const rev = [...selectedEvents5].some(se => (eventPersons5[se]||new Set()).has(f.person));
+                    if (fwd || rev) continue;
+                }
                 target.push(f);
                 used1.add(f[dedupeKey]);
-                if (dedupeKey2) used2.add(f[dedupeKey2]);
+                if (dedupeKey2) { used2.add(f[dedupeKey2]); selectedTraits.add(f[dedupeKey2]); }
+                if (task === 'task7') selectedCultures7.add(f.culture);
+                if (task === 'task5') { selectedPersons5.add(f.person); selectedEvents5.add(f.event); }
             }
         }
     }
@@ -584,12 +668,16 @@ function generateTask4Table() {
         const coversAllEpochs4 = TASK_EPOCHS.every(e => allowed.some(f => f.c === e));
         if (coversAllEpochs4) target = pickTargetTask4(allowed, rowsCount) || [];
         if (target.length === 0) {
-            // Fallback с дедупликацией по event text
+            // Fallback с дедупликацией по event text + fingerprint
             target = [];
             const usedEvents = new Set();
+            const usedFPs = new Set();
             for (const f of shuffleArray([...allowed])) {
                 if (target.length >= rowsCount) break;
-                if (!usedEvents.has(f.event)) { target.push(f); usedEvents.add(f.event); }
+                const fp = eventFingerprint(f);
+                if (!usedEvents.has(f.event) && !usedFPs.has(fp)) {
+                    target.push(f); usedEvents.add(f.event); usedFPs.add(fp);
+                }
             }
         }
     }
