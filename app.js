@@ -81,6 +81,8 @@ window.backToLobby = function() {
         if (window.cancelDuelDb) window.cancelDuelDb();
         window.state.duel.active = false;
     }
+    // FIX #7: сброс режима при выходе
+    window.state.currentMode = 'normal';
     $('game-container').classList.add('hidden');
     $('game-container').classList.remove('flex');
     $('lobby-area').classList.remove('hidden');
@@ -100,6 +102,9 @@ window.backToLobby = function() {
         if (el) { el.classList.add('hidden'); el.classList.remove('flex', 'lg:flex-row'); }
     });
     document.body.classList.remove('mode-detective');
+    // FIX #10: убираем оверлей доски если остался
+    const bo = $('board-overlay');
+    if (bo) bo.classList.add('hidden');
     window.updateZenButton();
     updateProgressBars();
 };
@@ -209,9 +214,11 @@ window.handleSettingsChange = function() {
 // или строка, на которую был показан ответ (answersRevealed)
 function calculateEgePoints(rows, task) {
     if (window.state.answersRevealed) return 0;
-    const errCount = [...rows].filter(tr =>
-        tr.dataset.scored === 'fixed' || tr.dataset.scored === 'incorrect'
-    ).length;
+    const errCount = [...rows].filter(tr => {
+        const scored = tr.dataset.scored;
+        // Ошибка = исправленная строка, неправильная, или вообще не оценённая (была пропущена)
+        return scored === 'fixed' || scored === 'incorrect' || !scored;
+    }).length;
     if (task === 'task4') {
         return errCount === 0 ? 3 : errCount === 1 ? 2 : errCount === 2 ? 1 : 0;
     } else {
@@ -223,7 +230,7 @@ function calculateEgePoints(rows, task) {
 function checkAnswers(isSure) {
     isSure = isSure !== false;
     const rows = $$('#task-table-body tr');
-    let allCorrect = true, filled = 0, total = $$('.dnd-slot').length, newlyCorrect = 0;
+    let allCorrect = true, filled = 0, total = $$('#task-table-body .dnd-slot').length, newlyCorrect = 0;
 
     rows.forEach(tr => tr.querySelectorAll('.dnd-slot').forEach(slot => {
         if (slot.classList.contains('has-item') && !slot.classList.contains('revealed-slot')) filled++;
