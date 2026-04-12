@@ -18,9 +18,9 @@ function eventFingerprint(d) {
 // Если в задании "присоединение Новгорода", то "присоединение Пскова" не будет дистрактором.
 const _thematicRules = [
     { id: 'join',       re: /присоединени|включени.*состав|вхожден.*состав|ликвидация независимости/i },
-    { id: 'treaty_swe', re: /(?:мир|договор|перемири).*швец|швец.*(?:мир|договор)|столбов.*мир|ништадт.*мир|або.*мир|верель|фридрихсгам/i },
-    { id: 'treaty_tur', re: /(?:мир|договор).*(?:турц|осман|перси|иран)|кючук|яссы.*(?:договор|мир)|адрианопол.*(?:договор|мир)|бухарест.*(?:договор|мир)|сан-стефан|ункяр|туркманчай/i },
-    { id: 'treaty_pol', re: /(?:мир|договор|перемири).*(?:реч|поспол|поль)|деулин.*перемири|андрусов|поляновк/i },
+    { id: 'treaty_swe', re: /(?:мир|договор|перемири).*швец|швец.*(?:мир|договор)|столбов|ништадт|або.*швец|верель|фридрихсгам|кардис/i },
+    { id: 'treaty_tur', re: /(?:мир|договор).*(?:турц|осман|перси|иран)|кючук|(?:яссы|адрианопол|бухарест).*(?:договор|мир)|(?:договор|мир).*(?:яссы|адрианопол|бухарест)|сан-стефан|ункяр|туркманчай|гюлистан/i },
+    { id: 'treaty_pol', re: /(?:мир|договор|перемири).*(?:реч.*посполит|польш)|деулин|андрусов|поляновк/i },
     { id: 'mongol',     re: /батый|батыя|нашестви.*монгол|монгол.*нашестви|монгольск.*войск/i },
     { id: 'revolt',     re: /восстани|бунт(?!ую)|мятеж/i },
     { id: 'found',      re: /^основани|основание/i },
@@ -38,12 +38,12 @@ function getEventGroup(d) {
     return null;
 }
 
-// Кеш: строится один раз при первом вызове
+// Кеш групп: строится один раз при первом вызове
 let _groupCache = null;
-function getGroupBannedValues(target) {
+function ensureGroupCache() {
     if (!_groupCache) {
         _groupCache = {};
-        (window.bigData || []).forEach((d, i) => {
+        (window.bigData || []).forEach(d => {
             const g = getEventGroup(d);
             if (g) {
                 if (!_groupCache[g]) _groupCache[g] = [];
@@ -51,22 +51,6 @@ function getGroupBannedValues(target) {
             }
         });
     }
-    const targetGroups = new Set();
-    target.forEach(t => {
-        const g = getEventGroup(t);
-        if (g) targetGroups.add(g);
-    });
-    const banned = new Set();
-    for (const g of targetGroups) {
-        (_groupCache[g] || []).forEach(d => {
-            if (!target.includes(d)) {
-                banned.add(String(d.geo));
-                banned.add(String(d.event));
-                banned.add(String(d.year));
-            }
-        });
-    }
-    return banned;
 }
 
 // Task4: 75% — по одной из каждой эпохи, 25% — 2×XX + early + XVIII/XIX
@@ -246,27 +230,54 @@ function generateDistractorsTask4(target, poolItems) {
     const requiredFakes = { geo: fakesPerType, event: fakesPerType, year: fakesPerType };
     const hiddenRowsData = [];
 
+    // ── Определяем группы для каждой строки ──
+    const rowGroups = target.map(getEventGroup);
+
     function popType(av, excl) {
         const valIds = av.map((t, i) => excl.includes(t) ? -1 : i).filter(i => i !== -1);
         if (valIds.length === 0) return av.splice(Math.floor(Math.random() * av.length), 1)[0];
         return av.splice(valIds[Math.floor(Math.random() * valIds.length)], 1)[0];
     }
 
-    // Определяем что скрыть в каждой строке
+    // ── Определяем что скрыть в каждой строке ──
+    // Правило: если строка из тематической группы И у неё 1 бланк → нельзя скрывать event в одиночку
+    // (иначе в дистракторах появится другое "присоединение" и не понять какое правильное)
     const rowChoices = [];
     target.forEach((row, idx) => {
         const needed = blanksPerRow[idx];
+        const group = rowGroups[idx];
         const chosen = [];
-        for (let i = 0; i < needed; i++) chosen.push(popType(availableTypes, chosen));
+
+        if (group && needed === 1) {
+            // Группированная строка с 1 бланком → только geo или year
+            const geoOrYear = availableTypes.filter(t => t !== 'event');
+            if (geoOrYear.length > 0) {
+                const pickIdx = availableTypes.indexOf(geoOrYear[Math.floor(Math.random() * geoOrYear.length)]);
+                chosen.push(availableTypes.splice(pickIdx, 1)[0]);
+            } else {
+                // Все geo/year разобраны → берём event, но ОБЯЗАТЕЛЬНО добавляем 2-й бланк (geo или year)
+                chosen.push(availableTypes.splice(availableTypes.indexOf('event'), 1)[0]);
+                // Принудительно добавляем geo или year из оставшихся (или создаём новый)
+                const extra = availableTypes.findIndex(t => t !== 'event');
+                if (extra !== -1) {
+                    chosen.push(availableTypes.splice(extra, 1)[0]);
+                } else {
+                    // Совсем крайний случай: добавляем год без учёта availableTypes
+                    chosen.push(Math.random() < 0.5 ? 'geo' : 'year');
+                }
+                blanksPerRow[idx] = 2;
+            }
+        } else {
+            for (let i = 0; i < needed; i++) chosen.push(popType(availableTypes, chosen));
+        }
+
         hiddenRowsData.push({ row, types: chosen });
         rowChoices.push(chosen);
         chosen.forEach(key => poolItems.push(row[key]));
     });
 
     // ── FIX: устраняем дубликаты скрытых значений ──
-    // Если два слота ожидают одинаковый текст (напр. два "Тула"), пользователь
-    // не сможет понять, какой чип куда — меняем скрытое поле на другое.
-    const hiddenValues = new Map(); // value → [{rowIdx, typeIdx}]
+    const hiddenValues = new Map();
     rowChoices.forEach((chosen, ri) => {
         chosen.forEach((key, ti) => {
             const val = String(target[ri][key]);
@@ -276,7 +287,6 @@ function generateDistractorsTask4(target, poolItems) {
     });
     for (const [val, slots] of hiddenValues) {
         if (slots.length < 2) continue;
-        // Оставляем первый, остальные пробуем заменить
         for (let s = 1; s < slots.length; s++) {
             const { ri, ti } = slots[s];
             const row = target[ri];
@@ -285,11 +295,9 @@ function generateDistractorsTask4(target, poolItems) {
             rowChoices.forEach((ch, i) => ch.forEach((k, j) => {
                 if (i !== ri || j !== ti) allHiddenVals.add(String(target[i][k]));
             }));
-            // Пробуем заменить на другой тип, значение которого уникально
             const alt = types.filter(t => t !== curKey && !rowChoices[ri].includes(t));
             for (const newKey of alt) {
                 if (!allHiddenVals.has(String(row[newKey]))) {
-                    // Убираем старое значение из пула, добавляем новое
                     const oldIdx = poolItems.indexOf(String(row[curKey]));
                     if (oldIdx !== -1) poolItems.splice(oldIdx, 1);
                     poolItems.push(row[newKey]);
@@ -301,7 +309,8 @@ function generateDistractorsTask4(target, poolItems) {
         }
     }
 
-    // ── Запрет на значения из «событий-близнецов» (same year+geo) ──
+    // ── Строим bannedVals ──
+    // 1) Близнецы (same year+geo) → банятся полностью (все поля)
     const targetFPs = new Set(target.map(eventFingerprint));
     const bannedVals = new Set(poolItems.map(String));
     window.bigData.forEach(d => {
@@ -311,9 +320,30 @@ function generateDistractorsTask4(target, poolItems) {
             bannedVals.add(String(d.year));
         }
     });
-    // ── Запрет на значения из тематической группы ──
-    const groupBanned = getGroupBannedValues(target);
-    groupBanned.forEach(v => bannedVals.add(v));
+    // 2) Тематические группы → банятся ТОЛЬКО тексты событий
+    //    Год и гео из группы — ОТЛИЧНЫЕ дистракторы (проверяют знания)
+    const targetGroupIds = new Set(rowGroups.filter(Boolean));
+    ensureGroupCache();
+    if (targetGroupIds.size > 0 && _groupCache) {
+        for (const gid of targetGroupIds) {
+            (_groupCache[gid] || []).forEach(d => {
+                if (!target.includes(d)) {
+                    bannedVals.add(String(d.event)); // бан только на текст события
+                }
+            });
+        }
+    }
+    // 3) Записи с ИДЕНТИЧНЫМ текстом event → банятся ВСЕ их поля
+    //    Если event="вхождение в состав РФ" у target, а в базе ещё 3 таких —
+    //    их geo/year создают неразрешимую неоднозначность
+    const targetEvents = new Set(target.map(t => t.event));
+    window.bigData.forEach(d => {
+        if (targetEvents.has(d.event) && !target.includes(d)) {
+            bannedVals.add(String(d.geo));
+            bannedVals.add(String(d.event));
+            bannedVals.add(String(d.year));
+        }
+    });
 
     // Авто-ловушки для годов
     function autoYearTraps(yearStr) {
@@ -371,7 +401,7 @@ function generateDistractorsTask4(target, poolItems) {
         }
     });
 
-    // ── FIX: финальная дедупликация пула ──
+    // ── Финальная дедупликация пула ──
     const uniquePool = [];
     const seenPool = new Set();
     for (const item of poolItems) {
@@ -553,7 +583,15 @@ function generateTask4Table() {
         // Умный подбор работает если доступны все эпохи (all, или кастом покрывающий все)
         const coversAllEpochs4 = TASK_EPOCHS.every(e => allowed.some(f => f.c === e));
         if (coversAllEpochs4) target = pickTargetTask4(allowed, rowsCount) || [];
-        if (target.length === 0) target = shuffleArray([...allowed]).slice(0, Math.min(rowsCount, allowed.length));
+        if (target.length === 0) {
+            // Fallback с дедупликацией по event text
+            target = [];
+            const usedEvents = new Set();
+            for (const f of shuffleArray([...allowed])) {
+                if (target.length >= rowsCount) break;
+                if (!usedEvents.has(f.event)) { target.push(f); usedEvents.add(f.event); }
+            }
+        }
     }
 
     window.state.currentTargetData = target;

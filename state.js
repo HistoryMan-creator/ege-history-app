@@ -200,10 +200,16 @@ const SAVE_FIELDS = [
     'bestSpeedrunScore', 'dailyStats', 'achievements', 'achievementsData'
 ];
 
+const MAX_MISTAKES_POOL = 200;
+
 function buildSavePayload() {
     const s = window.state.stats;
     const payload = {};
     SAVE_FIELDS.forEach(k => { payload[k] = s[k]; });
+    // FIX #5: обрезаем пул ошибок — оставляем последние
+    if (window.state.mistakesPool.length > MAX_MISTAKES_POOL) {
+        window.state.mistakesPool = window.state.mistakesPool.slice(-MAX_MISTAKES_POOL);
+    }
     payload.mistakesPool = window.state.mistakesPool;
     payload.hideLearned = window.state.hideLearned;
     return payload;
@@ -297,7 +303,12 @@ function loadFromStorage() {
         const parsed = JSON.parse(saved);
         Object.assign(window.state.stats, parsed);
         if (parsed.streak !== undefined) window.state.stats.streak = parsed.streak;
-        if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
+        if (parsed.mistakesPool) {
+            window.state.mistakesPool = parsed.mistakesPool;
+            if (window.state.mistakesPool.length > MAX_MISTAKES_POOL) {
+                window.state.mistakesPool = window.state.mistakesPool.slice(-MAX_MISTAKES_POOL);
+            }
+        }
         window.state.hideLearned = true; // всегда скрываем выученное автоматически
 
         // Гарантируем структуру

@@ -164,7 +164,17 @@ window.answerFlashcard = function(isCorrect, isSure, e) {
     e.stopPropagation();
     const fact = window.state.currentFlashcardFact;
     const fKey = factKey(fact);
+    const task = window.state.currentTask;
     const mIdx = window.state.mistakesPool.findIndex(m => mistakeMatchesFact(m, fact));
+
+    // FIX #3: трекаем eraStats для флеш-карточек
+    const eraKey = getEraFromFact(fact, task);
+    if (eraKey) {
+        if (!window.state.stats.eraStats[task]) window.state.stats.eraStats[task] = {};
+        if (!window.state.stats.eraStats[task][eraKey]) window.state.stats.eraStats[task][eraKey] = { correct: 0, total: 0 };
+        window.state.stats.eraStats[task][eraKey].total++;
+        if (isCorrect) window.state.stats.eraStats[task][eraKey].correct++;
+    }
 
     if (isCorrect) {
         haptic('success');
@@ -408,7 +418,7 @@ window.handleRPPlainClick = function(e) {
         window.state.stats.streak = 0;
         window.state.rpHasMistake = true;
         updateGlobalUI();
-        saveProgress();
+        saveLocal(); // FIX #9: только локально, не спамим облако
     }
     setTimeout(() => n.classList.remove('animate-shake', 'text-rose-600', 'shaking'), 500);
     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');

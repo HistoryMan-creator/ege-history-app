@@ -2,60 +2,18 @@
 // Загружается первым (нет зависимостей от app.js)
 'use strict';
 
-// ── CSS: скрываем старые стат-элементы через CSS немедленно,
-//    без ожидания JS-событий. Это работает даже до DOMContentLoaded.
+// ── Минимальный CSS для шапки (без скрытия элементов) ──
 (function() {
     const s = document.createElement('style');
     s.id = '_topbar_css';
     s.textContent =
-        /* Скрыть старый блок статов шапки */
-        '#stat-solved,#stat-learned,#stat-memory{display:none!important}' +
-        'button[data-action="openEGEModal"]{display:none!important}' +
-        /* Скрыть старый центральный блок статистики целиком */
-        '#main-header .flex-1.px-2{display:none!important}' +
-        /* Правые кнопки — отступы */
-        '#main-header button[data-action="toggleFocusMode"],' +
-        '#main-header button[data-action="toggleTheme"],' +
-        '#main-header button[data-action="openGlobalTopModal"]{' +
-            'padding:6px 10px!important;margin:0 2px!important;border-radius:10px!important' +
-        '}' +
-        /* top-stats-bar — инлайн в строке шапки */
-        '#top-stats-bar{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}' +
         '#top-stats-bar [data-card]{transition:opacity .15s,transform .15s;cursor:pointer}' +
         '#top-stats-bar [data-card]:active{opacity:.75;transform:scale(.95)}';
     (document.head || document.documentElement).appendChild(s);
 })();
 
-// ── DOM патч: запускаем как можно раньше ────────────────────────────────────
+// ── Скрыть чекбокс "скрывать выученное" — он больше не нужен ──
 function patchHeaderDOM() {
-    const header = document.getElementById('main-header');
-    if (!header) return;
-
-    // 1. Найти центральный div с иконками (flex-1 px-2) и заменить его на top-stats-bar
-    const centerDiv = header.querySelector('.flex-1.px-2');
-    if (centerDiv && !document.getElementById('top-stats-bar')) {
-        // Создаём top-stats-bar ВМЕСТО старого центра — прямо в той же строке
-        const bar = document.createElement('div');
-        bar.id = 'top-stats-bar';
-        bar.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;padding:0 4px';
-        centerDiv.parentNode.replaceChild(bar, centerDiv);
-    } else if (!document.getElementById('top-stats-bar')) {
-        // Fallback: создаём внутри шапки
-        const bar = document.createElement('div');
-        bar.id = 'top-stats-bar';
-        bar.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;padding:0 4px';
-        const headerRow = header.querySelector('div');
-        if (headerRow) headerRow.insertBefore(bar, headerRow.children[1]);
-    }
-
-    // 2. Убрать фиксированную высоту h-10/h-12 из первой строки шапки
-    const headerRow = header.querySelector('div');
-    if (headerRow) {
-        ['h-10', 'h-12', 'sm:h-12'].forEach(c => headerRow.classList.remove(c));
-        headerRow.style.minHeight = '44px';
-    }
-
-    // 3. Скрыть чекбокс "скрывать выученное" в настройках
     const hll = document.getElementById('pg-hide-learned-container');
     if (hll) hll.style.display = 'none';
 }
@@ -188,6 +146,7 @@ document.addEventListener('app:ready', function initPullToRefresh() {
         if (diff > 80) {
             pulling = false;
             if (typeof haptic === 'function') haptic('medium');
+            if (window.loadProgressFromCloud) window.loadProgressFromCloud();
             if (typeof updateProgressBars === 'function') updateProgressBars();
             if (typeof updateGlobalUI === 'function') updateGlobalUI();
             showToast('🔄', 'Обновлено!', 'bg-blue-500', 'border-blue-700');
@@ -225,14 +184,12 @@ window.openGlobalSettings = function() {
         $('pg-database-container').classList.add('hidden');
     }
     
-    if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'custom';
+    if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'all';
     if ($('filter-case')) $('pg-filter-case').value = $('filter-case').value || 'rtw';
     if ($('filter-database')) $('pg-filter-database').value = $('filter-database').value || 'top100';
     if ($('filter-rows')) window.setPgRows($('filter-rows').value || '4');
-    // Always open custom period by default with 862-2026
-    if ($('pg-filter-period').value === 'custom' || $('pg-filter-period').value === 'all') {
-        $('pg-filter-period').value = 'custom';
-        $('filter-period').value = 'custom';
+    // Если свой период — подставляем дефолтные годы если пустые
+    if ($('pg-filter-period').value === 'custom') {
         if (!$('pg-custom-year-start').value || $('pg-custom-year-start').value === '0') $('pg-custom-year-start').value = '862';
         if (!$('pg-custom-year-end').value || $('pg-custom-year-end').value === '0') $('pg-custom-year-end').value = '2026';
     }
@@ -243,7 +200,7 @@ window.openGlobalSettings = function() {
 
 window.closePreGameModal = function() { hideModal('pre-game-modal'); $('pg-sheet').classList.add('translate-y-full'); };
 window.checkCustomPeriod = function() { $('pg-custom-period-container').classList.toggle('hidden', $('pg-filter-period').value !== 'custom'); };
-window.setPgRows = function(rows) { $$('.pg-row-btn').forEach(btn => btn.className = "pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors"); $(`btn-row-${rows}`).className = "pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors"; $('filter-rows').value = rows; };
+window.setPgRows = function(rows) { $$('.pg-row-btn').forEach(btn => btn.className = "pg-row-btn bg-white border-gray-200 text-gray-600 dark:bg-[#2c2c2c] dark:border-[#3f3f46] dark:text-gray-400 border-2 rounded-xl py-3 font-black text-sm transition-colors"); const active = $(`btn-row-${rows}`); if (active) active.className = "pg-row-btn bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-2 rounded-xl py-3 font-black text-sm transition-colors"; $('filter-rows').value = rows; };
 
 window.applyGlobalSettings = function() {
     haptic('medium'); 
@@ -542,13 +499,15 @@ function updateGlobalUI() {
     }
 }
 
-// ── Рендер компактной панели статистики (инлайн в шапке) ─────────────────
+// ── HW-баннер в шапке (заменяет статы когда есть ДЗ, возвращает обратно когда нет) ──
+let _headerCenterBackup = null;
 function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) {
-    const container = document.getElementById('top-stats-bar');
-    if (!container) return;
+    const center = document.getElementById('header-center');
+    if (!center) return;
 
-    // ── ДЗ-режим ────────────────────────────────────────────────────────────
     if (hwMode && hwMode.total > 0) {
+        // Сохраняем оригинальное содержимое если ещё не сохранили
+        if (!_headerCenterBackup) _headerCenterBackup = center.innerHTML;
         const parts = [];
         if (hwMode.t3 > 0) parts.push('🔗' + hwMode.t3);
         if (hwMode.t4 > 0) parts.push('📍' + hwMode.t4);
@@ -556,8 +515,8 @@ function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) 
         if (hwMode.t7 > 0) parts.push('🎨' + hwMode.t7);
         const dlRaw = localStorage.getItem('teacher_hw_deadline');
         const dlStr = dlRaw ? ' · до ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) : '';
-        container.innerHTML = `
-        <div data-card onclick="window.showHwTasksSequential&&window.showHwTasksSequential()"
+        center.innerHTML = `
+        <div id="top-stats-bar" data-card onclick="window.showHwTasksSequential&&window.showHwTasksSequential()"
              style="display:flex;align-items:center;gap:5px;background:rgba(239,68,68,0.82);border:1px solid rgba(255,255,255,0.22);border-radius:9px;padding:4px 10px;cursor:pointer;max-width:100%;overflow:hidden;animation:hwPulse 2s ease-in-out infinite;width:100%">
           <span style="font-size:12px;flex-shrink:0">🔥</span>
           <span style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">
@@ -566,37 +525,11 @@ function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) 
           <span style="font-size:9px;color:rgba(255,255,255,0.65);white-space:nowrap;flex-shrink:0">▶</span>
         </div>
         <style>@keyframes hwPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}50%{box-shadow:0 0 0 4px rgba(239,68,68,0)}}</style>`;
-        return;
+    } else if (_headerCenterBackup) {
+        // ДЗ выполнено — восстанавливаем статы
+        center.innerHTML = _headerCenterBackup;
+        _headerCenterBackup = null;
     }
-
-    // ── Цвета ────────────────────────────────────────────────────────────────
-    const scoreColor  = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
-    const daysColor   = daysLeft <= 14 ? '#f87171' : daysLeft <= 30 ? '#fbbf24' : '#a78bfa';
-    const daysLabel   = daysLeft === 0 ? 'ЕГЭ!' : daysLeft + 'д';
-    // ЕГЭ-баллы: светло-голубой → зелёный по накоплению
-    const ptsColor    = egePoints >= 500 ? '#34d399' : egePoints >= 200 ? '#60a5fa' : egePoints >= 50 ? '#fbbf24' : 'rgba(255,255,255,0.75)';
-
-    const sep = `<span style="color:rgba(255,255,255,0.18);font-size:14px;flex-shrink:0;user-select:none;line-height:1">│</span>`;
-
-    const stat = (icon, value, color, onclick, title) =>
-        `<div data-card onclick="${onclick}" title="${title}"
-              style="display:flex;align-items:center;gap:3px;cursor:pointer;flex-shrink:0;padding:3px 6px;border-radius:7px"
-              onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background=''"
-              ontouchstart="this.style.background='rgba(255,255,255,0.1)'" ontouchend="this.style.background=''">
-           <span style="font-size:12px;line-height:1;flex-shrink:0">${icon}</span>
-           <span style="font-size:13px;font-weight:900;color:${color};line-height:1;letter-spacing:-.3px">${value}</span>
-         </div>`;
-
-    container.innerHTML =
-        `<div style="display:flex;align-items:center;justify-content:center;gap:0;width:100%;overflow:hidden;min-width:0">` +
-            stat('📊', '~' + sc,          scoreColor, "window.openEGEModal&&window.openEGEModal()",    'Прогноз ЕГЭ') +
-            sep +
-            stat('📅', daysLabel,          daysColor,  "window.openEGEModal&&window.openEGEModal()",    'Дней до ЕГЭ') +
-            sep +
-            stat('⭐', egePoints + 'б',    ptsColor,   "window.openStatsModal&&window.openStatsModal()", 'Набрано баллов (по критериям ЕГЭ)') +
-            sep +
-            stat('🧠', totalL,             '#c4b5fd',  "window.openStatsModal&&window.openStatsModal()", 'Фактов выучено') +
-        `</div>`;
 }
 
 let toastTimeout = null;
