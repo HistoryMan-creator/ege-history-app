@@ -127,9 +127,6 @@ window.finishOnboarding = function() {
 };
 
 // === PULL-TO-REFRESH ===
-// БАГ-ФИКс: эта функция вызывалась как IIFE с $ из app.js, который ещё не загружен.
-// $ — это const из app.js, он не доступен когда выполняется ui.js (defer-порядок).
-// Решение: используем document.getElementById напрямую и откладываем до app:ready.
 document.addEventListener('app:ready', function initPullToRefresh() {
     let startY = 0, pulling = false;
     const lobby = document.getElementById('lobby-area');
@@ -155,9 +152,8 @@ document.addEventListener('app:ready', function initPullToRefresh() {
     lobby.addEventListener('touchend', function() { pulling = false; }, { passive: true });
 }, { once: true });
 
-// app:ready — дополнительный рендер на случай если patchHeaderDOM отработал раньше initStorage
 document.addEventListener('app:ready', function() {
-    patchHeaderDOM(); // idempotent — повторный вызов безопасен
+    patchHeaderDOM();
     if (typeof updateGlobalUI === 'function') updateGlobalUI();
 }, { once: true });
 
@@ -168,17 +164,15 @@ window.openGlobalSettings = function() {
     $('pg-rows-container').classList.remove('hidden');
     $('pg-case-container').classList.add('hidden'); 
     $('pg-database-container').classList.remove('hidden'); 
-    if ($('pg-hide-learned-container')) $('pg-hide-learned-container').classList.add('hidden'); // выключено — всегда активно
+    if ($('pg-hide-learned-container')) $('pg-hide-learned-container').classList.add('hidden');
     
-    // Hide period & rows for detective mode (Secret Archive uses its own case system)
     if (window.state.currentMode === 'detective') {
         $('pg-period-container').classList.add('hidden');
         $('pg-rows-container').classList.add('hidden');
         $('pg-database-container').classList.add('hidden');
-        $('pg-hide-learned-container').classList.add('hidden');
+        if ($('pg-hide-learned-container')) $('pg-hide-learned-container').classList.add('hidden');
         $('pg-case-container').classList.remove('hidden');
     }
-    // Hide rows for red pencil mode
     if (window.state.currentMode === 'redpencil') {
         $('pg-rows-container').classList.add('hidden');
         $('pg-database-container').classList.add('hidden');
@@ -188,7 +182,7 @@ window.openGlobalSettings = function() {
     if ($('filter-case')) $('pg-filter-case').value = $('filter-case').value || 'rtw';
     if ($('filter-database')) $('pg-filter-database').value = $('filter-database').value || 'top100';
     if ($('filter-rows')) window.setPgRows($('filter-rows').value || '4');
-    // Если свой период — подставляем дефолтные годы если пустые
+    
     if ($('pg-filter-period').value === 'custom') {
         if (!$('pg-custom-year-start').value || $('pg-custom-year-start').value === '0') $('pg-custom-year-start').value = '862';
         if (!$('pg-custom-year-end').value || $('pg-custom-year-end').value === '0') $('pg-custom-year-end').value = '2026';
@@ -209,7 +203,6 @@ window.applyGlobalSettings = function() {
     $('custom-year-end').value = $('pg-custom-year-end').value;
     $('filter-case').value = $('pg-filter-case').value;
     if ($('filter-database')) $('filter-database').value = $('pg-filter-database').value;
-    // hideLearned всегда активно автоматически — не нужно из UI
     
     saveProgress();
     closePreGameModal();
@@ -249,7 +242,6 @@ function toggleHideLearned() { window.state.hideLearned = $('toggle-hide-learned
 
 window.startHwFromBanner = function() {
     haptic('light');
-    // Стартуем с задания у которого больше всего строк в ДЗ
     const s = window.state.stats;
     const tasks = [
         { key: 'task3', cnt: s.hwTask3||0 },
@@ -261,11 +253,9 @@ window.startHwFromBanner = function() {
     quickStartGame(best.cnt > 0 ? best.key : 'task4', 'normal');
 };
 
-// ── Показать задания ДЗ последовательно (мини просмотрщик) ─────────────────
 window.showHwTasksSequential = function() {
     haptic('light');
     const s = window.state.stats;
-    // Собираем список заданий с их количеством
     const tasks = [];
     if ((s.hwTask3||0) > 0) tasks.push({ key: 'task3', emoji: '🔗', name: 'Задание №3 — Процессы', cnt: s.hwTask3 });
     if ((s.hwTask4||0) > 0) tasks.push({ key: 'task4', emoji: '📍', name: 'Задание №4 — География', cnt: s.hwTask4 });
@@ -320,7 +310,6 @@ window.showHwTasksSequential = function() {
             </button>` : ''}
           </div>
         </div>`;
-        // Bind next step
         overlay._nextStep = () => { idx = Math.min(idx + 1, tasks.length - 1); renderStep(); };
     }
     renderStep();
@@ -378,7 +367,6 @@ window.openEGEModal = function() {
         })()}
       </div>`;
 
-    // Используем существующий модал-контейнер через innerHTML overlay
     const overlayId = 'ege-score-overlay';
     let overlay = document.getElementById(overlayId);
     if (!overlay) {
@@ -412,11 +400,9 @@ function updateGlobalUI() {
         if (window.isFactLearned(d)) { totalL++; if (d.nextReview > now) freshL++; }
     });
 
-    // ── Счётчик дней до ЕГЭ (1 июня 2026, 10:00 МСК = 07:00 UTC) ──
     const EGE_DATE = new Date('2026-06-01T07:00:00Z');
     const daysLeft = Math.max(0, Math.ceil((EGE_DATE - now) / 86400000));
 
-    // ── Средняя точность по всем заданиям ──
     let totalCorrect = 0, totalAttempts = 0;
     const es = window.state.stats.eraStats || {};
     ['task3','task4','task5','task7'].forEach(tk => {
@@ -428,14 +414,10 @@ function updateGlobalUI() {
     });
     const accuracy = totalAttempts >= 10 ? Math.round(totalCorrect / totalAttempts * 100) : null;
 
-    // ── ЕГЭ-баллы за задания ──
     const egePoints = window.state.stats.egePoints || 0;
-
-    // ── Балл ЕГЭ ──
     const egeResult = estimateEGEScore(window.state.stats);
     const sc = egeResult.score;
 
-    // ── Обновляем панель верхней строки ──
     const hwTotal = window.state.stats.hwFlashcardsToSolve || 0;
     const hwMode = hwTotal > 0 ? {
         total: hwTotal,
@@ -446,22 +428,18 @@ function updateGlobalUI() {
     } : null;
     renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved: window.state.stats.totalSolvedEver || 0, hwMode });
 
-    // Обратная совместимость — старые элементы если есть
     const egeEl = $('stat-ege');
     if (egeEl) {
-        egeEl.textContent = '~' + sc;
-        egeEl.className = 'text-xs sm:text-sm font-black ' +
-            (sc >= 85 ? 'text-emerald-400' : sc >= 70 ? 'text-blue-400' : sc >= 55 ? 'text-yellow-300' : 'text-rose-400');
+        egeEl.textContent = sc;
+        egeEl.className = 'text-[14px] sm:text-[16px] font-black text-[#fbbf24] leading-none group-hover:scale-110 transition-transform';
     }
-    // Progress ring around EGE score
     const egeRing = $('ege-ring');
     if (egeRing) {
-        const circumference = 97.4; // 2 * PI * 15.5
+        const circumference = 97.4;
         const pct = Math.min(sc / 100, 1);
         egeRing.style.strokeDashoffset = circumference * (1 - pct);
-        egeRing.style.stroke = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
+        egeRing.style.stroke = '#fbbf24';
     }
-    // Days until EGE
     if ($('stat-days')) updateText($('stat-days'), daysLeft);
 
     updateText($('stat-streak'), window.state.stats.streak);
@@ -471,7 +449,6 @@ function updateGlobalUI() {
     updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver);
     updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
 
-    // Per-task solved counters
     const sbt = window.state.stats.solvedByTask || {};
     if ($('modal-stat-task3')) $('modal-stat-task3').textContent = sbt.task3 || 0;
     if ($('modal-stat-task4')) updateText($('modal-stat-task4'), sbt.task4 || 0);
@@ -510,14 +487,12 @@ function updateGlobalUI() {
     }
 }
 
-// ── HW-баннер в шапке (заменяет статы когда есть ДЗ, возвращает обратно когда нет) ──
 let _headerCenterBackup = null;
 function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) {
     const center = document.getElementById('header-center');
     if (!center) return;
 
     if (hwMode && hwMode.total > 0) {
-        // Сохраняем оригинальное содержимое если ещё не сохранили
         if (!_headerCenterBackup) _headerCenterBackup = center.innerHTML;
         const parts = [];
         if (hwMode.t3 > 0) parts.push('🔗' + hwMode.t3);
@@ -528,7 +503,7 @@ function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) 
         const dlStr = dlRaw ? ' · до ' + new Date(dlRaw + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) : '';
         center.innerHTML = `
         <div id="top-stats-bar" data-card onclick="window.showHwTasksSequential&&window.showHwTasksSequential()"
-             style="display:flex;align-items:center;gap:5px;background:rgba(239,68,68,0.82);border:1px solid rgba(255,255,255,0.22);border-radius:9px;padding:4px 10px;cursor:pointer;max-width:100%;overflow:hidden;animation:hwPulse 2s ease-in-out infinite;width:100%">
+             style="display:flex;align-items:center;gap:5px;background:rgba(239,68,68,0.82);border:1px solid rgba(255,255,255,0.22);border-radius:14px;padding:6px 12px;cursor:pointer;max-width:100%;overflow:hidden;animation:hwPulse 2s ease-in-out infinite;width:100%">
           <span style="font-size:12px;flex-shrink:0">🔥</span>
           <span style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">
             ДЗ: ${hwMode.total} строк${parts.length ? ' · ' + parts.join(' ') : ''}${dlStr}
@@ -537,7 +512,6 @@ function renderTopBar({ daysLeft, sc, egePoints, totalL, totalSolved, hwMode }) 
         </div>
         <style>@keyframes hwPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)}50%{box-shadow:0 0 0 4px rgba(239,68,68,0)}}</style>`;
     } else if (_headerCenterBackup) {
-        // ДЗ выполнено — восстанавливаем статы
         center.innerHTML = _headerCenterBackup;
         _headerCenterBackup = null;
     }
@@ -549,8 +523,8 @@ function showToast(emoji, text, bg, border) { const t = $('joke-toast'), c = $('
 function endGame() {
     clearInterval(window.state.timerInterval); $('modal-score').innerText = window.state.stats.streak;
     if (window.state.currentMode === 'speedrun') { if (window.state.stats.streak > (window.state.stats.bestSpeedrunScore || 0)) { window.state.stats.bestSpeedrunScore = window.state.stats.streak; checkAchievements(); } }
-    saveLocal(); // ✅ Сохраняем локально сразу
-    syncNow();   // ✅ И немедленно в облако — игра завершена, это ключевое событие
+    saveLocal(); 
+    syncNow();   
     showModal('game-over-modal'); $('board-overlay').classList.remove('hidden');
 }
 
@@ -639,17 +613,46 @@ window.openTeacherModal = function() {
 window.saveTeacherClassCode = function() { const cd = $('teacher-class-code-input').value.trim(); if(cd) localStorage.setItem('teacher_class_code', cd); if (window.loadClassProgress) window.loadClassProgress(); };
 window.switchTeacherTab = function(tab) { ['stats', 'weekly'].forEach(t => { $(`teacher-tab-${t}`).classList.add('hidden'); $(`teacher-tab-${t}`).classList.remove('flex'); $(`tab-btn-${t}`).className = "py-3 text-[9px] sm:text-xs font-black border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 transition-colors uppercase tracking-wide leading-none truncate"; }); $(`teacher-tab-${tab}`).classList.remove('hidden'); $(`teacher-tab-${tab}`).classList.add('flex'); $(`tab-btn-${tab}`).className = "py-3 text-[9px] sm:text-xs font-black border-b-2 border-examBlue text-examBlue dark:text-blue-400 transition-colors uppercase tracking-wide leading-none truncate"; if (window.loadClassProgress) window.loadClassProgress(); };
 
-window.copyTextReport = function() { 
-    const tM = Math.floor((window.state.stats.totalTimeSpent || 0) / 60); 
-    const lC = Object.values(window.state.stats.factStreaks || {}).filter(window.isFactLearned).length; 
-    let t = `🎓 Отчет: Тренажер ЕГЭ История\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n⏱ Время: ${tM} мин\n✅ Решено: ${window.state.stats.totalSolvedEver}\n🃏 Карточек: ${window.state.stats.flashcardsSolved || 0}\n🔥 Стрик: ${window.state.stats.streak}\n🧠 Выучено: ${lC} фактов\n\n📊 По эпохам:\n`; 
-    const rawEra = window.state.stats.eraStats || {};
-    Object.entries(TASK_EPOCH_NAMES).forEach(([k, n]) => {
-        let correct = 0, total = 0;
-        ['task3','task4','task5','task7'].forEach(tk => { const e = (rawEra[tk] || {})[k] || {}; correct += e.correct || 0; total += e.total || 0; });
-        t += `- ${n}: ${total > 0 ? Math.round((correct / total) * 100) : 0}% (${correct} из ${total})\n`;
+window.openGlobalTopModal = function() {
+    showModal('global-top-modal');
+    if (window.loadGlobalLeaderboard) window.loadGlobalLeaderboard();
+};
+
+window.copyTextReport = function() {
+    const s = window.state.stats;
+    let t = `🏛 Тренажер ЕГЭ: История\n\n`;
+    t += `📊 Всего решено: ${s.totalSolvedEver || 0}\n`;
+    t += `🔥 Текущий стрик: ${s.streak || 0}\n`;
+    
+    if (typeof estimateEGEScore === 'function') {
+        const egeResult = estimateEGEScore(s);
+        t += `🎓 Прогноз ЕГЭ: ${egeResult.score} баллов\n\n`;
+    }
+
+    t += `📈 Точность по эпохам:\n`;
+    const tasks = ['task3', 'task4', 'task5', 'task7'];
+    const eMap = { 'early': 'Древность', '18th': 'XVIII в.', '19th': 'XIX в.', '20th': 'XX в.' };
+    const combinedEra = { 'early': {c:0,t:0}, '18th': {c:0,t:0}, '19th': {c:0,t:0}, '20th': {c:0,t:0} };
+    
+    tasks.forEach(tk => {
+        if (!s.eraStats || !s.eraStats[tk]) return;
+        Object.keys(eMap).forEach(eKey => {
+            if (s.eraStats[tk][eKey]) {
+                combinedEra[eKey].c += s.eraStats[tk][eKey].correct || 0;
+                combinedEra[eKey].t += s.eraStats[tk][eKey].total || 0;
+            }
+        });
     });
-    if (window.state.mistakesPool.length > 0) { 
+    
+    Object.keys(eMap).forEach(eKey => {
+        const correct = combinedEra[eKey].c;
+        const total = combinedEra[eKey].t;
+        if (total === 0) return;
+        const pct = Math.round((correct / total) * 100);
+        t += `- ${eMap[eKey]}: ${pct}% (${correct} из ${total})\n`;
+    });
+
+    if (window.state.mistakesPool && window.state.mistakesPool.length > 0) { 
         t += `\n⚠️ Ошибки:\n`; 
         window.state.mistakesPool.forEach((m, i) => { 
             if (m.task === 'task7') t += `${i + 1}. ${m.fact.culture} ➡️ ${m.fact.trait}\n`;
@@ -658,9 +661,12 @@ window.copyTextReport = function() {
             else t += `${i + 1}. ${m.fact.geo} | ${m.fact.event} | ${m.fact.year}\n`; 
         }); 
     } else t += `\n🎉 Ошибок нет!\n`; 
+    
     const copyFn = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700'); }; 
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700')).catch(copyFn); else copyFn(); 
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => showToast('📋', 'Скопировано!', 'bg-emerald-500', 'border-emerald-700')).catch(copyFn); else copyFn();
 };
 
-window.openMapModal = function(name) { const cd = typeof geoDict !== 'undefined' ? geoDict[name] : null; $('yandex-map-iframe').src = cd ? `https://yandex.ru/map-widget/v1/?ll=${cd[0]},${cd[1]}&z=6&pt=${cd[0]},${cd[1]},pm2rdm` : `https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(name + ' историческое место')}&z=6`; $('map-modal-title').innerText = name; showModal('map-modal'); };
-
+window.handleLogoClick = function() {
+    if (typeof haptic === 'function') haptic('light');
+    showToast('🏛️', 'Тренажер ЕГЭ: История (ULTIMATE)', 'bg-blue-500', 'border-blue-700');
+};
