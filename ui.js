@@ -450,9 +450,20 @@ function updateGlobalUI() {
     const egeEl = $('stat-ege');
     if (egeEl) {
         egeEl.textContent = '~' + sc;
-        egeEl.className = 'text-sm font-black ' +
+        egeEl.className = 'text-xs sm:text-sm font-black ' +
             (sc >= 85 ? 'text-emerald-400' : sc >= 70 ? 'text-blue-400' : sc >= 55 ? 'text-yellow-300' : 'text-rose-400');
     }
+    // Progress ring around EGE score
+    const egeRing = $('ege-ring');
+    if (egeRing) {
+        const circumference = 97.4; // 2 * PI * 15.5
+        const pct = Math.min(sc / 100, 1);
+        egeRing.style.strokeDashoffset = circumference * (1 - pct);
+        egeRing.style.stroke = sc >= 85 ? '#34d399' : sc >= 70 ? '#60a5fa' : sc >= 55 ? '#fbbf24' : '#f87171';
+    }
+    // Days until EGE
+    if ($('stat-days')) updateText($('stat-days'), daysLeft);
+
     updateText($('stat-streak'), window.state.stats.streak);
     updateText($('stat-solved'), window.state.stats.totalSolvedEver);
     if ($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver);
@@ -489,6 +500,12 @@ function updateGlobalUI() {
     }
 
     let h = totalL === 0 ? 100 : Math.round((freshL / totalL) * 100);
+    // Memory icon color indicator
+    const memIcon = $('stat-memory-icon');
+    if (memIcon) {
+        memIcon.textContent = h >= 80 ? '🌙' : h >= 50 ? '🔥' : '⚠️';
+        memIcon.title = 'Память: ' + h + '%';
+    }
     if ($('stat-memory')) {
         const mem = $('stat-memory');
         mem.classList.remove('text-emerald-400','text-rose-400','text-yellow-400');

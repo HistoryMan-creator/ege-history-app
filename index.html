@@ -331,23 +331,40 @@
             <div class="flex items-center gap-2 cursor-pointer active:scale-90 transition-transform shrink-0" data-action="handleLogoClick">
                 <span class="text-xl sm:text-2xl">🏛️</span>
             </div>
-            <div id="header-center" class="flex items-center justify-center gap-3 sm:gap-4 flex-1 px-3">
+            <div id="header-center" class="flex items-center justify-center flex-1 px-1 sm:px-3">
                 <span id="stat-streak" class="hidden">0</span>
-                <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="flex items-center gap-1 bg-white/8 hover:bg-white/15 active:scale-95 transition-all rounded-lg px-2 py-1 select-none">
-                    <span class="text-xs">📊</span>
-                    <span class="text-sm font-black text-amber-300" id="stat-ege">—</span>
-                </button>
-                <div class="flex items-center gap-1.5" title="Всего решено строк">
-                    <span class="text-[9px] font-bold text-white/40 uppercase">строк</span>
-                    <span class="text-sm font-black text-emerald-400" id="stat-solved">0</span>
-                </div>
-                <div class="flex items-center gap-1.5" title="Фактов в памяти">
-                    <span class="text-[9px] font-bold text-white/40 uppercase">фактов</span>
-                    <span class="text-sm font-black text-violet-400" id="stat-learned">0</span>
-                </div>
-                <div class="hidden sm:flex items-center gap-1.5" title="Доля свежих карточек">
-                    <span class="text-[9px] font-bold text-white/40 uppercase">память</span>
-                    <span class="text-sm font-black text-emerald-400" id="stat-memory">100%</span>
+                <div id="top-stats-bar" class="flex items-center gap-0 sm:gap-1 bg-white/[0.06] border border-white/[0.12] rounded-xl px-1.5 sm:px-3 py-1 w-full max-w-md justify-between">
+                    <!-- Progress ring + EGE score -->
+                    <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="flex items-center gap-0 active:scale-95 transition-transform select-none shrink-0">
+                        <div class="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center">
+                            <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5"/>
+                                <circle id="ege-ring" cx="18" cy="18" r="15.5" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="97.4" style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s"/>
+                            </svg>
+                            <span class="text-xs sm:text-sm font-black text-amber-300" id="stat-ege">—</span>
+                        </div>
+                    </button>
+                    <!-- Learned facts -->
+                    <div class="flex flex-col items-center leading-none px-1 sm:px-2" title="Выучено фактов">
+                        <span class="text-sm sm:text-base font-black text-emerald-400" id="stat-learned">0</span>
+                        <span class="text-[7px] sm:text-[8px] font-bold text-white/40 uppercase tracking-wide">выучено</span>
+                    </div>
+                    <!-- Points earned -->
+                    <div class="flex flex-col items-center leading-none px-1 sm:px-2" title="Баллов за задания">
+                        <span class="text-sm sm:text-base font-black text-blue-400" id="stat-solved">0</span>
+                        <span class="text-[7px] sm:text-[8px] font-bold text-white/40 uppercase tracking-wide">баллов</span>
+                    </div>
+                    <!-- Days left -->
+                    <div class="flex flex-col items-center leading-none px-1 sm:px-2" title="Дней до ЕГЭ">
+                        <span class="text-sm sm:text-base font-black italic text-rose-400" id="stat-days">—</span>
+                        <span class="text-[7px] sm:text-[8px] font-bold text-white/40 uppercase tracking-wide">дней</span>
+                    </div>
+                    <!-- Icons -->
+                    <div class="flex items-center gap-0.5 shrink-0">
+                        <span class="text-sm sm:text-base" title="Достижения">🏆</span>
+                        <span class="text-sm sm:text-base" title="Стрик">🔥</span>
+                        <span class="text-sm sm:text-base" id="stat-memory-icon" title="Память">🌙</span>
+                    </div>
                 </div>
             </div>
             <div class="flex items-center shrink-0 gap-0.5 sm:gap-1 border-l border-white/10 pl-2 ml-1">
