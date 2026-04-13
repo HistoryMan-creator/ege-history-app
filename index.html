@@ -326,51 +326,58 @@
     <script src="app.js" defer></script>
 
     <!-- ШАПКА -->
-    <header id="main-header" class="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-[#0f0f0f] dark:to-[#141414] text-white sticky top-0 z-50 no-print transition-colors duration-400">
-        <div class="max-w-7xl mx-auto px-2 sm:px-3 flex items-center h-11 sm:h-12 gap-2">
-            <!-- Logo -->
-            <div class="flex items-center cursor-pointer active:scale-90 transition-transform shrink-0" data-action="handleLogoClick">
-                <span class="text-lg sm:text-xl">🏛️</span>
-            </div>
-            <!-- Stats bar -->
-            <div id="header-center" class="flex-1 min-w-0">
-                <span id="stat-streak" class="hidden">0</span>
-                <div id="top-stats-bar" class="flex items-center bg-white/[0.07] border border-white/[0.10] rounded-[10px] px-2 sm:px-3 py-[5px] gap-2 sm:gap-3">
-                    <!-- Progress ring + EGE score -->
-                    <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="active:scale-95 transition-transform select-none shrink-0">
-                        <div class="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center">
-                            <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2.8"/>
-                                <circle id="ege-ring" cx="18" cy="18" r="15.5" fill="none" stroke="#f59e0b" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="97.4" style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s"/>
-                            </svg>
-                            <span class="text-[13px] sm:text-[14px] font-black text-amber-300 leading-none" id="stat-ege">—</span>
-                        </div>
+    <header id="main-header" class="bg-gray-50 dark:bg-[#121212] sticky top-0 z-50 no-print transition-colors duration-400 pt-2 pb-2 sm:pt-3 sm:pb-3 px-2 sm:px-4">
+        <div id="header-center" class="max-w-4xl mx-auto w-full">
+            <span id="stat-streak" class="hidden">0</span>
+            
+            <div id="top-stats-bar" class="flex items-center justify-between bg-[#1f2f4e] dark:bg-[#1A2C4D] rounded-2xl px-3 sm:px-5 py-2.5 sm:py-3 w-full shadow-lg border border-white/10">
+                
+                <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+                    <div class="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/20 rounded-xl cursor-pointer active:scale-95 transition-all shadow-inner" data-action="handleLogoClick">
+                        <span class="text-lg sm:text-xl drop-shadow-md">🏛️</span>
+                    </div>
+                    
+                    <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 active:scale-95 transition-transform shrink-0 group">
+                        <svg class="absolute inset-0 w-full h-full -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+                            <circle id="ege-ring" cx="18" cy="18" r="15.5" fill="none" stroke="#facc15" stroke-width="3" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="20" style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s"/>
+                        </svg>
+                        <span class="text-[14px] sm:text-[15px] font-black text-yellow-400 leading-none group-hover:scale-110 transition-transform" id="stat-ege">84</span>
                     </button>
-                    <!-- Learned facts -->
-                    <div class="flex flex-col items-center leading-none min-w-0" title="Выучено фактов">
-                        <span class="text-[13px] sm:text-[14px] font-black text-emerald-400 leading-none" id="stat-learned">0</span>
-                        <span class="text-[7px] sm:text-[8px] font-bold text-white/35 uppercase tracking-wider mt-[2px]">выучено</span>
-                    </div>
-                    <!-- Points earned -->
-                    <div class="flex flex-col items-center leading-none min-w-0" title="Баллов за задания">
-                        <span class="text-[13px] sm:text-[14px] font-black text-blue-400 leading-none" id="stat-solved">0</span>
-                        <span class="text-[7px] sm:text-[8px] font-bold text-white/35 uppercase tracking-wider mt-[2px]">баллов</span>
-                    </div>
-                    <!-- Days left -->
-                    <div class="flex flex-col items-center leading-none min-w-0" title="Дней до ЕГЭ">
-                        <span class="text-[13px] sm:text-[14px] font-black text-white/90 leading-none italic" id="stat-days">—</span>
-                        <span class="text-[7px] sm:text-[8px] font-bold text-white/35 uppercase tracking-wider mt-[2px]">дней</span>
-                    </div>
-                    <!-- Mini icons -->
-                    <div class="flex items-center gap-[2px] shrink-0 ml-auto">
-                        <span class="text-[13px] sm:text-[14px] cursor-pointer" title="Достижения" data-action="openGlobalTopModal">🏆</span>
-                        <span class="text-[13px] sm:text-[14px]" title="Стрик" id="stat-streak-icon">🔥</span>
-                        <span class="text-[13px] sm:text-[14px] cursor-pointer" title="Сменить тему" data-action="toggleTheme">🌙</span>
-                    </div>
                 </div>
+
+                <div class="flex flex-1 items-center justify-center gap-4 sm:gap-8">
+                    <div class="w-px h-8 bg-white/10 hidden sm:block"></div>
+                    
+                    <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px]" title="Выучено фактов">
+                        <span class="text-[16px] sm:text-[18px] font-black text-blue-300 leading-none mb-1 drop-shadow-sm" id="stat-learned">0</span>
+                        <span class="text-[8px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">выучено</span>
+                    </div>
+
+                    <div class="w-px h-8 bg-white/10"></div>
+
+                    <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px]" title="Баллов за задания">
+                        <span class="text-[16px] sm:text-[18px] font-black text-purple-300 leading-none mb-1 drop-shadow-sm" id="stat-solved">0</span>
+                        <span class="text-[8px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">баллов</span>
+                    </div>
+
+                    <div class="w-px h-8 bg-white/10"></div>
+
+                    <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px]" title="Дней до ЕГЭ">
+                        <span class="text-[16px] sm:text-[18px] font-black text-rose-400 leading-none mb-1 drop-shadow-sm" id="stat-days">—</span>
+                        <span class="text-[8px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">дней</span>
+                    </div>
+                    
+                    <div class="w-px h-8 bg-white/10 hidden sm:block"></div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer active:scale-95 text-[14px] sm:text-[16px] shadow-inner" title="Достижения" data-action="openGlobalTopModal">🏆</button>
+                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer active:scale-95 text-[14px] sm:text-[16px] shadow-inner" title="Дзен режим" data-action="toggleFocusMode">🧘</button>
+                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer active:scale-95 text-[14px] sm:text-[16px] shadow-inner" title="Сменить тему" data-action="toggleTheme">🌙</button>
+                </div>
+                
             </div>
-            <!-- Settings gear -->
-            <button data-action="toggleFocusMode" class="p-1 hover:bg-white/10 rounded-lg transition-colors text-sm active:scale-95 shrink-0" title="Дзен режим">🧘</button>
         </div>
     </header>
 
