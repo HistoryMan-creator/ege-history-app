@@ -500,12 +500,6 @@ function updateGlobalUI() {
     }
 
     let h = totalL === 0 ? 100 : Math.round((freshL / totalL) * 100);
-    // Memory icon color indicator
-    const memIcon = $('stat-memory-icon');
-    if (memIcon) {
-        memIcon.textContent = h >= 80 ? '🌙' : h >= 50 ? '🔥' : '⚠️';
-        memIcon.title = 'Память: ' + h + '%';
-    }
     if ($('stat-memory')) {
         const mem = $('stat-memory');
         mem.classList.remove('text-emerald-400','text-rose-400','text-yellow-400');
