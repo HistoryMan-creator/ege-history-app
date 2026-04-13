@@ -330,51 +330,56 @@
         <div id="header-center" class="max-w-4xl mx-auto w-full">
             <span id="stat-streak" class="hidden">0</span>
             
-            <div id="top-stats-bar" class="flex items-center justify-between bg-[#1f2f4e] dark:bg-[#1A2C4D] rounded-2xl px-3 sm:px-5 py-2.5 sm:py-3 w-full shadow-lg border border-white/10">
+            <div id="top-stats-bar" class="flex items-center justify-between bg-[#233B66] dark:bg-[#1E3354] rounded-xl sm:rounded-2xl px-2 sm:px-4 py-2 w-full shadow-lg border-none">
                 
-                <div class="flex items-center gap-3 sm:gap-4 shrink-0">
-                    <div class="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/20 rounded-xl cursor-pointer active:scale-95 transition-all shadow-inner" data-action="handleLogoClick">
+                <!-- Левая часть: лого и балл -->
+                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 hover:bg-white/10 rounded-lg sm:rounded-xl cursor-pointer active:scale-95 transition-all" data-action="handleLogoClick">
                         <span class="text-lg sm:text-xl drop-shadow-md">🏛️</span>
                     </div>
                     
                     <button data-action="openEGEModal" title="Прогноз балла ЕГЭ" class="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 active:scale-95 transition-transform shrink-0 group">
                         <svg class="absolute inset-0 w-full h-full -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
                             <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
-                            <circle id="ege-ring" cx="18" cy="18" r="15.5" fill="none" stroke="#facc15" stroke-width="3" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="20" style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s"/>
+                            <circle id="ege-ring" cx="18" cy="18" r="15.5" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="20" style="transition:stroke-dashoffset 0.8s ease, stroke 0.4s"/>
                         </svg>
-                        <span class="text-[14px] sm:text-[15px] font-black text-yellow-400 leading-none group-hover:scale-110 transition-transform" id="stat-ege">84</span>
+                        <span class="text-[14px] sm:text-[16px] font-black text-[#fbbf24] leading-none group-hover:scale-110 transition-transform" id="stat-ege">84</span>
                     </button>
                 </div>
 
-                <div class="flex flex-1 items-center justify-center gap-4 sm:gap-8">
-                    <div class="w-px h-8 bg-white/10 hidden sm:block"></div>
+                <div class="w-px h-6 bg-white/10 mx-1 sm:mx-2 hidden sm:block"></div>
+
+                <!-- Центральная часть: Статы -->
+                <div class="flex flex-1 items-center justify-center gap-3 sm:gap-6">
                     
-                    <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px]" title="Выучено фактов">
-                        <span class="text-[16px] sm:text-[18px] font-black text-blue-300 leading-none mb-1 drop-shadow-sm" id="stat-learned">0</span>
-                        <span class="text-[8px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">выучено</span>
+                    <div class="flex flex-col items-center min-w-[45px] sm:min-w-[60px]" title="Выучено фактов">
+                        <span class="text-[15px] sm:text-[18px] font-black text-[#93C5FD] leading-none mb-1 drop-shadow-sm" id="stat-learned">0</span>
+                        <span class="text-[7px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">выучено</span>
                     </div>
 
-                    <div class="w-px h-8 bg-white/10"></div>
+                    <div class="w-px h-6 bg-white/10"></div>
 
-                    <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px]" title="Баллов за задания">
-                        <span class="text-[16px] sm:text-[18px] font-black text-purple-300 leading-none mb-1 drop-shadow-sm" id="stat-solved">0</span>
-                        <span class="text-[8px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">баллов</span>
+                    <div class="flex flex-col items-center min-w-[45px] sm:min-w-[60px]" title="Баллов за задания">
+                        <span class="text-[15px] sm:text-[18px] font-black text-[#C4B5FD] leading-none mb-1 drop-shadow-sm" id="stat-solved">0</span>
+                        <span class="text-[7px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">баллов</span>
                     </div>
 
-                    <div class="w-px h-8 bg-white/10"></div>
+                    <div class="w-px h-6 bg-white/10"></div>
 
-                    <div class="flex flex-col items-center min-w-[50px] sm:min-w-[60px]" title="Дней до ЕГЭ">
-                        <span class="text-[16px] sm:text-[18px] font-black text-rose-400 leading-none mb-1 drop-shadow-sm" id="stat-days">—</span>
-                        <span class="text-[8px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">дней</span>
+                    <div class="flex flex-col items-center min-w-[45px] sm:min-w-[60px]" title="Дней до ЕГЭ">
+                        <span class="text-[15px] sm:text-[18px] font-black text-[#FB7185] leading-none mb-1 drop-shadow-sm" id="stat-days">—</span>
+                        <span class="text-[7px] sm:text-[9px] font-black text-white/50 uppercase tracking-widest">дней</span>
                     </div>
                     
-                    <div class="w-px h-8 bg-white/10 hidden sm:block"></div>
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer active:scale-95 text-[14px] sm:text-[16px] shadow-inner" title="Достижения" data-action="openGlobalTopModal">🏆</button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer active:scale-95 text-[14px] sm:text-[16px] shadow-inner" title="Дзен режим" data-action="toggleFocusMode">🧘</button>
-                    <button class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer active:scale-95 text-[14px] sm:text-[16px] shadow-inner" title="Сменить тему" data-action="toggleTheme">🌙</button>
+                <div class="w-px h-6 bg-white/10 mx-1 sm:mx-2 hidden sm:block"></div>
+
+                <!-- Правая часть: Кнопки -->
+                <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                    <button class="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-md sm:rounded-lg transition-all cursor-pointer active:scale-95 text-[12px] sm:text-[14px]" title="Достижения" data-action="openGlobalTopModal">🏆</button>
+                    <button class="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-md sm:rounded-lg transition-all cursor-pointer active:scale-95 text-[12px] sm:text-[14px]" title="Дзен режим" data-action="toggleFocusMode">🧘</button>
+                    <button class="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-md sm:rounded-lg transition-all cursor-pointer active:scale-95 text-[12px] sm:text-[14px]" title="Сменить тему" data-action="toggleTheme">🌙</button>
                 </div>
                 
             </div>
