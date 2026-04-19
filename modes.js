@@ -229,7 +229,18 @@ function generateDetectiveTable() {
         return;
     }
 
-    const caseData = cases[Math.floor(Math.random() * cases.length)];
+    // ── Умный выбор кейса: цикл без повторов ──
+    const caseKey = $('filter-case').value;
+    if (!window._detectiveSeenCases) window._detectiveSeenCases = {};
+    if (!window._detectiveSeenCases[caseKey]) window._detectiveSeenCases[caseKey] = [];
+    let seen = window._detectiveSeenCases[caseKey];
+    // Если все кейсы показаны — сбросить
+    if (seen.length >= cases.length) seen.length = 0;
+    // Выбрать из непоказанных
+    const unseen = cases.map((c, i) => i).filter(i => !seen.includes(i));
+    const pickIdx = unseen[Math.floor(Math.random() * unseen.length)];
+    seen.push(pickIdx);
+    const caseData = cases[pickIdx];
     window.state.currentTargetData = caseData.items;
     $('table-head').innerHTML = `<tr><th class="p-2 sm:p-4 text-left relative bg-[#f3efe6] dark:bg-[#c7c1b3] rounded-t-lg"><div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1">Архив Главного Управления</div><div class="text-2xl sm:text-3xl font-serif font-black text-[#3e352d] uppercase border-b-2 border-[#d1c1a5] pb-2">ДОСЬЕ №${Math.floor(Math.random() * 900 + 100)}-${['К','А','М','С','Ж'][Math.floor(Math.random() * 5)]}</div><div class="text-sm font-bold text-[#3e352d] mt-3 flex items-center gap-2"><span class="text-xl">📁</span> ${caseData.title}</div></th></tr>`;
 

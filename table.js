@@ -99,16 +99,25 @@ function pickTargetTask3(allowed, rowsCount) {
     return target.length === 4 ? shuffleArray(target) : null;
 }
 
-// Task5: early + XVIII-XIX + ВОВ + (60% СВО / 40% другой XX)
+// Task5: слоты по твоей схеме —
+//   Слот 1 (100%): Древность и Смута (<1700)
+//   Слот 2 (100%): XVIII и XIX века вместе (1700 — 1917 включительно, чтобы 1901-1918 не пустовали)
+//   Слот 3 (100%): ВОВ (1941-1945)
+//   Слот 4 (ротация): случайно одна из трёх категорий с равным шансом —
+//      * ранний СССР (1918-1940, без ВОВ)
+//      * поздний СССР + РФ (1946-2021)
+//      * СВО (>=2022)
+//   Если выбранной подкатегории нет в пуле, fallback на соседние.
 function pickTargetTask5(allowed, rowsCount) {
     if (rowsCount !== 4) return null;
-    const isEarly = f => f.year < 1700;
-    const is1819 = f => f.year >= 1700 && f.year <= 1899;
-    const isWW2 = f => f.year >= 1941 && f.year <= 1945;
-    const isSVO = f => f.year >= 2022;
-    const isOther20 = f => f.year >= 1900 && f.year < 1941;
+    const isEarly    = f => f.year < 1700;
+    const isXVIIIXIX = f => f.year >= 1700 && f.year <= 1917;
+    const isWW2      = f => f.year >= 1941 && f.year <= 1945;
+    const isEarlySov = f => f.year >= 1918 && f.year < 1941;
+    const isLateSov  = f => f.year >= 1946 && f.year < 2022; // поздний СССР + РФ
+    const isSVO      = f => f.year >= 2022;
+
     const slotUE = new Set(), slotUP = new Set();
-    // Кросс-проверка: event → все person'ы
     const eventPersons = {};
     (window.task5Data || []).forEach(d => {
         if (!eventPersons[d.event]) eventPersons[d.event] = new Set();
@@ -118,10 +127,8 @@ function pickTargetTask5(allowed, rowsCount) {
     const pick1 = (pool) => {
         for (const f of pool) {
             if (slotUE.has(f.event) || slotUP.has(f.person)) continue;
-            // Прямая: ранее выбранный person подходит этому event?
             const myAlts = eventPersons[f.event] || new Set();
             const fwd = [...selectedPersons].some(sp => myAlts.has(sp));
-            // Обратная: person этого event подходит ранее выбранному event?
             const rev = [...selectedEvents].some(se => (eventPersons[se] || new Set()).has(f.person));
             if (fwd || rev) continue;
             slotUE.add(f.event); slotUP.add(f.person);
@@ -131,13 +138,22 @@ function pickTargetTask5(allowed, rowsCount) {
         return null;
     };
     const shuf = shuffleArray([...allowed]);
+
     const slot1 = pick1(shuf.filter(isEarly));
-    const slot2 = pick1(shuf.filter(is1819));
+    const slot2 = pick1(shuf.filter(isXVIIIXIX));
     const slot3 = pick1(shuf.filter(isWW2));
-    const wantSVO = Math.random() < 0.6;
-    const slot4 = wantSVO
-        ? (pick1(shuf.filter(isSVO)) || pick1(shuf.filter(isOther20)))
-        : (pick1(shuf.filter(isOther20)) || pick1(shuf.filter(isSVO)));
+
+    // Слот 4: равномерная ротация по 3 подкатегориям XX+ века
+    const subcats = ['earlySov', 'lateSov', 'svo'];
+    const chosen = subcats[Math.floor(Math.random() * subcats.length)];
+    const filters = { earlySov: isEarlySov, lateSov: isLateSov, svo: isSVO };
+    const fallbackOrder = [chosen, ...shuffleArray(subcats.filter(s => s !== chosen))];
+    let slot4 = null;
+    for (const cat of fallbackOrder) {
+        slot4 = pick1(shuf.filter(filters[cat]));
+        if (slot4) break;
+    }
+
     const slots = [slot1, slot2, slot3, slot4].filter(Boolean);
     return slots.length === 4 ? shuffleArray(slots) : null;
 }
@@ -195,6 +211,17 @@ const EPOCH_PICKERS = { task3: pickTargetTask3, task4: pickTargetTask4, task5: p
 //  SMART DISTRACTORS — генерация ловушек
 // ═══════════════════════════════════════════════════════════
 
+// ── Адаптивное правило «минимум N лет удалённости» для дистракторов task3/5/7.
+//    Если пользователь выбрал широкий период (span >= 120) — строго ±30 лет.
+//    Если узкий — правило смягчается, чтобы пул не иссякал.
+function _computeMinYearDistance(epochSpan) {
+    if (epochSpan >= 120) return 30;
+    if (epochSpan >= 80)  return 20;
+    if (epochSpan >= 40)  return 10;
+    if (epochSpan >= 15)  return 5;
+    return 0; // микро-период — правило отключено
+}
+
 function generateDistractors(task, target, missing) {
     const poolItems = [...missing];
 
@@ -202,7 +229,7 @@ function generateDistractors(task, target, missing) {
         return generateDistractorsTask4(target, poolItems);
     }
 
-    // Task3/5/7: единая логика — берём дистракторы из того же/соседнего периода
+    // Task3/5/7: единая логика
     const cfg = TASK_CONFIG[task];
     const dataSource = cfg.data();
     const targetPeriods = [...new Set(target.map(t => t.c))];
@@ -215,41 +242,103 @@ function generateDistractors(task, target, missing) {
     });
     targetPeriods.forEach(p => adjSet.delete(p));
 
-    // Определяем поле для дистракторов
     const fieldMap = { task3: 'fact', task5: 'person', task7: 'trait' };
-    const field = fieldMap[task];
-
-    const usedVals = new Set(poolItems);
-    // Исключаем ВСЕ альтернативные ответы для того же видимого поля
-    // task7: все trait'ы той же culture. task5: все person'ы того же event. task3: все fact'ы того же process
     const displayMap = { task3: 'process', task5: 'event', task7: 'culture' };
+    const field = fieldMap[task];
     const displayField = displayMap[task];
-    if (displayField) {
-        const targetDisplayVals = new Set(target.map(t => t[displayField]));
-        dataSource.forEach(d => {
-            if (targetDisplayVals.has(d[displayField])) usedVals.add(d[field]);
-        });
-    }
 
-    const scored = [];
-    const seen = new Set();
+    // ── Собираем все "запрещённые" значения поля field ──
+    const usedVals = new Set(poolItems);
+    const targetDisplayVals = new Set(target.map(t => t[displayField]));
+
+    // 1) Прямая блокировка: любое значение field, которое в базе связано
+    //    с каким-то из target[displayField] — уже валидный ответ → не дистрактор.
     dataSource.forEach(d => {
-        const val = d[field];
-        if (seen.has(val) || usedVals.has(val)) return;
-        seen.add(val);
-        const pri = targetPeriods.includes(d.c) ? 0 : (adjSet.has(d.c) ? 1 : 2);
-        scored.push({ val, pri });
+        if (targetDisplayVals.has(d[displayField])) usedVals.add(d[field]);
     });
-    shuffleArray(scored);
-    scored.sort((a, b) => a.pri - b.pri);
+
+    // 2) Обратная блокировка: строим индекс field → все его displayField.
+    //    Любой кандидат, чей field хотя бы раз в базе связан с одним
+    //    из target[displayField] — тоже должен быть исключён.
+    //    (Эта проверка дублирует п.1 математически, но работает и для случаев,
+    //     когда один и тот же person/fact/trait появляется с разными display-values
+    //     в базе, т.е. это дополнительный defensive слой.)
+    const fieldToDisplays = {};
+    dataSource.forEach(d => {
+        const v = d[field];
+        if (!fieldToDisplays[v]) fieldToDisplays[v] = new Set();
+        fieldToDisplays[v].add(d[displayField]);
+    });
+
+    // ── Определяем эпох-диапазон и порог ±N лет ──
+    const targetPeriodSet = new Set(targetPeriods);
+    const relevantPool = dataSource.filter(d => targetPeriodSet.has(d.c));
+    const relevantYears = relevantPool.map(d => d.year).filter(y => typeof y === 'number');
+    const epochSpan = relevantYears.length
+        ? (Math.max(...relevantYears) - Math.min(...relevantYears))
+        : 0;
+    const initMinDist = _computeMinYearDistance(epochSpan);
+    const targetYears = target.map(t => t.year).filter(y => typeof y === 'number');
+
+    // ── Собираем кандидатов с данным порогом yearDist ──
+    // Правило «минимум ±N лет от target-года» защищает от тематических близнецов:
+    //   target=Избранная рада (1549) → в дистракторах НЕ должно быть Макария (1551)
+    //   или Курбского (1552), т.к. они тоже участники реформ Ивана IV.
+    //   target=свержение Лжедмитрия I (1606) → блокируем Болотникова (1606),
+    //   Пожарского (1612), Минина (1612) — все тематически в Смуте.
+    //
+    // ИСКЛЮЧЕНИЕ для task5: если конкретный target-год ∈ [1941, 1945] (ВОВ),
+    //   то правило к НЕМУ не применяется. Причина: в ВОВ множество деятелей
+    //   разных тем (лётчики, конструкторы, разведчики, писатели) — они по смыслу
+    //   не пересекаются, и блокировать их друг от друга вредно.
+    //   Но правило сохраняется для остальных target-лет того же задания.
+    const wwExempt = (ty) => (task === 'task5' && ty >= 1941 && ty <= 1945);
+    function collectCandidates(yearDist) {
+        const scored = [];
+        const seen = new Set();
+        dataSource.forEach(d => {
+            const val = d[field];
+            if (seen.has(val) || usedVals.has(val)) return;
+            // Обратная проверка: кандидат подходит как ответ для какого-то target.display?
+            const myDisplays = fieldToDisplays[val] || new Set();
+            for (const tdv of targetDisplayVals) {
+                if (myDisplays.has(tdv)) return; // семантический близнец — не дистрактор
+            }
+            // Правило ±N лет: применяется выборочно — не применяется к target-годам ВОВ (task5)
+            if (yearDist > 0 && typeof d.year === 'number' && targetYears.length) {
+                const tooClose = targetYears.some(ty => !wwExempt(ty) && Math.abs(d.year - ty) < yearDist);
+                if (tooClose) return;
+            }
+            seen.add(val);
+            const pri = targetPeriodSet.has(d.c) ? 0 : (adjSet.has(d.c) ? 1 : 2);
+            scored.push({ val, pri });
+        });
+        shuffleArray(scored);
+        scored.sort((a, b) => a.pri - b.pri);
+        return scored;
+    }
 
     const fakesCount = Math.ceil(target.length / 2);
     const needed = target.length + fakesCount;
+
+    // Основной проход
+    let scored = collectCandidates(initMinDist);
+
+    // FALLBACK: если не хватает — поэтапно снижаем порог
+    if (poolItems.length + scored.length < needed) {
+        for (const step of [20, 10, 5, 0]) {
+            if (step >= initMinDist) continue;
+            scored = collectCandidates(step);
+            if (poolItems.length + scored.length >= needed) break;
+        }
+    }
+
     for (const s of scored) {
         if (poolItems.length >= needed) break;
         poolItems.push(s.val);
     }
-    // ── FIX: финальная дедупликация пула ──
+
+    // ── Финальная дедупликация ──
     const uniquePool = [];
     const seenPool = new Set();
     for (const item of poolItems) {
@@ -393,18 +482,66 @@ function generateDistractorsTask4(target, poolItems) {
         }
     });
 
-    // Авто-ловушки для годов
-    function autoYearTraps(yearStr) {
+    // Авто-ловушки для годов.
+    //
+    // Факт считается «ТОПОВЫМ», если его год уже размечен в trapDict вручную.
+    // Для ТОПовых событий (Куликовская, Бородино, Сталинград и т.п.) выпускник
+    // ДОЛЖЕН знать год точно, поэтому допустимы близкие даты-ловушки.
+    //
+    // Для НЕ-ТОПовых событий (второстепенные битвы, города, указы) лучше
+    // давать тематически близкие дистракторы (даже с разницей 100+ лет),
+    // либо события той же эпохи с отступом ≥40 лет — чтобы случайная близость
+    // в 2-3 года не создавала ложное ощущение ошибки ученика.
+    function autoYearTraps(yearStr, targetFact) {
         const y = parseInt(yearStr, 10);
         if (!y) return [];
-        const seen = new Set(), candidates = [];
+        const period = targetFact && targetFact.c;
+        const targetGroup = targetFact ? getEventGroup(targetFact) : null;
+
+        // Является ли дата «ТОПовой»? Проверяем наличие ключа в trapDict.
+        const isTopEvent = typeof trapDict !== 'undefined' && trapDict.hasOwnProperty(yearStr);
+
+        const seen = new Set();
+        const thematic = []; // тематически родственные (любое расстояние)
+        const farSame  = []; // та же эпоха, отступ ≥40 лет
+        const nearSame = []; // та же эпоха, отступ <40 лет
+        const closeAll = []; // ближайшие ≤50 лет (для ТОПовых — поведение как было раньше)
+
         window.bigData.forEach(d => {
             const dy = parseInt(d.year, 10);
-            if (dy && dy !== y && !seen.has(d.year) && Math.abs(dy - y) <= 50) {
-                seen.add(d.year); candidates.push({ val: d.year, dist: Math.abs(dy - y) });
+            if (!dy || dy === y || seen.has(d.year)) return;
+            seen.add(d.year);
+            const dist = Math.abs(dy - y);
+            if (targetGroup && getEventGroup(d) === targetGroup) {
+                thematic.push({ val: d.year, dist });
             }
+            if (period && d.c === period) {
+                if (dist >= 40) farSame.push({ val: d.year, dist });
+                else            nearSame.push({ val: d.year, dist });
+            }
+            if (dist <= 50) closeAll.push({ val: d.year, dist });
         });
-        return candidates.sort((a, b) => a.dist - b.dist).slice(0, 5).map(c => c.val);
+
+        thematic.sort((a, b) => a.dist - b.dist);
+        farSame.sort((a, b) => a.dist - b.dist);
+        nearSame.sort((a, b) => b.dist - a.dist); // чем дальше, тем лучше в fallback
+        closeAll.sort((a, b) => a.dist - b.dist);
+
+        if (isTopEvent) {
+            // ТОП: близкие даты — «злые» ловушки, как и было. trapDict всё равно
+            // имеет приоритет 60% над этим auto-fallback.
+            return [
+                ...closeAll.slice(0, 4).map(c => c.val),
+                ...thematic.slice(0, 2).map(c => c.val),
+            ];
+        }
+
+        // НЕ-ТОП: приоритет тематическим, затем отступ ≥40, последним — fallback
+        return [
+            ...thematic.slice(0, 4).map(c => c.val),
+            ...farSame.slice(0, 4).map(c => c.val),
+            ...nearSame.slice(0, 2).map(c => c.val),
+        ];
     }
 
     function autoGeoTraps(geoStr, period) {
@@ -431,7 +568,7 @@ function generateDistractorsTask4(target, poolItems) {
             }
             // Авто-ловушки для годов
             if (type === 'year' && relHid) {
-                const picked = autoYearTraps(relHid.row.year).find(t => !bannedVals.has(t));
+                const picked = autoYearTraps(relHid.row.year, relHid.row).find(t => !bannedVals.has(t));
                 if (picked) { poolItems.push(picked); bannedVals.add(picked); continue; }
             }
             // Авто-ловушки для гео
@@ -647,7 +784,10 @@ function generateTask4Table() {
 
     resetTableUI();
 
-    $('table-head').innerHTML = `<tr><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] text-center">🗺️ Объект</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[45%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">📜 Событие</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">⏳ Дата</th></tr>`;
+    if (generateTable._lastHeadTask !== 'task4') {
+        $('table-head').innerHTML = `<tr><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] text-center">🗺️ Объект</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[45%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">📜 Событие</th><th class="p-1.5 sm:p-3 text-[11px] sm:text-[14px] font-bold border-b border-gray-200 dark:border-[#2c2c2c] w-[27.5%] border-l border-gray-200 dark:border-[#2c2c2c] text-center">⏳ Дата</th></tr>`;
+        generateTable._lastHeadTask = 'task4';
+    }
 
     let target = [];
     if (window.state.isHomeworkMode && window.state.hwTargetIndices?.length > 0) {

@@ -443,8 +443,8 @@ function updateGlobalUI() {
     if ($('stat-days')) updateText($('stat-days'), daysLeft);
 
     updateText($('stat-streak'), window.state.stats.streak);
-    updateText($('stat-solved'), window.state.stats.totalSolvedEver);
-    if ($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.totalSolvedEver);
+    updateText($('stat-solved'), window.state.stats.egePoints || 0);
+    if ($('zen-stat-solved')) updateText($('zen-stat-solved'), window.state.stats.egePoints || 0);
     updateText($('stat-learned'), totalL);
     updateText($('modal-stat-solved'), window.state.stats.totalSolvedEver);
     updateText($('modal-stat-mistakes'), window.state.mistakesPool.length);
