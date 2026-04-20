@@ -24,36 +24,25 @@
     letter-spacing: 0;
 }
 
-/* --- ШАПКА: мягкое перекрытие контента при скролле --- */
-/* Вместо жёсткой непрозрачной полосы — полупрозрачный фон с blur
-   и плавный градиент снизу, чтобы контент не «обрубался» */
+/* --- ШАПКА: FLOATING ISLAND (графит) ---
+   Сама <header> прозрачная — никакого белого/чёрного прямоугольника.
+   «Остров» — #top-stats-bar внутри, плавает над контентом со скруглением и тенью.
+   При скролле (sticky) над контентом остаётся только остров, фон страницы виден по краям. */
 #main-header {
-    background-color: rgba(249, 250, 251, 0.78) !important; /* gray-50/78 */
-    backdrop-filter: saturate(180%) blur(14px);
-    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    background-color: transparent !important;
     border-bottom: none !important;
-    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
-.dark #main-header {
-    background-color: rgba(18, 18, 18, 0.72) !important;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.03);
+/* Чуть «приподнять» остров над контентом плавной тенью */
+#top-stats-bar {
+    background-color: #27272a !important; /* графит, светлая тема */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
-/* Мягкий «fade-out» сразу под шапкой: 12px растушёвка к прозрачности */
-#main-header::after {
-    content: "";
-    position: absolute;
-    left: 0; right: 0; bottom: -12px;
-    height: 12px;
-    pointer-events: none;
-    background: linear-gradient(to bottom,
-        rgba(249, 250, 251, 0.6) 0%,
-        rgba(249, 250, 251, 0) 100%);
-}
-.dark #main-header::after {
-    background: linear-gradient(to bottom,
-        rgba(18, 18, 18, 0.55) 0%,
-        rgba(18, 18, 18, 0) 100%);
+.dark #top-stats-bar {
+    background-color: #18181b !important; /* графит глубже, тёмная тема */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.04) inset !important;
 }
 
 /* --- ГЛОБАЛЬНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ --- */
