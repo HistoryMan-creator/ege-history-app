@@ -155,11 +155,15 @@ document.addEventListener('app:ready', function initPullToRefresh() {
 document.addEventListener('app:ready', function() {
     patchHeaderDOM();
     if (typeof updateGlobalUI === 'function') updateGlobalUI();
+    // data.js уже загружен — можно корректно посчитать дела
+    if (typeof window.refreshDetectiveCaseOptions === 'function') window.refreshDetectiveCaseOptions();
 }, { once: true });
 
 // Обновляет лейблы опций в #pg-filter-case, добавляя счётчик «N дел».
-// Категории без дел прячутся, с одним делом получают пометку «· 1 дело».
+// Категории с числом дел < MIN_CASES_TO_SHOW скрываются, остальные получают пометку «· N дел».
+// Чтобы вернуть одиночные категории — изменить MIN_CASES_TO_SHOW на 1.
 window.refreshDetectiveCaseOptions = function() {
+    const MIN_CASES_TO_SHOW = 2;
     const select = $('pg-filter-case');
     if (!select || typeof detectiveCases === 'undefined') return;
     Array.from(select.options).forEach(opt => {
@@ -168,14 +172,10 @@ window.refreshDetectiveCaseOptions = function() {
         const key = opt.value;
         const arr = detectiveCases[key];
         const count = Array.isArray(arr) ? arr.length : 0;
-        if (count === 0) {
+        if (count < MIN_CASES_TO_SHOW) {
             opt.hidden = true;
             opt.disabled = true;
-            opt.textContent = opt.dataset.baseLabel + ' · пусто';
-        } else if (count === 1) {
-            opt.hidden = false;
-            opt.disabled = false;
-            opt.textContent = opt.dataset.baseLabel + ' · 1 дело';
+            opt.textContent = opt.dataset.baseLabel + (count === 0 ? ' · пусто' : ' · 1 дело');
         } else {
             opt.hidden = false;
             opt.disabled = false;
@@ -185,7 +185,12 @@ window.refreshDetectiveCaseOptions = function() {
     // Если текущий выбранный пункт оказался скрыт — переключимся на первый видимый
     if (select.selectedOptions[0] && select.selectedOptions[0].hidden) {
         const firstVisible = Array.from(select.options).find(o => !o.hidden);
-        if (firstVisible) select.value = firstVisible.value;
+        if (firstVisible) {
+            select.value = firstVisible.value;
+            // Синхронизируем системный #filter-case, чтобы игра стартовала с валидной категорией
+            const sysSelect = $('filter-case');
+            if (sysSelect) sysSelect.value = firstVisible.value;
+        }
     }
 };
 

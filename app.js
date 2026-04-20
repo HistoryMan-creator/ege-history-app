@@ -498,6 +498,9 @@ function initStorage() {
     }
     initPrecomputed();
 
+    // Скрываем пустые/одиночные категории детектива из селектора + добавляем счётчик дел
+    if (typeof window.refreshDetectiveCaseOptions === 'function') window.refreshDetectiveCaseOptions();
+
     if (!DOM['filter-period'].value) DOM['filter-period'].value = 'all';
     if (!DOM['filter-task'].value) DOM['filter-task'].value = 'task4';
     if (!DOM['filter-mode'].value) DOM['filter-mode'].value = 'normal';
