@@ -1,6 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* --- ШАПКА: мягкое перекрытие контента при скролле --- */
+/* Вместо жёсткой непрозрачной полосы — полупрозрачный фон с blur
+   и плавный градиент снизу, чтобы контент не «обрубался» */
+#main-header {
+    background-color: rgba(249, 250, 251, 0.78) !important; /* gray-50/78 */
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: none !important;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.dark #main-header {
+    background-color: rgba(18, 18, 18, 0.72) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.03);
+}
+/* Мягкий «fade-out» сразу под шапкой: 12px растушёвка к прозрачности */
+#main-header::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -12px;
+    height: 12px;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+        rgba(249, 250, 251, 0.6) 0%,
+        rgba(249, 250, 251, 0) 100%);
+}
+.dark #main-header::after {
+    background: linear-gradient(to bottom,
+        rgba(18, 18, 18, 0.55) 0%,
+        rgba(18, 18, 18, 0) 100%);
+}
+
 /* --- ГЛОБАЛЬНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ --- */
 html, body { 
     overscroll-behavior-y: none; 

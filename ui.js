@@ -157,8 +157,41 @@ document.addEventListener('app:ready', function() {
     if (typeof updateGlobalUI === 'function') updateGlobalUI();
 }, { once: true });
 
+// Обновляет лейблы опций в #pg-filter-case, добавляя счётчик «N дел».
+// Категории без дел прячутся, с одним делом получают пометку «· 1 дело».
+window.refreshDetectiveCaseOptions = function() {
+    const select = $('pg-filter-case');
+    if (!select || typeof detectiveCases === 'undefined') return;
+    Array.from(select.options).forEach(opt => {
+        // Сохраняем исходный текст один раз
+        if (!opt.dataset.baseLabel) opt.dataset.baseLabel = opt.textContent.replace(/\s·\s.*$/, '').trim();
+        const key = opt.value;
+        const arr = detectiveCases[key];
+        const count = Array.isArray(arr) ? arr.length : 0;
+        if (count === 0) {
+            opt.hidden = true;
+            opt.disabled = true;
+            opt.textContent = opt.dataset.baseLabel + ' · пусто';
+        } else if (count === 1) {
+            opt.hidden = false;
+            opt.disabled = false;
+            opt.textContent = opt.dataset.baseLabel + ' · 1 дело';
+        } else {
+            opt.hidden = false;
+            opt.disabled = false;
+            opt.textContent = opt.dataset.baseLabel + ` · ${count} дел`;
+        }
+    });
+    // Если текущий выбранный пункт оказался скрыт — переключимся на первый видимый
+    if (select.selectedOptions[0] && select.selectedOptions[0].hidden) {
+        const firstVisible = Array.from(select.options).find(o => !o.hidden);
+        if (firstVisible) select.value = firstVisible.value;
+    }
+};
+
 window.openGlobalSettings = function() {
     $('pre-game-title').innerText = 'Глобальные настройки';
+    window.refreshDetectiveCaseOptions();
     
     $('pg-period-container').classList.remove('hidden');
     $('pg-rows-container').classList.remove('hidden');
