@@ -155,10 +155,48 @@ document.addEventListener('app:ready', function initPullToRefresh() {
 document.addEventListener('app:ready', function() {
     patchHeaderDOM();
     if (typeof updateGlobalUI === 'function') updateGlobalUI();
+    // data.js уже загружен — можно корректно посчитать дела
+    if (typeof window.refreshDetectiveCaseOptions === 'function') window.refreshDetectiveCaseOptions();
 }, { once: true });
+
+// Обновляет лейблы опций в #pg-filter-case, добавляя счётчик «N дел».
+// Категории с числом дел < MIN_CASES_TO_SHOW скрываются, остальные получают пометку «· N дел».
+// Чтобы вернуть одиночные категории — изменить MIN_CASES_TO_SHOW на 1.
+window.refreshDetectiveCaseOptions = function() {
+    const MIN_CASES_TO_SHOW = 2;
+    const select = $('pg-filter-case');
+    if (!select || typeof detectiveCases === 'undefined') return;
+    Array.from(select.options).forEach(opt => {
+        // Сохраняем исходный текст один раз
+        if (!opt.dataset.baseLabel) opt.dataset.baseLabel = opt.textContent.replace(/\s·\s.*$/, '').trim();
+        const key = opt.value;
+        const arr = detectiveCases[key];
+        const count = Array.isArray(arr) ? arr.length : 0;
+        if (count < MIN_CASES_TO_SHOW) {
+            opt.hidden = true;
+            opt.disabled = true;
+            opt.textContent = opt.dataset.baseLabel + (count === 0 ? ' · пусто' : ' · 1 дело');
+        } else {
+            opt.hidden = false;
+            opt.disabled = false;
+            opt.textContent = opt.dataset.baseLabel + ` · ${count} дел`;
+        }
+    });
+    // Если текущий выбранный пункт оказался скрыт — переключимся на первый видимый
+    if (select.selectedOptions[0] && select.selectedOptions[0].hidden) {
+        const firstVisible = Array.from(select.options).find(o => !o.hidden);
+        if (firstVisible) {
+            select.value = firstVisible.value;
+            // Синхронизируем системный #filter-case, чтобы игра стартовала с валидной категорией
+            const sysSelect = $('filter-case');
+            if (sysSelect) sysSelect.value = firstVisible.value;
+        }
+    }
+};
 
 window.openGlobalSettings = function() {
     $('pre-game-title').innerText = 'Глобальные настройки';
+    window.refreshDetectiveCaseOptions();
     
     $('pg-period-container').classList.remove('hidden');
     $('pg-rows-container').classList.remove('hidden');
@@ -215,6 +253,51 @@ window.applyGlobalSettings = function() {
 };
 
 function toggleTheme() { localStorage.setItem('ege_theme', document.documentElement.classList.toggle('dark') ? 'dark' : 'light'); }
+
+/* ──────────────────────────────────────────────────────────
+   SKIN SYSTEM — 7 лобби-тем
+   ────────────────────────────────────────────────────────── */
+const SKINS = ['aurora','classic','constructivism','vaporwave','sakura','terminal','midnight','scholar'];
+
+window.applySkin = function(skin) {
+    if (!SKINS.includes(skin)) skin = 'aurora';
+    // Remove all previous skin classes
+    SKINS.forEach(s => document.body.classList.remove('skin-' + s));
+    // Aurora is the default (no extra class needed)
+    if (skin !== 'aurora') document.body.classList.add('skin-' + skin);
+    localStorage.setItem('ege_skin', skin);
+    updateSkinPicker(skin);
+};
+
+function updateSkinPicker(activeSkin) {
+    const picker = document.getElementById('skin-picker');
+    if (!picker) return;
+    picker.querySelectorAll('.skin-btn').forEach(btn => {
+        const s = btn.dataset.skin;
+        const isActive = s === activeSkin || (activeSkin === 'aurora' && s === 'aurora');
+        // Style the button border to show active state
+        btn.style.borderColor = isActive ? '#60a5fa' : 'transparent';
+        btn.style.background  = isActive ? 'rgba(59,130,246,.12)' : '';
+        btn.style.borderRadius = '12px';
+    });
+}
+
+// Apply skin on page load
+(function() {
+    const saved = localStorage.getItem('ege_skin') || 'aurora';
+    SKINS.forEach(s => document.body.classList.remove('skin-' + s));
+    if (saved !== 'aurora') document.body.classList.add('skin-' + saved);
+})();
+
+// Delegate click on skin-picker
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.skin-btn[data-skin]');
+    if (btn) {
+        if (typeof haptic === 'function') haptic('light');
+        window.applySkin(btn.dataset.skin);
+    }
+});
+
 
 window.toggleFocusMode = function() {
     window.state.focusMode = !window.state.focusMode; 
@@ -596,6 +679,9 @@ window.openProfileModal = function() {
         $('profile-google-status').textContent = gEmail ? '✅ ' + gEmail : 'Не привязан';
         $('profile-google-status').className = gEmail ? 'text-[11px] font-bold text-emerald-600 mt-1' : 'text-[11px] font-bold text-gray-400 mt-1';
     }
+    // Refresh skin picker active state
+    const currentSkin = localStorage.getItem('ege_skin') || 'aurora';
+    updateSkinPicker(currentSkin);
     showModal('profile-modal');
 };
 window.saveProfileName = function() { const nm = $('profile-name-input').value.trim(), cd = $('profile-class-code').value.trim(); if (nm) localStorage.setItem('student_manual_name', nm); if (cd !== undefined) localStorage.setItem('student_class_code', cd); showToast('✅', 'Профиль сохранен!', 'bg-emerald-500', 'border-emerald-700'); hideModal('profile-modal'); if (window.syncProgressToCloud) window.syncProgressToCloud(); };
