@@ -1,50 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* --- ИЕРАРХИЯ ТИПОГРАФИКИ В ЛОББИ ---
-   Проблема: заголовки секций и названия карточек визуально равносильны
-   (всё font-black uppercase) — глаз не знает, за что цепляться.
-   Решение: карточки становятся *громче* (но без UPPERCASE),
-   секции остаются тише — получаем чёткую H2 → H3 иерархию. */
-#lobby-area > div > h3 {
-    /* Заголовки секций — тихий лейбл */
-    letter-spacing: 0.15em;
-    font-weight: 800;
-}
-#lobby-area h4 {
-    /* Названия карточек режимов — громкие, но без капслока */
-    text-transform: none !important;
-    letter-spacing: -0.01em !important;
-    font-weight: 900;
-}
-/* Подписи под заголовками карточек — чуть крупнее и с лучшим контрастом */
-#lobby-area h4 + p {
-    font-weight: 600;
-    letter-spacing: 0;
-}
-
-/* --- ШАПКА: FLOATING ISLAND (графит) ---
-   Сама <header> прозрачная — никакого белого/чёрного прямоугольника.
-   «Остров» — #top-stats-bar внутри, плавает над контентом со скруглением и тенью.
-   При скролле (sticky) над контентом остаётся только остров, фон страницы виден по краям. */
-#main-header {
-    background-color: transparent !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-/* Чуть «приподнять» остров над контентом плавной тенью */
-#top-stats-bar {
-    background-color: #27272a !important; /* графит, светлая тема */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-}
-.dark #top-stats-bar {
-    background-color: #18181b !important; /* графит глубже, тёмная тема */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.04) inset !important;
-}
-
 /* --- ГЛОБАЛЬНЫЕ СТИЛИ И ПЕРЕМЕННЫЕ --- */
 html, body { 
     overscroll-behavior-y: none; 

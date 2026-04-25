@@ -155,48 +155,10 @@ document.addEventListener('app:ready', function initPullToRefresh() {
 document.addEventListener('app:ready', function() {
     patchHeaderDOM();
     if (typeof updateGlobalUI === 'function') updateGlobalUI();
-    // data.js уже загружен — можно корректно посчитать дела
-    if (typeof window.refreshDetectiveCaseOptions === 'function') window.refreshDetectiveCaseOptions();
 }, { once: true });
-
-// Обновляет лейблы опций в #pg-filter-case, добавляя счётчик «N дел».
-// Категории с числом дел < MIN_CASES_TO_SHOW скрываются, остальные получают пометку «· N дел».
-// Чтобы вернуть одиночные категории — изменить MIN_CASES_TO_SHOW на 1.
-window.refreshDetectiveCaseOptions = function() {
-    const MIN_CASES_TO_SHOW = 2;
-    const select = $('pg-filter-case');
-    if (!select || typeof detectiveCases === 'undefined') return;
-    Array.from(select.options).forEach(opt => {
-        // Сохраняем исходный текст один раз
-        if (!opt.dataset.baseLabel) opt.dataset.baseLabel = opt.textContent.replace(/\s·\s.*$/, '').trim();
-        const key = opt.value;
-        const arr = detectiveCases[key];
-        const count = Array.isArray(arr) ? arr.length : 0;
-        if (count < MIN_CASES_TO_SHOW) {
-            opt.hidden = true;
-            opt.disabled = true;
-            opt.textContent = opt.dataset.baseLabel + (count === 0 ? ' · пусто' : ' · 1 дело');
-        } else {
-            opt.hidden = false;
-            opt.disabled = false;
-            opt.textContent = opt.dataset.baseLabel + ` · ${count} дел`;
-        }
-    });
-    // Если текущий выбранный пункт оказался скрыт — переключимся на первый видимый
-    if (select.selectedOptions[0] && select.selectedOptions[0].hidden) {
-        const firstVisible = Array.from(select.options).find(o => !o.hidden);
-        if (firstVisible) {
-            select.value = firstVisible.value;
-            // Синхронизируем системный #filter-case, чтобы игра стартовала с валидной категорией
-            const sysSelect = $('filter-case');
-            if (sysSelect) sysSelect.value = firstVisible.value;
-        }
-    }
-};
 
 window.openGlobalSettings = function() {
     $('pre-game-title').innerText = 'Глобальные настройки';
-    window.refreshDetectiveCaseOptions();
     
     $('pg-period-container').classList.remove('hidden');
     $('pg-rows-container').classList.remove('hidden');
