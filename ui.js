@@ -201,24 +201,20 @@ window.openGlobalSettings = function() {
     $('pg-period-container').classList.remove('hidden');
     $('pg-rows-container').classList.remove('hidden');
     $('pg-case-container').classList.add('hidden'); 
-    $('pg-database-container').classList.remove('hidden'); 
     if ($('pg-hide-learned-container')) $('pg-hide-learned-container').classList.add('hidden');
     
     if (window.state.currentMode === 'detective') {
         $('pg-period-container').classList.add('hidden');
         $('pg-rows-container').classList.add('hidden');
-        $('pg-database-container').classList.add('hidden');
         if ($('pg-hide-learned-container')) $('pg-hide-learned-container').classList.add('hidden');
         $('pg-case-container').classList.remove('hidden');
     }
     if (window.state.currentMode === 'redpencil') {
         $('pg-rows-container').classList.add('hidden');
-        $('pg-database-container').classList.add('hidden');
     }
     
     if ($('filter-period')) $('pg-filter-period').value = $('filter-period').value || 'all';
     if ($('filter-case')) $('pg-filter-case').value = $('filter-case').value || 'rtw';
-    if ($('filter-database')) $('pg-filter-database').value = $('filter-database').value || 'top100';
     if ($('filter-rows')) window.setPgRows($('filter-rows').value || '4');
     
     if ($('pg-filter-period').value === 'custom') {
@@ -240,7 +236,6 @@ window.applyGlobalSettings = function() {
     $('custom-year-start').value = $('pg-custom-year-start').value; 
     $('custom-year-end').value = $('pg-custom-year-end').value;
     $('filter-case').value = $('pg-filter-case').value;
-    if ($('filter-database')) $('filter-database').value = $('pg-filter-database').value;
     
     saveProgress();
     closePreGameModal();
@@ -440,7 +435,7 @@ window.openEGEModal = function() {
           const mx4 = typeof bigData !== 'undefined' ? bigData.length : 500;
           const mx5 = typeof task5Data !== 'undefined' ? task5Data.length : 250;
           const mx3 = typeof task3Data !== 'undefined' ? task3Data.length : 150;
-          const mx7 = typeof window.task7Data !== 'undefined' ? window.task7Data.length : (typeof task7Top100Data !== 'undefined' ? task7Top100Data.length : 180);
+          const mx7 = typeof window.task7Data !== 'undefined' ? window.task7Data.length : 180;
           return [['📍 №4',r.d4,mx4,'#185FA5'],['👤 №5',r.d5,mx5,'#8b5cf6'],['🔗 №3',r.d3,mx3,'#1D9E75'],['🎨 №7',r.d7,mx7,'#d97706']].map(([lbl,cnt,mx,clr])=>`
           <div style="background:rgba(128,128,128,0.07);border-radius:8px;padding:8px 10px">
             <div style="font-size:11px;color:#888;margin-bottom:4px">${lbl}</div>

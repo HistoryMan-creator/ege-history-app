@@ -97,7 +97,7 @@ window.backToLobby = function() {
     $('game-timer-display').classList.add('hidden');
     $('task-table-body').innerHTML = '';
     $('pool-container').innerHTML = '';
-    ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => {
+    ['classic-task-area', 'flashcard-area', 'study-area', 'visual-trainer-area', 'redpencil-area'].forEach(id => {
         const el = $(id);
         if (el) { el.classList.add('hidden'); el.classList.remove('flex', 'lg:flex-row'); }
     });
@@ -152,10 +152,11 @@ function toggleMode(mode) {
 
     const isFc = mode === 'flashcards', isSpd = mode === 'speedrun';
     const isSt = mode === 'study', isDet = mode === 'detective';
+    const isVisual = mode === 'visual';
     const isRP = mode === 'redpencil', isDuel = mode === 'duel';
     document.body.classList.toggle('mode-detective', isDet);
 
-    ['classic-task-area', 'flashcard-area', 'study-area', 'redpencil-area'].forEach(id => {
+    ['classic-task-area', 'flashcard-area', 'study-area', 'visual-trainer-area', 'redpencil-area'].forEach(id => {
         const el = $(id);
         if (el) { el.classList.add('hidden'); if (id === 'classic-task-area') el.classList.remove('flex', 'lg:flex-row'); else el.classList.remove('flex'); }
     });
@@ -170,6 +171,9 @@ function toggleMode(mode) {
         const sa = $('study-area'); if (sa) { sa.classList.remove('hidden'); sa.classList.add('flex'); }
         window.state.studyIndex = 0;
         if (window.renderStudyCard) window.renderStudyCard();
+    } else if (isVisual) {
+        const va = $('visual-trainer-area'); if (va) { va.classList.remove('hidden'); va.classList.add('flex'); }
+        if (window.renderVisualTrainer) window.renderVisualTrainer();
     } else {
         const ca = $('classic-task-area');
         if (ca) { ca.classList.remove('hidden'); ca.classList.add('flex', 'lg:flex-row'); }
@@ -202,6 +206,7 @@ window.handleSettingsChange = function() {
     const mode = window.state.currentMode;
     if (mode === 'flashcards') window.nextFlashcard();
     else if (mode === 'study') { window.state.studyIndex = 0; if (window.renderStudyCard) renderStudyCard(); }
+    else if (mode === 'visual') { if (window.renderVisualTrainer) renderVisualTrainer(true); }
     else if (mode === 'redpencil') { if (window.startRedPencilMode) startRedPencilMode(); }
     else if (window.generateTable) generateTable();
 };
@@ -543,6 +548,9 @@ const ACTION_HANDLERS = {
     startHwFromBanner:      () => window.startHwFromBanner?.(),
     backToLobby:            () => window.backToLobby?.(),
     quickStartGame:         (a, a2) => window.quickStartGame?.(a, a2 || 'normal'),
+    startVisualTrainer:     () => window.startVisualTrainer?.(),
+    answerVisualTrainer:    (a) => window.answerVisualTrainer?.(a),
+    resetVisualTrainer:     () => window.resetVisualTrainer?.(),
     pickTaskForMode:        (a) => window.pickTaskForMode?.(a),
     confirmTaskPick:        (a) => window.confirmTaskPick?.(a),
     closeTaskPicker:        () => window.closeTaskPicker?.(),

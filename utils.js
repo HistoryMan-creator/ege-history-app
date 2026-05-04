@@ -121,7 +121,7 @@ const DOM = {};
 function cacheDOM() {
     [
         'filter-period', 'filter-task', 'filter-mode', 'filter-rows', 'filter-case',
-        'filter-database', 'pool-container', 'task-table-body', 'table-head',
+        'pool-container', 'task-table-body', 'table-head',
         'game-container', 'lobby-area', 'bottom-nav', 'check-buttons',
         'reveal-btn', 'next-btn', 'game-timer-display', 'pool-title',
         'toggle-hide-learned', 'pg-hide-learned', 'detective-stamp',

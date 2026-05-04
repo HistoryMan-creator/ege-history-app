@@ -3,7 +3,6 @@
 
 // --- Инициализация глобальных данных из data.js ---
 window.task7Data = typeof task7Data !== 'undefined' ? task7Data : [];
-window.task7Top100Data = typeof task7Top100Data !== 'undefined' ? task7Top100Data : window.task7Data;
 
 // --- Глобальное состояние ---
 window.state = {
@@ -23,6 +22,8 @@ window.state = {
         dailyStats: {},
         hwFlashcardsToSolve: 0,
         hwTask3: 0, hwTask4: 0, hwTask5: 0, hwTask7: 0,
+        visualArchitectureProgress: {},
+        visualArchitectureSolved: 0,
         achievements: [],
         achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 }
     },
@@ -39,6 +40,8 @@ window.state = {
     isTeacherAdmin: false,
     focusMode: false,
     studyIndex: 0,
+    currentVisualQuestion: null,
+    currentVisualId: null,
     errorStreak: 0,
     duel: {
         active: false, matchId: null, isPlayer1: false,
@@ -55,7 +58,6 @@ function initPrecomputed() {
     window.task3Data = typeof task3Data !== 'undefined' ? task3Data : (window.task3Data || []);
     window.task5Data = typeof task5Data !== 'undefined' ? task5Data : (window.task5Data || []);
     window.task7Data = typeof task7Data !== 'undefined' ? task7Data : (window.task7Data || []);
-    window.task7Top100Data = typeof task7Top100Data !== 'undefined' ? task7Top100Data : (window.task7Top100Data || window.task7Data || []);
 
     const totalItems = (window.bigData?.length || 0) + (window.task3Data?.length || 0) +
                        (window.task5Data?.length || 0) + (window.task7Data?.length || 0);
@@ -88,12 +90,9 @@ function initPrecomputed() {
 function getBasePool(period) {
     period = period || 'all';
     const task = window.state.currentTask;
-    let dbType = $('filter-database') ? $('filter-database').value : 'top100';
 
     if (task === 'task7') {
-        const baseData = dbType === 'top100'
-            ? (window.task7Top100Data || window.task7Data || [])
-            : (window.task7Data || []);
+        const baseData = window.task7Data || [];
         if (period === 'custom') {
             const startY = parseInt($('custom-year-start').value) || 0;
             const endY = parseInt($('custom-year-end').value) || 3000;
@@ -197,6 +196,7 @@ const STORAGE_KEY = 'ege_final_storage_v4';
 const SAVE_FIELDS = [
     'streak', 'totalSolvedEver', 'solvedByTask', 'flashcardsSolved',
     'eraStats', 'factStreaks', 'hwFlashcardsToSolve', 'totalTimeSpent',
+    'visualArchitectureProgress', 'visualArchitectureSolved',
     'bestSpeedrunScore', 'dailyStats', 'achievements', 'achievementsData'
 ];
 
@@ -319,6 +319,8 @@ function loadFromStorage() {
         if (!window.state.stats.achievementsData) window.state.stats.achievementsData = { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 };
         if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
         if (!window.state.stats.egePoints) window.state.stats.egePoints = 0;
+        if (!window.state.stats.visualArchitectureProgress) window.state.stats.visualArchitectureProgress = {};
+        if (window.state.stats.visualArchitectureSolved === undefined) window.state.stats.visualArchitectureSolved = 0;
 
         // Миграция factStreaks
         const now = Date.now();

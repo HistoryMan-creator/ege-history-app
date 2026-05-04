@@ -164,19 +164,22 @@ function pickTargetTask7(allowed, rowsCount) {
     const ep = {};
     TASK_EPOCHS.forEach(e => { ep[e] = allowed.filter(f => f.c === e); });
 
-    // Строим индекс: для каждой culture — все её traits из БД
+    // Строим индекс: для каждого нормализованного памятника/произведения — все его traits из БД.
+    // Это склеивает варианты вроде «рассказ/повесть» и не даёт им попасть в одно задание.
     const cultureTraits = {};
     (window.task7Data || []).forEach(d => {
-        if (!cultureTraits[d.culture]) cultureTraits[d.culture] = new Set();
-        cultureTraits[d.culture].add(d.trait);
+        const key = _task7CultureKey(d.culture);
+        if (!cultureTraits[key]) cultureTraits[key] = new Set();
+        cultureTraits[key].add(d.trait);
     });
 
     const pickFrom = (pool, count, usedC, usedT, selectedTraits, selectedCultures) => {
         const res = [];
         for (const f of shuffleArray([...pool])) {
             if (res.length >= count) break;
-            if (usedC.has(f.culture) || usedT.has(f.trait)) continue;
-            const myAltTraits = cultureTraits[f.culture] || new Set();
+            const cultureKey = _task7CultureKey(f.culture);
+            if (usedC.has(cultureKey) || usedT.has(f.trait)) continue;
+            const myAltTraits = cultureTraits[cultureKey] || new Set();
             // Прямая проверка: ранее выбранный trait подходит этой culture?
             const fwd = [...selectedTraits].some(st => myAltTraits.has(st));
             // Обратная проверка: trait этой записи подходит ранее выбранной culture?
@@ -186,10 +189,10 @@ function pickTargetTask7(allowed, rowsCount) {
             });
             if (fwd || rev) continue;
             res.push(f);
-            usedC.add(f.culture);
+            usedC.add(cultureKey);
             usedT.add(f.trait);
             selectedTraits.add(f.trait);
-            selectedCultures.add(f.culture);
+            selectedCultures.add(cultureKey);
         }
         return res;
     };
@@ -222,6 +225,203 @@ function _computeMinYearDistance(epochSpan) {
     return 0; // микро-период — правило отключено
 }
 
+function _task7AddKey(keys, key) {
+    if (key) keys.add(key);
+}
+
+function _task7Century(year) {
+    year = parseInt(year, 10);
+    if (!year || year < 1) return 0;
+    return Math.floor((year - 1) / 100) + 1;
+}
+
+function _task7NormalizeText(text) {
+    return String(text || '')
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .replace(/[«»„“”]/g, '"')
+        .replace(/[—–]/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function _task7Slug(text) {
+    return _task7NormalizeText(text)
+        .replace(/[^a-zа-я0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function _task7CultureKey(culture) {
+    const raw = _task7NormalizeText(culture);
+    const quoted = raw.match(/"([^"]+)"/);
+    let title = quoted ? quoted[1] : raw;
+    title = title.replace(/\s*\([^)]*\)\s*$/g, '').trim();
+
+    let type = 'object';
+    const typeMatch = raw.match(/^(рассказ|повесть|роман|книга|поэма|стихотворение|комедия|пьеса|опера|картина|портрет|кинофильм|киноэпопея|скульптура)\s+/);
+    if (typeMatch) {
+        type = typeMatch[1];
+    } else if (quoted) {
+        type = 'book';
+    }
+
+    if (type === 'рассказ' || type === 'повесть') type = 'short_prose';
+    if (type === 'комедия' || type === 'пьеса') type = 'drama';
+    if (type === 'книга') type = 'book';
+    if (type === 'киноэпопея') type = 'кинофильм';
+
+    if (!quoted) {
+        title = raw
+            .replace(/^(икона|памятник|ансамбль|здание|собор|церковь|храм)\s+/, '')
+            .replace(/^(рассказ|повесть|роман|книга|поэма|стихотворение|комедия|пьеса|опера|картина|портрет|кинофильм|киноэпопея|скульптура)\s+/, '')
+            .trim();
+    }
+
+    return type + ':' + _task7Slug(title);
+}
+
+function _task7AddTextKeys(keys, text) {
+    text = _task7NormalizeText(text);
+
+    const aliases = [
+        ['creator:ilarion', /митрополит иларион|слово о законе и благодати/],
+        ['creator:nestor', /нестор|повесть временных лет|чтение о борисе и глебе/],
+        ['creator:monomakh', /поучение детям|киевским князем/],
+        ['creator:epifaniy', /епифан|житие сергия радонежского/],
+        ['creator:rublev', /андрей рубл[её]в|икона «?троица»?|троица/],
+        ['creator:nikitin', /никитин|хожение за три моря|тверским купцом/],
+        ['creator:filofey', /филофей|москва\s*[—-]\s*третий рим/],
+        ['creator:silvestr', /сильвестр|домострой/],
+        ['creator:kurbsky', /курбск|история о великом князе московском/],
+        ['creator:palitsyn', /авраамий палицын|осаде троице-сергиева монастыря|смутного времени/],
+        ['creator:avvakum', /аввакум|житие протопопа аввакума/],
+        ['creator:sumarokov', /сумароков|отец русской драмы/],
+        ['creator:fonvizin', /фонвизин|недоросль/],
+        ['creator:falkone', /фальконе|медный всадник/],
+        ['creator:karamzin', /карамзин|бедная лиза|сентиментализм|история государства российского/],
+        ['creator:radishchev', /радищев|путешествие из петербурга в москву|бунтовщиком хуже пугач[её]ва/],
+        ['creator:trezzini', /доменико трезини|трезини|летний дворец петра|петропавловский собор|двенадцати коллегий/],
+        ['creator:rastrelli', /растрелли|смольн(?:ый|ого)(?: собор| монастыр)|зимний дворец|петергофский дворец|екатерининский дворец/],
+        ['creator:novikov', /новиков|трутень|живописец/],
+        ['creator:kazakov', /м\.?\s*ф\.?\s*казаков|сенатский дворец|московского университета на моховой/],
+        ['creator:bazhenov', /баженов|дом пашкова|царицыно/],
+        ['creator:quarenghi', /кваренги|академии наук|смольного института/],
+        ['creator:pushkin', /пушкин|евгений онегин|капитанская дочка/],
+        ['creator:gogol', /гоголь|ревизор|м[её]ртвые души/],
+        ['creator:glinka', /глинка|жизнь за царя|русской национальной оперы/],
+        ['creator:musorgsky', /мусоргск|борис годунов|хованщина/],
+        ['creator:surikov', /суриков|утро стрелецкой казни|боярыня морозова|переход суворова через альпы|покорение сибири ермаком/],
+        ['creator:repin', /репин|бурлаки на волге|крестный ход|не ждали/],
+        ['creator:bulgakov', /булгаков|белая гвардия|собачье сердце|дни турбиных/],
+        ['creator:sholokhov', /шолохов|тихий дон|поднятая целина|они сражались за родину/],
+        ['creator:eisenstein', /эйзенштейн|броненосец|иван грозный|александр невский/],
+        ['creator:solzhenitsyn', /солженицын|один день ивана денисовича|матр[её]нин двор|архипелаг гулаг/],
+        ['creator:ryazanov', /рязанов|ирония судьбы|служебный роман|жестокий романс/],
+        ['creator:gaidai', /гайдай|операция «?ы»?|кавказская пленница|иван васильевич/]
+    ];
+
+    aliases.forEach(([key, re]) => { if (re.test(text)) _task7AddKey(keys, key); });
+
+    const centuryRe = /(xi|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\s*в/i;
+    const roman = { xi: 11, xii: 12, xiii: 13, xiv: 14, xv: 15, xvi: 16, xvii: 17, xviii: 18, xix: 19, xx: 20 };
+    const m = text.match(centuryRe);
+    if (m && !/рубеж/.test(text)) _task7AddKey(keys, 'century:' + roman[m[1].toLowerCase()]);
+
+    if (/начал[еа]\s+xviii|первой четверти\s+xviii/.test(text)) _task7AddKey(keys, 'period:early18');
+    if (/рубеж[еа]?\s+xvii[–-]xviii/.test(text)) _task7AddKey(keys, 'period:turn17_18');
+    if (/рубеж[еа]?\s+xv[–-]xvi/.test(text)) _task7AddKey(keys, 'period:turn15_16');
+    if (/правлени[ея]\s+владимира святославича/.test(text)) _task7AddKey(keys, 'reign:vladimir');
+    if (/правлени[ея]\s+ярослава мудрого/.test(text)) _task7AddKey(keys, 'reign:yaroslav');
+    if (/правлени[ея]\s+всеволода большое гнездо/.test(text)) _task7AddKey(keys, 'reign:vsevolod_big_nest');
+    if (/правлени[ея]\s+петра i/.test(text)) _task7AddKey(keys, 'reign:peter1');
+    if (/правлени[ея]\s+ивана iii/.test(text)) _task7AddKey(keys, 'reign:ivan3');
+    if (/правлени[ея]\s+ивана iv/.test(text)) _task7AddKey(keys, 'reign:ivan4');
+    if (/правлени[ея]\s+андрея боголюбского/.test(text)) _task7AddKey(keys, 'reign:andrey_bogolubsky');
+    if (/правлени[ея]\s+алексея михайловича/.test(text)) _task7AddKey(keys, 'reign:alexey_mikhailovich');
+    if (/правлени[ея]\s+павла i/.test(text)) _task7AddKey(keys, 'reign:pavel1');
+    if (/правлени[ея]\s+николая i/.test(text)) _task7AddKey(keys, 'reign:nikolay1');
+    if (/период руководства.*ленина/.test(text)) _task7AddKey(keys, 'life:lenin');
+    if (/период руководства.*хрущ[её]ва|эпох[ау]\s+«?оттепел/.test(text)) _task7AddKey(keys, 'period:ottepel');
+    if (/эпох[ау]\s+«?засто|период\s+«?засто/.test(text)) _task7AddKey(keys, 'period:zastoy');
+    if (/современником владимира мономаха/.test(text)) _task7AddKey(keys, 'life:monomakh');
+    if (/современником ярослава мудрого/.test(text)) _task7AddKey(keys, 'life:yaroslav');
+    if (/современником александра невского/.test(text)) _task7AddKey(keys, 'life:alexander_nevsky');
+    if (/современником дмитрия донского/.test(text)) _task7AddKey(keys, 'life:dmitry_donskoy');
+    if (/современником сергия радонежского/.test(text)) _task7AddKey(keys, 'life:sergiy_radonezhsky');
+    if (/современником василия i/.test(text)) _task7AddKey(keys, 'life:vasily1');
+    if (/современником ивана iii/.test(text)) _task7AddKey(keys, 'life:ivan3');
+    if (/современником ивана iv/.test(text)) _task7AddKey(keys, 'life:ivan4');
+    if (/современником м\.?\s*и\.?\s*воротынского/.test(text)) _task7AddKey(keys, 'life:vorotynsky');
+    if (/современником ленина/.test(text)) _task7AddKey(keys, 'life:lenin');
+    if (/мамаево побоище|куликовск|событиям xiv/.test(text)) _task7AddKey(keys, 'event:kulikovo');
+    if (/нашестви[ея] батыя/.test(text)) _task7AddKey(keys, 'event:baty');
+    if (/церковн(?:ого|ый) раскол/.test(text)) _task7AddKey(keys, 'event:schism');
+    if (/смутн(?:ого|ое) времен/.test(text)) _task7AddKey(keys, 'event:smuta');
+    if (/крымск(?:ой|ая) войн/.test(text)) _task7AddKey(keys, 'event:crimean_war');
+    if (/восстани[яе]\s+пугач/.test(text)) _task7AddKey(keys, 'event:pugachev_revolt');
+    if (/стрелецк(?:их|ие) бунт/.test(text)) _task7AddKey(keys, 'event:streltsy_revolt');
+    if (/перв(?:ой|ая) российск(?:ой|ая) революц/.test(text)) _task7AddKey(keys, 'event:first_revolution');
+    if (/гражданск(?:ой|ая) войн/.test(text)) _task7AddKey(keys, 'event:civil_war');
+    if (/велик(?:ой|ая) отечественн(?:ой|ая) войн/.test(text)) _task7AddKey(keys, 'event:ww2');
+    if (/нэп|новой экономической политик/.test(text)) _task7AddKey(keys, 'period:nep');
+    if (/поздн(?:его|ий) сталинизм|формализм/.test(text)) _task7AddKey(keys, 'period:late_stalin');
+    if (/перестройк/.test(text)) _task7AddKey(keys, 'period:perestroika');
+    if (/могуч(?:ей|ая) кучк/.test(text)) _task7AddKey(keys, 'group:moguchaya_kuchka');
+    if (/передвижн/.test(text)) _task7AddKey(keys, 'group:peredvizhniki');
+    if (/борис годунов|хованщина|князь игорь|сказка о царе салтане/.test(text)) _task7AddKey(keys, 'group:moguchaya_kuchka');
+    if (/тройка|не ждали|крестный ход|боярыня морозова|бурлаки на волге|утро стрелецкой казни|апофеоз войны/.test(text)) _task7AddKey(keys, 'group:peredvizhniki');
+    if (/белая гвардия|разгром|чапаев|окаянные дни|хождение по мукам/.test(text)) _task7AddKey(keys, 'event:civil_war');
+    if (/броненосец.*пот[её]мкин/.test(text)) _task7AddKey(keys, 'event:first_revolution');
+    if (/пут[её]вка в жизнь/.test(text)) _task7AddKey(keys, 'period:nep');
+    if (/ленинградская.*симфония|жди меня|василий т[её]ркин|молодая гвардия|они сражались за родину|судьба человека|живые и м[её]ртвые|сотников|а зори здесь тихие|в списках не значился|оборона севастополя|фашист пролетел|в бой идут одни/.test(text)) _task7AddKey(keys, 'event:ww2');
+    if (/карнавальная ночь|летят журавли|оттепель|один день ивана денисовича|матр[её]нин двор|я шагаю по москве|доктор живаго/.test(text)) _task7AddKey(keys, 'period:ottepel');
+    if (/семнадцать мгновений весны|ирония судьбы|служебный роман|москва слезам не верит|иван васильевич|белое солнце пустыни|жестокий романс|архипелаг гулаг/.test(text)) _task7AddKey(keys, 'period:zastoy');
+    if (/покаяние|дети арбата/.test(text)) _task7AddKey(keys, 'period:perestroika');
+}
+
+function _task7FactSemanticKeys(fact) {
+    const keys = new Set();
+    const year = typeof getYearFromFact === 'function' ? getYearFromFact(fact) : parseInt(fact?.year, 10);
+    const century = _task7Century(year);
+
+    if (century) _task7AddKey(keys, 'century:' + century);
+    if (year >= 1490 && year <= 1510) _task7AddKey(keys, 'period:turn15_16');
+    if (year >= 1690 && year <= 1710) _task7AddKey(keys, 'period:turn17_18');
+    if (year >= 1700 && year <= 1725) _task7AddKey(keys, 'period:early18');
+    if (year >= 980 && year <= 1015) _task7AddKey(keys, 'reign:vladimir');
+    if (year >= 1019 && year <= 1054) _task7AddKey(keys, 'reign:yaroslav');
+    if (year >= 1176 && year <= 1212) _task7AddKey(keys, 'reign:vsevolod_big_nest');
+    if (year >= 1682 && year <= 1725) _task7AddKey(keys, 'reign:peter1');
+    if (year >= 1462 && year <= 1505) _task7AddKey(keys, 'reign:ivan3');
+    if (year >= 1533 && year <= 1584) _task7AddKey(keys, 'reign:ivan4');
+    if (year >= 1157 && year <= 1174) _task7AddKey(keys, 'reign:andrey_bogolubsky');
+    if (year >= 1645 && year <= 1676) _task7AddKey(keys, 'reign:alexey_mikhailovich');
+    if (year >= 1796 && year <= 1801) _task7AddKey(keys, 'reign:pavel1');
+    if (year >= 1825 && year <= 1855) _task7AddKey(keys, 'reign:nikolay1');
+    if (year >= 1953 && year <= 1964) _task7AddKey(keys, 'period:ottepel');
+    if (year >= 1964 && year <= 1985) _task7AddKey(keys, 'period:zastoy');
+    if (year >= 1070 && year <= 1125) _task7AddKey(keys, 'life:monomakh');
+    if (year >= 1019 && year <= 1054) _task7AddKey(keys, 'life:yaroslav');
+    if (year >= 1220 && year <= 1263) _task7AddKey(keys, 'life:alexander_nevsky');
+    if (year >= 1359 && year <= 1389) _task7AddKey(keys, 'life:dmitry_donskoy');
+    if (year >= 1340 && year <= 1392) _task7AddKey(keys, 'life:sergiy_radonezhsky');
+    if (year >= 1389 && year <= 1425) _task7AddKey(keys, 'life:vasily1');
+    if (year >= 1440 && year <= 1505) _task7AddKey(keys, 'life:ivan3');
+    if (year >= 1530 && year <= 1584) _task7AddKey(keys, 'life:ivan4');
+    if (year >= 1510 && year <= 1573) _task7AddKey(keys, 'life:vorotynsky');
+    if (year >= 1870 && year <= 1924) _task7AddKey(keys, 'life:lenin');
+
+    _task7AddTextKeys(keys, `${fact?.culture || ''} ${fact?.trait || ''}`);
+    return keys;
+}
+
+function _task7TraitSemanticKeys(trait) {
+    const keys = new Set();
+    _task7AddTextKeys(keys, trait);
+    return keys;
+}
+
 function generateDistractors(task, target, missing) {
     const poolItems = [...missing];
 
@@ -250,11 +450,23 @@ function generateDistractors(task, target, missing) {
     // ── Собираем все "запрещённые" значения поля field ──
     const usedVals = new Set(poolItems);
     const targetDisplayVals = new Set(target.map(t => t[displayField]));
+    const task7TargetDisplayKeys = task === 'task7'
+        ? new Set(target.map(t => _task7CultureKey(t[displayField])))
+        : null;
+    const task7TargetSemanticKeys = task === 'task7'
+        ? target.reduce((keys, t) => {
+            _task7FactSemanticKeys(t).forEach(k => keys.add(k));
+            return keys;
+        }, new Set())
+        : null;
 
     // 1) Прямая блокировка: любое значение field, которое в базе связано
     //    с каким-то из target[displayField] — уже валидный ответ → не дистрактор.
     dataSource.forEach(d => {
         if (targetDisplayVals.has(d[displayField])) usedVals.add(d[field]);
+        if (task7TargetDisplayKeys && task7TargetDisplayKeys.has(_task7CultureKey(d[displayField]))) {
+            usedVals.add(d[field]);
+        }
     });
 
     // 2) Обратная блокировка: строим индекс field → все его displayField.
@@ -264,10 +476,18 @@ function generateDistractors(task, target, missing) {
     //     когда один и тот же person/fact/trait появляется с разными display-values
     //     в базе, т.е. это дополнительный defensive слой.)
     const fieldToDisplays = {};
+    const fieldToDisplayKeys = {};
+    const fieldToSemanticKeys = {};
     dataSource.forEach(d => {
         const v = d[field];
         if (!fieldToDisplays[v]) fieldToDisplays[v] = new Set();
         fieldToDisplays[v].add(d[displayField]);
+        if (task === 'task7') {
+            if (!fieldToDisplayKeys[v]) fieldToDisplayKeys[v] = new Set();
+            fieldToDisplayKeys[v].add(_task7CultureKey(d[displayField]));
+            if (!fieldToSemanticKeys[v]) fieldToSemanticKeys[v] = new Set();
+            _task7FactSemanticKeys(d).forEach(k => fieldToSemanticKeys[v].add(k));
+        }
     });
 
     // ── Определяем эпох-диапазон и порог ±N лет ──
@@ -303,6 +523,18 @@ function generateDistractors(task, target, missing) {
             const myDisplays = fieldToDisplays[val] || new Set();
             for (const tdv of targetDisplayVals) {
                 if (myDisplays.has(tdv)) return; // семантический близнец — не дистрактор
+            }
+            if (task7TargetDisplayKeys) {
+                const myDisplayKeys = fieldToDisplayKeys[val] || new Set();
+                for (const key of myDisplayKeys) {
+                    if (task7TargetDisplayKeys.has(key)) return;
+                }
+            }
+            if (task7TargetSemanticKeys) {
+                const candidateKeys = fieldToSemanticKeys[val] || _task7FactSemanticKeys(d);
+                for (const k of candidateKeys) {
+                    if (task7TargetSemanticKeys.has(k)) return;
+                }
             }
             // Правило ±N лет: применяется выборочно — не применяется к target-годам ВОВ (task5)
             if (yearDist > 0 && typeof d.year === 'number' && targetYears.length) {
@@ -687,8 +919,9 @@ function generateTwoColumnTable() {
             const cultureTraits7 = {};
             if (task === 'task7') {
                 (window.task7Data || []).forEach(d => {
-                    if (!cultureTraits7[d.culture]) cultureTraits7[d.culture] = new Set();
-                    cultureTraits7[d.culture].add(d.trait);
+                    const cultureKey = _task7CultureKey(d.culture);
+                    if (!cultureTraits7[cultureKey]) cultureTraits7[cultureKey] = new Set();
+                    cultureTraits7[cultureKey].add(d.trait);
                 });
             }
             // Task5: аналогичная проверка для event→person
@@ -708,7 +941,9 @@ function generateTwoColumnTable() {
                 if (dedupeKey2 && used2.has(f[dedupeKey2])) continue;
                 // Task7: trait не должен быть альтернативой другой уже выбранной culture и наоборот
                 if (task === 'task7') {
-                    const myAlts = cultureTraits7[f.culture] || new Set();
+                    const cultureKey = _task7CultureKey(f.culture);
+                    if (selectedCultures7.has(cultureKey)) continue;
+                    const myAlts = cultureTraits7[cultureKey] || new Set();
                     const fwd = [...selectedTraits].some(st => myAlts.has(st));
                     const rev = [...selectedCultures7].some(sc => (cultureTraits7[sc]||new Set()).has(f[dedupeKey2]));
                     if (fwd || rev) continue;
@@ -723,7 +958,7 @@ function generateTwoColumnTable() {
                 target.push(f);
                 used1.add(f[dedupeKey]);
                 if (dedupeKey2) { used2.add(f[dedupeKey2]); selectedTraits.add(f[dedupeKey2]); }
-                if (task === 'task7') selectedCultures7.add(f.culture);
+                if (task === 'task7') selectedCultures7.add(_task7CultureKey(f.culture));
                 if (task === 'task5') { selectedPersons5.add(f.person); selectedEvents5.add(f.event); }
             }
         }
