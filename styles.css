@@ -467,3 +467,31 @@ body.skin-golden .dnd-slot { background-color: #fffaeb !important; border-color:
 .achievement-locked { filter: grayscale(100%); opacity: 0.5; }
 
 body.zen-mode-active main { padding-bottom: 20px !important; }
+
+/* --- ВИЗУАЛЬНЫЙ ТРЕНАЖЁР: оптимизация размера картинок ---
+   На ПК картинка не должна занимать весь экран — оставляем место для ответов. */
+.visual-img-box {
+    height: 220px;
+    max-height: 35vh;
+}
+@media (min-width: 640px) {
+    .visual-img-box { height: 280px; max-height: 40vh; }
+}
+@media (min-width: 1024px) {
+    .visual-img-box { height: 360px; max-height: 50vh; }
+}
+.visual-img-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.visual-trainer-root {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+@media (min-width: 1024px) {
+    .visual-trainer-root {
+        overflow-y: visible;
+        max-height: none;
+    }
+}
