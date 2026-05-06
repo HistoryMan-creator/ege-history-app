@@ -49,16 +49,27 @@ window.updateZenButton = function() {
 };
 
 // === НАВИГАЦИЯ ===
+function isMediaTaskChoice(task) {
+    return !!(window.isMediaLearningTask && window.isMediaLearningTask(task));
+}
+
+function supportsYearSort(task) {
+    return task === 'task3' || task === 'task7' || isMediaTaskChoice(task);
+}
+
 window.quickStartGame = function(task, mode) {
     haptic('medium');
+    if (isMediaTaskChoice(task) && mode !== 'flashcards' && mode !== 'study') {
+        mode = 'study';
+    }
     window.state.currentTask = task;
     $('filter-task').value = task;
     $('filter-mode').value = mode;
     const sortYC = $('pg-sort-year-container');
-    if (sortYC) sortYC.classList.toggle('hidden', task !== 'task3');
+    if (sortYC) sortYC.classList.toggle('hidden', !supportsYearSort(task));
     if (!$('filter-period').value) $('filter-period').value = 'all';
 
-    const cfg = TASK_CONFIG[task];
+    const cfg = TASK_CONFIG[task] || TASK_CONFIG.task4;
     const titles = {
         'normal': `${cfg.emoji} ${cfg.label}`,
         'speedrun': '⚡ Спидран', 'flashcards': '🃏 Флеш-карточки',
@@ -120,13 +131,19 @@ window.pickTaskForMode = function(mode) {
     window._pendingMode = mode;
     const modeNames = { 'flashcards': '🃏 Флеш-карточки', 'speedrun': '⚡ Спидран', 'mistakes': '🔥 Ошибки', 'study': '📖 Сюжеты' };
     $('tp-title').innerText = modeNames[mode] || 'Выберите задание';
+    const allowMediaTasks = mode === 'flashcards' || mode === 'study';
+    $$('.media-task-pick').forEach(btn => btn.classList.toggle('hidden', !allowMediaTasks));
     updateTaskPickerProgress();
     $('task-picker-modal').classList.remove('hidden');
     $('task-picker-modal').classList.add('flex');
     setTimeout(() => { $('task-picker-modal').classList.remove('opacity-0'); $('tp-sheet').classList.remove('translate-y-full'); }, 10);
 };
 
-window.confirmTaskPick = function(task) { closeTaskPicker(); if (window._pendingMode) quickStartGame(task, window._pendingMode); };
+window.confirmTaskPick = function(task) {
+    const mode = (isMediaTaskChoice(task) && window._pendingMode !== 'flashcards') ? 'study' : window._pendingMode;
+    closeTaskPicker();
+    if (mode) quickStartGame(task, mode);
+};
 window.closeTaskPicker = function() {
     $('task-picker-modal').classList.add('opacity-0');
     $('tp-sheet').classList.add('translate-y-full');
@@ -197,8 +214,10 @@ function toggleMode(mode) {
 window.handleTaskChange = function() {
     window.state.currentTask = $('filter-task').value;
     const sortC = $('pg-sort-year-container');
-    if (sortC) sortC.classList.toggle('hidden', window.state.currentTask !== 'task3');
+    if (sortC) sortC.classList.toggle('hidden', !supportsYearSort(window.state.currentTask));
     if (window.state.currentMode === 'flashcards') window.nextFlashcard();
+    else if (window.state.currentMode === 'study') window.renderStudyCard();
+    else if (isMediaTaskChoice(window.state.currentTask)) quickStartGame(window.state.currentTask, 'study');
     else generateTable();
 };
 window.handleModeChange = function() { toggleMode($('filter-mode').value); };
@@ -550,6 +569,7 @@ const ACTION_HANDLERS = {
     quickStartGame:         (a, a2) => window.quickStartGame?.(a, a2 || 'normal'),
     startVisualTrainer:     () => window.startVisualTrainer?.(),
     selectVisualCategory:   (a) => window.selectVisualCategory?.(a),
+    selectCultureLearningTab: (a) => window.selectCultureLearningTab?.(a),
     backToVisualCategoryPicker: () => window.backToVisualCategoryPicker?.(),
     answerVisualStep:       (a) => window.answerVisualStep?.(a),
     resetVisualTrainer:     () => window.resetVisualTrainer?.(),

@@ -109,13 +109,320 @@ window.endDuel = function() {
 //  ФЛЕШ-КАРТОЧКИ
 // ═══════════════════════════════════════════════════════════
 
+const MEDIA_LEARNING_TASKS = {
+    visualPainting: 'painting',
+    visualArchitecture: 'architecture',
+    visualMaps: 'maps',
+};
+
+function isMediaLearningTask(task) {
+    return Object.prototype.hasOwnProperty.call(MEDIA_LEARNING_TASKS, task || window.state.currentTask);
+}
+
+window.isMediaLearningTask = isMediaLearningTask;
+
+function escapeHtml(text) {
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function cultureLearningTab() {
+    return 'base';
+}
+
+function cultureLearningTabsHtml() {
+    return '';
+}
+
+window.selectCultureLearningTab = function(tab) {
+    const taskByTab = { painting: 'visualPainting', architecture: 'visualArchitecture', maps: 'visualMaps' };
+    if (!taskByTab[tab]) return;
+    window.state.currentTask = taskByTab[tab];
+    if ($('filter-task')) $('filter-task').value = taskByTab[tab];
+    window.state.studyIndex = 0;
+    window._cultureFlashcardCursor = {};
+    haptic('light');
+    if (window.state.currentMode === 'flashcards') window.nextFlashcard();
+    else if (window.state.currentMode === 'study') window.renderStudyCard();
+};
+
+function cultureVisualPool(period, task) {
+    const tab = MEDIA_LEARNING_TASKS[task || window.state.currentTask];
+    if (!tab) return null;
+    const base = (window.visualStudyData && window.visualStudyData[tab]) || [];
+    if (period === 'all') return [...base];
+    if (period === 'custom') {
+        const startY = parseInt($('custom-year-start').value) || 0;
+        const endY = parseInt($('custom-year-end').value) || 3000;
+        return base.filter(item => {
+            const y = getYearFromFact(item);
+            return y >= startY && y <= endY;
+        });
+    }
+    return base.filter(item => item.c === period);
+}
+
+function flashcardPoolForCurrentTask() {
+    const period = $('filter-period').value || 'all';
+    if (!isMediaLearningTask(window.state.currentTask)) {
+        return getFilteredPool(period);
+    }
+
+    let pool = cultureVisualPool(period) || [];
+    const now = Date.now();
+    const filtered = pool.filter(f => {
+        const d = window.state.stats.factStreaks[factKey(f)];
+        return !(d && d.level > 0 && d.nextReview > now);
+    });
+    return filtered.length ? filtered : pool;
+}
+
+function studyPoolForCurrentTask() {
+    const period = $('filter-period').value || 'all';
+    if (isMediaLearningTask(window.state.currentTask)) {
+        return cultureVisualPool(period) || [];
+    }
+    return getBasePool(period);
+}
+
+function pickFlashcardFact(allowed) {
+    const sortByYear = $('filter-sort-year') && $('filter-sort-year').checked;
+    if ((window.state.currentTask === 'task7' || isMediaLearningTask(window.state.currentTask)) && sortByYear) {
+        const sorted = [...allowed].sort((a, b) => getYearFromFact(a) - getYearFromFact(b));
+        const key = `${window.state.currentTask}|${$('filter-period').value || 'all'}`;
+        if (!window._cultureFlashcardCursor) window._cultureFlashcardCursor = {};
+        const idx = window._cultureFlashcardCursor[key] || 0;
+        window._cultureFlashcardCursor[key] = idx + 1;
+        return sorted[idx % sorted.length];
+    }
+    return allowed[Math.floor(Math.random() * allowed.length)];
+}
+
+function mediaKindLabel(fact) {
+    if (fact.mediaKind === 'painting') return 'Живопись';
+    if (fact.mediaKind === 'architecture') return 'Архитектура';
+    if (fact.mediaKind === 'maps') return 'Карта';
+    return 'Памятник культуры';
+}
+
+function normalizeDetailLabel(label) {
+    return String(label || '').trim().toLowerCase().replace(/ё/g, 'е');
+}
+
+function detailValue(fact, labels) {
+    const wanted = labels.map(normalizeDetailLabel);
+    const row = (fact.details || []).find(item => wanted.includes(normalizeDetailLabel(item.label)));
+    return row ? String(row.value || '').trim() : '';
+}
+
+function compactText(text, maxLen) {
+    const value = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!value || value.length <= maxLen) return value;
+    return value.slice(0, Math.max(0, maxLen - 1)).trimEnd() + '…';
+}
+
+function mediaMetaPieces(fact) {
+    const years = fact.years || detailValue(fact, ['Годы', 'Дата']) || (fact.year ? `${fact.year} г.` : '');
+    if (fact.mediaKind === 'maps') {
+        return [
+            years,
+            fact.ruler || detailValue(fact, ['Правитель/руководитель', 'Правитель'])
+        ].filter(Boolean).map(item => compactText(item, 72));
+    }
+    if (fact.mediaKind === 'painting') {
+        return [
+            years,
+            detailValue(fact, ['Автор']),
+            detailValue(fact, ['Период'])
+        ].filter(Boolean).map(item => compactText(item, 64));
+    }
+    if (fact.mediaKind === 'architecture') {
+        return [
+            years,
+            detailValue(fact, ['Место', 'Город']),
+            detailValue(fact, ['Правитель', 'Автор', 'Архитектор'])
+        ].filter(Boolean).map(item => compactText(item, 64));
+    }
+    return [years].filter(Boolean);
+}
+
+function mediaSublineText(fact) {
+    if (fact.mediaKind === 'maps') {
+        return [detailValue(fact, ['Тип']), detailValue(fact, ['Раздел'])]
+            .filter(Boolean)
+            .map(item => compactText(item, 72))
+            .join(' · ');
+    }
+    return compactText(detailValue(fact, ['Стиль']), 150);
+}
+
+function mediaDescriptionText(fact) {
+    if (fact.mediaKind === 'maps') {
+        if (mapLegendItems(fact).length) return '';
+        const fallback = String(fact.fullDescription || '')
+            .replace(/;\s*период:\s*[^;]+/i, '')
+            .replace(/;\s*раздел:\s*\d{1,2}\s*-\s*\d{1,2}\s*вв?\.?/i, '');
+        return compactText(detailValue(fact, ['Ориентиры']) || fallback, 185);
+    }
+    const description = detailValue(fact, ['Описание']) || fact.fullDescription;
+    if (fact.mediaKind === 'architecture' && isRedundantMediaDescription(fact, description)) return '';
+    return compactText(description, 185);
+}
+
+function isRedundantMediaDescription(fact, description) {
+    const text = String(description || '').toLowerCase().replace(/ё/g, 'е');
+    if (!text) return false;
+    const years = String(fact.years || detailValue(fact, ['Годы']) || '').toLowerCase().replace(/ё/g, 'е');
+    if (years && text.includes(years)) return true;
+    const century = years.match(/(\d+)\s*век/);
+    return !!(century && text.match(new RegExp(`${century[1]}\\s*век`)));
+}
+
+function cleanMapLegendText(fact, text) {
+    let value = String(text || '').replace(/\s+/g, ' ').trim();
+    const title = String(fact.culture || '').trim();
+    const shortTitle = title.split(':')[0].trim();
+    [title, shortTitle].filter(Boolean).forEach(part => {
+        const idx = value.indexOf(part);
+        if (idx > 0) value = value.slice(0, idx).trim();
+        else if (idx === 0) value = value.slice(part.length).trim();
+    });
+    value = value
+        .replace(/\s+история$/i, '')
+        .replace(/\s+Заштрихованные.+$/i, '')
+        .replace(/\s+Подсказки:.+$/i, '')
+        .replace(/\s+Фронты и командующие.+$/i, '')
+        .replace(/\s+Как поменялись.+$/i, '')
+        .replace(/\s+На схеме есть.+$/i, '')
+        .replace(/^[\s;,.\-]+|[\s;,.\-]+$/g, '');
+    return compactText(value, 92);
+}
+
+function mapLegendItems(fact) {
+    if (fact.mediaKind !== 'maps') return [];
+    const raw = (window.mapLegendData && window.mapLegendData[fact.id]) || [];
+    return raw.map(item => ({
+        n: item.n || item.mark || '',
+        t: cleanMapLegendText(fact, item.t || item.text || '')
+    })).filter(item => item.n && item.t);
+}
+
+function mediaLegendHtml(fact) {
+    const items = mapLegendItems(fact);
+    if (!items.length) return '';
+    const visible = items.slice(0, 8);
+    const more = items.length > visible.length ? `<div class="media-map-legend-more">+${items.length - visible.length}</div>` : '';
+    return `<div class="media-map-legend" aria-label="Подписи к номерам на карте">
+        ${visible.map(item => `<div><b>${escapeHtml(item.n)}</b><span>${escapeHtml(item.t)}</span></div>`).join('')}
+        ${more}
+    </div>`;
+}
+
+function mediaInfoHtml(fact, tailHtml) {
+    const meta = mediaMetaPieces(fact);
+    const subline = mediaSublineText(fact);
+    const description = mediaDescriptionText(fact);
+    return `<div class="media-fact-info">
+        <span class="media-fact-label">${escapeHtml(mediaKindLabel(fact))}</span>
+        <h2>${escapeHtml(fact.culture)}</h2>
+        ${meta.length ? `<div class="media-meta-line">${meta.map(escapeHtml).join('<span>·</span>')}</div>` : ''}
+        ${subline ? `<p class="media-subline">${escapeHtml(subline)}</p>` : ''}
+        ${mediaLegendHtml(fact)}
+        ${description ? `<p class="media-description">${escapeHtml(description)}</p>` : ''}
+        ${tailHtml || ''}
+    </div>`;
+}
+
+function mediaImageHtml(fact) {
+    const imgSrc = escapeHtml(fact.image);
+    const imgAlt = escapeHtml(fact.culture);
+    const img = `<img src="${imgSrc}" alt="${imgAlt}">`;
+    if (fact.mediaKind === 'maps') {
+        // Встроенный зум-вьюер вместо ссылки в новую вкладку
+        return `<div class="media-fact-image media-map-zoomable" onclick="window.openMapZoomViewer('${imgSrc}', '${imgAlt}')" title="Нажми для увеличения">
+            ${img}
+            <div class="map-zoom-hint">🔍 Нажми для увеличения</div>
+        </div>`;
+    }
+    return `<div class="media-fact-image">${img}</div>`;
+}
+
+function renderMediaFlashcardFront(fact, d) {
+    const actions = `<div class="media-answer-buttons">
+        <button type="button" onclick="window.answerFlashcard(false, false, event)" class="forgot">Забыл</button>
+        <button type="button" onclick="window.answerFlashcard(true, false, event)" class="doubt">Сомневаюсь</button>
+        <button type="button" onclick="window.answerFlashcard(true, true, event)" class="remember">Помню</button>
+    </div>`;
+    // ЛИЦЕВАЯ сторона — только изображение + уровень + подсказка «нажми»
+    return `<div class="culture-media-flashcard media-kind-${escapeHtml(fact.mediaKind || 'culture')} media-fc-front" onclick="window.flipMediaFlashcard(this)" style="cursor:pointer;" data-fact-key="${escapeHtml(factKey(fact))}">
+        <div class="fc-level-badge media-level">Ур: ${d ? d.level || 0 : 0} | Балл: ${d ? (d.points || 0).toFixed(1) : 0}/3</div>
+        ${mediaImageHtml(fact)}
+        <div class="media-fact-info" style="justify-content:center;align-items:center;text-align:center;">
+            <span class="media-fact-label">${escapeHtml(mediaKindLabel(fact))}</span>
+            <p style="font-size:12px;font-weight:900;color:#60a5fa;text-transform:uppercase;letter-spacing:0.08em;margin-top:8px;animation:pulse 2s infinite;">👆 Нажми, чтобы перевернуть</p>
+        </div>
+    </div>`;
+}
+
+// Переворот медиа-карточки (архитектура, живопись, карты)
+window.flipMediaFlashcard = function(card) {
+    if (card.classList.contains('media-fc-flipped')) return;
+    card.classList.add('media-fc-flipped');
+    card.onclick = null;
+    card.style.cursor = 'default';
+    haptic('medium');
+
+    const fact = window.state.currentFlashcardFact;
+    if (!fact) return;
+
+    const d = window.state.stats.factStreaks[factKey(fact)];
+    const actions = `<div class="media-answer-buttons">
+        <button type="button" onclick="window.answerFlashcard(false, false, event)" class="forgot">Забыл</button>
+        <button type="button" onclick="window.answerFlashcard(true, false, event)" class="doubt">Сомневаюсь</button>
+        <button type="button" onclick="window.answerFlashcard(true, true, event)" class="remember">Помню</button>
+    </div>`;
+
+    // Перестраиваем карточку в открытое состояние
+    card.className = `culture-media-flashcard media-open-card media-kind-${escapeHtml(fact.mediaKind || 'culture')}`;
+    card.innerHTML = `
+        <div class="fc-level-badge media-level">Ур: ${d ? d.level || 0 : 0} | Балл: ${d ? (d.points || 0).toFixed(1) : 0}/3</div>
+        ${mediaImageHtml(fact)}
+        ${mediaInfoHtml(fact, actions)}
+    `;
+    setTimeout(() => window.updateZenButton(), 50);
+};
+
+function renderMediaFactBack(fact) {
+    return `<div class="media-fact-back">
+        ${mediaImageHtml(fact)}
+        ${mediaInfoHtml(fact, '')}
+    </div>`;
+}
+
+function renderMediaStudyCard(fact, progressText) {
+    const nextButton = '<button data-action="nextStudyCard" class="culture-study-next">Понятно, дальше</button>';
+    return `<div class="culture-study-wrap media-kind-${escapeHtml(fact.mediaKind || 'culture')}-wrap">
+        <article class="culture-study-card media-kind-${escapeHtml(fact.mediaKind || 'culture')}">
+            ${mediaImageHtml(fact)}
+            ${mediaInfoHtml(fact, nextButton)}
+        </article>
+        <div class="st-progress media-progress">${escapeHtml(progressText)}</div>
+    </div>`;
+}
+
 window.nextFlashcard = function() {
-    const allowed = getFilteredPool($('filter-period').value || 'all');
+    const area = $('flashcard-area');
+    const tabs = cultureLearningTabsHtml();
+    const allowed = flashcardPoolForCurrentTask();
     if (!allowed || allowed.length === 0) {
-        $('flashcard-area').innerHTML = '<div class="text-center p-10 w-full"><h2 class="text-xl font-bold text-rose-500 bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c]">⚠️ В этом периоде нет событий!</h2></div>';
+        area.innerHTML = tabs + '<div class="text-center p-10 w-full"><h2 class="text-xl font-bold text-rose-500 bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-[#2c2c2c]">⚠️ В этом периоде нет событий!</h2></div>';
         return;
     }
-    const fact = allowed[Math.floor(Math.random() * allowed.length)];
+    const fact = pickFlashcardFact(allowed);
     const d = window.state.stats.factStreaks[factKey(fact)];
     const task = window.state.currentTask;
     const cfg = TASK_CONFIG[task];
@@ -123,13 +430,16 @@ window.nextFlashcard = function() {
     const labelMap = { task3: 'Процесс', task4: 'Событие', task5: 'Участник', task7: 'Памятник культуры' };
     const titleMap = { task3: f => f.process, task4: f => f.event, task5: f => f.person, task7: f => f.culture };
 
-    const tpl = $('flashcard-template-front').content.cloneNode(true);
-    tpl.querySelector('.fc-level-badge').innerText = `Ур: ${d ? d.level || 0 : 0} | Балл: ${d ? (d.points || 0).toFixed(1) : 0}/3`;
-    tpl.querySelector('.fc-label').innerText = labelMap[task] || 'Событие';
-    tpl.querySelector('.fc-title').innerText = titleMap[task](fact);
-    const area = $('flashcard-area');
-    area.innerHTML = '';
-    area.appendChild(tpl);
+    area.innerHTML = tabs;
+    if (fact.image) {
+        area.insertAdjacentHTML('beforeend', renderMediaFlashcardFront(fact, d));
+    } else {
+        const tpl = $('flashcard-template-front').content.cloneNode(true);
+        tpl.querySelector('.fc-level-badge').innerText = `Ур: ${d ? d.level || 0 : 0} | Балл: ${d ? (d.points || 0).toFixed(1) : 0}/3`;
+        tpl.querySelector('.fc-label').innerText = labelMap[task] || 'Событие';
+        tpl.querySelector('.fc-title').innerText = titleMap[task](fact);
+        area.appendChild(tpl);
+    }
     window.state.currentFlashcardFact = fact;
 };
 
@@ -139,7 +449,9 @@ window.flipFlashcard = function(card) {
     haptic('medium');
     const fact = window.state.currentFlashcardFact;
     const task = window.state.currentTask;
-    card.className = "w-full max-w-md bg-blue-50 dark:bg-[#1e1e1e] rounded-3xl shadow-[0_8px_30px_rgba(59,130,246,0.15)] p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-[#2c2c2c] transition-all duration-300 relative flipped";
+    card.className = fact.image
+        ? "culture-media-flashcard media-back-card flipped"
+        : "w-full max-w-md bg-blue-50 dark:bg-[#1e1e1e] rounded-3xl shadow-[0_8px_30px_rgba(59,130,246,0.15)] p-6 min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-blue-200 dark:border-[#2c2c2c] transition-all duration-300 relative flipped";
     card.onclick = null;
 
     const contentMap = {
@@ -150,8 +462,19 @@ window.flipFlashcard = function(card) {
             return `<div class="bg-white dark:bg-[#181818]/50 p-5 rounded-2xl shadow-sm border border-blue-100 dark:border-[#2c2c2c] w-full mb-3"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Год</span><span class="text-3xl font-black text-examBlue dark:text-blue-300">${fact.year}</span></div><div class="bg-white dark:bg-[#181818]/50 p-5 rounded-2xl shadow-sm border border-green-100 dark:border-[#2c2c2c] flex flex-col items-center w-full"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Место</span><span class="text-xl font-bold text-emerald-700 dark:text-emerald-400 leading-relaxed">${fact.geo}</span>${mapLink}</div>`;
         },
         task5: () => `<div class="bg-white dark:bg-[#181818]/50 p-5 rounded-2xl shadow-sm border border-purple-100 dark:border-[#2c2c2c] w-full text-center"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Событие</span><span class="text-lg sm:text-xl font-bold text-purple-700 dark:text-purple-400 leading-relaxed">${fact.event}</span></div>`,
-        task7: () => `<div class="bg-white dark:bg-[#181818]/50 p-5 rounded-2xl shadow-sm border border-amber-100 dark:border-[#2c2c2c] w-full text-center mb-3"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Характеристика</span><span class="text-[14px] font-bold text-amber-700 dark:text-amber-400 leading-relaxed">${fact.trait}</span></div><div class="bg-white dark:bg-[#181818]/50 p-4 rounded-2xl shadow-sm border border-blue-100 dark:border-[#2c2c2c] w-full text-center"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Создание</span><span class="text-2xl font-black text-examBlue dark:text-blue-300">${fact.year}</span></div>`,
+        task7: () => fact.image ? renderMediaFactBack(fact) : `<div class="bg-white dark:bg-[#181818]/50 p-5 rounded-2xl shadow-sm border border-amber-100 dark:border-[#2c2c2c] w-full text-center mb-3"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Характеристика</span><span class="text-[14px] font-bold text-amber-700 dark:text-amber-400 leading-relaxed">${fact.trait}</span></div><div class="bg-white dark:bg-[#181818]/50 p-4 rounded-2xl shadow-sm border border-blue-100 dark:border-[#2c2c2c] w-full text-center"><span class="text-[10px] text-gray-400 uppercase font-black block mb-1 tracking-widest">Создание</span><span class="text-2xl font-black text-examBlue dark:text-blue-300">${fact.year}</span></div>`,
     };
+
+    if (fact.image) {
+        card.innerHTML = `${renderMediaFactBack(fact)}
+            <div class="media-answer-buttons">
+                <button onclick="window.answerFlashcard(false, false, event)" class="forgot">Забыл</button>
+                <button onclick="window.answerFlashcard(true, false, event)" class="doubt">Сомневаюсь</button>
+                <button onclick="window.answerFlashcard(true, true, event)" class="remember">Помню</button>
+            </div>`;
+        setTimeout(() => window.updateZenButton(), 50);
+        return;
+    }
 
     const tpl = $('flashcard-template-back').content.cloneNode(true);
     tpl.querySelector('.fc-content').innerHTML = (contentMap[task] || contentMap.task4)();
@@ -275,9 +598,10 @@ function generateDetectiveTable() {
 // ═══════════════════════════════════════════════════════════
 
 window.renderStudyCard = function() {
-    const pool = getBasePool($('filter-period').value || 'all');
+    const pool = studyPoolForCurrentTask();
+    const tabs = cultureLearningTabsHtml();
     if (pool.length === 0) {
-        $('study-area').innerHTML = '<div class="text-center p-10 bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm"><h2 class="text-xl font-bold text-rose-500">⚠️ В этом периоде нет событий!</h2></div>';
+        $('study-area').innerHTML = tabs + '<div class="text-center p-10 bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm"><h2 class="text-xl font-bold text-rose-500">⚠️ В этом периоде нет событий!</h2></div>';
         return;
     }
     const sorted = [...pool].sort((a, b) => getYearFromFact(a) - getYearFromFact(b));
@@ -288,6 +612,11 @@ window.renderStudyCard = function() {
 
     const it = sorted[window.state.studyIndex];
     const task = window.state.currentTask;
+    const progressText = `Карточка ${window.state.studyIndex + 1} из ${sorted.length}`;
+    if (it.image) {
+        $('study-area').innerHTML = tabs + renderMediaStudyCard(it, progressText);
+        return;
+    }
     const labelMap = { task3: 'Процесс → Факт', task4: 'География', task5: 'Личность', task7: 'Культура' };
     const titleMap = {
         task3: it => `${it.year} г. • ${it.process}`,
@@ -306,8 +635,8 @@ window.renderStudyCard = function() {
     tpl.querySelector('.st-label').innerText = labelMap[task] || 'Событие';
     tpl.querySelector('.st-title').innerText = titleMap[task](it);
     tpl.querySelector('.st-desc').innerText = descMap[task](it);
-    tpl.querySelector('.st-progress').innerText = `Карточка ${window.state.studyIndex + 1} из ${sorted.length}`;
-    $('study-area').innerHTML = '';
+    tpl.querySelector('.st-progress').innerText = progressText;
+    $('study-area').innerHTML = tabs;
     $('study-area').appendChild(tpl);
 };
 

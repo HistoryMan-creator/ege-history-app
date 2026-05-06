@@ -228,30 +228,29 @@ function renderVisualCategoryPicker(area) {
     });
 
     const cards = categories.map(({ key, cfg, items, learned, pct }) => `
-        <button data-action="selectVisualCategory" data-arg="${key}"
-            class="text-left bg-white hover:bg-blue-50 dark:bg-[#1e1e1e] dark:hover:bg-[#242424] border border-gray-200 dark:border-[#2c2c2c] rounded-2xl p-5 shadow-sm active:scale-[0.99] transition-all">
-            <div class="flex items-center justify-between gap-4 mb-4">
-                <div class="flex items-center gap-3 min-w-0">
-                    <span class="text-3xl">${cfg.icon}</span>
-                    <div class="min-w-0">
-                        <div class="text-lg font-black text-gray-800 dark:text-gray-100 uppercase tracking-wider">${cfg.label}</div>
-                        <div class="text-xs font-bold text-gray-400">${learned} / ${items.length} выучено</div>
+        <button data-action="selectVisualCategory" data-arg="${key}" class="visual-cat-btn">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
+                    <span style="font-size:1.875rem;">${cfg.icon}</span>
+                    <div style="min-width:0;">
+                        <div class="vcat-title">${cfg.label}</div>
+                        <div class="vcat-sub">${learned} / ${items.length} выучено</div>
                     </div>
                 </div>
-                <span class="text-gray-300 dark:text-gray-600 text-xl">›</span>
+                <span class="vcat-arrow">›</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-1.5 rounded-full" style="width:${pct}%"></div>
+            <div class="visual-cat-progress-track">
+                <div class="visual-cat-progress-fill" style="width:${pct}%"></div>
             </div>
         </button>
     `).join('');
 
-    area.innerHTML = `<div class="w-full max-w-3xl flex flex-col gap-4 visual-category-picker">
-        <div class="text-center">
-            <div class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Визуал ЕГЭ</div>
-            <h2 class="text-2xl sm:text-3xl font-black text-gray-800 dark:text-gray-100 leading-tight">Что решаем?</h2>
+    area.innerHTML = `<div class="visual-category-picker">
+        <div style="text-align:center;margin-bottom:1rem;">
+            <div style="font-size:0.625rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">Визуал ЕГЭ</div>
+            <h2>Что решаем?</h2>
         </div>
-        <div class="grid sm:grid-cols-2 gap-3">${cards}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0.75rem;">${cards}</div>
     </div>`;
 }
 
@@ -405,54 +404,60 @@ window.renderVisualTrainer = function(forceNew) {
     // --- Options ---
     const options = step.options.map(option => `
         <button data-action="answerVisualStep" data-arg="${option.key}" data-visual-option="${option.key}"
-            class="visual-option w-full text-left bg-white hover:bg-blue-50 dark:bg-[#242424] dark:hover:bg-[#2c2c2c] border border-gray-200 dark:border-[#3f3f46] rounded-xl p-3 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed active:scale-[0.99] transition-all cursor-pointer">
+            class="visual-option">
             ${visualEscape(option.text)}
         </button>`).join('');
 
-    area.innerHTML = `<div class="w-full max-w-5xl flex flex-col gap-2 visual-trainer-root">
-        <div class="flex items-center justify-between gap-3 px-1">
-            <div class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest">${cfg.icon} ${visualEscape(cfg.label)}</div>
-            <div class="flex items-center gap-2">
-                <div class="text-[10px] sm:text-xs font-black text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">${learned} / ${items.length} выучено</div>
-                <button data-action="backToVisualCategoryPicker" class="text-[10px] font-black text-gray-400 hover:text-blue-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full transition-colors" title="Выбрать раздел">↔</button>
-                <button data-action="resetVisualTrainer" class="text-[10px] font-black text-gray-400 hover:text-rose-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full transition-colors" title="Сбросить прогресс">🔄</button>
+    area.innerHTML = `<div class="visual-trainer-root" style="width:100%;max-width:80rem;display:flex;flex-direction:column;gap:0.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0 0.25rem;">
+            <div style="font-size:0.6875rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;">${cfg.icon} ${visualEscape(cfg.label)}</div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <div class="visual-learned-badge">${learned} / ${items.length} выучено</div>
+                <button data-action="backToVisualCategoryPicker" class="visual-ctrl-btn" title="Выбрать раздел">↔</button>
+                <button data-action="resetVisualTrainer" class="visual-ctrl-btn ctrl-reset" title="Сбросить прогресс">🔄</button>
             </div>
         </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-1">
-            <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-1.5 rounded-full transition-all duration-700" style="width:${pct}%"></div>
+        <div class="visual-progress-track" style="margin-bottom:0.25rem;">
+            <div class="visual-cat-progress-fill" style="width:${pct}%;transition:width 0.7s;"></div>
         </div>
-        <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(300px,400px)] gap-3 items-stretch">
-            <div class="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm overflow-hidden flex flex-col">
-                <div class="bg-gray-100 dark:bg-[#181818] flex items-center justify-center visual-img-box">
-                    <img src="${visualEscape(item.mainImage)}" alt="Памятник" class="w-full h-full object-contain">
+        <div style="display:grid;grid-template-columns:1fr;gap:0.75rem;align-items:stretch;">
+            <div class="visual-item-card">
+                <div class="visual-img-box">
+                    <img src="${visualEscape(item.mainImage)}" alt="Памятник">
                 </div>
-                <div class="p-3 border-t border-gray-200 dark:border-[#2c2c2c]">
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="flex-1 min-w-0">
-                            <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">🧩 Определи характеристики</div>
-                            <div class="flex items-center gap-1 text-[11px] font-bold text-gray-400">
+                <div class="visual-item-footer">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:0.625rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;">🧩 Определи характеристики</div>
+                            <div style="display:flex;align-items:center;gap:0.25rem;font-size:0.6875rem;font-weight:700;color:#9ca3af;">
                                 <span>Серия:</span> ${streakDots}
-                                <span class="ml-1 text-gray-300 dark:text-gray-600">${progress.streak}/2</span>
+                                <span style="margin-left:4px;">${progress.streak}/2</span>
                             </div>
                         </div>
                     </div>
-                    <!-- Stepper -->
-                    <div class="flex items-start gap-0 mt-1">${stepperDots}</div>
+                    <div style="display:flex;align-items:flex-start;gap:0;margin-top:0.25rem;">${stepperDots}</div>
                 </div>
             </div>
-            <div class="bg-gray-50 dark:bg-[#181818] rounded-2xl border border-gray-200 dark:border-[#2c2c2c] shadow-sm p-3 sm:p-4 flex flex-col gap-2">
+            <div class="visual-question-panel">
                 <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-lg">${visualFactIcon(step.factType)}</span>
-                        <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Шаг ${currentIdx + 1} из ${totalSteps}</div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+                        <span style="font-size:1.125rem;">${visualFactIcon(step.factType)}</span>
+                        <div style="font-size:0.625rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:0.08em;">Шаг ${currentIdx + 1} из ${totalSteps}</div>
                     </div>
-                    <h3 class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-200 leading-snug">${visualEscape(step.question)}</h3>
+                    <h3 class="visual-question-text">${visualEscape(step.question)}</h3>
                 </div>
-                <div class="flex flex-col gap-1.5">${options}</div>
-                <div id="visual-feedback" class="min-h-[36px] text-xs font-bold text-gray-500 dark:text-gray-400 leading-relaxed mt-auto"></div>
+                <div style="display:flex;flex-direction:column;gap:0.375rem;">${options}</div>
+                <div id="visual-feedback" class="visual-feedback"></div>
             </div>
         </div>
-    </div>`;
+    </div>
+    <style>
+    @media(min-width:1024px){
+        .visual-trainer-root > div:last-child{
+            grid-template-columns: minmax(0,1fr) minmax(300px,400px);
+        }
+    }
+    </style>`;
 };
 
 /**
@@ -465,16 +470,15 @@ window.answerVisualStep = function(optionKey) {
     const step = ms.steps[ms.currentStep];
     const correct = optionKey === 'correct';
 
-    // Подсветить кнопки
+    // Подсветить кнопки через CSS-классы (без Tailwind dark: в JS)
     document.querySelectorAll('[data-visual-option]').forEach(btn => {
         btn.disabled = true;
-        btn.classList.remove('hover:bg-blue-50', 'dark:hover:bg-[#2c2c2c]', 'cursor-pointer');
         if (btn.dataset.visualOption === 'correct') {
-            btn.classList.add('bg-emerald-50', 'border-emerald-400', 'text-emerald-800', 'dark:bg-emerald-900/30', 'dark:text-emerald-300');
+            btn.classList.add('opt-correct');
         } else if (btn.dataset.visualOption === optionKey) {
-            btn.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-800', 'dark:bg-rose-900/30', 'dark:text-rose-300');
+            btn.classList.add('opt-wrong');
         } else {
-            btn.classList.add('opacity-60');
+            btn.classList.add('opt-dim');
         }
     });
 
@@ -482,12 +486,12 @@ window.answerVisualStep = function(optionKey) {
 
     if (correct) {
         haptic('success');
-        if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400">✓ ${visualEscape(visualFactLabel(step.factType))}: ${visualEscape(step.correctAnswer)}</span>`;
+        if (feedback) feedback.innerHTML = `<span style="color:#059669;">✓ ${visualEscape(visualFactLabel(step.factType))}: ${visualEscape(step.correctAnswer)}</span>`;
     } else {
         haptic('error');
         ms.allCorrect = false;
         ms.wrongSteps.push(ms.currentStep);
-        if (feedback) feedback.innerHTML = `<span class="text-rose-600 dark:text-rose-400">✗ Правильно: ${visualEscape(step.correctAnswer)}</span>`;
+        if (feedback) feedback.innerHTML = `<span style="color:#e11d48;">✗ Правильно: ${visualEscape(step.correctAnswer)}</span>`;
     }
 
     const isLast = ms.currentStep >= ms.steps.length - 1;
@@ -511,13 +515,13 @@ window.answerVisualStep = function(optionKey) {
                 window.state.currentVisualId = null;
                 window.state.stats[cfg.solvedKey] = (window.state.stats[cfg.solvedKey] || 0) + 1;
                 setTimeout(() => {
-                    if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400">🏆 Все верно! <b>${visualEscape(item.title)}</b> — ВЫУЧЕНО!</span>`;
+                    if (feedback) feedback.innerHTML = `<span style="color:#059669;">🏆 Все верно! <b>${visualEscape(item.title)}</b> — ВЫУЧЕНО!</span>`;
                 }, correct ? 300 : 800);
                 showToast(cfg.icon, `${item.title} выучен!`, 'bg-emerald-500', 'border-emerald-700');
             } else {
                 window.state.currentVisualId = item.id;
                 setTimeout(() => {
-                    if (feedback) feedback.innerHTML = `<span class="text-blue-600 dark:text-blue-400">✅ Все характеристики верны! <b>${visualEscape(item.title)}</b> — серия ${progress.streak}/2</span>`;
+                    if (feedback) feedback.innerHTML = `<span style="color:#2563eb;">✅ Все характеристики верны! <b>${visualEscape(item.title)}</b> — серия ${progress.streak}/2</span>`;
                 }, correct ? 300 : 800);
             }
         } else {
@@ -526,7 +530,7 @@ window.answerVisualStep = function(optionKey) {
             window.state.currentVisualId = null;
             const wrongCount = ms.wrongSteps.length;
             setTimeout(() => {
-                if (feedback) feedback.innerHTML = `<span class="text-rose-600 dark:text-rose-400">❌ Это <b>${visualEscape(item.title)}</b>. Ошибок: ${wrongCount} из ${ms.steps.length}. Серия сброшена.</span>`;
+                if (feedback) feedback.innerHTML = `<span style="color:#e11d48;">❌ Это <b>${visualEscape(item.title)}</b>. Ошибок: ${wrongCount} из ${ms.steps.length}. Серия сброшена.</span>`;
             }, correct ? 300 : 800);
         }
 
@@ -544,6 +548,7 @@ window.answerVisualStep = function(optionKey) {
         setTimeout(() => window.renderVisualTrainer(), delay);
     }
 };
+
 
 window.resetVisualTrainer = function() {
     const category = visualSelectedCategory();

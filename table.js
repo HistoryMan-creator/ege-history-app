@@ -964,10 +964,10 @@ function generateTwoColumnTable() {
         }
     }
 
-    // Сортировка по году для task3
-    if (task === 'task3') {
+    // Сортировка по году для хронологических и культурных заданий
+    if (task === 'task3' || task === 'task7') {
         const sortByYear = $('filter-sort-year') && $('filter-sort-year').checked;
-        if (sortByYear) target.sort((a, b) => (a.year || 0) - (b.year || 0));
+        if (sortByYear) target.sort((a, b) => getYearFromFact(a) - getYearFromFact(b));
     }
 
     window.state.currentTargetData = target;

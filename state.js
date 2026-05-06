@@ -42,6 +42,7 @@ window.state = {
     isTeacherAdmin: false,
     focusMode: false,
     studyIndex: 0,
+    cultureLearningTab: 'base',
     currentVisualQuestion: null,
     currentVisualId: null,
     currentVisualCategory: null,
@@ -56,11 +57,50 @@ window.state = {
 const precomputed = { task3: {}, task4: {}, task5: {}, task7: {} };
 const periodsList = ['all', 'early', '18th', '19th', '20th'];
 
+function romanCenturyToNumber(value) {
+    const map = {
+        i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10,
+        xi: 11, xii: 12, xiii: 13, xiv: 14, xv: 15, xvi: 16, xvii: 17, xviii: 18,
+        xix: 19, xx: 20, xxi: 21,
+    };
+    return map[String(value || '').toLowerCase()] || 0;
+}
+
+function normalizeCultureCenturyText(text) {
+    return String(text ?? '').replace(/\b([IVXLCDM]{1,6})(?:\s*[-–]\s*([IVXLCDM]{1,6}))?\s*(вв?\.?|век(?:а|е|ов)?)/gi, (match, a, b, suffix) => {
+        const first = romanCenturyToNumber(a);
+        const second = b ? romanCenturyToNumber(b) : 0;
+        if (!first) return match;
+        const normalizedSuffix = /^вв/i.test(suffix) ? 'вв.' : suffix.toLowerCase();
+        return second ? `${first}-${second} ${normalizedSuffix}` : `${first} ${normalizedSuffix}`;
+    });
+}
+
+function normalizeCultureCenturyLabels(value, seen) {
+    if (typeof value === 'string') return normalizeCultureCenturyText(value);
+    if (!value || typeof value !== 'object') return value;
+    seen = seen || new Set();
+    if (seen.has(value)) return value;
+    seen.add(value);
+    if (Array.isArray(value)) {
+        value.forEach((item, idx) => { value[idx] = normalizeCultureCenturyLabels(item, seen); });
+        return value;
+    }
+    Object.keys(value).forEach(key => {
+        value[key] = normalizeCultureCenturyLabels(value[key], seen);
+    });
+    return value;
+}
+
 function initPrecomputed() {
     window.bigData   = typeof bigData   !== 'undefined' ? bigData   : (window.bigData   || []);
     window.task3Data = typeof task3Data !== 'undefined' ? task3Data : (window.task3Data || []);
     window.task5Data = typeof task5Data !== 'undefined' ? task5Data : (window.task5Data || []);
     window.task7Data = typeof task7Data !== 'undefined' ? task7Data : (window.task7Data || []);
+    normalizeCultureCenturyLabels(window.task7Data);
+    normalizeCultureCenturyLabels(window.visualArchitectureData);
+    normalizeCultureCenturyLabels(window.visualPaintingData);
+    normalizeCultureCenturyLabels(window.visualStudyData);
 
     const totalItems = (window.bigData?.length || 0) + (window.task3Data?.length || 0) +
                        (window.task5Data?.length || 0) + (window.task7Data?.length || 0);
@@ -113,7 +153,8 @@ function getBasePool(period) {
     if (task === 'task3') {
         return period === 'all' ? [...baseData] : baseData.filter(d => d.c === period);
     }
-    return precomputed[task][period] || baseData;
+    return (precomputed[task] && precomputed[task][period]) ||
+        (period === 'all' ? [...baseData] : baseData.filter(d => d.c === period));
 }
 
 function getFilteredPool(period, limit) {
@@ -450,7 +491,8 @@ function getTaskProgress(task) {
     for (const [key, val] of Object.entries(streaks)) {
         const match = prefix
             ? key.startsWith(prefix)
-            : (!key.startsWith('t5_') && !key.startsWith('t7_') && !key.startsWith('t3_'));
+            : (!key.startsWith('t5_') && !key.startsWith('t7_') && !key.startsWith('t3_') &&
+               !key.startsWith('vp_') && !key.startsWith('va_') && !key.startsWith('vm_'));
         if (match && window.isFactLearned(val)) learned++;
     }
 

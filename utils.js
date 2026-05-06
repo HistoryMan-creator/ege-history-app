@@ -110,7 +110,8 @@ function countLearnedForTask(taskKey, streaks) {
     Object.entries(src).forEach(([k, v]) => {
         const match = prefix
             ? k.startsWith(prefix)
-            : (!k.startsWith('t5_') && !k.startsWith('t7_') && !k.startsWith('t3_'));
+            : (!k.startsWith('t5_') && !k.startsWith('t7_') && !k.startsWith('t3_') &&
+               !k.startsWith('vp_') && !k.startsWith('va_') && !k.startsWith('vm_'));
         if (match && window.isFactLearned(v)) count++;
     });
     return count;
