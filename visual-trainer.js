@@ -35,6 +35,7 @@ const VISUAL_CATEGORY_CONFIG = {
         icon: '🖼️',
         progressKey: 'visualPaintingProgress',
         solvedKey: 'visualPaintingSolved',
+        excludedFactTypes: ['style'],
         data: () => (window.visualPaintingData || []).filter(item => item.type === 'painting'),
     },
 };
@@ -49,6 +50,11 @@ function visualCategoryConfig(category) {
 
 function visualCategoryForItem(item) {
     return item?.type === 'painting' ? 'painting' : 'architecture';
+}
+
+function visualFactEnabled(item, fact) {
+    const excluded = visualCategoryConfig(visualCategoryForItem(item)).excludedFactTypes || [];
+    return !excluded.includes(fact.type);
 }
 
 function visualData(category) {
@@ -149,12 +155,12 @@ function visualFactDistractors(items, item, fact) {
  */
 function visualBuildSteps(items, item) {
     // Фильтруем date — точный год не спрашиваем
-    const facts = (item.drillFacts || []).filter(f => f.type !== 'date' && f.answer && visualFactDistractors(items, item, f).length >= 3);
+    const facts = (item.drillFacts || []).filter(f => visualFactEnabled(item, f) && f.type !== 'date' && f.answer && visualFactDistractors(items, item, f).length >= 3);
 
     if (!facts.length) {
         // Фоллбэк: если нет drill facts с достаточными дистракторами,
         // спрашиваем хотя бы то что есть
-        const anyFacts = (item.drillFacts || []).filter(f => f.answer && visualFactDistractors(items, item, f).length >= 1);
+        const anyFacts = (item.drillFacts || []).filter(f => visualFactEnabled(item, f) && f.answer && visualFactDistractors(items, item, f).length >= 1);
         if (!anyFacts.length) return [];
         return anyFacts.map(fact => _buildStep(items, item, fact));
     }
