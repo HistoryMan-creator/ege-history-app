@@ -1052,6 +1052,7 @@
     <!-- FIX 2.2: defer позволяет браузеру парсить HTML параллельно с загрузкой data.js (579 КБ).
          Оба тега defer — гарантируют порядок выполнения: data.js → app:ready dispatch. -->
     <script src="visualArchitectureData.generated.js" defer></script>
+    <script src="visualPaintingData.generated.js" defer></script>
     <script src="data.js" defer></script>
     <script defer>document.dispatchEvent(new Event('app:ready'));</script>
 </body>

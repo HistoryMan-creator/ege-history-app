@@ -24,6 +24,8 @@ window.state = {
         hwTask3: 0, hwTask4: 0, hwTask5: 0, hwTask7: 0,
         visualArchitectureProgress: {},
         visualArchitectureSolved: 0,
+        visualPaintingProgress: {},
+        visualPaintingSolved: 0,
         achievements: [],
         achievementsData: { nightOwls: 0, earlyBirds: 0, hwDone: 0, hwPerfect: 0, maxMistakes: 0 }
     },
@@ -42,6 +44,7 @@ window.state = {
     studyIndex: 0,
     currentVisualQuestion: null,
     currentVisualId: null,
+    currentVisualCategory: null,
     errorStreak: 0,
     duel: {
         active: false, matchId: null, isPlayer1: false,
@@ -197,6 +200,7 @@ const SAVE_FIELDS = [
     'streak', 'totalSolvedEver', 'solvedByTask', 'flashcardsSolved',
     'eraStats', 'factStreaks', 'hwFlashcardsToSolve', 'totalTimeSpent',
     'visualArchitectureProgress', 'visualArchitectureSolved',
+    'visualPaintingProgress', 'visualPaintingSolved',
     'bestSpeedrunScore', 'dailyStats', 'achievements', 'achievementsData'
 ];
 
@@ -321,6 +325,8 @@ function loadFromStorage() {
         if (!window.state.stats.egePoints) window.state.stats.egePoints = 0;
         if (!window.state.stats.visualArchitectureProgress) window.state.stats.visualArchitectureProgress = {};
         if (window.state.stats.visualArchitectureSolved === undefined) window.state.stats.visualArchitectureSolved = 0;
+        if (!window.state.stats.visualPaintingProgress) window.state.stats.visualPaintingProgress = {};
+        if (window.state.stats.visualPaintingSolved === undefined) window.state.stats.visualPaintingSolved = 0;
 
         // Миграция factStreaks
         const now = Date.now();

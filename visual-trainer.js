@@ -20,21 +20,58 @@ function visualEscape(text) {
         .replace(/'/g, '&#39;');
 }
 
-function visualData() {
-    return (window.visualArchitectureData || []).filter(item => item && item.mainImage && item.fullCharacteristic);
+const VISUAL_CATEGORY_CONFIG = {
+    architecture: {
+        label: 'Архитектура',
+        shortLabel: 'Архитектура',
+        icon: '🏛️',
+        progressKey: 'visualArchitectureProgress',
+        solvedKey: 'visualArchitectureSolved',
+        data: () => (window.visualArchitectureData || []).filter(item => item.type === 'architecture'),
+    },
+    painting: {
+        label: 'Живопись',
+        shortLabel: 'Живопись',
+        icon: '🖼️',
+        progressKey: 'visualPaintingProgress',
+        solvedKey: 'visualPaintingSolved',
+        data: () => (window.visualPaintingData || []).filter(item => item.type === 'painting'),
+    },
+};
+
+function visualSelectedCategory() {
+    return window.state.currentVisualCategory || null;
 }
 
-function visualProgressFor(id) {
-    const stats = window.state.stats;
-    if (!stats.visualArchitectureProgress) stats.visualArchitectureProgress = {};
-    if (!stats.visualArchitectureProgress[id]) {
-        stats.visualArchitectureProgress[id] = { streak: 0, learned: false, attempts: 0, correct: 0 };
+function visualCategoryConfig(category) {
+    return VISUAL_CATEGORY_CONFIG[category] || VISUAL_CATEGORY_CONFIG.architecture;
+}
+
+function visualCategoryForItem(item) {
+    return item?.type === 'painting' ? 'painting' : 'architecture';
+}
+
+function visualData(category) {
+    if (category && VISUAL_CATEGORY_CONFIG[category]) {
+        return VISUAL_CATEGORY_CONFIG[category].data().filter(item => item && item.mainImage && item.fullCharacteristic);
     }
-    return stats.visualArchitectureProgress[id];
+    return Object.keys(VISUAL_CATEGORY_CONFIG).flatMap(key => visualData(key));
+}
+
+function visualProgressFor(itemOrId, category) {
+    const id = typeof itemOrId === 'string' ? itemOrId : itemOrId.id;
+    const resolvedCategory = category || (typeof itemOrId === 'string' ? visualSelectedCategory() : visualCategoryForItem(itemOrId));
+    const cfg = visualCategoryConfig(resolvedCategory);
+    const stats = window.state.stats;
+    if (!stats[cfg.progressKey]) stats[cfg.progressKey] = {};
+    if (!stats[cfg.progressKey][id]) {
+        stats[cfg.progressKey][id] = { streak: 0, learned: false, attempts: 0, correct: 0 };
+    }
+    return stats[cfg.progressKey][id];
 }
 
 function visualLearnedCount(items) {
-    return items.filter(item => visualProgressFor(item.id).learned).length;
+    return items.filter(item => visualProgressFor(item).learned).length;
 }
 
 /**
@@ -43,7 +80,7 @@ function visualLearnedCount(items) {
  * - Приоритет: in-progress (streak > 0) > новые
  */
 function visualPickPool(items) {
-    const open = items.filter(item => !visualProgressFor(item.id).learned);
+    const open = items.filter(item => !visualProgressFor(item).learned);
     if (!open.length) return null;
 
     const history = window._visualHistory || [];
@@ -56,7 +93,7 @@ function visualPickPool(items) {
     if (!candidates.length) candidates = open;
 
     // Приоритет: in-progress
-    const inProgress = candidates.filter(item => visualProgressFor(item.id).streak > 0);
+    const inProgress = candidates.filter(item => visualProgressFor(item).streak > 0);
     // Из in-progress убираем те что были в последних 6
     const ipFresh = inProgress.filter(item => !recentIds.has(item.id));
     
@@ -147,9 +184,11 @@ function _buildStep(items, item, fact) {
 /** Красивое имя типа факта для UI */
 function visualFactIcon(type) {
     const icons = {
+        title: '🖼️',
         creator: '🎨',
         location: '📍',
         century: '🕰️',
+        halfCentury: '⌛',
         date: '📅',
         style: '🏛️',
         ruler: '👑',
@@ -160,9 +199,11 @@ function visualFactIcon(type) {
 
 function visualFactLabel(type) {
     const labels = {
+        title: 'Название',
         creator: 'Автор',
         location: 'Место',
         century: 'Век',
+        halfCentury: 'Половина века',
         date: 'Дата',
         style: 'Стиль',
         ruler: 'Правитель',
@@ -171,10 +212,70 @@ function visualFactLabel(type) {
     return labels[type] || 'Факт';
 }
 
+function renderVisualCategoryPicker(area) {
+    const categories = Object.keys(VISUAL_CATEGORY_CONFIG).map(key => {
+        const cfg = visualCategoryConfig(key);
+        const items = visualData(key);
+        const learned = visualLearnedCount(items);
+        const pct = items.length ? Math.round(learned / items.length * 100) : 0;
+        return { key, cfg, items, learned, pct };
+    });
+
+    const cards = categories.map(({ key, cfg, items, learned, pct }) => `
+        <button data-action="selectVisualCategory" data-arg="${key}"
+            class="text-left bg-white hover:bg-blue-50 dark:bg-[#1e1e1e] dark:hover:bg-[#242424] border border-gray-200 dark:border-[#2c2c2c] rounded-2xl p-5 shadow-sm active:scale-[0.99] transition-all">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="text-3xl">${cfg.icon}</span>
+                    <div class="min-w-0">
+                        <div class="text-lg font-black text-gray-800 dark:text-gray-100 uppercase tracking-wider">${cfg.label}</div>
+                        <div class="text-xs font-bold text-gray-400">${learned} / ${items.length} выучено</div>
+                    </div>
+                </div>
+                <span class="text-gray-300 dark:text-gray-600 text-xl">›</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-1.5 rounded-full" style="width:${pct}%"></div>
+            </div>
+        </button>
+    `).join('');
+
+    area.innerHTML = `<div class="w-full max-w-3xl flex flex-col gap-4 visual-category-picker">
+        <div class="text-center">
+            <div class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Визуал ЕГЭ</div>
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-800 dark:text-gray-100 leading-tight">Что решаем?</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">${cards}</div>
+    </div>`;
+}
+
+window.selectVisualCategory = function(category) {
+    if (!VISUAL_CATEGORY_CONFIG[category]) return;
+    haptic('medium');
+    window.state.currentVisualCategory = category;
+    window.state.currentVisualId = null;
+    window._visualHistory = [];
+    window._visualMultiStep = null;
+    const cfg = visualCategoryConfig(category);
+    $('game-title-display').innerText = `${cfg.icon} ${cfg.label}`;
+    window.renderVisualTrainer(true);
+};
+
+window.backToVisualCategoryPicker = function() {
+    haptic('light');
+    window.state.currentVisualCategory = null;
+    window.state.currentVisualId = null;
+    window._visualHistory = [];
+    window._visualMultiStep = null;
+    $('game-title-display').innerText = '🏛️ Визуал ЕГЭ';
+    window.renderVisualTrainer(true);
+};
+
 
 window.startVisualTrainer = function() {
     haptic('medium');
     window.state.currentMode = 'visual';
+    window.state.currentVisualCategory = null;
     window.state.currentVisualId = null;
     window._visualHistory = [];
     window._visualMultiStep = null;
@@ -194,8 +295,9 @@ window.startVisualTrainer = function() {
 window.renderVisualTrainer = function(forceNew) {
     const area = $('visual-trainer-area');
     if (!area) return;
-    const items = visualData();
-    if (!items.length) {
+    const selectedCategory = visualSelectedCategory();
+    const allItems = visualData();
+    if (!allItems.length) {
         area.innerHTML = '<div class="text-center p-8 bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm border border-gray-100 dark:border-[#2c2c2c] text-rose-500 font-black">База визуала не загружена.</div>';
         return;
     }
@@ -204,16 +306,33 @@ window.renderVisualTrainer = function(forceNew) {
         window._visualHistory = [];
         window._visualMultiStep = null;
     }
+    if (!selectedCategory) {
+        renderVisualCategoryPicker(area);
+        return;
+    }
 
+    const cfg = visualCategoryConfig(selectedCategory);
+    const items = visualData(selectedCategory);
+    if (!items.length) {
+        area.innerHTML = `<div class="w-full max-w-lg bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm border border-gray-200 dark:border-[#2c2c2c] p-6 text-center">
+            <div class="text-3xl mb-3">${cfg.icon}</div>
+            <div class="text-sm font-black text-rose-500 uppercase tracking-widest mb-4">База «${visualEscape(cfg.label)}» не загружена.</div>
+            <button data-action="backToVisualCategoryPicker" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black py-3 rounded-xl uppercase tracking-widest active:scale-95 transition-transform">Назад</button>
+        </div>`;
+        return;
+    }
     const learned = visualLearnedCount(items);
     const pct = Math.round(learned / items.length * 100);
 
     if (learned >= items.length) {
         area.innerHTML = `<div class="w-full max-w-lg bg-white dark:bg-[#1e1e1e] rounded-3xl shadow-sm border border-gray-200 dark:border-[#2c2c2c] p-8 text-center">
             <div class="text-5xl mb-4">🏆</div>
-            <h2 class="text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest mb-2">Архитектура выучена!</h2>
+            <h2 class="text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest mb-2">${visualEscape(cfg.label)} выучена!</h2>
             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 mb-6">${learned} / ${items.length} памятников</p>
-            <button data-action="resetVisualTrainer" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl uppercase tracking-widest active:scale-95 transition-transform">🔄 Начать заново</button>
+            <div class="flex flex-col gap-2">
+                <button data-action="resetVisualTrainer" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl uppercase tracking-widest active:scale-95 transition-transform">🔄 Начать заново</button>
+                <button data-action="backToVisualCategoryPicker" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-black py-3 rounded-2xl uppercase tracking-widest active:scale-95 transition-transform">Выбор раздела</button>
+            </div>
         </div>`;
         return;
     }
@@ -233,6 +352,7 @@ window.renderVisualTrainer = function(forceNew) {
         }
         ms = {
             item,
+            category: selectedCategory,
             steps,
             currentStep: 0,
             allCorrect: true,
@@ -243,7 +363,7 @@ window.renderVisualTrainer = function(forceNew) {
     }
 
     const item = ms.item;
-    const progress = visualProgressFor(item.id);
+    const progress = visualProgressFor(item, ms.category);
     const step = ms.steps[ms.currentStep];
     const totalSteps = ms.steps.length;
     const currentIdx = ms.currentStep;
@@ -285,9 +405,10 @@ window.renderVisualTrainer = function(forceNew) {
 
     area.innerHTML = `<div class="w-full max-w-5xl flex flex-col gap-2 visual-trainer-root">
         <div class="flex items-center justify-between gap-3 px-1">
-            <div class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest">Визуальная архитектура</div>
+            <div class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest">${cfg.icon} ${visualEscape(cfg.label)}</div>
             <div class="flex items-center gap-2">
                 <div class="text-[10px] sm:text-xs font-black text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">${learned} / ${items.length} выучено</div>
+                <button data-action="backToVisualCategoryPicker" class="text-[10px] font-black text-gray-400 hover:text-blue-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full transition-colors" title="Выбрать раздел">↔</button>
                 <button data-action="resetVisualTrainer" class="text-[10px] font-black text-gray-400 hover:text-rose-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full transition-colors" title="Сбросить прогресс">🔄</button>
             </div>
         </div>
@@ -369,7 +490,9 @@ window.answerVisualStep = function(optionKey) {
         // Завершение раунда — подводим итоги
         ms.finished = true;
         const item = ms.item;
-        const progress = visualProgressFor(item.id);
+        const category = ms.category || visualCategoryForItem(item);
+        const cfg = visualCategoryConfig(category);
+        const progress = visualProgressFor(item, category);
         progress.attempts = (progress.attempts || 0) + 1;
         progress.lastUpdated = Date.now();
 
@@ -380,11 +503,11 @@ window.answerVisualStep = function(optionKey) {
                 progress.learned = true;
                 progress.learnedAt = Date.now();
                 window.state.currentVisualId = null;
-                window.state.stats.visualArchitectureSolved = (window.state.stats.visualArchitectureSolved || 0) + 1;
+                window.state.stats[cfg.solvedKey] = (window.state.stats[cfg.solvedKey] || 0) + 1;
                 setTimeout(() => {
                     if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400">🏆 Все верно! <b>${visualEscape(item.title)}</b> — ВЫУЧЕНО!</span>`;
                 }, correct ? 300 : 800);
-                showToast('🏛️', `${item.title} выучен!`, 'bg-emerald-500', 'border-emerald-700');
+                showToast(cfg.icon, `${item.title} выучен!`, 'bg-emerald-500', 'border-emerald-700');
             } else {
                 window.state.currentVisualId = item.id;
                 setTimeout(() => {
@@ -417,14 +540,26 @@ window.answerVisualStep = function(optionKey) {
 };
 
 window.resetVisualTrainer = function() {
-    if (!confirm('Сбросить весь прогресс визуала? Все памятники вернутся в пул.')) return;
+    const category = visualSelectedCategory();
+    const cfg = visualCategoryConfig(category);
+    const message = category
+        ? `Сбросить прогресс раздела «${cfg.label}»? Все памятники вернутся в пул.`
+        : 'Сбросить весь прогресс визуала? Все памятники вернутся в пул.';
+    if (!confirm(message)) return;
     haptic('light');
-    window.state.stats.visualArchitectureProgress = {};
-    window.state.stats.visualArchitectureSolved = 0;
+    if (category) {
+        window.state.stats[cfg.progressKey] = {};
+        window.state.stats[cfg.solvedKey] = 0;
+    } else {
+        Object.values(VISUAL_CATEGORY_CONFIG).forEach(entry => {
+            window.state.stats[entry.progressKey] = {};
+            window.state.stats[entry.solvedKey] = 0;
+        });
+    }
     window.state.currentVisualId = null;
     window._visualHistory = [];
     window._visualMultiStep = null;
     saveProgress();
     window.renderVisualTrainer(true);
-    showToast('🔄', 'Прогресс визуала сброшен', 'bg-blue-500', 'border-blue-700');
+    showToast('🔄', category ? `Прогресс раздела «${cfg.label}» сброшен` : 'Прогресс визуала сброшен', 'bg-blue-500', 'border-blue-700');
 };
