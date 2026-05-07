@@ -342,10 +342,8 @@ function mediaImageHtml(fact) {
     const imgAlt = escapeHtml(fact.culture);
     const img = `<img src="${imgSrc}" alt="${imgAlt}">`;
     if (fact.mediaKind === 'maps') {
-        // Встроенный зум-вьюер вместо ссылки в новую вкладку
-        return `<div class="media-fact-image media-map-zoomable" onclick="window.openMapZoomViewer('${imgSrc}', '${imgAlt}')" title="Нажми для увеличения">
+        return `<div class="media-fact-image media-map-zoomable">
             ${img}
-            <div class="map-zoom-hint">🔍 Нажми для увеличения</div>
         </div>`;
     }
     return `<div class="media-fact-image">${img}</div>`;

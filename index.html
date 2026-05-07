@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="styles.css">
     
     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js" defer></script>
 
     <style>
         /* Принудительно отключаем влияние системной тёмной темы браузера/телефона.
@@ -326,6 +327,67 @@
         document.addEventListener('app:ready', dismissSkeleton);
         // Запасной: если data.js не стрельнул событием (сетевая ошибка и т.п.)
         window.addEventListener('load', function() { setTimeout(dismissSkeleton, 300); });
+        
+        // Инициализация Panzoom для нативного зума картинок без масштабирования всего UI
+        function initImagePanzoom() {
+            const attachPanzoom = (img) => {
+                if (img.dataset.pzAttached) return;
+                img.dataset.pzAttached = 'true';
+                
+                const wrapper = document.createElement('div');
+                wrapper.style.width = '100%';
+                wrapper.style.height = '100%';
+                wrapper.style.position = 'relative';
+                wrapper.style.overflow = 'hidden';
+                
+                img.parentNode.insertBefore(wrapper, img);
+                wrapper.appendChild(img);
+
+                const pz = Panzoom(img, {
+                    maxScale: 5,
+                    minScale: 1,
+                    contain: 'outside',
+                    step: 0.3
+                });
+
+                wrapper.addEventListener('wheel', pz.zoomWithWheel);
+                
+                // Двойной тап для приближения
+                let lastTap = 0;
+                wrapper.addEventListener('touchend', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    if (tapLength < 500 && tapLength > 0) {
+                        e.preventDefault();
+                        if (pz.getScale() > 1) pz.zoom(1, { animate: true });
+                        else pz.zoomToPoint(2, { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY }, { animate: true });
+                    }
+                    lastTap = currentTime;
+                });
+            };
+
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach(m => {
+                    if (m.type === 'childList') {
+                        m.addedNodes.forEach(node => {
+                            if (node.nodeType === 1) {
+                                const imgs = node.querySelectorAll ? node.querySelectorAll('.visual-img-box img, .media-map-zoomable img, .media-fact-image img') : [];
+                                imgs.forEach(attachPanzoom);
+                                if (node.matches && node.matches('.visual-img-box img, .media-map-zoomable img, .media-fact-image img')) {
+                                    attachPanzoom(node);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+            document.querySelectorAll('.visual-img-box img, .media-map-zoomable img, .media-fact-image img').forEach(attachPanzoom);
+        }
+        
+        document.addEventListener('app:ready', initImagePanzoom);
+        window.addEventListener('load', initImagePanzoom);
       })();
     </script>
 
@@ -562,210 +624,6 @@
     </nav>
 
     <!-- === МОДАЛКИ === -->
-
-    <!-- 🗺️ Зум-вьюер карт -->
-    <div id="map-zoom-modal" aria-label="Просмотр карты">
-        <button class="mzm-close-btn" onclick="window.closeMapZoomViewer()" title="Закрыть (Esc)">✕</button>
-        <div class="mzm-toolbar">
-            <button class="mzm-btn" onclick="window.mzmZoom(1.4)" title="Приблизить">+</button>
-            <span class="mzm-scale-label" id="mzm-scale-label">100%</span>
-            <button class="mzm-btn" onclick="window.mzmZoom(1/1.4)" title="Отдалить">−</button>
-            <button class="mzm-btn" onclick="window.mzmReset()" title="По размеру экрана" style="font-size:13px;">⤢</button>
-        </div>
-        <div class="mzm-canvas-wrap" id="mzm-canvas">
-            <img class="mzm-img" id="mzm-img" src="" alt="">
-        </div>
-    </div>
-
-    <script>
-    // ═══ MAP ZOOM VIEWER ═══════════════════════════════════════
-    (function() {
-        'use strict';
-        let scale = 1, minScale = 0.2, maxScale = 8;
-        let tx = 0, ty = 0;           // текущий сдвиг (relative to natural center)
-        let dragging = false, lastX = 0, lastY = 0;
-        let imgNaturalW = 0, imgNaturalH = 0;
-        let wrapW = 0, wrapH = 0;
-
-        const modal   = () => document.getElementById('map-zoom-modal');
-        const canvas  = () => document.getElementById('mzm-canvas');
-        const img     = () => document.getElementById('mzm-img');
-        const lbl     = () => document.getElementById('mzm-scale-label');
-
-        function applyTransform(smooth) {
-            const el = img();
-            if (!el) return;
-            el.classList.toggle('smooth', !!smooth);
-            el.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
-            if (lbl()) lbl().textContent = Math.round(scale * 100) + '%';
-        }
-
-        function clampTx() {
-            // Ограничиваем сдвиг чтобы картинка не уходила совсем за экран
-            const maxTx = Math.max(0, (imgNaturalW * scale - wrapW) / 2 + wrapW * 0.1);
-            const maxTy = Math.max(0, (imgNaturalH * scale - wrapH) / 2 + wrapH * 0.1);
-            tx = Math.max(-maxTx, Math.min(maxTx, tx));
-            ty = Math.max(-maxTy, Math.min(maxTy, ty));
-        }
-
-        function fitToScreen() {
-            const el = img();
-            if (!el || !imgNaturalW) return;
-            wrapW = canvas().clientWidth || window.innerWidth;
-            wrapH = canvas().clientHeight || window.innerHeight - 80;
-            scale = Math.min(wrapW / imgNaturalW, wrapH / imgNaturalH, 1);
-            minScale = Math.min(scale * 0.5, 0.2);
-            tx = 0; ty = 0;
-        }
-
-        window.mzmReset = function(smooth) {
-            fitToScreen();
-            applyTransform(smooth);
-        };
-
-        window.mzmZoom = function(factor, cx, cy) {
-            wrapW = canvas().clientWidth;
-            wrapH = canvas().clientHeight;
-            const pivX = (cx !== undefined ? cx : wrapW / 2) - wrapW / 2;
-            const pivY = (cy !== undefined ? cy : wrapH / 2) - wrapH / 2;
-            const newScale = Math.max(minScale, Math.min(maxScale, scale * factor));
-            const ratio = newScale / scale;
-            tx = pivX + (tx - pivX) * ratio;
-            ty = pivY + (ty - pivY) * ratio;
-            scale = newScale;
-            clampTx();
-            applyTransform(false);
-        };
-
-        window.openMapZoomViewer = function(src, alt) {
-            const m = modal();
-            const el = img();
-            if (!m || !el) return;
-            el.classList.remove('smooth');
-            el.src = src;
-            el.alt = alt || '';
-            scale = 1; tx = 0; ty = 0;
-            el.style.transform = '';
-            m.classList.add('open');
-            document.body.style.overflow = 'hidden';
-
-            el.onload = function() {
-                imgNaturalW = el.naturalWidth || el.width || 800;
-                imgNaturalH = el.naturalHeight || el.height || 600;
-                window.mzmReset(false);
-            };
-            if (el.complete && el.naturalWidth) {
-                imgNaturalW = el.naturalWidth;
-                imgNaturalH = el.naturalHeight;
-                window.mzmReset(false);
-            }
-        };
-
-        window.closeMapZoomViewer = function() {
-            const m = modal();
-            if (m) m.classList.remove('open');
-            document.body.style.overflow = '';
-        };
-
-        // Клавиша Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') window.closeMapZoomViewer();
-            if (!modal()?.classList.contains('open')) return;
-            if (e.key === '+' || e.key === '=') { e.preventDefault(); window.mzmZoom(1.3); }
-            if (e.key === '-') { e.preventDefault(); window.mzmZoom(1/1.3); }
-            if (e.key === '0') { e.preventDefault(); window.mzmReset(true); }
-        });
-
-        // Закрыть при клике на фон
-        document.addEventListener('click', function(e) {
-            const m = modal();
-            if (m && e.target === m) window.closeMapZoomViewer();
-        });
-
-        // ── Wheel zoom ──
-        document.addEventListener('wheel', function(e) {
-            if (!modal()?.classList.contains('open')) return;
-            e.preventDefault();
-            const rect = canvas().getBoundingClientRect();
-            const cx = e.clientX - rect.left - canvas().clientWidth / 2;
-            const cy = e.clientY - rect.top - canvas().clientHeight / 2;
-            const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-            window.mzmZoom(factor, cx + canvas().clientWidth / 2, cy + canvas().clientHeight / 2);
-        }, { passive: false });
-
-        // ── Drag (mouse) ──
-        document.addEventListener('mousedown', function(e) {
-            if (!modal()?.classList.contains('open')) return;
-            if (e.target.closest('.mzm-toolbar, .mzm-close-btn')) return;
-            dragging = true;
-            lastX = e.clientX; lastY = e.clientY;
-            canvas()?.classList.add('grabbing');
-        });
-        document.addEventListener('mousemove', function(e) {
-            if (!dragging) return;
-            tx += e.clientX - lastX;
-            ty += e.clientY - lastY;
-            lastX = e.clientX; lastY = e.clientY;
-            clampTx();
-            applyTransform(false);
-        });
-        document.addEventListener('mouseup', function() {
-            dragging = false;
-            canvas()?.classList.remove('grabbing');
-        });
-
-        // ── Touch: drag + pinch ──
-        let lastTouchDist = 0, lastTouchMidX = 0, lastTouchMidY = 0;
-        document.addEventListener('touchstart', function(e) {
-            if (!modal()?.classList.contains('open')) return;
-            if (e.target.closest('.mzm-toolbar, .mzm-close-btn')) return;
-            if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                lastTouchDist = Math.hypot(dx, dy);
-                lastTouchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                lastTouchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            } else if (e.touches.length === 1) {
-                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-                dragging = true;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', function(e) {
-            if (!modal()?.classList.contains('open')) return;
-            if (e.touches.length === 2) {
-                e.preventDefault();
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const dist = Math.hypot(dx, dy);
-                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                if (lastTouchDist > 0) {
-                    const factor = dist / lastTouchDist;
-                    window.mzmZoom(factor, midX, midY);
-                }
-                lastTouchDist = dist;
-                lastTouchMidX = midX; lastTouchMidY = midY;
-            } else if (dragging && e.touches.length === 1) {
-                tx += e.touches[0].clientX - lastX;
-                ty += e.touches[0].clientY - lastY;
-                lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-                clampTx();
-                applyTransform(false);
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', function() {
-            dragging = false;
-            lastTouchDist = 0;
-        });
-
-        // Пересчёт при ресайзе
-        window.addEventListener('resize', function() {
-            if (modal()?.classList.contains('open')) window.mzmReset(false);
-        });
-    })();
-    </script>
 
 
     
