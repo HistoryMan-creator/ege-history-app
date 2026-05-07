@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="styles.css">
     
     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js" defer></script>
 
     <style>
         /* Принудительно отключаем влияние системной тёмной темы браузера/телефона.
@@ -325,69 +324,85 @@
           el.addEventListener('transitionend', function() { el.remove(); }, { once: true });
         }
         document.addEventListener('app:ready', dismissSkeleton);
-        // Запасной: если data.js не стрельнул событием (сетевая ошибка и т.п.)
         window.addEventListener('load', function() { setTimeout(dismissSkeleton, 300); });
+        // Легковесный скрипт для нативного pinch-to-zoom только для картинок (без библиотек и окон)
+        let activeImg = null;
+        let startDist = 0, scale = 1;
+        let startX = 0, startY = 0, startTx = 0, startTy = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.tagName === 'IMG' && e.target.closest('.media-fact-image, .visual-img-box, .media-map-zoomable')) {
+                const img = e.target;
+                if (e.touches.length === 2) {
+                    activeImg = img;
+                    activeImg.style.transition = 'none';
+                    activeImg.style.position = 'relative';
+                    activeImg.style.zIndex = '9999';
+                    startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                    scale = activeImg._scale || 1;
+                    startTx = activeImg._tx || 0;
+                    startTy = activeImg._ty || 0;
+                } else if (e.touches.length === 1 && (img._scale || 1) > 1) {
+                    activeImg = img;
+                    activeImg.style.transition = 'none';
+                    startX = e.touches[0].pageX;
+                    startY = e.touches[0].pageY;
+                    startTx = activeImg._tx || 0;
+                    startTy = activeImg._ty || 0;
+                }
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!activeImg) return;
+            if (e.touches.length === 2) {
+                e.preventDefault(); // Запрещаем скролл страницы
+                let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                let newScale = Math.max(1, Math.min(5, scale * (dist / startDist)));
+                activeImg.style.transform = `translate(${startTx}px, ${startTy}px) scale(${newScale})`;
+                activeImg._scale = newScale;
+            } else if (e.touches.length === 1 && activeImg._scale > 1) {
+                e.preventDefault();
+                let tx = startTx + (e.touches[0].pageX - startX);
+                let ty = startTy + (e.touches[0].pageY - startY);
+                activeImg.style.transform = `translate(${tx}px, ${ty}px) scale(${activeImg._scale})`;
+                activeImg._tx = tx;
+                activeImg._ty = ty;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', function(e) {
+            if (activeImg && e.touches.length === 0) {
+                if (activeImg._scale <= 1) {
+                    activeImg.style.transform = '';
+                    activeImg.style.zIndex = '';
+                    activeImg._scale = 1;
+                    activeImg._tx = 0;
+                    activeImg._ty = 0;
+                }
+                activeImg = null;
+            }
+        });
         
-        // Инициализация Panzoom для нативного зума картинок без масштабирования всего UI
-        function initImagePanzoom() {
-            const attachPanzoom = (img) => {
-                if (img.dataset.pzAttached) return;
-                img.dataset.pzAttached = 'true';
-                
-                const wrapper = document.createElement('div');
-                wrapper.style.width = '100%';
-                wrapper.style.height = '100%';
-                wrapper.style.position = 'relative';
-                wrapper.style.overflow = 'hidden';
-                
-                img.parentNode.insertBefore(wrapper, img);
-                wrapper.appendChild(img);
+        // Двойной тап для сброса зума
+        let lastTap = 0;
+        document.addEventListener('touchend', function(e) {
+            if (e.target.tagName === 'IMG' && e.target.closest('.media-fact-image, .visual-img-box, .media-map-zoomable')) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 300 && tapLength > 0) {
+                    e.preventDefault();
+                    e.target.style.transition = 'transform 0.2s ease';
+                    e.target.style.transform = '';
+                    e.target.style.zIndex = '';
+                    e.target._scale = 1;
+                    e.target._tx = 0;
+                    e.target._ty = 0;
+                }
+                lastTap = currentTime;
+            }
+        }, { passive: false });
 
-                const pz = Panzoom(img, {
-                    maxScale: 5,
-                    minScale: 1,
-                    contain: 'outside',
-                    step: 0.3
-                });
-
-                wrapper.addEventListener('wheel', pz.zoomWithWheel);
-                
-                // Двойной тап для приближения
-                let lastTap = 0;
-                wrapper.addEventListener('touchend', (e) => {
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTap;
-                    if (tapLength < 500 && tapLength > 0) {
-                        e.preventDefault();
-                        if (pz.getScale() > 1) pz.zoom(1, { animate: true });
-                        else pz.zoomToPoint(2, { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY }, { animate: true });
-                    }
-                    lastTap = currentTime;
-                });
-            };
-
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach(m => {
-                    if (m.type === 'childList') {
-                        m.addedNodes.forEach(node => {
-                            if (node.nodeType === 1) {
-                                const imgs = node.querySelectorAll ? node.querySelectorAll('.visual-img-box img, .media-map-zoomable img, .media-fact-image img') : [];
-                                imgs.forEach(attachPanzoom);
-                                if (node.matches && node.matches('.visual-img-box img, .media-map-zoomable img, .media-fact-image img')) {
-                                    attachPanzoom(node);
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
-            document.querySelectorAll('.visual-img-box img, .media-map-zoomable img, .media-fact-image img').forEach(attachPanzoom);
-        }
-        
-        document.addEventListener('app:ready', initImagePanzoom);
-        window.addEventListener('load', initImagePanzoom);
       })();
     </script>
 
