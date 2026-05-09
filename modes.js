@@ -262,7 +262,8 @@ function mediaSublineText(fact) {
 
 function mediaDescriptionText(fact) {
     if (fact.mediaKind === 'maps') {
-        if (mapLegendItems(fact).length) return '';
+        const legend = mapLegendParts(fact);
+        if (legend.items.length || legend.notes.length) return '';
         const fallback = String(fact.fullDescription || '')
             .replace(/;\s*период:\s*[^;]+/i, '')
             .replace(/;\s*раздел:\s*\d{1,2}\s*-\s*\d{1,2}\s*вв?\.?/i, '');
@@ -292,34 +293,168 @@ function cleanMapLegendText(fact, text) {
         else if (idx === 0) value = value.slice(part.length).trim();
     });
     value = value
+        .replace(/поитогам/gi, 'по итогам')
+        .replace(/иНиштадт/gi, 'и Ништадт')
+        .replace(/иПетербург/gi, 'и Петербург')
+        .replace(/соШвец/gi, 'со Швец')
+        .replace(/поСтолбов/gi, 'по Столбов')
+        .replace(/иДеулин/gi, 'и Деулин')
+        .replace(/другихземлепроходцев/gi, 'других землепроходцев')
+        .replace(/неспрашивают/gi, 'не спрашивают')
         .replace(/\s+история$/i, '')
-        .replace(/\s+Заштрихованные.+$/i, '')
-        .replace(/\s+Подсказки:.+$/i, '')
-        .replace(/\s+Фронты и командующие.+$/i, '')
-        .replace(/\s+Как поменялись.+$/i, '')
-        .replace(/\s+На схеме есть.+$/i, '')
         .replace(/^[\s;,.\-]+|[\s;,.\-]+$/g, '');
-    return compactText(value, 92);
+    return value;
+}
+
+function normalizeMapLegendPayload(fact) {
+    const payload = (window.mapLegendData && window.mapLegendData[fact.id]) || null;
+    if (!payload) return { items: [], notes: [] };
+    if (Array.isArray(payload)) return { items: payload, notes: [] };
+    return {
+        items: Array.isArray(payload.items) ? payload.items : [],
+        notes: Array.isArray(payload.notes) ? payload.notes : []
+    };
+}
+
+function splitMapLegendText(fact, text) {
+    let value = cleanMapLegendText(fact, text);
+    const notes = [];
+    value = value.replace(/([а-яё)])(?=(Заштрихованные|Подсказки:|Фронты и командующие|Как поменялись|На схеме есть|Кучум\s*[-–—]|Кашлык\s*[-–—]|Ясак\s*[-–—]|Дальше цифры|Важные сражения:|Орел и Белгород|Больше 3 городов|Линии фронта|Варшава\s*[-–—]|Параллельно проходила|Прага была|Хиросима|Темные страны|Северо-Кавказский|Отступать))/gi, '$1 ');
+    const notePatterns = [
+        /(\s|^)(Заштрихованные.+)$/i,
+        /(\s|^)(Подсказки:.*)$/i,
+        /(\s|^)(Фронты и командующие.*)$/i,
+        /(\s|^)(Как поменялись.+)$/i,
+        /(\s|^)(На схеме есть.+)$/i,
+        /(\s|^)(Кучум\s*[-–—].+)$/i,
+        /(\s|^)(Кашлык\s*[-–—].+)$/i,
+        /(\s|^)(Ясак\s*[-–—].+)$/i,
+        /(\s|^)(Дальше цифры.+)$/i,
+        /(\s|^)(Важные сражения:.+)$/i,
+        /(\s|^)(Орел и Белгород.+)$/i,
+        /(\s|^)(Больше 3 городов.+)$/i,
+        /(\s|^)(Линии фронта.+)$/i,
+        /(\s|^)(Варшава\s*[-–—].+)$/i,
+        /(\s|^)(Параллельно проходила.+)$/i,
+        /(\s|^)(Прага была.+)$/i,
+        /(\s|^)(Хиросима.+)$/i,
+        /(\s|^)(Темные страны.+)$/i,
+        /(\s|^)(Северо-Кавказский.+)$/i,
+        /(\s|^)(Отступать.+)$/i
+    ];
+
+    notePatterns.forEach(pattern => {
+        const match = value.match(pattern);
+        if (!match) return;
+        const note = match[2].replace(/^[\s;,.\-]+|[\s;,.\-]+$/g, '').trim();
+        if (note) notes.push(note);
+        value = value.slice(0, match.index).replace(/^[\s;,.\-]+|[\s;,.\-]+$/g, '').trim();
+    });
+
+    return { text: value, notes };
+}
+
+function cleanMapLegendNote(fact, text) {
+    const note = cleanMapLegendText(fact, text)
+        .replace(/^[\s;,.\-]+|[\s;,.\-]+$/g, '')
+        .trim();
+    if (/^Фронты и командующие в$/i.test(note)) return '';
+    return note;
+}
+
+function isFalseMapLegendItem(item) {
+    const value = String(item.t || '').trim();
+    if (!value) return true;
+    if (/^(?:й|го|ый|ая|ой|ого|ий)\b/i.test(value)) return true;
+    if (/^(?:й|го|ый|ая|ой|ого|ий)\s+/i.test(value)) return true;
+    if (/^(?:Белорусский|Украинский|Прибалтийский)\s+фронт/i.test(value)) return true;
+    if (/^(?:командующие|Параллельно проходила|армии СССР|армии США)\b/i.test(value)) return true;
+    return false;
+}
+
+function normalizeEmbeddedMapMarkers(text) {
+    return String(text || '')
+        .replace(/([а-яё)])(?=([А-Я])\s*[-–—])/g, '$1 ')
+        .replace(/([а-яё)])(?=(\d{1,2})\s*[-.)]\s+)/g, '$1 ');
+}
+
+function expandMapLegendEntries(raw) {
+    const n = String(raw.n || raw.mark || '').trim();
+    const source = normalizeEmbeddedMapMarkers(raw.t || raw.text || '');
+    const markerRegex = /(?:^|\s)(\d{1,2})\s*[-.)]\s+|(?:^|\s)([А-Я])\s*[-–—]\s*/g;
+    const matches = Array.from(source.matchAll(markerRegex)).filter(match => match.index > 0);
+    if (!matches.length) return [{ n, t: source }];
+
+    const entries = [{ n, t: source.slice(0, matches[0].index).trim() }];
+    matches.forEach((match, index) => {
+        const mark = match[1] || match[2] || '';
+        const start = match.index + match[0].length;
+        const end = matches[index + 1] ? matches[index + 1].index : source.length;
+        entries.push({ n: mark, t: source.slice(start, end).trim() });
+    });
+    return entries;
+}
+
+function falseMapLegendNote(item) {
+    const mark = String(item.n || '').trim();
+    const value = String(item.t || '').trim();
+    if (!mark || !value) return '';
+    return `${mark}-${value}`.replace(/^(\d+)-\s+(й|го|ый|ая|ой|ого|ий)\b/i, '$1-$2');
+}
+
+function mapLegendParts(fact) {
+    if (fact.mediaKind !== 'maps') return { items: [], notes: [] };
+    const payload = normalizeMapLegendPayload(fact);
+    const notes = [];
+    const seenItems = new Set();
+    const seenNotes = new Set();
+    const pushNote = (noteText) => {
+        const note = cleanMapLegendNote(fact, noteText);
+        const key = note.toLowerCase();
+        if (note && !seenNotes.has(key)) {
+            seenNotes.add(key);
+            notes.push(note);
+        }
+    };
+
+    const items = payload.items.flatMap(expandMapLegendEntries).map(raw => {
+        const split = splitMapLegendText(fact, raw.t || raw.text || '');
+        split.notes.forEach(pushNote);
+        return {
+            n: String(raw.n || raw.mark || '').trim(),
+            t: split.text
+        };
+    }).filter(item => {
+        if (!item.n) return false;
+        if (isFalseMapLegendItem(item)) {
+            pushNote(falseMapLegendNote(item));
+            return false;
+        }
+        const key = `${item.n}::${item.t.toLowerCase()}`;
+        if (seenItems.has(key)) return false;
+        seenItems.add(key);
+        return true;
+    });
+
+    payload.notes.forEach(pushNote);
+
+    return { items, notes };
 }
 
 function mapLegendItems(fact) {
-    if (fact.mediaKind !== 'maps') return [];
-    const raw = (window.mapLegendData && window.mapLegendData[fact.id]) || [];
-    return raw.map(item => ({
-        n: item.n || item.mark || '',
-        t: cleanMapLegendText(fact, item.t || item.text || '')
-    })).filter(item => item.n && item.t);
+    return mapLegendParts(fact).items;
 }
 
 function mediaLegendHtml(fact) {
-    const items = mapLegendItems(fact);
-    if (!items.length) return '';
-    const visible = items.slice(0, 8);
-    const more = items.length > visible.length ? `<div class="media-map-legend-more">+${items.length - visible.length}</div>` : '';
-    return `<div class="media-map-legend" aria-label="Подписи к номерам на карте">
-        ${visible.map(item => `<div><b>${escapeHtml(item.n)}</b><span>${escapeHtml(item.t)}</span></div>`).join('')}
-        ${more}
-    </div>`;
+    const legend = mapLegendParts(fact);
+    if (!legend.items.length && !legend.notes.length) return '';
+    const itemsHtml = legend.items.length ? `<div class="media-map-legend" aria-label="Подписи к номерам на карте">
+        ${legend.items.map(item => `<div><b>${escapeHtml(item.n)}</b><span>${escapeHtml(item.t)}</span></div>`).join('')}
+    </div>` : '';
+    const notesHtml = legend.notes.length ? `<div class="media-map-notes" aria-label="Пояснения к карте">
+        ${legend.notes.map(note => `<p>${escapeHtml(note)}</p>`).join('')}
+    </div>` : '';
+    return `${itemsHtml}${notesHtml}`;
 }
 
 function mediaInfoHtml(fact, tailHtml) {

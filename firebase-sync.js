@@ -24,16 +24,69 @@
         
         let fbUser = null; 
 
+        function getTelegramWebApp() {
+            return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        }
+
+        function getTelegramUser() {
+            const app = getTelegramWebApp();
+            return app && app.initDataUnsafe ? app.initDataUnsafe.user : null;
+        }
+
+        function isTelegramMiniAppContext() {
+            const app = getTelegramWebApp();
+            return !!(app && (app.initData || app.initDataUnsafe));
+        }
+
+        function rememberTelegramUser() {
+            const tgU = getTelegramUser();
+            if (tgU && tgU.id) {
+                localStorage.setItem('known_tg_id', String(tgU.id));
+                localStorage.removeItem('ege_sync_identity_warning');
+                return String(tgU.id);
+            }
+            return localStorage.getItem('known_tg_id') || '';
+        }
+
+        async function waitForTelegramIdentity(timeoutMs = 1800) {
+            const started = Date.now();
+            rememberTelegramUser();
+            while (!localStorage.getItem('known_tg_id') && isTelegramMiniAppContext() && Date.now() - started < timeoutMs) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                rememberTelegramUser();
+            }
+            return localStorage.getItem('known_tg_id') || '';
+        }
+
+        function getIdentitySource(id) {
+            const knownTg = localStorage.getItem('known_tg_id') || '';
+            const googleUid = localStorage.getItem('google_uid') || '';
+            if (knownTg && id === knownTg) return 'telegram';
+            if (googleUid && id === 'google_' + googleUid) return 'google';
+            if (id) return 'stable';
+            return 'missing';
+        }
+
+        window.getSyncDebugInfo = function() {
+            const canonicalId = fbUser ? resolveUserId(fbUser) : (localStorage.getItem('stable_student_id') || '');
+            return {
+                telegramContext: isTelegramMiniAppContext(),
+                telegramId: localStorage.getItem('known_tg_id') || '',
+                googleEmail: localStorage.getItem('google_email') || '',
+                canonicalId,
+                identitySource: getIdentitySource(canonicalId),
+                legacyIds: getAllKnownIds().filter(id => id !== canonicalId),
+                pendingCloudSync: localStorage.getItem('ege_pending_cloud_sync') === '1',
+                lastCloudSync: localStorage.getItem('ege_last_cloud_sync') || '',
+                warning: localStorage.getItem('ege_sync_identity_warning') || ''
+            };
+        };
+
         // ─── Надёжная система ID: храним ВСЕ известные идентификаторы ───────
         // Возвращает «канонический» ID для записи/чтения основного документа,
         // но getAllKnownIds() отдаёт полный список для синхронизации во все документы.
         function resolveUserId(userObj) {
-            const tgU = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe ? window.Telegram.WebApp.initDataUnsafe.user : null;
-            
-            // Сохраняем ТГ-ID отдельно, если он есть
-            if (tgU && tgU.id) {
-                localStorage.setItem('known_tg_id', String(tgU.id));
-            }
+            rememberTelegramUser();
             // Google-ID сохраняется в _applyGoogleUser → localStorage 'google_uid'
             
             // Канонический приоритет: TG > Google > старый stable > новый анонимный
@@ -48,10 +101,19 @@
                 canonical = 'google_' + googleUid;
             } else if (oldStable) {
                 canonical = oldStable;
+            } else if (isTelegramMiniAppContext()) {
+                localStorage.setItem('ege_sync_identity_warning', 'telegram_id_missing');
+                return '';
             } else {
                 canonical = userObj ? userObj.uid : 'anon_' + Date.now();
             }
             
+            if (oldStable && oldStable !== canonical) {
+                localStorage.setItem('previous_stable_student_id', oldStable);
+                const legacy = new Set((localStorage.getItem('legacy_student_ids') || '').split(',').filter(Boolean));
+                legacy.add(oldStable);
+                localStorage.setItem('legacy_student_ids', [...legacy].join(','));
+            }
             localStorage.setItem('stable_student_id', canonical);
             return canonical;
         }
@@ -62,10 +124,14 @@
             const knownTg = localStorage.getItem('known_tg_id');
             const googleUid = localStorage.getItem('google_uid');
             const oldStable = localStorage.getItem('stable_student_id');
+            const previousStable = localStorage.getItem('previous_stable_student_id');
+            const legacyIds = (localStorage.getItem('legacy_student_ids') || '').split(',').filter(Boolean);
             
             if (knownTg) ids.add(knownTg);
             if (googleUid) ids.add('google_' + googleUid);
-            if (oldStable && !oldStable.startsWith('anon_')) ids.add(oldStable);
+            if (oldStable) ids.add(oldStable);
+            if (previousStable) ids.add(previousStable);
+            legacyIds.forEach(id => ids.add(id));
             
             // Фильтруем дубли и невалидные
             return [...ids].filter(id => id && id.length > 0);
@@ -302,10 +368,8 @@
                 if (cloudLoaded === 0 && localSolved > 0) {
                     // Restore local state that might have been overwritten
                     try {
-                        const parsed = JSON.parse(localStateJson);
-                        const statsFields = ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks','hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData'];
-                        statsFields.forEach(k => { if (parsed[k] !== undefined) window.state.stats[k] = parsed[k]; });
-                        if (parsed.mistakesPool) window.state.mistakesPool = parsed.mistakesPool;
+                        const parsed = normalizeSavedStateObject(JSON.parse(localStateJson));
+                        if (parsed) applyMergedState(parsed);
                         localStorage.setItem('ege_final_storage_v4', localStateJson);
                     } catch(e) {}
                     await window.syncProgressToCloud();
@@ -368,6 +432,7 @@
         onAuthStateChanged(auth, async (u) => { 
             fbUser = u; 
             if (u) {
+                await waitForTelegramIdentity();
                 // ── Сохраняем Google-данные если вход через Google
                 const googleProvider = (u.providerData || []).find(p => p.providerId === 'google.com');
                 if (googleProvider) {
@@ -458,7 +523,7 @@
                 }
                 
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-                for (const hwId of hwIds) {
+                for (const hwId of hwIds.filter(Boolean)) {
                     const unsub = onSnapshot(doc(studentsCol, hwId), _handleHwSnapshot, (error) => console.error("HW snapshot error for " + hwId + ":", error));
                     _hwUnsubscribers.push(unsub);
                 }
@@ -1309,19 +1374,53 @@
         };
         
         // ─── Умное глубокое слияние нескольких fullStateJson ────────────────────
-        function deepMergeStates(jsonStrings) {
-            const states = jsonStrings.map(j => {
-                try { const p = JSON.parse(j); return p.stats ? p : { stats: p }; }
-                catch(e) { return null; }
-            }).filter(Boolean);
-            if (!states.length) return null;
-            if (states.length === 1) return states[0];
+        function normalizeSavedStateObject(raw) {
+            if (!raw || typeof raw !== 'object') return null;
+            const stats = { ...(raw.stats || raw) };
+            const mistakesPool = Array.isArray(raw.mistakesPool)
+                ? raw.mistakesPool
+                : (Array.isArray(stats.mistakesPool) ? stats.mistakesPool : []);
+            delete stats.mistakesPool;
+            return {
+                stats,
+                mistakesPool,
+                hideLearned: raw.hideLearned ?? stats.hideLearned ?? true
+            };
+        }
 
-            const merged = { stats: {}, mistakesPool: [] };
+        function parseSavedStateJson(json) {
+            if (!json || json.length < 2) return null;
+            try { return normalizeSavedStateObject(JSON.parse(json)); }
+            catch(e) { return null; }
+        }
+
+        function mergeVisualProgress(states, key) {
+            const out = {};
+            const score = (v) => {
+                if (!v || typeof v !== 'object') return 0;
+                return (v.learned ? 1000000 : 0) + (v.streak || 0) * 10000 + (v.correct || 0) * 100 + (v.attempts || 0);
+            };
+            states.forEach(s => {
+                Object.entries(s.stats?.[key] || {}).forEach(([id, val]) => {
+                    const cur = out[id];
+                    out[id] = !cur || score(val) >= score(cur) ? { ...val } : cur;
+                });
+            });
+            return out;
+        }
+
+        function deepMergeStates(jsonStrings) {
+            const states = jsonStrings.map(parseSavedStateJson).filter(Boolean);
+            if (!states.length) return null;
+
+            const merged = { stats: {}, mistakesPool: [], hideLearned: true };
             const st = merged.stats;
 
-            ['totalSolvedEver','streak','bestSpeedrunScore','flashcardsSolved','totalTimeSpent'].forEach(k => {
-                st[k] = Math.max(...states.map(s => s.stats?.[k] || 0));
+            ['totalSolvedEver','streak','bestSpeedrunScore','flashcardsSolved','totalTimeSpent',
+             'egePoints','hwFlashcardsToSolve','hwTask3','hwTask4','hwTask5','hwTask7',
+             'visualArchitectureSolved','visualPaintingSolved'].forEach(k => {
+                const hasValue = states.some(s => s.stats?.[k] !== undefined);
+                if (hasValue) st[k] = Math.max(...states.map(s => Number(s.stats?.[k]) || 0));
             });
             st.solvedByTask = { task3: 0, task4: 0, task5: 0, task7: 0 };
             states.forEach(s => {
@@ -1332,7 +1431,7 @@
             states.forEach(s => {
                 Object.entries(s.stats?.factStreaks || {}).forEach(([k, v]) => {
                     const cur = st.factStreaks[k];
-                    if (!cur || (v.level||0) > (cur.level||0) || ((v.level||0)===(cur.level||0) && (v.streak||0)>(cur.streak||0)))
+                    if (!cur || (v.level||0) > (cur.level||0) || ((v.level||0)===(cur.level||0) && (v.points||v.streak||0)>(cur.points||cur.streak||0)))
                         st.factStreaks[k] = v;
                 });
             });
@@ -1350,10 +1449,15 @@
             st.dailyStats = {};
             states.forEach(s => {
                 Object.entries(s.stats?.dailyStats || {}).forEach(([date, val]) => {
-                    if (!st.dailyStats[date] || (val.solved||0) > (st.dailyStats[date].solved||0))
-                        st.dailyStats[date] = val;
+                    if (!st.dailyStats[date]) st.dailyStats[date] = {};
+                    const dst = st.dailyStats[date];
+                    Object.entries(val || {}).forEach(([k, v]) => {
+                        dst[k] = Math.max(Number(dst[k]) || 0, Number(v) || 0);
+                    });
                 });
             });
+            st.visualArchitectureProgress = mergeVisualProgress(states, 'visualArchitectureProgress');
+            st.visualPaintingProgress = mergeVisualProgress(states, 'visualPaintingProgress');
             const achSet = new Set();
             states.forEach(s => (s.stats?.achievements || []).forEach(a => achSet.add(a)));
             st.achievements = [...achSet];
@@ -1368,18 +1472,51 @@
                     if (!mistakeKeys.has(key)) { mistakeKeys.add(key); merged.mistakesPool.push(m); }
                 });
             });
+            merged.hideLearned = states.some(s => s.hideLearned === false) ? false : true;
             return merged;
+        }
+
+        const CLOUD_STATE_FIELDS = [
+            'streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
+            'hwFlashcardsToSolve','hwTask3','hwTask4','hwTask5','hwTask7','totalTimeSpent',
+            'bestSpeedrunScore','dailyStats','achievements','achievementsData','egePoints',
+            'visualArchitectureProgress','visualArchitectureSolved','visualPaintingProgress','visualPaintingSolved'
+        ];
+
+        function applyMergedState(merged) {
+            const normalized = normalizeSavedStateObject(merged);
+            if (!normalized) return null;
+            const st = normalized.stats || {};
+            CLOUD_STATE_FIELDS.forEach(k => {
+                if (st[k] !== undefined) window.state.stats[k] = st[k];
+            });
+            if (Array.isArray(normalized.mistakesPool)) window.state.mistakesPool = normalized.mistakesPool;
+            window.state.hideLearned = normalized.hideLearned !== false;
+            if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
+            if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3:0, task4:0, task5:0, task7:0 };
+            if (!window.state.stats.achievements) window.state.stats.achievements = [];
+            if (!window.state.stats.achievementsData) window.state.stats.achievementsData = {};
+            if (!window.state.stats.visualArchitectureProgress) window.state.stats.visualArchitectureProgress = {};
+            if (!window.state.stats.visualPaintingProgress) window.state.stats.visualPaintingProgress = {};
+            localStorage.setItem('ege_final_storage_v4', JSON.stringify(normalized));
+            return normalized;
         }
 
         window.loadProgressFromCloud = async function() {
             if (!fbUser || !db) return;
             try {
+                await waitForTelegramIdentity();
                 const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
                 const canonicalId = resolveUserId(fbUser);
+                if (!canonicalId) {
+                    localStorage.setItem('ege_pending_cloud_sync', '1');
+                    console.warn('[Sync] Telegram context without Telegram ID; cloud load is postponed.');
+                    return;
+                }
                 const allFound = new Map(); // docId → data
 
                 // 1а. По прямым известным ID
-                const knownIds = new Set([canonicalId]);
+                const knownIds = new Set([canonicalId, ...getAllKnownIds()]);
                 const knownTg = localStorage.getItem('known_tg_id');
                 const googleUid = localStorage.getItem('google_uid');
                 if (knownTg) knownIds.add(knownTg);
@@ -1425,7 +1562,8 @@
                     //    (email или tgId). Без него возможно случайное слияние чужих аккаунтов.
                     const sharedEmail = [...allFound.values()].every(d => d.googleEmail && d.googleEmail === gEmail);
                     const sharedTg    = [...allFound.values()].every(d => d.tgId && d.tgId === localStorage.getItem('known_tg_id'));
-                    const hasCrossRef  = [...allFound.keys()].some(id => id === canonicalId);
+                    const localKnownIds = getAllKnownIds();
+                    const hasCrossRef  = [...allFound.keys()].some(id => id === canonicalId || localKnownIds.includes(id));
                     if (!sharedEmail && !sharedTg && !hasCrossRef) {
                         console.warn('[Sync] Пропускаем авто-слияние: нет жёсткого общего ID');
                         // Загружаем только лучший документ без слияния
@@ -1433,19 +1571,24 @@
                             if ((data.totalSolved||0) >= bestSolved) { bestSolved = data.totalSolved||0; bestData = data; bestDocId = id; }
                         });
                     } else {
-                    const merged = deepMergeStates([...allFound.values()].map(d => d.fullStateJson).filter(j => j && j.length > 10));
+                    const localJson = localStorage.getItem('ege_final_storage_v4') || '';
+                    const merged = deepMergeStates([...allFound.values()].map(d => d.fullStateJson).concat(localJson).filter(j => j && j.length > 10));
                     if (merged) {
-                        const st = merged.stats;
-                        ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
-                         'hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData']
-                            .forEach(k => { if (st[k] !== undefined) window.state.stats[k] = st[k]; });
-                        if (merged.mistakesPool) window.state.mistakesPool = merged.mistakesPool;
+                        applyMergedState(merged);
                         const mergedJson = JSON.stringify(merged);
+                        const knownTgForDoc = localStorage.getItem('known_tg_id') || '';
                         localStorage.setItem('ege_final_storage_v4', mergedJson);
                         try {
                             await setDoc(doc(studentsCol, canonicalId), {
                                 fullStateJson: mergedJson,
                                 totalSolved: window.state.stats.totalSolvedEver || 0,
+                                egePoints: window.state.stats.egePoints || 0,
+                                tgId: knownTgForDoc || (/^\d+$/.test(canonicalId) ? canonicalId : ''),
+                                knownTgId: knownTgForDoc,
+                                canonicalId: canonicalId,
+                                identitySource: getIdentitySource(canonicalId),
+                                googleEmail: localStorage.getItem('google_email') || '',
+                                knownGoogleId: localStorage.getItem('google_uid') ? 'google_' + localStorage.getItem('google_uid') : '',
                                 _mergedFrom: [...allFound.keys()].filter(id => id !== canonicalId),
                                 _mergedAt: Date.now()
                             }, { merge: true });
@@ -1478,23 +1621,30 @@
                 if (bestData?.knownTgId && /^\d+$/.test(String(bestData.knownTgId))) localStorage.setItem('known_tg_id', String(bestData.knownTgId));
                 if (bestData?.googleEmail && !localStorage.getItem('google_email')) localStorage.setItem('google_email', bestData.googleEmail);
 
-                const shouldLoad = bestData?.fullStateJson && (bestSolved > (window.state.stats.totalSolvedEver||0) || (window.state.stats.totalSolvedEver||0) === 0);
-                if (shouldLoad) {
-                    try {
-                        const cS = JSON.parse(bestData.fullStateJson);
-                        const inner = cS.stats ? cS : { stats: cS };
-                        ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
-                         'hwFlashcardsToSolve','totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData']
-                            .forEach(k => { if (inner.stats[k] !== undefined) window.state.stats[k] = inner.stats[k]; });
-                        if (inner.mistakesPool || inner.stats?.mistakesPool)
-                            window.state.mistakesPool = inner.mistakesPool || inner.stats.mistakesPool;
-                        if (!window.state.stats.dailyStats) window.state.stats.dailyStats = {};
-                        if (!window.state.stats.solvedByTask) window.state.stats.solvedByTask = { task3:0, task4:0, task5:0, task7:0 };
-                        if (!window.state.stats.achievements) window.state.stats.achievements = [];
-                        if (!window.state.stats.achievementsData) window.state.stats.achievementsData = {};
-                        localStorage.setItem('ege_final_storage_v4', bestData.fullStateJson);
-                        console.log(`[Sync] Загружено ${bestSolved} задач из ${bestDocId}`);
-                    } catch(parseErr) { console.error('[Sync] Parse error:', parseErr); }
+                if (bestData?.fullStateJson) {
+                    const localJson = localStorage.getItem('ege_final_storage_v4') || '';
+                    const merged = deepMergeStates([bestData.fullStateJson, localJson].filter(j => j && j.length > 10));
+                    if (merged) {
+                        applyMergedState(merged);
+                        const mergedJson = JSON.stringify(merged);
+                        const knownTgForDoc = localStorage.getItem('known_tg_id') || '';
+                        try {
+                            const mergedUpdate = {
+                                fullStateJson: mergedJson,
+                                totalSolved: window.state.stats.totalSolvedEver || 0,
+                                egePoints: window.state.stats.egePoints || 0,
+                                tgId: knownTgForDoc || (/^\d+$/.test(canonicalId) ? canonicalId : ''),
+                                knownTgId: knownTgForDoc,
+                                canonicalId: canonicalId,
+                                identitySource: getIdentitySource(canonicalId),
+                                googleEmail: localStorage.getItem('google_email') || bestData.googleEmail || '',
+                                knownGoogleId: localStorage.getItem('google_uid') ? 'google_' + localStorage.getItem('google_uid') : (bestData.knownGoogleId || '')
+                            };
+                            if (bestData.syncPin) mergedUpdate.syncPin = bestData.syncPin;
+                            await setDoc(doc(studentsCol, canonicalId), mergedUpdate, { merge: true });
+                        } catch(writeErr) { console.warn('[Sync] Merged load write skipped:', writeErr); }
+                        console.log(`[Sync] Загружено и объединено ${window.state.stats.totalSolvedEver || bestSolved} задач из ${bestDocId}`);
+                    }
                 }
                 if (window.updateGlobalUI) window.updateGlobalUI();
                 if (window.updateProgressBars) window.updateProgressBars();
@@ -1508,7 +1658,14 @@
                     try {
                         const bestPayload = allFound.get(bestDocId) || bestData;
                         if (bestPayload) {
-                            await setDoc(doc(studentsCol, newCanonical), { ...bestPayload, tgId: newCanonical }, { merge: true });
+                            const knownTgForDoc = localStorage.getItem('known_tg_id') || '';
+                            await setDoc(doc(studentsCol, newCanonical), {
+                                ...bestPayload,
+                                tgId: knownTgForDoc || (/^\d+$/.test(newCanonical) ? newCanonical : ''),
+                                knownTgId: knownTgForDoc,
+                                canonicalId: newCanonical,
+                                identitySource: getIdentitySource(newCanonical)
+                            }, { merge: true });
                             if (bestDocId !== newCanonical) {
                                 await setDoc(doc(studentsCol, bestDocId), { _mergedInto: newCanonical, _mergedAt: Date.now() }, { merge: true });
                             }
@@ -1521,10 +1678,30 @@
 
         window.syncProgressToCloud = async function() {
             if (!fbUser || !db) return;
-            const s = window.state.stats;
-            if (!s) return;
+            if (!window.state?.stats) return;
+            await waitForTelegramIdentity(800);
+            const canonicalId = resolveUserId(fbUser);
+            if (!canonicalId) {
+                localStorage.setItem('ege_pending_cloud_sync', '1');
+                console.warn('[Sync] Telegram context without Telegram ID; cloud write is postponed.');
+                return;
+            }
             
             const nw = Date.now();
+            const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+            try {
+                const localJson = localStorage.getItem('ege_final_storage_v4') || '{}';
+                const currentSnap = await getDoc(doc(studentsCol, canonicalId));
+                if (currentSnap.exists()) {
+                    const remoteJson = currentSnap.data().fullStateJson || '';
+                    const merged = deepMergeStates([remoteJson, localJson].filter(j => j && j.length > 10));
+                    if (merged) applyMergedState(merged);
+                }
+            } catch(e) {
+                console.warn('[Sync] Pre-write merge skipped:', e);
+            }
+
+            const s = window.state.stats;
             const gEmail = localStorage.getItem('google_email') || '';
             const knownTg = localStorage.getItem('known_tg_id') || '';
             const googleUid = localStorage.getItem('google_uid');
@@ -1566,12 +1743,29 @@
             };
             
             // ✅ FIX: Пишем ТОЛЬКО в один канонический документ — никаких Race Conditions
-            const canonicalId = resolveUserId(fbUser);
-            const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
-            
             try {
-                await setDoc(doc(studentsCol, canonicalId), { ...payload, tgId: canonicalId }, { merge: true });
+                await setDoc(doc(studentsCol, canonicalId), {
+                    ...payload,
+                    tgId: knownTg || (/^\d+$/.test(canonicalId) ? canonicalId : ''),
+                    knownTgId: knownTg,
+                    canonicalId: canonicalId,
+                    identitySource: getIdentitySource(canonicalId)
+                }, { merge: true });
+                localStorage.removeItem('ege_pending_cloud_sync');
+                localStorage.setItem('ege_last_cloud_sync', String(nw));
                 console.log(`[Sync] Записано в документ: ${canonicalId}`);
+                const legacyIds = getAllKnownIds().filter(id => id && id !== canonicalId);
+                for (const legacyId of legacyIds) {
+                    try {
+                        await setDoc(doc(studentsCol, legacyId), {
+                            _mergedInto: canonicalId,
+                            _mergedAt: nw,
+                            knownTgId: knownTg,
+                            googleEmail: gEmail,
+                            knownGoogleId: googleId
+                        }, { merge: true });
+                    } catch(e) {}
+                }
             } catch(e) {
                 console.error('[Sync] write error', e);
                 return; // Не обновляем кэш если основная запись упала
@@ -1884,7 +2078,12 @@
                 return null;
             }
             const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+            await waitForTelegramIdentity();
             const canonicalId = resolveUserId(fbUser);
+            if (!canonicalId) {
+                showToast('⚠️', 'Telegram ID еще не получен. Откройте приложение через кнопку бота или повторите через пару секунд.', 'bg-amber-500', 'border-amber-700');
+                return null;
+            }
             try {
                 const snap = await getDoc(doc(studentsCol, canonicalId));
                 if (snap.exists() && snap.data().syncPin) return snap.data().syncPin;
@@ -1940,7 +2139,9 @@
                 if (pinSnap.empty) return showToast('❌', 'PIN не найден', 'bg-rose-500', 'border-rose-700');
 
                 let targetDoc = null;
+                await waitForTelegramIdentity();
                 const canonicalId = resolveUserId(fbUser);
+                if (!canonicalId) return showToast('⚠️', 'Telegram ID еще не получен. Повторите через пару секунд.', 'bg-amber-500', 'border-amber-700');
                 pinSnap.forEach(docSnap => {
                     if (docSnap.id !== canonicalId) targetDoc = docSnap;
                 });
@@ -1954,11 +2155,13 @@
                 const mySolved = myData.totalSolved || 0;
                 const theirSolved = targetData.totalSolved || 0;
 
-                // Канонический = тот у кого больше прогресса
-                const keepId   = theirSolved > mySolved ? targetDoc.id : canonicalId;
-                const absorbId = theirSolved > mySolved ? canonicalId   : targetDoc.id;
-                const keepData = theirSolved > mySolved ? targetData : myData;
-                const absData  = theirSolved > mySolved ? myData : targetData;
+                // If Telegram ID is known, keep the canonical Telegram document and merge PIN data into it.
+                const preferCanonical = !!localStorage.getItem('known_tg_id');
+                const keepRemote = !preferCanonical && theirSolved > mySolved;
+                const keepId   = keepRemote ? targetDoc.id : canonicalId;
+                const absorbId = keepRemote ? canonicalId   : targetDoc.id;
+                const keepData = keepRemote ? targetData : myData;
+                const absData  = keepRemote ? myData : targetData;
 
                 const merged = deepMergeStates([keepData.fullStateJson, absData.fullStateJson].filter(j => j && j.length > 10));
                 const mergedJson = merged ? JSON.stringify(merged) : keepData.fullStateJson;
@@ -1967,7 +2170,13 @@
                 await setDoc(doc(studentsCol, keepId), {
                     fullStateJson: mergedJson, totalSolved: mergedTotal,
                     _mergedFrom: [...(keepData._mergedFrom || []), absorbId],
-                    _mergedAt: Date.now(), syncPin: keepData.syncPin || targetData.syncPin || ''
+                    _mergedAt: Date.now(), syncPin: keepData.syncPin || targetData.syncPin || '',
+                    tgId: localStorage.getItem('known_tg_id') || (/^\d+$/.test(keepId) ? keepId : ''),
+                    knownTgId: localStorage.getItem('known_tg_id') || '',
+                    canonicalId: keepId,
+                    identitySource: getIdentitySource(keepId),
+                    googleEmail: localStorage.getItem('google_email') || keepData.googleEmail || targetData.googleEmail || '',
+                    knownGoogleId: localStorage.getItem('google_uid') ? 'google_' + localStorage.getItem('google_uid') : (keepData.knownGoogleId || targetData.knownGoogleId || '')
                 }, { merge: true });
                 await setDoc(doc(studentsCol, absorbId), { _mergedInto: keepId, _mergedAt: Date.now() }, { merge: true });
 
@@ -1979,12 +2188,7 @@
 
                 // Загружаем объединённые данные
                 if (merged) {
-                    const st = merged.stats;
-                    ['streak','totalSolvedEver','solvedByTask','flashcardsSolved','eraStats','factStreaks',
-                     'totalTimeSpent','bestSpeedrunScore','dailyStats','achievements','achievementsData','egePoints']
-                        .forEach(k => { if (st[k] !== undefined) window.state.stats[k] = st[k]; });
-                    if (merged.mistakesPool) window.state.mistakesPool = merged.mistakesPool;
-                    localStorage.setItem('ege_final_storage_v4', mergedJson);
+                    applyMergedState(merged);
                 }
 
                 showToast('✅', 'Аккаунты успешно привязаны!', 'bg-emerald-500', 'border-emerald-700');

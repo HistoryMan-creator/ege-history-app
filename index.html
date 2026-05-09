@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Тренажер ЕГЭ: История (ULTIMATE)</title>
     
     <link rel="preconnect" href="https://telegram.org">
@@ -12,6 +16,9 @@
     <link rel="dns-prefetch" href="https://ege-history-bot.firebaseapp.com">
     
     <!-- Подключаем скомпилированный CSS вместо CDN -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-180.png">
     <link rel="stylesheet" href="output.css">
     <link rel="stylesheet" href="theme-aurora.css">
     <link rel="stylesheet" href="styles.css">
@@ -1148,8 +1155,8 @@
 
     <!-- jsPDF грузится лениво (см. loadJsPDFOnDemand в firebase-sync.js) — не нужен при старте -->
 
-    <!-- === FIREBASE === -->
-    <script src="firebase-sync.js" type="module"></script>
+    <!-- === PWA + Firebase loader === -->
+    <script src="pwa.js" defer></script>
 
     <!-- FIX 2.2: defer позволяет браузеру парсить HTML параллельно с загрузкой data.js (579 КБ).
          Оба тега defer — гарантируют порядок выполнения: data.js → app:ready dispatch. -->

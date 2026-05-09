@@ -20,6 +20,67 @@ function visualEscape(text) {
         .replace(/'/g, '&#39;');
 }
 
+function visualAnswerText(text) {
+    const value = String(text ?? '').trim();
+    if (value === 'Великий Новгород' || value === 'Великий Новгород, Новгород') return 'Новгород';
+    return value.replace(/\bВеликий Новгород\b/g, 'Новгород').replace(/Новгород,\s*Новгород/g, 'Новгород');
+}
+
+function visualIsBlockedDistractor(item, fact, answer) {
+    if (item?.id === 'hram-voskreseniya-hristova-na-krovi-spas-na-krovi' && fact?.type === 'ruler') {
+        return visualAnswerText(answer) === 'Сталин';
+    }
+    return false;
+}
+
+let visualMistakeCardTimeout = null;
+function showVisualMistakeCard(item, step) {
+    const old = document.getElementById('visual-mistake-card');
+    if (old) old.remove();
+    if (visualMistakeCardTimeout) clearTimeout(visualMistakeCardTimeout);
+
+    const card = document.createElement('div');
+    card.id = 'visual-mistake-card';
+    const facts = visualAnswerText(item.fullCharacteristic || (item.importantFacts || []).slice(0, 3).join(' '));
+    card.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+            <div style="width:2.25rem;height:2.25rem;border-radius:999px;background:rgba(239,68,68,0.12);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:1.15rem;">✕</div>
+            <div style="min-width:0;flex:1;">
+                <div style="font-size:0.68rem;font-weight:900;letter-spacing:0.12em;text-transform:uppercase;color:#ef4444;margin-bottom:0.18rem;">Разбор ошибки</div>
+                <div style="font-size:0.98rem;font-weight:900;color:#111827;line-height:1.15;margin-bottom:0.35rem;">${visualEscape(item.title)}</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#475569;line-height:1.35;">${visualEscape(facts)}</div>
+                <div style="margin-top:0.35rem;font-size:0.78rem;font-weight:900;color:#2563eb;">${visualEscape(visualFactLabel(step.factType))}: ${visualEscape(visualAnswerText(step.correctAnswer))}</div>
+            </div>
+        </div>`;
+    card.style.cssText = [
+        'position:fixed',
+        'left:50%',
+        'top:calc(env(safe-area-inset-top, 0px) + 0.75rem)',
+        'transform:translate(-50%, -0.75rem)',
+        'opacity:0',
+        'z-index:10050',
+        'width:min(92vw, 34rem)',
+        'padding:0.9rem 1rem',
+        'border-radius:1.1rem',
+        'background:rgba(255,255,255,0.96)',
+        'border:1px solid rgba(239,68,68,0.22)',
+        'box-shadow:0 20px 50px rgba(15,23,42,0.22)',
+        'backdrop-filter:blur(14px)',
+        'transition:opacity 180ms ease, transform 180ms ease',
+        'pointer-events:none'
+    ].join(';');
+    document.body.appendChild(card);
+    requestAnimationFrame(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translate(-50%, 0)';
+    });
+    visualMistakeCardTimeout = setTimeout(() => {
+        card.style.opacity = '0';
+        card.style.transform = 'translate(-50%, -0.75rem)';
+        setTimeout(() => card.remove(), 220);
+    }, 2500);
+}
+
 const VISUAL_CATEGORY_CONFIG = {
     architecture: {
         label: 'Архитектура',
@@ -133,14 +194,21 @@ function visualUniqueBy(items, getValue) {
  * Генерируем дистракторы для конкретного drill fact
  */
 function visualFactDistractors(items, item, fact) {
-    const byType = other => (other.drillFacts || []).find(f => f.type === fact.type && f.answer && f.answer !== fact.answer);
+    const correctAnswer = visualAnswerText(fact.answer);
+    const byType = other => (other.drillFacts || []).find(f => {
+        const answer = visualAnswerText(f.answer);
+        return f.type === fact.type &&
+            answer &&
+            answer !== correctAnswer &&
+            !visualIsBlockedDistractor(item, fact, answer);
+    });
     const samePeriod = visualUniqueBy(
         items.filter(other => other.id !== item.id && other.period === item.period && byType(other)),
-        other => byType(other).answer
+        other => visualAnswerText(byType(other).answer)
     );
     const all = visualUniqueBy(
         items.filter(other => other.id !== item.id && byType(other)),
-        other => byType(other).answer
+        other => visualAnswerText(byType(other).answer)
     );
     const source = samePeriod.length >= 4 ? samePeriod : all;
     return shuffleArray(source).slice(0, 4).map((entry, idx) => ({
@@ -175,14 +243,14 @@ function _buildStep(items, item, fact) {
     const distractors = visualFactDistractors(items, item, fact);
     // Берём до 3 дистракторов + 1 правильный = 4 варианта
     const options = shuffleArray([
-        { key: 'correct', text: fact.answer, correct: true },
+        { key: 'correct', text: visualAnswerText(fact.answer), correct: true },
         ...distractors.slice(0, 3),
     ]);
     return {
         factType: fact.type,
         label: fact.label,
         question: fact.question,
-        correctAnswer: fact.answer,
+        correctAnswer: visualAnswerText(fact.answer),
         options,
     };
 }
@@ -491,7 +559,8 @@ window.answerVisualStep = function(optionKey) {
         haptic('error');
         ms.allCorrect = false;
         ms.wrongSteps.push(ms.currentStep);
-        if (feedback) feedback.innerHTML = `<span style="color:#e11d48;">✗ Правильно: ${visualEscape(step.correctAnswer)}</span>`;
+        showVisualMistakeCard(ms.item, step);
+        if (feedback) feedback.innerHTML = `<span style="color:#e11d48;">✗ Разбор ошибки показан сверху</span>`;
     }
 
     const isLast = ms.currentStep >= ms.steps.length - 1;
@@ -530,7 +599,7 @@ window.answerVisualStep = function(optionKey) {
             window.state.currentVisualId = null;
             const wrongCount = ms.wrongSteps.length;
             setTimeout(() => {
-                if (feedback) feedback.innerHTML = `<span style="color:#e11d48;">❌ Это <b>${visualEscape(item.title)}</b>. Ошибок: ${wrongCount} из ${ms.steps.length}. Серия сброшена.</span>`;
+                if (feedback) feedback.innerHTML = `<span style="color:#e11d48;">❌ Ошибок: ${wrongCount} из ${ms.steps.length}. Серия сброшена.</span>`;
             }, correct ? 300 : 800);
         }
 

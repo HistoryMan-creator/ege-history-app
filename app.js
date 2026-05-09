@@ -542,6 +542,9 @@ function initStorage() {
     updateProgressBars();
     checkOnboarding();
     checkURLForHomework();
+    window.egeAppStorageReady = true;
+    document.dispatchEvent(new Event('ege:storage-ready'));
+    if (window.egePwa && navigator.onLine !== false) window.egePwa.loadFirebaseSync?.();
 
     // Таймер общего времени — сохраняем каждые 30 сек
     setInterval(() => {

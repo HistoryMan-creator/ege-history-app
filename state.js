@@ -19,6 +19,7 @@ window.state = {
         factStreaks: {},
         totalTimeSpent: 0,
         bestSpeedrunScore: 0,
+        egePoints: 0,
         dailyStats: {},
         hwFlashcardsToSolve: 0,
         hwTask3: 0, hwTask4: 0, hwTask5: 0, hwTask7: 0,
@@ -240,6 +241,7 @@ const STORAGE_KEY = 'ege_final_storage_v4';
 const SAVE_FIELDS = [
     'streak', 'totalSolvedEver', 'solvedByTask', 'flashcardsSolved',
     'eraStats', 'factStreaks', 'hwFlashcardsToSolve', 'totalTimeSpent',
+    'egePoints', 'hwTask3', 'hwTask4', 'hwTask5', 'hwTask7',
     'visualArchitectureProgress', 'visualArchitectureSolved',
     'visualPaintingProgress', 'visualPaintingSolved',
     'bestSpeedrunScore', 'dailyStats', 'achievements', 'achievementsData'
@@ -262,6 +264,7 @@ function buildSavePayload() {
 
 function saveLocal() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(buildSavePayload()));
+    localStorage.setItem('ege_pending_cloud_sync', '1');
 }
 
 let _cloudSyncTimer = null;
@@ -269,13 +272,15 @@ function scheduleSyncToCloud() {
     if (_cloudSyncTimer) clearTimeout(_cloudSyncTimer);
     _cloudSyncTimer = setTimeout(() => {
         _cloudSyncTimer = null;
+        if (navigator.onLine === false) return;
         if (window.syncProgressToCloud) window.syncProgressToCloud();
-    }, 2 * 60 * 1000);
+    }, 10 * 1000);
 }
 
 function syncNow() {
     if (_cloudSyncTimer) { clearTimeout(_cloudSyncTimer); _cloudSyncTimer = null; }
-    if (window.syncProgressToCloud) window.syncProgressToCloud();
+    if (navigator.onLine === false) return;
+    if (window.syncProgressToCloud) return window.syncProgressToCloud();
 }
 
 function saveProgress() {
@@ -346,10 +351,12 @@ function loadFromStorage() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (!saved) return;
         const parsed = JSON.parse(saved);
-        Object.assign(window.state.stats, parsed);
-        if (parsed.streak !== undefined) window.state.stats.streak = parsed.streak;
-        if (parsed.mistakesPool) {
-            window.state.mistakesPool = parsed.mistakesPool;
+        const savedStats = parsed.stats || parsed;
+        Object.assign(window.state.stats, savedStats);
+        if (savedStats.streak !== undefined) window.state.stats.streak = savedStats.streak;
+        const savedMistakes = parsed.mistakesPool || savedStats.mistakesPool;
+        if (savedMistakes) {
+            window.state.mistakesPool = savedMistakes;
             if (window.state.mistakesPool.length > MAX_MISTAKES_POOL) {
                 window.state.mistakesPool = window.state.mistakesPool.slice(-MAX_MISTAKES_POOL);
             }

@@ -967,6 +967,11 @@ body.zen-mode-active main { padding-bottom: 20px !important; }
     font-size: clamp(22px, 2.1vw, 34px);
     line-height: 1.08;
 }
+.media-kind-maps .media-fact-info {
+    justify-content: flex-start;
+    max-height: clamp(360px, 70svh, 860px);
+    overflow-y: auto;
+}
 .dark .media-fact-info h2 { color: #e5e7eb; }
 .media-meta-line {
     display: flex;
@@ -1034,10 +1039,24 @@ body.zen-mode-active main { padding-bottom: 20px !important; }
 }
 .media-map-legend span {
     min-width: 0;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
+    display: block;
+    overflow: visible;
+    overflow-wrap: anywhere;
+}
+.media-map-notes {
+    display: grid;
+    gap: 5px;
+    margin-top: 4px;
+    padding-top: 7px;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: clamp(11px, 1vw, 13px);
+    line-height: 1.25;
+    font-weight: 800;
+}
+.media-map-notes p {
+    margin: 0;
+    overflow-wrap: anywhere;
 }
 .media-map-legend-more {
     display: inline-flex !important;
@@ -1054,6 +1073,10 @@ body.zen-mode-active main { padding-bottom: 20px !important; }
 .dark .media-map-legend b {
     background: #1e3a8a;
     color: #bfdbfe;
+}
+.dark .media-map-notes {
+    border-color: #334155;
+    color: #94a3b8;
 }
 .dark .media-map-legend-more {
     background: #312e81;
@@ -1192,6 +1215,9 @@ body.zen-mode-active main { padding-bottom: 20px !important; }
         font-size: 20px;
         line-height: 1.08;
     }
+    .media-kind-maps .media-fact-info {
+        max-height: clamp(210px, 36svh, 320px);
+    }
     .media-meta-line {
         font-size: 12px;
         line-height: 1.18;
@@ -1222,8 +1248,10 @@ body.zen-mode-active main { padding-bottom: 20px !important; }
         border-radius: 6px;
         font-size: 10px;
     }
-    .media-map-legend span {
-        -webkit-line-clamp: 1;
+    .media-map-notes {
+        gap: 4px;
+        font-size: 10.5px;
+        line-height: 1.18;
     }
     .media-fact-details {
         gap: 2px;
